@@ -1,0 +1,48 @@
+*----These notes aim at illustrating the steps to include a new package in the DESERT svn folder----*
+
+EXAMPLE:
+
+- name of the folder where the new package to be added to DESERT is contained: uwfoo
+- folder in DESERT where to put the new package to be added (one among "application", "transport", "network", "data_link", "physical", "mobility"): layerfoo
+- content of uwfoo (C++ files): uwfoo.h, uwfoo.cc
+- NOTE: before add the new foo folder in DESERT be sure it does not contain any useless file (including the hidden files that you can visualize with the shell command "ls -a")
+
+1. enter the DESERT folder
+2. open the autogen.sh file and add to it:
+   - 2a. the command: 
+       echo "DESERT_CPPFLAGS=\"\$DESERT_CPPFLAGS \"'-I$(top_srcdir)/layerfoo/uwfoo'" >> /configure.ac
+   after (or among) the others (see from line 41). NOTE: be sure to add this command in the correct if block according to the fact if uwfoo requires or not woss;
+   - 2b. the command:
+   echo "\t layerfoo/uwfoo/Makefile" >> /configure.ac
+   into the field AC_CONFIG_FILES([...]), among or after all the others (see from line 79). NOTE: depending on whether uwfoo requires WOSS or not, be sure to add this command in the correct "if" block;
+   - 2c. the command:
+   echo "\t layerfoo/uwfoo" >> /Makefile.am 
+   in the field SUBDIRS after (or among) the others (see from line 126). NOTE: depending on whether uwfoo requires WOSS or not, be sure to add this command in the correct "if" block;
+3. Put the uwfoo folder in the folder layerfoo, within the DESERT folder
+4. Copy and past the files autogen.sh, configure.ac, Makefile.am, initlib.cc from any of the folders already present in DESERT (e.g., from DESERT/application/uwcbr) into the new folder DESERT/layerfoo/uwfoo
+5. open the file DESERT/layerfoo/uwfoo/configure.ac and write in the first field AC_INIT "uwfoo" where required (e.g., change AC_INIT(uwcbr,1.0.0) with 
+AC_INIT(uwfoo,1.0.0))
+6. open the file DESERT/layerfoo/uwfoo/initlib.cc and change it according to the indications in the NS-Miracle guide
+7. open the file DESERT/layerfoo/uwfoo/Makefile.am and:
+  - 7a. search-and-substitute uwfoo wherever is needed (e.g., to replace uwcbr with uwfoo, replace libuwcbr.la with libuwfoo.la, replace libuwcbr_la_SOURCES with libuwfoo_la_SOURCES, replace libuwcbr_la_CPPFLAGS with libuwfoo_la_CPPFLAGS, ...)
+  - 7b. list all the source files in the uwfoo folder (just uwfoo.h and uwfoo.cc in our case) in the field libuwfoo_la_SOURCES, i.e., 
+      libuwfoo_la_SOURCES = uwfoo.h\
+                            uwfoo.cc
+  7c. be sure that the .tcl file containing the default values of the binded variables (generally indicated with a "-default" or "-init" suffix) is present in DESERT/layerfoo/uwfoo and correcly called as well. 
+
+
+*** svn upload
+
+Before proceeding further, please be sure once again that the new folder you added to your local version of DESERT does not contain any useless file (including the hidding files that you can visualize with the simple shell command "ls -a"), then
+
+A. open a shell
+B. go in the DESERT folder
+C. dial "svn update"
+D. dial "svn add layerfoo/uwfoo"
+E. dial "svn commit -m 'your comment (e.g., I have added the uwfoo package in layerfoo)'"
+ 
+
+*** tcl sample uploading
+
+Please, consider also to add a .tcl sample to illustrate the use of your new package. Put it in the path DESERT/samples/layerfoo/uwfoo and upload it in the svn repository similarly as above.
+

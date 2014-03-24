@@ -1,0 +1,250 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+\newcommand{\MP}[1]{\begin{color}{NavyBlue} (MP: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $6^{th}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting: } $1^{st}$ of February $2012$\\
+{\it Present: } Saiful Azad (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD). Federico Favaro (DEI, UniPD), Paolo Casari (DEI, UniPD)
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} Current state of DESERT Underwater.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} 
+
+\begin{itemize}
+ \item {\bf New svn folder reorganization.} Illustration of the new folder organization. Proposal of adding a new level in the current folder organization (i.e., following the TCP/IP standard: {\tt DESERT/application}, {\tt DESERT/transport}, {\tt DESERT/network}, {\tt DESERT/data\_link}, {\tt DESERT/physical}). We also need to add a folder to contain all the mobility modules to be put in DESERT (i.e., the {\tt DESERT/mobility} folder);
+ \item {\bf Formalism.} We need to agree upon a common pattern and some common rules on the organization of our C++ and Tcl code;
+ \item {\bf Modules to change and adapt.} We need to add to the DESERT repository the MAC modules implemented (CSMA-ALOHA, ALOHA with ARQ, DACAP, Tone Lohi, AUV Polling, USR-AIMD). Also, we can include three modules for the mobility (driftpostion, gmmobility3D, gm3D for WOSS). No need to do particular changes, but for the names (add the prefix ``UW'' to them...) and for the binding. Remember that according to minutes5, {\bf all the modules that will be included in the DESERT release (e.g., {\tt UWCBR}, {\tt UWIP}, $\dots$) should be called by a tcl-user in the following manner:\\
+{\tt
+set \$module [new Module/UW/CBR]\\ 
+set \$module [new Module/UW/IP]\\
+...}};\\
+
+\end{itemize}
+{\bf Conclusions:} 
+\begin{itemize}
+ \item we will reorganize the DESERT folder according to the TCP/IP stack (i.e., a module of a given layer, e.g., the network layer, should be put in the corresponding folder, e.g., the folder {\tt DESERT/network});
+ \item we will prepare a document to agree upon the common patterns and rules to be followed in writing our C++ (modules) and Tcl codes (binding);
+ \item we will add the MAC and mobilities modules available to the DESERT repository.
+\end{itemize}
+
+ 
+\  \\
+\noindent {\bf Agenda item B:}  Definition of what we still need for DESERT.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} 
+
+\begin{itemize}
+ \item {\bf Missing modules.} Should we include in DESERT other modules (for simulation) for the PHY layer further than UWMPhy\_modem (designed for emulation and testbed)? What about the VBR module (see minutes4) on which Giovanni is working?  ;
+ \item {\bf Modules with unclear behaviour.} What the hell does the UWMLL module?? See Agenda item C;
+ \item {\bf Stack/Map definition.} How many maps should we define for the testbed? There is a easy and efficient way to implement them? Giovanni proposal: implement a class that allows to map any field of interest (i.e., any field in all the packet of interest) in a binary string of a variable number of bits (from 1, namely, max compression and network constraints, to the size of the field of interest, i.e., no compression and no network constraints);
+\end{itemize}
+{\bf Conclusions:} 
+\begin{itemize}
+ \item We agreed upon the fact that for simulation at the PHY layer we can use the BPSK module of either WOSS or NS-Miracle and the UW channel provide by NS-Miracle. NOTE: we should clearly explain this in the documentation that will illustrate the release of DESERT.
+ \item VBR is currently under development but it can be assigned a very low priority to this activity.
+ \item Riccardo will try to implement Giovanni's proposal for the mapping.
+\end{itemize}
+
+\  \\
+\noindent {\bf Agenda item C:}  Description of UWMLL.\\
+{\bf Presenter:} Saiful Azad\\
+{\bf Discussion:} UWMLL (as well as MLL) is used to write in the MAC header the SRC and DST MAC addresses according to the SRC and DST IP addresses contained in the IP header. ARP messages will be sent over the network to figure out the needed association of addresses, if this information is not already provided by the user (i.e., by filling the ARP tables in the tcl files). Moreover, the SRC and DST addresses in the MAC header are written differently according to the setting of the field addr\_type() in the common header. This field can take three values: {\tt NS\_AF\_ILINK} (the field {\tt macDA()} of the MAC header is set equal to the field {\tt next\_hop()} in the common header - this can impact on the MAC layer if the implemented MAC protocols use or check the field  {\tt macDA()}), {\tt NS\_AF\_INET} (undefined behaviour at MAC layers), {\tt NS\_AF\_NONE} (the field {\tt macDA()} of the MAC header is set equal to {\tt MAC\_BROADCAST} if the IP DST is {\tt UWIP\_BROADCAST}, otherwise the function {\tt 
+arpResolve(nsaddr\_t, Packet$^*$)} is called. This function either assign to the field {\tt macDA()} the right MAC DST address according to the IP DST address or start an ARP discovery request to fill the incomplete ARP table - this can impact on the MAC layer if the implemented MAC protocols use or check the field  {\tt macDA()}).\\ 
+{\bf Conclusions:} 
+To avoid undefined behaviour at the MAC layers, within the modules of DESERT we should always use and set {\tt ch-> addr\_type() = ??}. 
+
+\ \\
+\noindent {\bf Agenda item D:}  Definition of the documentation to write for DESERT.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} 
+We need to agree upon a common way of write (and common patterns to write):
+\begin{itemize}
+ \item {\bf Tcl files} (for examples and documentation purposes);
+ \item {\bf Comment our C++ code} (for illustration and documentation purposes). Should we use Doxygen? \MP{If we all use Netbeans or other IDE, I think we should share the same tools->option->editor->formatting settings (such as indents, braces placements, spces, ...). In this way, a quick Alt+Shift+F create a easy-to-read code. My settings so far are: Indent size = 4, Expand tabs to spaces = unchecked, Tab size = 3, Statement Continuation Indent = 3, all braces in a new line, default settings for the remainigs.};
+\end{itemize}
+{\bf Conclusions:} 
+\begin{itemize}
+\item we will prepare a document to agree upon the common patterns and rules to be followed in writing our Tcl codes (examples);
+\item we will prepare a document to agree upon the way (Doxygen complaint) in which to comment our C++ code.
+\end{itemize}
+ 
+
+\noindent {\bf Agenda item E:}  DESERT Underwater for MTS/IEEE Oceans 2012.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:}
+Extended abstract sent to MTS/IEEE Oceans 2012 to present DESERT at the international research community.
+\begin{itemize}
+ \item {\bf Important dates.} 
+\begin{itemize} \item Notification of acceptance: February 15, 2012; \item Camera ready due: March 31, 2012; \item Conference date: May 21--­24, 2012 (it would be nice to have DESERT released by that date); \end{itemize}
+ \item {\bf Paper organization.} Roughly speaking: motivation (already present in the submitted extended abstract)/description of the 
+modules available (core of the paper - anyone has to contribute as respect to his own modules)/ experiment results (hopefully, to be conducted between the end of February and the beginning of March in Livorno);
+ \end{itemize}
+{\bf Conclusions:} 
+\begin{itemize} 
+\item we should work with the objective of release DESERT by the mid of May;
+\item we will prepare a document to describe a general scheme to describe each of the modules of DESERT and to be adopted in writing the paper for OCEANS.
+\end{itemize}
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. 
+
+{\bf Action items:}\\
+\ \\ 
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & Document to standardize our C++ codes (modules). & Giovanni & 26/02/2012\\ 
+A2 & Document to standardize our Tcl codes (examples). & Saiful e Federico F.& 26/02/2012\\ 
+A3 & Document to standardize the comments to our C++ codes (modules). & Riccardo  & 26/02/2012\\ 
+A4 & Definition of a general scheme to describe the DESERT Underwater modules for OCEANS. & Riccardo & 26/02/2012\\ 
+A5 & Re-organization of the svn folder DESERT\_Underwater/DESERT: & Riccardo & 05/02/2012\\
+A6 & Inclusion of the following MAC modules in DESERT: UWCSMA-ALOHA, UWDACAP, UWToneLohi, UWAUVPolling & Federico F. & 26/02/2012\\
+A7 & Inclusion of the following MAC modules in DESERT: UWALOHA, UWUSR-AIMD& Saiful & 26/02/2012\\
+A8 & Inclusion of the following mobility modules in DESERT: UWGMMobility3D, UWDriftMobility& Giovanni  & 26/02/2012\\
+A9 & Inclusion of the following mobility modules in DESERT: UWGM3DforWOSS &  Saiful & 26/02/2012\\
+A10 & Check the terms of license for the code to release  & Paolo & 26/02/2012\\
+
+\hline
+\end{tabular}
+\ \\
+\ \\
+{\bf Note 1:} who is in charge of adding new modules in DESERT (Saiful, Giovanni, Federico F.), can also freely decide to change their name. The important thing is to maintains the prefix ``UW''. \\
+{\bf Note 2:} the next meeting for DESERT is foreseen for one among the following dates: February the 27th, the 28th or the 29th. A week before, I will send to you the usual mail to decide the actual date.
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+ \item {\bf A1} Done. See agenda item G minutes7 and svn. 
+ \item {\bf A2} Done. See agenda item G minutes7 and svn. 
+ \item {\bf A3} Done. See agenda item G minutes7 and svn.
+ \item {\bf A4} Done. See agenda item L minutes7. 
+ \item {\bf A5} Done. See svn.
+ \item {\bf A6} Done. See svn. 
+ \item {\bf A7} Done. See svn. 
+ \item {\bf A8} Done. See svn.
+ \item {\bf A9} Done. See svn.
+ \item {\bf A10} Done. See agenda item D minutes9.
+\end{itemize}
+
+
+
+\end{document}

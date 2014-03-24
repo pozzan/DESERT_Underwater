@@ -1,0 +1,95 @@
+\section{Modules for the application layer}\label{sec:application}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwcbr}
+   \item {\bf Description:} This module implements a Constant Bit Rate (CBR) packet traffic between a sender and a receiver. The data traffic can be generated either by injecting packets in the network with a constant time period or according to a Poisson process with given mean. A single {\tt uwcbr} module represents a data flow between a pair of nodes: if there are two or more nodes transmitting to the same destination, the latter should have an equal number of {\tt uwcbr} modules, one for each flow. 
+   \item {\bf Library name:} {\tt libuwcbr.so}
+   \item {\bf Tcl name:} {\tt Module/UW/CBR}.
+   \item {\bf Tcl parameters:} 
+   \begin{description}
+    \item {\tt period\_}: period between two consecutive packet transmissions;
+    \item {\tt destPort\_}: {\tt Port} value of the destination;
+    \item {\tt destAddr\_}: {\tt IP} of the destination;
+    \item {\tt packetSize\_}: size of the packet payload;
+    \item {\tt PoissonTraffic\_}: used to enable or disable the generation of traffic according to a Poisson distribution;
+    \item {\tt debug\_}: flag to disable or enable debug messages [range in \{0,1\}] (optional, default value = 0);
+    \item {\tt drop\_out\_of\_order\_}: flag used to change the behaviour of the module. If equals to 1 the module will accept packets only if in order, otherwise the module will accept them also out of order. (v1.1.0)
+   \end{description}
+   \item {\bf Tcl commands:}
+   \begin{description}
+    \item {\tt start}: start sending packets;
+    \item {\tt stop}: stop sending packets;
+    \item {\tt getrtt}: get the round trip time seen for the last received packet;
+    \item {\tt getftt}: get the forward trip time;
+    \item {\tt getper}: get the packet error rate;
+    \item {\tt getthr}: get the throughput (in bytes/s);
+    \item {\tt getrttstd}: get the standard deviation of the round trip time;
+    \item {\tt getfttstd}: get the standard deviation of the forward trip time;
+    \item {\tt getsentpkts}: get the number of {\tt CBR} packets sent;
+    \item {\tt getrecvpkts}: get the number of {\tt CBR} packets received;
+    \item {\tt getcbrheadersize}: get the size in byte of a {\tt hdr\_cbr} packet;
+    \item {\tt sendPkt}: send a single {\tt CBR} packet;
+    \item {\tt resetStats}: reset all the statistics;
+   \end{description}
+   \item {\bf Internal packet headers:} {\tt hdr\_uwcbr}.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_uwip} (uwip header from DESERT);  {\tt hdr\_uwudp} (uwudp header from DESERT).
+   \item {\bf Warnings:} This module requires an {\tt UWUDP} module below. A single {\tt UWCBR} module does not represent an application, but a single flow between two nodes: if there are two nodes transmitting to the same node, the latter should have two {\tt UWCBR modules}, one for each flow.
+   \item {\bf Parent Libraries:}
+   \begin{description}
+   \item {\tt libMiracle.so}
+   \item {\tt libuwip}
+   \item {\tt libuwudp}
+   \end{description}
+   \item {\bf Tcl Scripts:} 
+   \begin{description}
+   \item {\tt samples/basic/uwcbr.tcl}
+   \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+    \item {\bf Name:} {\tt uwvbr}
+    \item {\bf Description:} This module implements a Variable Bit Rate (VBR) packet traffic between a sender and a receiver. The data packet generation process takes place by switching between two different CBR processes, e.g., having different average packet inter-arrival times. 
+    The switch between the processes can be configured by the user by providing the switching epochs. Otherwise, the simulator can be instructed to switch at constant or exponentially distributed intervals. A single {\tt uwvbr} module represents a data flow between a pair of nodes: if there are two or more nodes transmitting to the same node, the latter should have an equal number of {\tt uwvbr} modules, one for each flow.
+   \item {\bf Library name:} {\tt libuwvbr.so}
+   \item {\bf Tcl parameters:} 
+   \begin{description}
+    \item {\tt period\_}: period between two consecutive packet transmissions;
+    \item {\tt destPort\_}: {\tt Port} value of the destination;
+    \item {\tt destAddr\_}: {\tt IP} of the destination;
+    \item {\tt packetSize\_}: size of the packet payload;
+    \item {\tt PoissonTraffic\_}: flag used to enable or disable the generation of traffic according to a Poisson distribution;
+    \item {\tt debug\_}: flag to disable or enable debug messages [range in \{0,1\}] (optional, default value = 0);
+    \item {\tt drop\_out\_of\_order\_}: flag used to change the behaviour of the module. If equals to 1 the module will accept packets only if in order, otherwise the module will accept them also out of order. (v1.1.0)
+   \end{description}
+   \item {\bf Tcl commands:}
+   \begin{description}
+    \item {\tt start}: start sending packets;
+    \item {\tt stop}: stop sending packets;
+    \item {\tt getrtt}: get the round trip time seen for last received packet;
+    \item {\tt getftt}: get the forward trip time;
+    \item {\tt getper}: get the packet error rate;
+    \item {\tt getthr}: get the throughput (in bytes/s);
+    \item {\tt getrttstd}: get the standard deviation of the round trip time;
+    \item {\tt getfttstd}: get the standard deviation of the forward trip time;
+    \item {\tt getsentpkts}: get the number of {\tt VBR} packets sent;
+    \item {\tt getrecvpkts}: get the number of {\tt VBR} packets received;
+    \item {\tt getvbrheadersize}: return the size in byte of a {\tt hdr\_vbr} packet;
+    \item {\tt sendPkt}: send a single {\tt VBR} packet;
+    \item {\tt resetStats}: reset all the statistics;
+   \end{description}
+   \item {\bf Internal packet headers:} {\tt hdr\_uwvbr}.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_uwip} (uwip header from DESERT);  {\tt hdr\_uwudp} (uwudp header from DESERT).
+   \item {\bf Warnings:} This module requires an {\tt UWUDP} module below. A single {\tt UWVBR} module does not represent an application, but a single flow between two nodes: if there are two nodes transmitting to the same node, the latter should have two {\tt UWVBR modules}, one for each flow.
+   \item {\bf Parent Libraries:}
+   \begin{description}
+   \item {\tt libMiracle.so}
+   \item {\tt libuwip}
+   \item {\tt libuwudp}
+   \end{description}
+   \item {\bf Tcl Scripts:} 
+   \begin{description}
+   \item {\tt samples/basic/uwvbr.tcl}
+   \end{description}
+\end{description} 

@@ -1,0 +1,29 @@
+Procedure to follow to create the .pdf files.
+
+1. go in the repository folder ../DESERT/documents/minutes
+
+2. from the shell call the command 
+    ./go + <name of the tex file (without the extension .tex) you want to open in pdf> 
+(e.g., type "./go minutes1" to create minutes1.pdf)
+
+3. if you want to clear your folder from the intermediate latex files (*.aux *.bbl *.blg *.dvi *.log *.ps *.backup), from the shell call the command
+    ./go clear
+
+
+Procedure to follow to add a comment to the minutes.
+
+1. In the .tex file write a \newcommand directive to personalize the comment to be added. For an example with my initials: RM, see line 49 of each .tex file you find in this folder. The syntax of the directive is
+    \newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+Please choose a unique color and indicate your initials.
+
+2. Add a comment where you want in the .tex file, e.g.
+\RM{ Bla, bla, bla... we are too cool...}
+
+3. from the shell call the command ./go + name of the .tex file you modified (e.g., ./go minutes1 to modify minutes1.pdf) and check the new .pdf
+
+4. update the svn repository as follows: from the shell, type 
+   svn update
+and then 
+   svn commit -m 'your comments to the modifications done'
+The comments are optional, but ***STRONGLY*** encouraged.
+

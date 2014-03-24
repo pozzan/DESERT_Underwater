@@ -1,0 +1,198 @@
+\section{Modules for the network layer}\label{sec:network}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwstaticrouting}
+   \item {\bf Description:} This module makes it possible to simulate and test data traffic which has to follow predetermined routes. For each network node, there is an option to choose a default gateway and/or fill a static routing table (whose maximum size is hard-coded and fixed to $100$ entries). This information is then exploited locally at each node to forward the network packets, hop by hop, throughout the predetermined paths.
+   \item {\bf Library name:} {\tt libuwstaticrouting.so}
+   \item {\bf Tcl name:} {\tt Module/UW/StaticRouting}.
+   \item {\bf Tcl parameters:} none.
+   \item {\bf Tcl commands:}
+   	\begin{description}
+   	 \item {\tt numroutes}: return the size of the routing table;
+   	 \item {\tt clearroutes}: clear all the routing table information;
+ 	 \item {\tt printroutes}: print the routing table;
+ 	 \item {\tt defaultGateway}: set the {\tt IP} address of the {\tt default gateway} (example {\tt \$ipr(1) defaultGateway "1.0.0.254"});
+ 	 \item {\tt addroute}: add an entry in the routing table (example {\tt \$ipr(1) addRoute "1.0.0.1" "1.0.0.2"}, where the first {\tt IP} address is the destination, the second one is the next hop);
+ 	\end{description}
+   \item {\bf Internal packet headers:} none.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_uwip} (uwip header from DESERT).
+   \item {\bf Warnings:} The maximum size of the routing table is hard-coded, the name of the corresponding variable is {\tt IP\_ROUTING\_MAX\_ROUTES} and its value is fixed to 100.
+   \item {\bf Parent Libraries:}
+   \begin{description}
+   \item {\tt libMiracle.so}
+   \item {\tt libuwip}
+   \end{description}
+   \item {\bf Tcl Scripts:} 
+   \begin{description}
+   \item {\tt samples/basic/uwvbr.tcl.}
+   \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwsun}
+   \item {\bf Description:} This module implements a dynamic, reactive source routing protocol. The generation of routing paths can be made based on different criteria, such as the minimization of the hop-count or the maximization of the minimum Signal to Noise Ratio (SNR) along the links of the path. {\tt uwsun} is also designed to collect and process different statistics of interest for the routing level. Currently, this module supports all application modules provided in DESERT (i.e., {\tt uwcbr} and {\tt uwvbr}), and it can be easily extended. 
+   \item {\bf Library name:} {\tt libuwsun.so}
+   \item {\bf Tcl name:} {\tt Module/UW/SUNNode} for the nodes, {\tt Moudle/UW/SUNSink} for the sinks.
+   \item {\bf Tcl parameters (Node):}
+   \begin{description}
+   	 \item {\tt ipAddr\_}: {\tt IP} of the node;
+   	 \item {\tt subnet\_}: subnet mask of the node; (removed in v1.0.1)
+ 	 \item {\tt metrics\_}: metric used by the node during routing;
+ 	 \item {\tt PoissonTraffic\_}: flag used to enable or disable the generation of traffic according to a Poisson distribution;
+ 	 \item {\tt period\_status\_}: period of the Poisson distribution for the status packets;
+ 	 \item {\tt period\_data\_}: period of the Poisson distribution for the data packets;
+ 	 \item {\tt setAckMode\_}: flag to enable or disable the ARQ mechanism (NOTE: in order to completely disable the ARQ mechanism you have also to set the {\tt max\_ack\_error\_} parameter to 1); (removed in v1.0.1)
+ 	 \item {\tt max\_ack\_error\_}: maximum number of retransmission for the ARQ;
+ 	 \item {\tt timer\_route\_validity\_}: timer to determine the maximum time duration (in seconds) during which to consider valid a route established between a node and a sink;
+ 	 \item {\tt timer\_ack\_waiting\_}: timer to determine the maximum waiting time (in seconds) for an ACK (this value depends on both the observed sound speed profile and the distance between sender and transmitter);
+ 	 \item {\tt timer\_sink\_probe\_validity\_}: timer to determine the maximum time duration (in seconds) during which to consider valid a probe received from a sink;
+ 	 \item {\tt timer\_buffer\_}: timer to determine the time (in seconds) between two buffer processes; 	 
+ 	 \item {\tt printDebug\_}: flag used to print debug information; 	 
+ 	 \item {\tt probe\_min\_snr\_}: SNR threshold to consider valid the probe received from a sink (i.e., the SNR of the received probe must be above this threshold to be considered valid); 	 
+ 	 \item {\tt buffer\_max\_size\_}: the maximum size of the buffer;
+ 	 \item {\tt safe\_timer\_buffer\_}: flag used to enable several mechanisms that adapt the timer\_buffer\_ value automatically; (from v 1.1.0)
+ 	 \item {\tt disable\_path\_error\_}: used to disable the error messages. (from v 1.1.1)
+ 	\end{description}
+   \item {\bf Tcl parameters (Sink):}
+    \begin{description}
+     \item {\tt ipAddr\_}: {\tt IP} of the node;
+   	 \item {\tt subnet\_}: subnet mask of the node; (removed in v1.0.1)
+   	 \item {\tt setAckMode\_}: flag to enable or disable the ARQ mechanism; (removed in v1.0.1)
+   	 \item {\tt t\_probe}: time (in seconds) between two successive sink probes;
+   	 \item {\tt PoissonTraffic\_}: flag used to enable or disable the generation of traffic according to a Poisson distribution;
+   	 \item {\tt periodPoissonTraffic\_}: period of the Poisson distribution for the status packets;
+     \item {\tt printDebug\_}: flag used to print debug information; 	  
+    \end{description}
+   \item {\bf Tcl commands (Node):} 
+    \begin{description}
+    \item {\tt initialize}: retrieve the {\tt IP} address from the {\tt IP} module (NOTE: this command is mandatory, and it must be used after the assignment of the {\tt IP} address to the node);
+    \item {\tt printhopcount}: print the number of hops needed by the node to reach the sink;
+    \item {\tt printhops}: print the routing table of the node;
+    \item {\tt getackcount}: get the number of {\tt hdr\_sun\_ack} packets generated by all the nodes;
+    \item {\tt getdatapktcount}: get the number of {\tt hdr\_sun\_data} packets received from the upper layers by the entire network;
+    \item {\tt getforwardedcount}: get the number of {\tt hdr\_sun\_data} packets forwarded by the entire network;
+    \item {\tt getdatapktdroppedbuffer}: get the number of {\tt hdr\_sun\_data} packets dropped by the entire network because the buffer was full;
+    \item {\tt getdatapktdroppedmaxretx}: get the number of {\tt hdr\_sun\_data} packets dropped by the entire network because the maximum number of retransmission has been reached;
+    \item {\tt getpathestablishmentpktcount}: get the number of {\tt hdr\_sun\_path\_est} packets generated by the entire network;
+    \item {\tt getackheadersize}: get the size in Bytes of a {\tt hdr\_sun\_ack} packet;
+    \item {\tt getdatapktheadersize}: get the size in Bytes of a {\tt hdr\_sun\_data} packet;
+    \item {\tt getpathestheadersize}: get the size in Bytes of a {\tt hdr\_sun\_path\_est} packet;
+    \item {\tt getstats}: get the number of packets sent by a node with a specific hop count value (example: {\tt set stat\_ [\$ipr(\$i) getstats \$j]}, where \$j is the hop count value);
+    \item {\tt trace}: used to set the file name of the trace file in which UWSUN will save information about the packets processed.
+    \end{description}
+   \item {\bf Tcl commands (Sink):} 
+    \begin{description}
+    \item {\tt initialize}: retrieve the {\tt IP} address of the node from the {\tt IP} module (NOTE: this command is mandatory, and it must be used, in the tcl configuration script, after the assignment of the {\tt IP} address to the node);
+    \item {\tt start}: start to send probe messages;
+    \item {\tt stop}: stop to send probe messages;
+    \item {\tt sendprobe}: send a single probe message;
+    \item {\tt getprobetimer}: get the timer of the probe messages;
+    \item {\tt getprobepktcount}: get the number of {\tt hdr\_sun\_probe} packets generated by the sinks;
+    \item {\tt getackcount}: get the number of {\tt hdr\_sun\_ack} packets generated by the sinks;
+    \item {\tt getprobepktheadersize}: get the size in Bytes of a {\tt hdr\_sun\_probe} packet;  
+    \item {\tt getackheadersize}: get the size in Bytes of a {\tt hdr\_sun\_ack} packet;
+    \item {\tt setnumberofnodes}: set the number of nodes in the simulation (NOTE: do not count the sinks!). This value is used to compute and save statistics (example: {\tt \$ipr\_sink setnumberofnodes \$opt(nn)};
+    \item {\tt getstats}: get the number of packets received by the sink from a specific node with a specific hop count value (example: {\tt set stats(\$j) [\$ipr\_sink getstats \$i \$j]}, where {\tt \$i} is the last Byte of the {\tt IP} of the node, and {\tt \$j} is the hop count value);
+    \item {\tt trace}: used to set the file name of the trace file in which UWSUN will save information about the packets processed.
+    \end{description} 
+   \item {\bf Internal packet headers:} {\tt hdr\_sun\_ack}; {\tt hdr\_sun\_data}; {\tt hdr\_sun\_path\_est}; {\tt hdr\_sun\_probe}.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_uwcbr} (uwcbr header from DESERT); {\tt hdr\_uwip} (uwip header from DESERT); {\tt hdr\_MPhy} (MPhy header from ns-miracle)
+   \item {\bf Warnings:} The call to the {\tt initialize} command is mandatory for both sinks and nodes (it is possible to avoid it only by setting manually the {\tt ipAddr\_}). In order to notify the presence of the sink it is mandatory to send at least one probe with the command {\tt sendprobe}, or periodically with {\tt start}. If you want to disable completely the {\tt ARQ} you have to: set to 1 {\tt buffer\_max\_size\_} and {\tt max\_ack\_error\_}, and to 0 {\tt setAckMode\_} for both sinks and nodes. The maximum number of hops that a packet can perform is hard-coded and tuned to avoid flooding and increase performance (it is however possible to change such value by modifying the field {\tt MAX\_HOP\_NUMBER} in the source file {\tt sun-ipr-common-structures.h}).
+   \item {\bf Parent Libraries:}
+   \begin{description}
+      \item {\tt libMiracle.so}
+      \item {\tt libmphy}
+      \item {\tt libuwip}
+      \item {\tt libuwcbr}
+   \end{description}
+   \item {\bf Tcl Scripts:} 
+   \begin{description}
+      \item {\tt samples/basic/uwsun.tcl}
+   \end{description} 
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwicrp}
+   \item {\bf Description:} This module, which requires very few configuration parameters, implements a simple flooding-based routing mechanism called Information-Carrying Based Routing protocol, see~\cite{LiangTakamatsu}.
+   \item {\bf Library name:} {\tt libuwicrp.so}
+   \item {\bf Tcl name:} {\tt Module/UW/ICRPNode} for the nodes; {\tt Moudle/UW/ICRPSink} for the sinks.
+   \item {\bf Tcl parameters (Node):}
+   \begin{description}
+    \item {\tt ipAddr\_}: {\tt IP} of the node;
+    \item {\tt printDebug\_}: flag to print debug information;
+    \item {\tt maxvaliditytime\_}: the maximum validity period for a route established between a node and a sink;
+    \item {\tt timer\_ack\_waiting\_}: timer to determine the maximum waiting time (in seconds) for an ACK (this value depends on both the observed sound speed profile and the distance between sender and transmitter);
+   \end{description}
+   \item {\bf Tcl parameters (Sink):}
+   \begin{description}
+    \item {\tt ipAddr\_}: {\tt IP} of the sink;
+    \item {\tt printDebug\_}: flag to print debug information;
+   \end{description}
+   \item {\bf Tcl commands (Node):}
+   \begin{description}
+    \item {\tt initialize}: retrieve the {\tt IP} address of the node from the {\tt IP} module (NOTE: this command is mandatory, and it must be used, in the tcl configuration script, after the assignment of the {\tt IP} address to the node);
+    \item {\tt printhops}: print the routing table of the node;
+    \item {\tt clearhops}: clear all the routing information;
+    \item {\tt getackheadersize}: get the size in Bytes of a {\tt hdr\_uwicrp\_ack} packet;
+    \item {\tt getdataheadersize}: get the size in Bytes of a {\tt hdr\_uwicrp\_data} packet;
+    \item {\tt getstatusheadersize}: get the size in Bytes of a {\tt hdr\_uwicrp\_status} packet;
+    \item {\tt getackcount}: get the number of {\tt hdr\_uwicrp\_ack} packets generated by the nodes;
+    \item {\tt getdatapktcount}: get the number of {\tt hdr\_uwicrp\_data} packets generated by all the nodes;
+    \item {\tt getstatuspktcount}: get the number of {\tt hdr\_uwicrp\_status} packets forwarded by all the nodes;
+    \item {\tt ipsink}: notify to the node the {\tt IP} address of the sink (example: {\tt \$ipr ipsink "1.0.0.254"}).
+   \end{description}
+   \item {\bf Tcl commands (Sink):}
+   \begin{description}
+    \item {\tt initialize}: retrieve the {\tt IP} address of the node from the {\tt IP} module (NOTE: this command is mandatory, and it must be used, in the tcl configuration script, after the assignment of the {\tt IP} address to the node);
+    \item {\tt getackheadersize}: get the size in Bytes of a {\tt hdr\_uwicrp\_ack} packet;
+    \item {\tt getdataheadersize}: get the size in Bytes of a {\tt hdr\_uwicrp\_data} packet;
+    \item {\tt getstatusheadersize}: get the size in Bytes of a {\tt hdr\_uwicrp\_status} packet;
+    \item {\tt getackcount}: get the number of {\tt hdr\_uwicrp\_ack} packets generated by the sink;
+    \item {\tt getstatuspktcount}: get the number of {\tt hdr\_uwicrp\_status} packets generated by the sinks.
+   \end{description}
+   \item {\bf Internal packet headers:} {\tt hdr\_uwicrp\_ack}; {\tt hdr\_uwicrp\_data}; \\ {\tt hdr\_uwicrp\_status}.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_uwip} (uwip header from DESERT).
+   \item {\bf Warnings:} The call to the {\tt initialize} command is mandatory for both sinks and nodes (it is possible to avoid it only by setting manually the {\tt ipAddr\_}). For the nodes it is also mandatory to set manually the {\tt IP} of the sink using the command {\tt ipsink}. The maximum number of hops that a packet can perform is hard-coded and tuned to avoid flooding and increase performance (it is however possible to change such value by modifying the field {\tt MAX\_HOP\_NUMBER} in the source file {\tt uwicrp-common.h}).
+   \item {\bf Parent Libraries:}
+    \begin{description}
+     \item {\tt libMiracle.so}
+     \item {\tt libuwip}
+    \end{description}
+   \item {\bf Tcl Scripts:} 
+    \begin{description}
+     \item {\tt samples/basic/uwicrp.tcl}
+    \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwip}
+   \item {\bf Description:} This module is used to assign an address to the nodes in a given network according to the standard IPv4 addresses; it provides the Time-To-Live (TTL) functionality and does not implement any routing mechanism. It can be configured to provide all the functional and procedural means intended for an Internet Protocol module (e.g., fragmentation, data reassembly and notification of delivery errors).
+   \item {\bf Library name:} {\tt libuwip.so}
+   \item {\bf Tcl name:} {\tt Module/UW/IP}
+   \item {\bf Tcl parameters:}
+    \begin{description}
+     \item {\tt debug\_}: flag to disable or enable debug messages [range in \{0,1\}] (optional, default value = 0).
+    \end{description}
+   \item {\bf Tcl commands:}
+    \begin{description}
+     \item {\tt setaddrinet}: it is used to set the address type of the packets to {\tt NS\_AF\_INET}. See {\tt UWMLL} module for more information;
+     \item {\tt setaddrilink}: it is used to set the address type of the packets to {\tt NS\_AF\_ILINK}. See {\tt UWMLL} module for more information;
+     \item {\tt addr-string} return the {\tt IP} address of the node in the standard form (e.g., {\tt 1.0.0.2});
+     \item {\tt getipheadersize}: get the size in Bytes of a {\tt hdr\_uwip} packet;
+     \item {\tt addr}: set the {\tt IP} of a given node (example {\tt \$ip addr "1.0.0.1"});
+    \end{description}
+   \item {\bf Internal packet headers:} {\tt hdr\_uwip}.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2).
+   \item {\bf Warnings:} It is possible to obtain the {\tt IP} address from an {\tt UWIP} module with a synchronous message called {\tt UWIPClMsgReqAddr}.
+   \item {\bf Parent Libraries:} {\tt libMiracle.so}
+   \item {\bf Tcl Scripts:} 
+   \begin{description}
+   \item {\tt samples/basic/uwcbr.tcl}.
+   \end{description}
+\end{description}

@@ -1,0 +1,257 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $3^{rd}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting: } $15^{th}$ of November $2011$\\
+{\it Present: } Saiful Azad (DEI, UniPD), Paolo Casari (DEI, UniPD), El Hadi Cherkaoui (IIT), Federico Favaro (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD).
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} Illustration of the modules developed in ns-miracle for LINK LAYER CONTROL and BROADCAST ROUTING.\\
+{\bf Presenter:} Saiful Azad\\
+{\bf Discussion:} For the link layer control we have a module called USR (Underwater Selective Repeat), which implement a Selective Repeat ARQ (Automatic Repeat Request). Selective Repeat is an ARQ mechanism that allows a transmitter to send up to N consecutive packets\footnote{When $N=1$ we are implementing a Stop-and-Wait ARQ mechanism.} before waiting for ACK or NACK from the receiver. Both the transmitter and the receiver can buffer packets up to a given window size. In case of errors, only the erroneous packet are sent again. Thanks to the high delays which characterize the acoustic channel, $N$ can be chosen quite large in UW scenarios; for the same reason, however, in USR has been also implemented a guard interval to differ successive packet transmissions. USR implement two solutions for the determination of the buffer: a fixed and a variable window size. However, neither of the two solution requires exchange of control information between the nodes involved in the communication. USR requires two types of packets: DATA and ACK. It also need a sequence number able to identify all the packets getting out from and/or coming into a given node (and not only those referring to a single application as the sequence number of the CBR module does). Furthermore, USR can be applied both to a static network scenario as well as to a dynamic one. In this second case, an estimation of the velocity for each node is required along with a communication of this estimation to all the other nodes. However, we can take a conservative approach that do not involve further exchange of information (for each pair of nodes, any node is moving with the maximum velocity allowed by the application, along the direct path which joins the two, and towards opposite directions).
+
+Concerning routing, a module which realizes flooding in the network is also ready. This one is designed for a CBR application implemented in broadcast (and not considering a point-to-point communication as currently done by the CBR module provide in the ns-miracle package).
+
+{\bf Conclusions:} 
+
+Both USR (for link control) and flooding (for routing) can be considered to be integrated in the stacks for the emulation and testbed settings. Furthermore, probably it would be worth to design a new CBR module which extends the ns-miracle one to the  
+ 
+\vspace{0.5cm}
+
+\noindent {\bf Agenda item B:} Definition of the protocol stacks to be realized for each of the following activities: SIMULATION, EMULATION, TESTBED (research-oriented) and TESTBED (application-oriented).\\
+{\bf Presenter:} Paolo Casari\\
+{\bf Discussion:} \\
+List of modules available so far:\\
+{\bf PHYSICAL LAYER - Media layer}
+   \begin{itemize}
+    \item {\tt BPSK}, for simulation (propagation and interference designed for terrestrial links);
+    \item {\tt UnderwaterMiracle}, for simulation (deprecated);
+    \item {\tt WOSS}, for simulation (Urick's model or Bellhop, designed for underwater acoustic links);
+    \item {\tt MPhy\_modem}, for emulation and testbed.
+   \end{itemize}
+{\bf DATA LINK LAYER - Media layer}
+  \begin{itemize}
+    \item {\tt ALOHA} (Medium Access Control, MAC);
+    \item {\tt CSMA-ALOHA} (MAC);
+    \item {\tt DACAP} (MAC);
+    \item {\tt Tone-Lohi} (MAC);
+    \item {\tt Polling-based MAC} (MAC);
+    \item {\tt USR-ARQ} (joint MAC and Link Layer Control, LLC).
+   \end{itemize}
+{\bf NETWORK LAYER - Media layer}
+   \begin{itemize}
+     \item {\tt SpreadUW} (routing);
+     \item {\tt static routing} (ns-miracle's IP routing);
+     \item {\tt MSRP} (multipath routing);
+     \item {\tt restricted flooding} (multipath routing);
+     \item {\tt IP} (interface for IP addressese);
+     \item {\tt IPinterface} (interface for IP addresses).
+   \end{itemize}
+{\bf Other Media layer modules}
+   \begin{itemize}
+     \item {\tt MLL} (to map MAC addresses into IP ones).
+   \end{itemize}
+{\bf TRANSPORT - Host layer}
+   \begin{itemize}
+     \item {\tt PORT} (UDP).
+    \end{itemize}
+{\bf APPLICATION - Host layer}
+   \begin{itemize}
+     \item {\tt CBR} (Constant Bit Rate, for link to link communications).
+    \end{itemize}
+List of stacks that can be realized:\\
+{\bf SIMULATION STACKS}
+   \begin{itemize}
+     \item {\tt WOSS/ALOHA/MLL/IP/PORT/CBR};
+     \item {\tt WOSS/CSMA-ALOHA/MLL/IP/PORT/CBR};
+     \item {\tt WOSS/DACAP/MLL/IP/PORT/CBR};
+     \item {\tt WOSS/Tone-Lohi/MLL/IP/PORT/CBR};
+     \item {\tt WOSS/USR-ARQ/MLL/IP/PORT/CBR};
+     \item {\tt WOSS/ALOHA/MLL/IP/SpreadUW/PORT/CBR};
+     \item {\tt WOSS/Polling-based MAC/MLL/IP/PORT/CBR} (need a modification to the CBR for supporting broadcast);
+     \item {\tt WOSS/Polling-based MAC + USR-ARQ/MLL/IP/PORT/CBR} (need a modification to the CBR for supporting broadcast, ready next year);
+     \item {\tt WOSS + USR-ARQ + SpreadUW + CBR} (to be discussed if it is worthy).
+   \end{itemize}
+{\bf EMULATION STACKS}
+\begin{itemize}
+ \item {\tt MPHY\_Modem/ALOHA/MLL/IP/Port/CBR};
+ \item {\tt MPHY\_Modem/CSMA-ALOHA/MLL/IP/Port/CBR} (to be checked if feasible);
+ \item {\tt MPHY\_Modem/DACAP/MLL/IP/Port/CBR};
+ \item ({\tt MPHY\_Modem/Tone-Lohi/MLL/IP/Port/CBR}) (to be checked if feasible);
+ \item {\tt MPHY\_Modem/Polling/MLL/IP/Port/CBR} (need a modification to the CBR for supporting broadcast);
+ \item {\tt MPHY\_Modem/CSMA-ALOHA/MLL/IP/Static Routing/PORT/CBR} (need to discard packets from nodes that are not supposed to be within the receiver’s communications range);
+ \item {\tt MPHY\_Modem/USR/MLL/IP/Port/CBR} (with some attention, need a modification to the CBR for supporting broadcast);
+ \item {\tt MPHY\_Modem/Polling-based MAC/USR/MLL/IP/Port/CBR} (with some attention, need a modification to the CBR for supporting broadcast).
+\end{itemize}
+{\bf TESTBED STACKS - research oriented}\\
+Preferred multi-hop stack (to be realized by implementing a map between ns-miracle packets and NMEA minipackets, which have a payload of 13 bits. If required, also NMEA binary packets can be used. These have a payload of 32 bytes but also require the additional transmission of a cycle-init message):
+\begin{itemize}
+ \item {\tt MPHY\_Modem/CSMA-ALOHA/MLL/IP/SpreadUW/Port/CBR} (need to discard packets from nodes that are not supposed to be within the receiver’s communications range);
+\end{itemize}
+Single-hop stacks. Check feasibility of extending the same approach of above (mapping and all) to:
+\begin{itemize}
+ \item {\tt MPHY\_Modem/CSMA-ALOHA/MLL/IP/Port/CBR};
+ \item {\tt MPHY\_Modem/DACAP/MLL/IP/Port/CBR};
+ \item {\tt MPHY\_Modem/Tone-Lohi/MLL/IP/Port/CBR}.
+\end{itemize}
+What do we do for USR?\\
+{\bf TESTBED STACKS - application oriented}\\
+Preferred multi-hop stack (to be realized by implementing a map between ns-miracle packets and NMEA binary packets, which have a payload of 32 bytes. The objective is to let enough payload to the user for develop his/her own implementation.):
+\begin{itemize}
+ \item {\tt MPHY\_Modem/CSMA-ALOHA/MLL/IP/SpreadUW/Port/CBR};
+ \item {\tt MPHY\_Modem/CSMA-ALOHA/MLL/IP/Static Routing/Port/CBR}.
+\end{itemize}
+In both cases, we need to discard packets from nodes that are not supposed to be within the receiver's communications range.
+{\bf Conclusions:}
+
+We should proceed as follow:
+\begin{itemize}
+ \item defining and implementing the necessary modification to the existent modules of ns-miracle to realize the above stacks;
+ \item designing and implementing maps for the testbed stacks of above;
+ \item testing the correct functioning of the above stacks in all the four envisioned stacks;
+ \item preparing the explanatory and illustrative .tcl files;
+ \item defining and preparing the necessary documentation to support the code release.  
+\end{itemize}
+
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions.
+
+{\bf Action items:}\\
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person(s) responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & Design and realization of a new CBR module for UW. & Riccardo Masiero, Giovanni Toso, Saiful Azad & 30/11/2011\\ 
+A2 & Preliminary design of maps to connect some protocol stacks designed in ns-miracle with the WHOI micro-modems. & Riccardo Masiero, Giovanni Toso, Saiful Azad & 30/11/2011\\ 
+A3 & Definition of a common interface for writing .tcl files. & Riccardo Masiero, Giovanni Toso, Saiful Azad & 31/12/2011\\
+\hline
+\end{tabular}
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+ \item {\bf A1} Done. See Agenda item A, of minutes4 and minutes5;
+ \item {\bf A2} Done. See Agenda item C, of minutes5;
+ \item {\bf A3} 
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,276 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+\newcommand{\MP}[1]{\begin{color}{NavyBlue} (MP: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $8^{th}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting: } $19^{th}$ of April $2012$\\
+{\it Present: } Saiful Azad (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD), Federico Favaro (DEI, UniPD), Matteo Petrani (DEI, UniPD)\\
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} Sum up of the modules ready for DESERT Underwater.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} Quick overview of the paper written for OCEANS. Acceptance of the content by all.
+Modules to be still refined/modified according to paper sent to OCEANS and/or for other reasons:
+\begin{itemize}
+ \item {\tt uwmphy\_modem}, {\tt mfsk\_whoi\_mm}, {\tt mpsk\_whoi\_mm}, {\tt ms2c\_evologics}: refine and debug several mechanisms that, however, are working (map, temporary files for modem buffering, driver state machine);
+ \item {\tt mgoby\_whoi\_mm}: reorganize it as specialization of {\tt uwmphy\_modem};
+ \item {\tt uwpolling}: make the memory allocation more efficient and polish the code;
+ \item {\tt uwaloha}, {\tt uwsr}: add the command to manually set the MAC address
+\end{itemize}
+{\bf Conclusions:}  Refine as much as possible the DESERT modules according to the above.
+
+\  \\
+\noindent {\bf Agenda item B:} Documentation to prepare {\bf Doxygen documentation, module description and web site}.\\
+{\bf Presenters:} Riccardo Masiero and Giovanni Toso\\
+{\bf Discussion:}\\
+
+{\bf Doxygen documentation}
+
+According to reference in the guide of Giovanni (that you can find in the svn), put properly the following Doxygen commands in all the .h files of DESERT (see sun-ipr-node.h for example):
+     \begin{itemize}
+		\item file [{\bf what:} name of file, {\bf where:} at the beginning of the .h file]
+		\item brief [{\bf what:} just a line describing the actual .h file, NOT the protocol, {\bf where:} at the beginning of the .h file]
+		\item author [{\bf what:} the author(s) name and possible acknowledgments, {\bf where:} at the beginning of the .h file]
+		\item version [{\bf what:} three numbers in the form N1.N2.N3 where N1 is the release version, it starts from 1 and is increased if important changes has happened to the overall structure of the release (e.g., version 1 for DESERT based on ns2/NS-Miracle, 2 for DESERT based on ns3, $\dots$); N2 starts from 0 and is increased locally when important changes are made to a given file; N3 starts from 0 and is locally increased when just local bugs are fixed or minor modification are done. For the first release of DESERT Underwater all the modules should be of version 1.0.0 {\bf where:} at the beginning of the .h file]
+		\item deprecated [{\bf what:} if applicable, indication of old methods kept for compatibility. Not applicable for the first release $\dots$ {\bf where:} right before the declaration of the old method(s)]
+		\item see [{\bf what:} to create a link from a description to a method/class, {\bf where:} inside the description]
+		\item param[in] [{\bf what:} input parameter of a given method (we need one of such commands for each input parameter), {\bf where:} right before the declaration of the method]
+		\item param[out] [{\bf what:} variable passed by reference that have been modified (we need one of such commands for each variable), {\bf where:} right before the declaration of the method]
+		\item return [{\bf what:} the output variable returned by a given method (if different from void...) , {\bf where:} right before the declaration of the method]
+		\item bug [{\bf what:} if applicable, description of any bug not yet fixed, {\bf where:} right before the declaration of the method]
+		\item warning [{\bf what:} if applicable, description of possible warnings, {\bf where:} right before the declaration of the method]
+     \end{itemize}
+To better prepare the Doxygen documentation, please note the following:
+\begin{description}
+ \item 1) DO NOT doubling the comments of the .h files in the .cc files;
+ \item 2) the comments in the .cc files should be limited to the ones really important for the comprehension of a given algorithm or mechanism. The definition of ``really important'' is let to the actual implementer of the code;
+ \item 3) check that the order in which headers are included in the file is as follows: first local headers (i.e., ``header\_name.h''), then the others (i.e., $<$header\_name$>$).
+\end{description}
+In the .cc files, instead, we need to add only the doxygen header (file, author, version, brief) and the terms of licence (see sun-ipr-sink.cc for an example).
+
+The overall Doxygen file can be simply create downloading the corresponding application ({\tt apt-get install doxygen-gui}) and run it with the command {\tt doxywizard}.\\
+
+{\bf Module description}
+
+Refine the file already present in the svn to describe each module of DESERT according to the following scheme:
+
+ {\it Legend of the adopted scheme to describe the DESERT Underwater's modules}
+ \begin{description}
+   \item {\bf Name:} The name of the module;
+   \item {\bf Description:} A brief description of the module capabilities and functionalities (use the one done for the paper of OCEANS);
+   \item {\bf Tcl name:} The name of the module in Tcl, i.e., the tcl command to call in order to create the corresponding C++ object;
+   \item {\bf Tcl parameters:} Parameters that can be set via Tcl, their ranges and usage, i.e., what they are needed for;
+   \item {\bf Tcl commands:} Commands that can be set via Tcl with a specification of the mandatory commands that must be called to make everything running properly (e.g., initialization commands);
+   \item {\bf Library name:} the name of the corresponding NS-Miracle (DESERT) library; \RM{new!}
+   \item {\bf Internal packet headers:} Packet headers defined by the module (if applicable);
+   \item {\bf External packet headers:} External packet headers used by the module (if applicable);
+   \item {\bf Warnings:} Possible warnings for the good usage of the module, e.g., the use of this module in conjunction with module A,B,C is deprecated and/or can lead to an undefined behaviour.
+   \item {\bf Tcl Scripts:} Name of the tcl script written to give an usage example plus brief description of the implemented scenario and list of the other exploited modules (e.g., See {\tt test.tcl}, one hop transmission between a sender and a receiver. Other modules used in this script: {\tt uwcbr}, {\tt uwudp}, {\tt uwip}, $\dots$); \RM{new!}
+   \item {\bf Parent Libraries:} mandatory NS-Miracle/DESERT libraries that must be uploaded before loading the library of this module. \RM{new!}  
+\end{description}
+
+Note: for the use of databases to reproduce realistic trace we can refer to the WOSS documentation (check if database samples are already in the WOSS website, if not, interact with Fedrico Guerra about the opportunity to put them);
+
+{\bf Web site}
+
+Update the section ``people'' (add Giovanni, Matteo, Ivano, Saiful, Federico. Send biographies to Riccardo).\\
+Check if a php engine is running in the server (for improve the efficiency of the Doxygen documentation).\\
+
+Note: we decided to release DESERT Underwater as a zip folder: both (1) alone with the necessary instruction of where to find what and (2) in a folder containing all what we need to work (ns2, NS-Miracle, DESERT Underwater, WOSS, Bellhop, NetCDF), along with a configuration file to install anything (see A12 in minutes7). We have two possibilities: (1-safe path) just saying that DESERT has been fully test and is considered stable with, e.g., ns2.34 and WOSS 1.2 and declaring that the compatibility tests with the more recent versions or (2-dangerous path) trying to test the compatibility of DESERT with these new versions on time for the release of DESERT (i.e., for the OCEANS conference). We decided, for the time constrained, to dedicate few effort in pursuing the second street and keep the first one as mitigation plan. The actual versions of the different softwares that should be put in the all-in-one folder (and/or considered as ``THE ONES'' to be used with DESERT) will be decided during the next meeting (
+foreseen for the 8$^{th}$ of May).
+
+{\bf Conclusions:} Add the Doxygen information in all the .h files of DESERT according to the above notes. Create the overall Doxygen documentation. Refine the module description already present in the repository according the the scheme presented above. Prepare the web site for DESERT. Conduct some tests to check compatibility of DESERT with most recent versions of ns2 and WOSS.
+
+\  \\
+\noindent {\bf Agenda item C:} Documentation to prepare {\bf Tcl scripts}.\\
+{\bf Presenters:} Riccardo Masiero\\
+{\bf Discussion:}\\
+
+For each module of DESERT, we need to have a least one illustrative tcl script (a single tcl scripts can serve as reference for more than one module). To have a coherent way to write such tcl scripts we have prepared a skeleton according to which all the examples must be written. This skeleton MUST be used and followed by all when preparing the tcl scripts. The tcl scripts to prepare will be of two kinds (for each module to illustrate): basic (to illustrate the functioning of a given module in the simplest possible way) and advanced (i.e., by means of a well-structured .tcl scripts realized to conduct research tests and showing all the potential of our libraries). Also, the scripts files that we have to prepare, when applicable, should contain examples using WOSS and without using WOSS (both for the basic and the advance examples).
+
+Note: also in the .tcl scripts, for the use of databases to reproduce realistic trace we can refer to WOSS documentation (check if database samples are already in the WOSS website, if not, interact with Fedrico Guerra about the opportunity to put them);
+
+
+{\bf Conclusions:}  Write and test Tcl scripts for all the modules in DESERT according to the above specifications. 
+
+
+\  \\
+\noindent {\bf Agenda item D:} Open problems with the modules to release.\\
+{\bf Presenter:} Federico Favaro and Saiful Azad\\
+{\bf Discussion:} \\
+\begin{itemize}
+ \item Clarification of the problem with csma-aloha that can be solved by setting retransmission to 1 and buffer size to 1.\\
+  In csma-alhoa there was a problem related to the fact that it was not possible to set the queue buffer to 0; this bug, now solved, was related to a wrong initialization of a flag variable;
+ \item Clarification of the criterion used to identify the packets for the ARQ at the MAC layers.\\
+  The ARQ, at the MAC layers distinguish packets checking four header fields: 1) {\tt ch $\rightarrow$ uid()}, 2) {\tt ch $\rightarrow$ p\_type()}, 3) {\tt mach $\rightarrow$ src\_addr}, 4) {\tt ch $\rightarrow$ dst\_addr} (therefore, all these four fields must be sent and uniquely identify a packet also in the testbed settings. Pay attention to this during map implementation to be done at the physical layer.);
+ \item Clarification of the difference in the various existing version of csma-aloha.\\  
+       The original aloha csma is the {\tt aloha advanced} in the NS-Miracle repository, then Saiful made a stand alone version of the same, called {\tt csma-aloha version 1.0.0} (no modification as respect to {\tt aloha advanced}). A local copy of {\tt csma-aloha version 1.0.0}, renamed as {\tt aloha\_adv} has been locally modified by Saiful to support the automatic generation and transmission of ACK packets; erroneously this local folder has been given to Federico F., creating confusion. Finally, the modification done for {\tt aloha\_adv} have been put also in {\tt csma-aloha version 1.0.0}. The code of {\tt csma-aloha version 1.0.0} is the one that has been used to create the DESERT version of csma-aloha, namely {\tt uw-csma-aloha}.
+\end{itemize}
+{\bf Conclusions:} Problems and mysteries solved.
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. 
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & refinement of {\tt uwmphy\_modem}, {\tt mfsk\_whoi\_mm}, {\tt ms2c\_evologics} & Riccardo Masiero & 15/05/2012 \\ 
+A2 & refinement of {\tt mpsk\_whoi\_mm} & Matteo Petrani & 15/05/2012 \\
+A3 & adaptation of {\tt mgoby\_whoi\_mm} to the scheme of {\tt uwmphy\_modem} & Matteo Petrani & 15/05/2012 \\
+A4 & insert Doxygen commands in the .h files of DESERT & all & 07/05/2012 \\
+A5 & put the skeleton for writing Tcl Scripts for examples in the svn  & Riccardo Masiero & 22/04/2012 \\
+A6 & refine the module description in the repository & Riccardo Masiero & 17/05/2012 \\
+A7 & Web site for DESERT & Riccardo Masiero & 18/05/2012 \\
+A8 & Write and test example Tcl Scripts for all the module of DESERT & all & 15/05/2012 \\
+A9 & improvements of {\tt uwpolling} and adding manual setting of MAC addresses for {\tt aloha} and {\tt uwsr} & Federico Favaro & 27/04/2012 \\
+A10 & create the Doxygen documentation for DESERT & Giovanni Toso & 11/05/2012 \\
+A11 & preliminary compatibility tests with the new release of WOSS & Federico Favaro & 08/05/2012 \\
+A12 & preliminary compatibility tests with the new release of ns2 & Saiful Azad & 08/05/2012 \\
+A13 & check if samples of databases are already in WOSS (if not, let's think how to provide them) & Saiful Azad & 08/05/2012 \\
+A14 & provide personal biographies to Riccardo & all & 08/05/2012 \\
+\hline
+\end{tabular}
+\ \\
+
+NOTE: The next meeting is foreseen for the 8$^{th}$ of May 2012.
+
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+  \item {\bf A1} Done. See first release of DESERT (v 1.0.0). 
+  \item {\bf A2} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A3} \RM{Activity paused}.
+  \item {\bf A4} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A5} Done. See svn.
+  \item {\bf A6} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A7} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A8} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A9} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A10} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A11} Done. See shared google doc done by Federico Favaro.
+  \item {\bf A12}  \RM{Activity paused}. See mail of Roberto Petroccia at the ns-miracle user mailing list (compatibility with ns2.35).
+  \item {\bf A13} Action point eventually deleted.
+  \item {\bf A14} Done. See first release of DESERT (v 1.0.0).
+\end{itemize}
+
+
+\end{document}

@@ -1,0 +1,219 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $2^{nd}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting: } $8^{th}$ of November $2011$\\
+{\it Present: } Ivano Calabrese (DEI, UniPD), Paolo Casari (DEI, UniPD), El Hadi Cherkaoui (IIT), Federico Favaro (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Beatrice Tomasi (DEI, UniPD), Giovanni Toso (DEI, UniPD), Marco Zanforlin (DEI, UniPD).
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} Illustration of the modules developed in ns-miracle for the MAC layer.\\
+{\bf Presenter:} Federico Favaro\\
+{\bf Discussion:} We have four different modules developed in ns-miracle for the MAC layer:
+\begin{enumerate}
+ \item {\bf CSMA-ALOHA} is a simple protocol according to which each node senses the carrier before sending its data and waits if necessary
+until the channel is free. There are two types of packets: DATA and ACK. The DATA packet comes from the application layer (CBR), whilst the ACK packet does not require additional header. It is not clear what is the parameter {\tt alpha\_} and what it is used for. It is also a little bit unclear how the channel-listen mechanism is implemented (there is any interaction with the PHY layer? In case, how does this interaction occur?); 
+ \item {\bf DACAP} is an handshake-based (RTS/CTS) scheme which also introduces a very short warning packet in the RTS/CTS mechanism. There are five types of packets: RTS, CTS, WRN, DATA and ACK. It has its own sequence number (SN). It is a little bit unclear how the pause of the warning mechanism is implemented (i.e., the time during which the node defers the transmission after the RTS-CTS phase; any interaction with PHY?);
+ \item {\bf TONE-LOHI} is a MAC protocol that uses tones (i.e., very short packets) during contention rounds to reserve the channel. There are two types of packets: DATA and WAKE-UP TONE. In the .tcl file this module requires the use of two different channels, one to model the channel for the tones and the second one to model the channel for the data. The interaction with PHY during the waiting times between two tones is not very clear;
+ \item {\bf UW-POLLING} is a MAC protocol designed to make an AUV able to coordinate the collection of data from a field of sensors, in three phases. There are three types of packets: TRIGGER, PROBE, POLL. During the first phase of UW-POLLING, a TRIGGER is sent by the AUV to the sensors. This message contains the starting and the ending time of the second phase, when a PROBE message must be sent by each sensor to the AUV. This message should contain an information according to which the AUV can determine a certain order for the polling (e.g., the residual energy of the sensors or the availability of new data). Finally, the AUV sends a POLL message containing the list of the sensors that can send data in that order.
+\end{enumerate}
+{\bf Conclusions:} ALOHA-CSMA is the module that implements the most simple and robust MAC protocol for UW. Likely, this must be selected as the first choice to test the building of a full protocol stack. Some action points must be defined to clarify some issue related to the actual implementation of the presented MAC modules.
+
+\vspace{0.5cm}
+
+\noindent {\bf Agenda item B:} Illustration of the module SpreadUW, developed in ns-miracle for the routing layer.\\
+{\bf Presenter:} Giovanni Toso\\
+{\bf Discussion:} SpreadUW aims at developing a flexible routing mechanism for Underwater Acoustic Networks. It can be exploited in both fix and mobile networks, with multiple sinks and without the need of having nodes aware of their location. SpreadUW implements a mechanism for ``on-demand'' source routing. SpreadUW is characterized by the following: 
+\begin{itemize}
+ \item four type of packets;
+ \item three different metrics to build routing paths;
+ \item to build paths, there is the need of transmitting lists of IP addresses (contained in the packet fields of SpreadUW). 
+\end{itemize}
+{\bf Conclusions:}
+Probably, it would be not straightforward to test this module in the emulation and testbed settings with the WHOI FSK-mircomodem. In fact, SpreadUW needs to transmit over the channel quite a few information. However, by adding some assumptions and constrains in the scenarios we would like to test (e.g., maximum number of nodes, IP addresses format predefined as function of the modem IDs) we can try to cope with this issue. We consider that proceeding in this direction is worth to gain in generality as regard to the possible demonstrations to realize.  
+
+\vspace{0.5cm}
+
+\noindent {\bf Agenda item C:} Discussion about how to release the code realized so far for UW applications.\\
+{\bf Presenter:} Paolo Casari\\
+{\bf Discussion:} So far the most ``complete'' stack we have for simulation is: {\tt WOSS - CSMA/ALOHA - SpreadUW routing - Application} (neglecting {\tt MLL/IP/Port} and other ``support'' modules).\\
+The stack {\tt MPHY\_modem - CSMA/ALOHA - SpreadUW routing - Application}, or alternatively the stack {\tt MPHY\_modem - CSMA/ALOHA - Static routing - Application}, can be considered as the most complete for the modem emulation setting (i.e., one PC, many modems connected to it), since the acoustic messages in this case is only used as a trigger for a reception event (it does not contain actual information, being this stored somewhere in the same machine).\\
+Concerning the realization of actual testbeds (i.e., each modem is connected to its own host) with our WHOI FSK-micromodems, we have two possibilities:
+\begin{itemize}
+ \item using minipackets (that have a payload of just 13 bits). Probably in this context we should consider at most the stack {\tt MPHY\_modem - CSMA/ALOHA - Static routing - Application} and also additional restrictions (e.g., maximum number of nodes). We can even try to consider the stack {\tt MPHY\_modem - CSMA/ALOHA - SpreadUW routing - Application}, but restricting ourselves to even more specific cases (e.g., lower number of nodes, maximum number of hops in the network, max number of applications per node). In any case, very unlikely we can leave some space for a user to develop his own application by exploiting minipackets,;
+\item using binary messages (that have a payload of 32 bytes). Who cares if we have to wait a lot of seconds for each packet in this case (since the transmission of a cycle-init message is required before transmitting each data packet): when we will have a different version of the modem or a different modem, the framework will be ready to just create the packet contents with no compression, and a very simple mapping (which just eliminates the useless fields in the Miracle common header).
+\end{itemize}
+
+{\bf Conclusions:}
+
+The release of the modules for simulation has one ``preferred'' stack (the one above) and all other modules will be released as separate ones. In parallel, we may say something like: ``if you want to stack SpreadUW on top of DACAP you can go ahead, be aware that as of today every single control and data packet of SpreadUW will undergo a full handshake before transmission, which is apparently inefficient''.
+
+The release of the modules for the emulation/testbed setting will follow three separate paths:
+\begin{enumerate}
+ \item EMULATION: every stack works in this case, since we are not transmitting real packets, but just the index of a vector;
+ \item a research-oriented TESTBED (13 Bits or 32 Bytes), and implementing as many stacks as possible even with lots of mapping and compression;
+ \item an application-oriented TESTBED (32 Bytes), aimed at providing room for the development of a customized user's application. It must implement a simple and as robust as possible stack that leaves enough payload for the user's need and includes much fewer restrictions to the network (e.g., in terms of maximum number of nodes).  
+\end{enumerate}
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions.
+
+{\bf Action items:}\\
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person(s) responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & Check what are the parameter {\tt waiting\_time} and {\tt alpha}, and how they are related to channel sensing. & Federico Favaro & 18/11/2011\\ 
+A2 & Check how PHY/MAC CL messaging is performed (if any) to sense the channel (e.g., compare physical layer "interference" level to some threshold?). & Federico Favaro & 18/11/2011\\ 
+A3 & In Tone Lohi, check how the PHY models are bound to the tone and packet, so that we can operate both packets over the same PHY model on the hardware. & Federico Favaro & 18/11/2011\\
+A4 & In DACAP, check whether during defer times and other protocol phases there is any interaction with the PHY layer. & Federico Favaro & 18/11/2011\\
+A5 & Check how {\tt Mac2PhyStartRX} and {\tt Mac2PhyEndRX} would work when {\tt MPhy\_modem} is connected to the MAC protocols we have so far. & Federico Favaro e Riccardo Masiero & 16/12/2011\\
+A6 & Define the protocol stacks to be realized for each of the four activities: SIMULATION, EMULATION, TESTBED (research-oriented) and TESTBED (application-oriented). & Paolo Casari e Riccardo Masiero & 18/11/2011\\
+\hline
+\end{tabular}
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+ \item {\bf A1}\\
+ {\bf Federico Guerra}: ``{\tt waiting\_time} is a simple {\tt constant} to take into account for delay in time out calculations. i.e., my macs calculates timeouts based on a simple {\tt rtt} calculation, but that differs in time and space, so a {\tt waiting\_time} was introduced to compensate'';\\
+  {\bf Giovanni Toso}: ``Looking in the code it is possible to see that the parameter {\tt alpha} is used only in this line: {\tt srtt = alpha\_ * srtt + (1-alpha\_) * curr\_rtt;} so I think it is a weight used to evaluate the round time trip. It correlates the odl {\tt rtt} with the new one. ''
+ \item {\bf A2}\\
+{\bf Federico Guerra}: ``Channel sensing was introduced with the new phy class made by Petroccia. check that. {\tt Mphy\_sense} should be the name.''\\
+{\bf Federico Favaro}: ``In {\tt CS-ALOHA 1.1.0} sensing is implemented in this manner: If I'm in {\tt IDLE} state and I receive a packet from upper layers, I change the state variable in {\tt LISTEN} and I schedule the listen timer with this value\\
+\begin{small} {\tt double time = listen\_time * RNG::defaultrng()->uniform\_double() + wait\_costant;} \end{small}\\ 
+({\tt listen\_time} and {\tt wait\_costant} are variables in tcl).
+
+If in the meantime I receive something from the channel (since the transmission is broadcast, i can receive everything coming from the channel), I change the state variable in {\tt RX\_LISTEN}.
+
+When the timer expire, I check the state. If the state is not {\tt LISTEN}, it means that something has happened and the only thing that it can be happened is that i received something. So, if the state is not {\tt LISTEN}, I will not transmit my packet. Otherwise, if the state is  {\tt LISTEN}, I'll transmit my packet calling {\tt Mac2PhyStartTx}.
+
+{\bf So, the sensing is done using only the set of method {\tt Phy2Mac}, so we don't have to manage new type of CL message}.''
+
+ \item {\bf A3} \\
+ {\bf Federico Favaro}: ``When using the Tone-Lohi module, if two PHY layers are not added by the tcl-user, the module gives a {\tt TCL\_ERROR}. The function {\tt initMphyIds} is called in the initialization phase, and probably this method associates the two PHY layers indicated by the tcl-user with the corresponding signal to be transmitted (i.e., data or tone). After this, there is not any particular interaction between PHY and MAC. I would only underline that, when we call a {\tt Mac2Phy} method (i.e., we are sending a CL message to the PHY) we have to specify which PHY is the receiver of the message, namely, we have to call the method {\tt Mac2PhyStartTx(ModuleId id, Packet* p)}, where {\tt id} is the id of one of the two PHY that you have. When, instead, one of the two PHY notifies you something (e.g. the begin of a receive), it uses the unique method {\tt Phy2MacStartRx(Packet* p)} and we can understand which PHY layer is the sender by watching the type of the packet in common header. Finally, I would point out that when you have to transmit a data, you have to wake up the PHY layer by sending a CL message {\tt Mac2PhyTurnOn(phy\_id)}.'' 
+ \item {\bf A4}\\
+ {\bf Federico Favaro}: ``In {\tt DACAP}, there aren't strange interactions between {\tt PHY} and {\tt MAC} during the defer time and in other protocol phases. As always, the usual {\tt Phy2Mac} and {\tt Mac2Phy} messages is used.''
+ \item {\bf A5}\\
+ {\bf Riccardo Masiero}: ``Apparently, also from the study done by Matteo Petrani, from the {\tt PHY} layer we just need to notify the {\tt MAC} layer, via {\tt CL} messages ({\tt Phy2MacEndTx}) about the end of a transmission and the begin of a reception ({\tt Phy2MacStartRx})''.
+ \item {\bf A6} Done. See Agenda item B, of minutes3.
+\end{itemize}
+
+\end{document}

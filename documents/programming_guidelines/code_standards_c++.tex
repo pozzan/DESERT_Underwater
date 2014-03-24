@@ -1,0 +1,40 @@
+\documentclass[12pt]{article}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{listing}
+
+\begin{document}
+
+\begin{Large} \noindent {\bf{Department of Information Engineering (DEI), University of Padua}}\\ \end{Large}
+\begin{large} {DESERT Documentation} \end{large}\\
+\begin{large} {C++ Coding Standards} \end{large}
+
+\vspace{0.8cm}
+
+\section*{Useful links}
+\begin{itemize}
+	\item Google C++ Style Guide at \url{http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml}. Read them (I know, the document is very long) and we should discuss about them.
+	\item Extra suggestions: Section Programming Guidelines, \emph{Thinking in C++, Volume 1, 2nd Edition, pages 797-813}\footnote{You can find a free, and legal copy here: \url{http://www.dei.unipd.it/~tosogiov/books/TIC2Vone.pdf}}
+\end{itemize}
+\section*{Other Suggestions}
+Soon I will provide to you some coding suggestion from my experience (static vs virtual, const vs non-const, reference vs value vs pointer, \ldots)
+\begin{itemize}
+	\item If your module has one or more headers, provide a command \emph{get[PacketName]HeaderSize}, for example: \emph{getUwIpHeaderSize}. If your protocol contains more than one header create a list of commands;
+	\item It is prefereable if your command calls an internal static function (look at \emph{sun-ipr-node.h} and .cc for an example;
+	\item Remermber to pass to the function const references when you don't need to modify the argument;
+	\item When it is possible you must return const references and not copies by value;
+	\item Pay attention when you compare floats and double, look for
+	\begin{lstlisting}
+	std::numeric_limits<double>::epsilon()
+	\end{lstlisting}
+	\item Pay attention to memory leaks when you allocate memory with the \emph{new} command;
+	\item For your classes remember to define the copy constructure and to overload the \emph{operator=} (attention: check for self-assignments), and eventually redefine the \emph{ostream operator\textless\textless};
+	\item If your function doesn't modify the object for which it is called, declare the function \emph{const}
+	(es: virtual const int\& printString(const int\&) \textbf{const}, the const in bold is the one to declare the function const);
+	\item \ldots
+	
+	
+	\end{itemize}
+	
+
+\end{document}

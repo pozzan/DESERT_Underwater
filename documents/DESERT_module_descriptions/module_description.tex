@@ -1,0 +1,64 @@
+\documentclass[12pt]{article}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{listing}
+\usepackage{amsmath}
+\usepackage{graphics}
+\usepackage{fancyhdr}
+\usepackage[dvips]{graphicx}
+\usepackage[english]{babel}
+
+\newcommand{\figw}{1\linewidth}
+
+
+\DeclareMathOperator*{\mean}{mean}
+
+\begin{document}
+
+\begin{Large} \noindent {\bf{The DESERT Underwater Libraries:\\ Schematic Description of the Modules}} \end{Large}
+
+\vspace{0.8cm}
+\begin{abstract}
+ In this document we provide a brief and schematic description of all the modules included in the first release of DESERT Underwater (version 1.0.0). The described modules are grouped according to the TCP/IP stack, from Section~\ref{sec:application} to~\ref{sec:physical}. The modules implemented to simulate node mobility are also considered, see Section~\ref{sec:mobility}.\\
+
+ {\it Legend of the adopted scheme to describe the DESERT Underwater's modules}
+ \begin{description}
+    \item {\bf Name:} The name of the module;
+   \item {\bf Description:} A brief description of the module capabilities and functionalities;
+   \item {\bf Library name:} the name of the corresponding NS-Miracle (DESERT) library;
+   \item {\bf Tcl name:} The name of the module in Tcl, i.e., the tcl command to call in order to create the corresponding C++ object;
+   \item {\bf Tcl parameters:} Parameters that can be set via Tcl, their ranges and usage, i.e., what they are needed for;
+   \item {\bf Tcl commands:} Commands that can be set via Tcl with a specification of the mandatory commands that must be called to make everything running properly (e.g., initialization commands);
+   \item {\bf Internal packet headers:} Packet headers defined by the module (if applicable);
+   \item {\bf External packet headers:} External packet headers used by the module (if applicable);
+   \item {\bf Warnings:} Possible warnings for the good usage of the module, e.g., the use of this module in conjunction with module A,B,C is deprecated and/or can lead to an undefined behaviour.
+   \item {\bf Parent Libraries:} Mandatory NS-Miracle/DESERT libraries that must be loaded in the Tcl file of the parameter setting before loading the library of this module.
+   \item {\bf Tcl Scripts:} Name of the tcl sample where to find an usage example of the considered module;
+\end{description}
+\end{abstract}
+
+\newpage
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=\figw]{figure/DESERT_scheme.eps}
+\centering 
+\caption{Overview of the DESERT Underwater modules.}
+\label{fig:scheme}
+\end{center}
+\end{figure}
+
+\newpage
+
+
+\input{application.tex}
+\input{transport.tex}
+\input{network.tex}
+\input{data_link.tex}
+\input{physical.tex}
+\input{mobility.tex}
+
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,biblio}
+
+\end{document}

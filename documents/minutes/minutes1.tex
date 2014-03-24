@@ -1,0 +1,186 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $1^{st}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting: } $3^{rd}$ of November $2011$\\
+{\it Present: } Saiful Azad (DEI, UniPD), Ivano Calabrese (DEI, UniPD), Paolo Casari (DEI, UniPD), El Hadi Cherkaoui (IIT), Federico Favaro (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD), Marco Zanforlin (DEI, UniPD).
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} Explanation of the overall objective of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\bf Presenter:} Paolo Casari\\
+{\bf Discussion:} Up to now, we have been working quite independently on the following: UW channel modeling (WOSS), UW hardware interfacing (MPhy\_modem), MAC protocols (ALOHA, CSMA-ALOHA, DACAP, Tone-Lohi, UW Polling), LINK LAYER CONTROL (USR which implemenents an ARQ control mechanism), routing protocols (SpreadUW, static routing, MSRP, restricted flooding). We also envisioned the following exploitations of the implemented solution: simulation, emulation (one computer connected to multiple acoustic modems) and testbed (multiple acoustic modems, each one connected with its own controlling host, such as a laptop or the PandaBoard software mobile platform). We aim at define the way in which we want to public release the solutions implemented so far in ns-miracle, for Underwater. Also, we need to identify if there is something that needs to be realized from the scratch and, in case, implement it.\\
+{\bf Conclusions:} To achieve the overall goal of the SIGNET Underwater Group's NS-Miracle Task Force, we should:
+\begin{itemize}
+ \item share among anyone in the group the general knowledge about the available module;
+ \item discuss together to define the way in which we want to public release the UW solutions implemented so far in ns-miracle.
+\end{itemize}
+
+\noindent {\bf Agenda item B:} Illustration of {\it MPhy\_modem}, a ns-miracle module designed and implemented by Riccardo Masiero and Matteo Petrani to interface the ns2/ns-miracle simulator with real hardware. Currently, this module interfaces ns2/ns-miracle with the FSK WHOI micromodem.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} 
+\begin{itemize}
+ \item We foresee two experimental settings: i) an emulation setting, where multiple acoustic modems are connected with a single device (PC, laptop or a mobile software platform such as the PandaBoard or the Gumstix); ii) a testbed setting, where each acoustic modem is connected with a corresponding single device (PC, laptop or a mobile software platform such as the PandaBoard or the Gumstix);
+ \item The modem-to-host and host-to-modem communications are made via RS-232 serial cable and entail the exchange of string messages. These messages should be compliant to the NMEA standard. According to this standard, the considered ways to transmit user messages are: i) sending minipackets (see \$CCMUC command in NMEA standard) or binary data (see \$CCTXD command);
+ \item Minipackets have a payload of 13 bits and introduce a transmission latency of about 1 sec in case of an ideal channel\footnote{The one emulated by the WHOI development box by means of BNC cables.}. Currently, they are exploited to trigger the reception of a ns-miracle packet during the transmission of a data packet between two nodes in the emulation setting (i.e., the sender stores the pointer to the ns-miracle data packet to be sent in a given disk file, at row $n < 2^{13}-1$; then, it sends acoustically a minipacket whose payload contains the value $n$; finally, the receiver, receives the acoustic packet, reads $n$, retrieve the corresponding pointer to the sent ns-miracle packet and thus the packet itself). By properly mapping the necessary fields of the ns-miracle packet to be sent in 13 bits, it may be also possible to use minipackets in the testbed setting.
+ \item  FSK binary messages have a payload of 32 bytes and introduce a transmission latency of about 6 sec in case of an ideal channel, that is because the binary messages require to send an additional packet (cycle-init message, see \$CCCYC command) at the beginning of each packet transmission. Currently, they are exploited to trigger the reception of a ns-miracle packet during the transmission of a data packet between two nodes in the emulation setting (i.e., the sender sends acoustically a binary packet whose payload contains the pointer to the ns-miracle data packet to be sent; the receiver, receives the acoustic packet, reads the pointer to the sent ns-miracle packet and thus the packet itself). By properly mapping the necessary fields of the ns-miracle packet to be sent in 32 bytes, it may be also possible to use minipackets in the testbed setting\footnote{Matteo is now working at WHOI and experimenting with the PSK WHOI micromodems. With these hardwares is possible to pack an entire ns-miracle packet into a payload of 2048 bytes per packet. Furthermore, Matteo has referred that at WHOI there is a rumor around the possibility of removing the cycle-init message in the future release of the modem firmware, thus reducing the latency discussed above...}. 
+\end{itemize}
+{\bf Conclusions:}
+We want to build a tool based on ns-miracle and able to interface ns-miracle with real hardware. The main objective is to make the ns-miracle code written for network protocols usable in a testbed setting. In order to achieve this, we should proceed as follows:
+\begin{itemize}
+ \item define the network protocol stack(s) we would like to evaluate in a testbed setting; 
+ \item identify all the ns-miracle packet's fields which are necessary for the well-functioning of the stacks defined in the previous point;
+ \item map the identified fields in 13 bits and/or 32 bytes;
+ \item implement the necessary mapping routines (and reverse procedures) in the MPhy\_modem module, as well as a mechanism to signal the use of such mapping throughout the modules of the defined protocol stacks.   
+\end{itemize}
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. Pursuing our overall objective, the main constrains will likely occur to realize the testbed described above; therefore, we decided to focus the presentations in A1,A2 and A3 especially on the following issues:
+\begin{itemize}
+ \item illustration of the used packet header formats for each module;
+ \item description of the fundamental packet header fields (e.g., those actually involved in checking operations);
+ \item possibility of compressing the above fields (e.g., can we relate the node IP address to nodes ID ? For instance, can we restrict the allowed IP addresses to the form 1.0.0.\$ID ?).
+\end{itemize}
+
+{\bf Action items:}\\
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & Presentation of the ns-miracle modules that we have for MAC protocols. & Federico Favaro & 08/11/2011\\ 
+A2 & Presentation of the ns-miracle modules that we have for MAC protocols and LINK LAYER control. & Saiful Azad & 25/11/2011\\ 
+A3 & Presentation of the ns-miracle modules that we have for routing protocols. & Giovanni Toso & 08/11/2011\\
+A4 & Preliminary definition of the public release of the UW modules implemented so far in ns-miracle & Paolo Casari & 11/11/2011\\
+A5 & Definition of the protocol stacks we would like to test and provide for the public release of ns-miracle code for UW & Paolo Casari & 25/11/2011\\
+\hline
+\end{tabular}
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+ \item {\bf A1} Done. See Agenda item A, of minutes2;
+ \item {\bf A2} Done. See Agenda item A, of minutes3;
+ \item {\bf A3} Done. See Agenda item B, of minutes2;
+ \item {\bf A4} Done. See Agenda item C, of minutes2;
+ \item {\bf A5} Done. See Agenda item B, of minutes3.
+\end{itemize}
+
+
+
+
+\end{document}

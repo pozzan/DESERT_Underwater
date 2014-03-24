@@ -1,0 +1,186 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+\newcommand{\MP}[1]{\begin{color}{NavyBlue} (MP: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $12^{th}$ meeting of the SIGNET Underwater Group.\\
+{\it Date of the meeting: } $21^{st}$ of June $2012$\\
+{\it Present: } Riccardo Masiero (DEI, UniPD), Giovanni Toso (CFR), Federico Favaro (CFR), Matteo Petrani (CFR), Paolo Casari (CFR and DEI, UniPD), Ivano Calabrese (CFR), Saiful Azad (DEI, UniPD), Beatrice Tomasi (DEI, UniPD),  El Hadi Cherkaoui (IIT)\\
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} CHANGE-LOG and TO DO list : where, when, how.\\
+{\bf Presenter:} Giovanni Toso
+
+{\bf Discussion:} Illustration of the private pages built in the DESERT Underwater web page to keep trace of the code's CHANGE-LOG and TO DO list.
+
+{\bf Conclusions:} Separate the TO DO list page in three pages: high priority, medium priority, low priority 
+
+\ \\
+
+\noindent {\bf Agenda item B:} Proposals for the UW field experiments.\\
+{\bf Presenters:} All
+
+{\bf Discussion:} Presentation of proposals and sharing of ideas. See {\it uw\_experiment\_proposals.pdf} in the svn for details.
+
+{\bf Conclusions:} Set up of a doodle poll to vote the better proposals to investigate, discuss and detail further.
+
+\ \\
+
+\noindent {\bf Agenda item C:} How to empathize on the DESERT web site bugs fixed and news?\\
+{\bf Presenter:} Paolo Casari
+
+{\bf Discussion:} Postponed.
+\  \\
+
+\noindent {\bf Agenda item A:} Sum up of some old Action Points ...\\
+{\bf Presenter:} Riccardo Masiero
+
+{\bf Discussion:}
+\begin{itemize}
+ \item {\it Thesis Proposals}. Ready. 
+ \item {\it PER table for RACUN}. Postponed.
+ \item {\it Compatibility NS-Miracle with ns2.35}. Postponed (in the meanwhile, see mail sent by Roberto Petroccia through the mailing list of NS-Miracle).
+\end{itemize}
+
+{\bf Conclusions:} Send the Thesis Proposals to Michele Zorzi.
+\  \\
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. 
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & Separate the TO DO list page in three pages: high priority, medium priority, low priority & Riccardo & 29/06/2012\\
+A2 & Set up of a doodle poll to vote the better proposals to investigate, discuss and detail further & Riccardo & 25/06/2012\\
+A3 & Send the Thesis Proposals to Michele Zorzi & Paolo & 25/06/2012\\
+\hline
+\end{tabular}
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+  \item {\bf A1}: Done. See NAUTILUS/DESERT web site.
+  \item {\bf A2}: Done. See mail.
+  \item {\bf A3}: Done. See mail.
+\end{itemize}
+
+
+\end{document}

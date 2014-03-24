@@ -1,0 +1,176 @@
+\section{Modules for the physical layer}\label{sec:physical}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwmphypatch}
+   \item {\bf Description:} {\tt uwmphypatch} is a dumb module to patch the absence of a physical layer when a MAC module is used. It just receives and forwards a packet handling the cross-layer messages required by all the MAC layers of DESERT. The main aim of this module is to observe the behavior of a given network protocol over an ideal channel, before interfacing the network simulator engine with real hardware. It should be used in conjunction with the underwater channel or the dumb wireless channel provided by the NS-Miracle libraries, and mainly to gather insight about the mechanisms of the investigated network protocol (independently of the errors that can be introduced by the channel). Any usage related to performance evaluation is not recommended.
+   \item {\bf Library name:} {\tt libuwmphypatch.so}
+   \item {\bf Tcl name:} {\tt Module/UW/MPhypatch}
+   \item {\bf Tcl parameters:} 
+         \begin{description}
+          \item {\tt debug\_}: flag to disable or enable debug messages [range in \{0,1\}] (optional, default value = 0).
+         \end{description}
+   \item {\bf Tcl commands:} none.
+   \item {\bf Internal packet headers:} none. 
+   \item {\bf External packet headers:} none.
+   \item {\bf Warnings:} The main aim of this module is to observe the node behaviors according to a given protocol stack and over an ideal channel, before interfacing the network simulator engine with real hardwares (by means of the derived modules of {\tt UWMPHY\_MODEM}). It should be used in conjunction with the underwater channel or the dumb wireless channel provided with the NS-Miracle libraries, and mainly to gather insights about the mechanisms of the investigated network protocol (independently of the errors that can be introduced by the channel). Any other usage (e.g., for performance evaluation) is not recommended.
+   \item {\bf Tcl Scripts:}
+      \begin{description}
+		\item {\tt sample/basic/SIMULATION\_sample.tcl}.
+	   \end{description} 
+   \item {\bf Parent Libraries:}
+      \begin{description}
+		\item {\tt libMiracle.so};
+      \item {\tt libmphy.so}.
+	   \end{description} 
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwmphy\_modem}
+   \item {\bf Description:} This module defines and implements the general interface between ns2/NS-Miracle and real acoustic modems.     {\tt uwmphy\_modem} manages all the messages needed by NS-Miracle (e.g., cross layer messages between MAC and PHY layers) and contains all the simulation parameters that can be set by the user, along with the methods to change them. This module is an abstract class that must be used as base class for any derived class that interfaces NS-Miracle with a given hardware. Therefore, neither an actual object for this module nor its corresponding shadowed Tcl object can be created, hence there is no ``Tcl name'' associated to this module.
+   \item {\bf Library name:} {\tt libuwmphy\_modem.so}
+   \item {\bf Tcl name:} --- (see ``Warnings'' and the derived classed of this module).
+   \item {\bf Tcl parameters:}
+ 
+         \begin{description}
+          \item {\tt ID\_}: node ID [range in $\{0,1,\dots,255\}$, the use of $0$ is deprecated] (mandatory, default value = 0);
+          \item {\tt period\_}: time interval [in sec] between two successive checks on the modem status (i.e., to have notification of a packet reception) [range in $(0,\infty)$] (optional, default value = 0.001);
+          \item{\tt setting\_}: flag to switch between the TESTBED (flag equals to 1) and the EMULATION (flag equals to 0) setting [range in \{0,1\}] (optional, default value = 0);
+          \item{\tt stack\_}: flag to notify about the use of different protocol stacks [currently, range in \{0,\dots,2\}] (optional, default value = 0);
+          \item {\tt debug\_}: flag to disable or enable debug messages [range in \{0,1\}] (optional, default value = 0);
+          \item {\tt show\_}: flag to disable or enable messages for presentation purposes (e.g., user-friendly messages that notify when a packet is going to be sent or received) [range in \{0,1,2\}] (optional, default value = 1);
+          \item {\tt log\_}: flag to disable or enable the printing of log messages [range in \{0,1\}] (optional, default value = 0);
+          \item{\tt P\_err\_}: variable to set the probabilty of error for the erasure channel model (for debug purposes) [range in \{0,1\}] (optional, default value = 0) {\bf (only for v. 2.0.0 or above)};
+         \end{description} 
+   \item {\bf Tcl commands:}
+         \begin{description}
+          \item {\tt start}: start the modem (mandatory);
+          \item {\tt stop}: stop the modem and close the serial connection (mandatory);
+          \item {\tt excludeSRC}: command to indicate the source IDs from which the received packets must be considered in error (so as to force a very bad channel with no possibility of communication, for debug purposes). Usage {\tt \$UWMPhy\_modem\_name excludeSRC <list of IDs>}, e.g., {\tt \$modem1 excludeSRC 2 3 4} {\bf (only for v. 2.0.0 or above)};
+          \item {\tt includeSRC}: command to restore the possibility of receiving packets from a given source. Usage {\tt \$UWMPhy\_modem\_name includeSRC <list of IDs>}, e.g., {\tt \$modem1 includeSRC 2 3 4} {\bf (only for v. 2.0.0 or above)}; \item {\tt clearBannedSRC}: command to clear the list containing the ID of the source whose packets cannot be correctly received {\bf (only for v. 2.0.0 or above)}.
+          \end{description}
+   \item {\bf Internal packet headers:} none. 
+   \item {\bf External packet headers:} none (see the derived classed of this module).
+   \item {\bf Warnings:} 
+    \begin{enumerate}
+     \item This module is an abstract class whose corresponding virtual functions must be implemented by any derived class of {\tt UWMPHY\_MODEM}. Therefore, neither an actual object for this module nor its corresponding shadowed Tcl object can be created;
+     \item If the parameter {\tt setting\_} is set to 1 (i.e., TESTBED setting), always specify the used protocol stack by means of the {\tt stack\_} flag. See the Doxygen documentation of DESERT Underwater for more details about the protocol stacks supported by its libraries.   
+     \item Be sure that the payload to send fits into the acoustic packet.
+    \end{enumerate}
+    \item {\bf Tcl Scripts:} --
+    \item {\bf Parent Libraries:} --    
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt mfsk\_whoi\_mm}
+   \item {\bf Description:} Module derived from {\tt uwmphy\_modem} to implement the interface between ns2/NS-Miracle and the FSK WHOI micro-modem. 
+   \item {\bf Library name:} {\tt libmfsk\_whoi\_mm.so}
+   \item {\bf Tcl name:} {\tt Module/UW/MPhy\_modem/FSK\_WHOI\_MM}
+   \item {\bf Tcl parameters:} see {\tt uwmphy\_modem}.
+   \item {\bf Tcl commands:} see {\tt uwmphy\_modem}.
+   \item {\bf Internal packet headers:} none.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_mac} (common header from ns2); {\tt hdr\_uwcbr} (uwcbr header from DESERT); {\tt hdr\_uwvbr} (uwvbr header from DESERT); {\tt hdr\_uwudp} (uwudp header from DESERT); {\tt hdr\_uwip} (uwip header from DESERT).
+   \item {\bf Warnings:} If the parameter {\tt setting\_} is set to 1 (i.e., TESTBED setting), always specify the used protocol stack by means of the {\tt stack\_} flag. See the Doxygen documentation of DESERT Underwater for more details about the protocol stacks supported by this module. Remember to call the ``start'' and ``stop'' commands properly (see the Tcl scripts written to illustrate the use of this module).
+   \item {\bf Tcl Scripts:} 
+    	\begin{description}
+		\item {\tt samples/basic/EMULATION\_sample.tcl};
+		\item {\tt samples/basic/TESTBED\_n1\_sample.tcl}; 
+		\item {\tt samples/basic/TESTBED\_n2\_sample.tcl};
+		\item {\tt samples/advanced/FSK\_sample.tcl}.
+	   \end{description}
+   \item {\bf Parent Libraries:}
+      \begin{description}
+		\item {\tt libMiracle.so};
+      \item {\tt libmphy.so};
+      \item {\tt libuwip.so};
+      \item {\tt libuwmll.so};
+      \item {\tt libuwstaticrouting.so};
+      \item {\tt libuwaloha.so};
+      \item {\tt libuwudp.so};
+      \item {\tt libuwcbr.so};
+      \item {\tt libuwvbr.so};
+      \item {\tt libuwmphy\_modem.so}.
+	   \end{description} 
+      NOTE: {\tt libuwip.so}, {\tt libuwmll.so}, {\tt libuwstaticrouting.so}, \\ {\tt libuwaloha.so}, {\tt libuwudp.so}, {\tt libuwcbr.so} and {\tt libuwvbr.so} are need because of the current map implementation between NS-Miracle packets and modem payloads (for the TESTBED setting). See the DESERT Doxygen documentation for more details.
+
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt mpsk\_whoi\_mm}
+   \item {\bf Description:} Module derived from {\tt uwmphy\_modem} to implement the interface between ns2/NS-Miracle and the PSK WHOI micro-modem. 
+   \item {\bf Library name:} {\tt libmpsk\_whoi\_mm.so}
+   \item {\bf Tcl name:} {\tt Module/UW/MPhy\_modem/PSK\_WHOI\_MM}
+   \item {\bf Tcl parameters:} 
+         \begin{itemize}
+          \item{\tt packet\_rate\_}: variable to set the packet rate [range in \{0,\dots, 6\}];
+          \item see {\tt UWMPhy\_modem}. The EMULATION scenario is not implemented.
+         \end{itemize}
+   \item {\bf Tcl commands:} see {\tt UWMPHY\_MODEM}.
+   \item {\bf Internal packet headers:} none.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_mac} (common header from ns2); {\tt hdr\_uwcbr} (uwcbr header from DESERT); {\tt hdr\_uwvbr} (uwvbr header from DESERT); {\tt hdr\_uwudp} (uwudp header from DESERT); {\tt hdr\_uwip} (uwip header from DESERT).
+   \item {\bf Warnings:} This module create its own tracefile, that is in the form \textit{nodeID.phy}, located in the same folder of the running script. It is crash proof and it does not overwrite traces from a previous run of the same script.
+   \item {\bf Tcl Scripts:} 
+   	\begin{description}
+		\item {\tt samples/basic/EMULATION\_sample.tcl},
+		\item {\tt samples/basic/TESTBED\_n1\_sample.tcl}, 
+		\item {\tt samples/basic/TESTBED\_n2\_sample.tcl},
+		\item {\tt samples/advanced/PSK\_sample.tcl}.
+	  \end{description}
+   \item {\bf Parent Libraries:}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt mgoby\_whoi\_mm}
+   \item {\bf Description:} Module derived from {\tt uwmphy\_modem} to implement the interface between ns2/NS-Miracle and the WHOI micro-modems (both the FSK and PSK version) using the Goby software~\cite{Goby} to handle the connection with the modems.
+   \item {\bf Library name:} {\tt libmgoby\_whoi\_mm.so}
+   \item {\bf Tcl name:} {\tt Module/UW/MPhy\_modem/GOBY\_WHOI\_MM} 
+   \item {\bf Tcl parameters:} --
+   \item {\bf Tcl commands:} --
+   \item {\bf Internal packet headers:} --
+   \item {\bf External packet headers:} --
+   \item {\bf Warnings:} This module needs Goby's ($\geq 2.0$) and Google protobuf libraries installed (see http://gobysoft.com/doc/2.0/). It is not yet included in the DESERT Undewater libraries because under development. For further information please contact Matteo Petrani (email address: {\tt petranim@dei.unipd.it}).
+   \item {\bf Tcl Scripts:} -- 
+   \item {\bf Parent Libraries:} --
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt MS2C\_EvoLogics}
+   \item {\bf Description:} Module derived from {\tt uwmphy\_modem} to implement the interface between ns2/NS-Miracle and the S2C EvoLogics modem.
+   \item {\bf Library name:} {\tt libmstwoc\_evologics.so}
+   \item {\bf Tcl name:} {\tt Module/UW/MPhy\_modem/S2C}
+   \item {\bf Tcl parameters:} see {\tt uwmphy\_modem}.
+   \item {\bf Tcl commands:} see {\tt uwmphy\_modem}.
+   \item {\bf Internal packet headers:} none.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_mac} (common header from ns2); {\tt hdr\_uwcbr} (uwcbr header from DESERT); {\tt hdr\_uwvbr} (uwvbr header from DESERT); {\tt hdr\_uwudp} (uwudp header from DESERT); {\tt hdr\_uwip} (uwip header from DESERT).
+   \item {\bf Warnings:}
+   \item {\bf Tcl Scripts:} 
+         \begin{description}
+		     \item {\tt samples/basic/EMULATION\_sample.tcl},
+		     \item {\tt samples/basic/TESTBED\_n1\_sample.tcl}, 
+		     \item {\tt samples/basic/TESTBED\_n2\_sample.tcl},
+		     \item {\tt samples/advanced/S2C\_sample.tcl}.
+	     \end{description}
+   \item {\bf Parent Libraries:}
+    \begin{description}
+		\item {\tt libMiracle.so};
+      \item {\tt libmphy.so};
+      \item {\tt libuwip.so};
+      \item {\tt libuwmll.so};
+      \item {\tt libuwstaticrouting.so};
+      \item {\tt libuwaloha.so};
+      \item {\tt libuwudp.so};
+      \item {\tt libuwcbr.so};
+      \item {\tt libuwvbr.so};
+      \item {\tt libuwmphy\_modem.so}.
+	   \end{description} 
+      NOTE: {\tt libuwip.so}, {\tt libuwmll.so}, {\tt libuwstaticrouting.so}, \\ {\tt libuwaloha.so}, {\tt libuwudp.so}, {\tt libuwcbr.so} and {\tt libuwvbr.so} are need because of the current map implementation between NS-Miracle packets and modem payloads (for the TESTBED setting). See the DESERT Doxygen documentation for more details.
+\end{description}

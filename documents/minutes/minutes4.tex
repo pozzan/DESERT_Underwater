@@ -1,0 +1,209 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $4^{th}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting: } $22^{nd}$ of November $2011$\\
+{\it Present: } Saiful Azad (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD).
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} The CBR module: how is implemented and how we would like it to be.\\
+{\bf Presenter:} Saiful Azad and Giovanni Toso\\
+{\bf Discussion:} Currently, the ns-miracle CBR module is characterized by:
+\begin{itemize}
+\item unicast mode of transmission. When we need to connect to nodes, let say $N_1$ and $N_2$, in the .tcl file we need to write the following:\\
+{\tt
+\$$N_1$ set destAddr\_ [\$ip\_addr\_$N_2$]\\
+\$$N_1$ set destPort\_ \$port\_$N_2$\\
+}
+but also,\\
+{\tt
+\$$N_2$ set destAddr\_ [\$ip\_addr\_$N_1$]\\
+\$$N_2$ set destPort\_ \$port\_$N_1$\\
+}
+The first two commands are required to transmit from $N_1$ to $N_2$. However, even if the $N_2$ has not to transmit to $N_1$, also the second two commands are required. This is so because of a check implemented in the CBR module that discards packets with wrong destAddr and destPort;
+\item traffic generator. It implements three versions of constant bit rate: i) in the first one, a data packet is sent every $T$ secs (where $T$ is decided by the tcl-user); ii) in the second one, a data packet is sent every $T$ secs plus a random delay computed according to a Poisson distribution (this is to avoid simultaneous transmissions in the network due to the event-based mechanism of the ns simulator) ii) a third one, that generates traffic according to a Poisson process of parameter $1/T$. It also currently implements a simulator for the VOIP traffic (see the MOS function);  
+\item metrics. They are all local metrics (i.e., computed at each node). In detail: 1) Forward Trip Time (FTT); 2) Round Trip Time (RTT, it is computed only if there is a duplex communication); 3) Throughput; 4) Total number of sent packets; 5) Total number of received packets; 6) Packet Error Rate (PER); 7) Number of packets received out of order.
+\end{itemize}
+{\bf Conclusions:} We would like to have a light CBR module that is able to handle also broadcast messages. We would like to avoid the current twisted way of setting up a CBR communication between two nodes. Also, we would like to leave to the lower layers the burden of discarding the packets which we should not receive (the IP layer should check the IP addresses, whilst the transport layer should be the one in charge of sending the different flow to the right application based on the corresponding port number\footnote{During this meeting we also noticed the fact that, in order to have a right association between applications and ports, in the .tcl files the commands for this association MUST follow the commands for the modules connections. Differently, the port number does not increase with the number of application. We should keep this in mind when we will define a standard way to write .tcl files.}). The absence of a check for both the IP addresses and the application ports in the CBR will not impact the correct computation of the local metrics, if the network and transport layer modules that perform this check are put together with the CBR module in the protocol stack.
+
+
+\noindent {\bf Agenda item B:} Organization of the modules.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} Given the discussion emerged at the previous point and considering the protocol stacks defined in the previous meeting, probably it would be good to public release a folder containing all the necessary modules to realize these defined protocols. Even if this decision means that some modules should be almost completely copied from the current version of ns-miracle, we believe that it is worthy to do so in order to furnish a complete and coherent tool to the final user. Furthermore, if we need to do some minor modifications to the existing files (such us in the case of the ns-miracle modules Port and IP), we can do it straightforwardly, without impacting on ns-miracle. In order to distinguish our modules from the original ones of ns-miracle, we will indicate the first ones by add an ``UW'' prefix to their name (e.g., CBR will become UWCBR).\\
+%
+{\bf Conclusions:}\\
+{\it From the CBR module of ns-miracle we will realize the UWCBR module} by 
+\begin{itemize}
+ \item deleting checks (on the ``port'' fields, that instead must be checked by UWUDP, and on the IP addresses that are already checked in the IP module);
+ \item delete MOS;
+ \item remove the TS in the CBR header;
+ \item add ``gets'' to ease the computation of the statistics (e.g., to immediately retrieve the dimension of the header).
+\end{itemize}
+
+{\it From the Map/Port module of ns-miracle we will realize the UWUDP module} by
+\begin{itemize}
+ \item defining BROADCASTport = -1;
+ \item introducing a check on the port to de-multiplex different application flows;
+\end{itemize}
+
+{\it From UWUDP we will realize the UWTP (UW-Transport Protocol) module} by
+\begin{itemize}
+ \item introducing a mechanism to guarantee the in-order deliver of the messages at the upper layers (buffering); 
+ \item introducing a mechanism to enable end-to-end ARQ (i.e., ACK/NACK signaling at the transport level).
+\end{itemize}
+
+{\it From the IP module of ns-miracle we will realize the UWIP module} by
+\begin{itemize}
+ \item merge the ns-miracle modules IPinterface and IP;
+\end{itemize}
+
+{\it NOTE 1:} we can also think to design and realize a new module for the application layer, i.e., an UWVBR module, a module to generate traffic with variable bit rates (i.e., according to a specific function for the traffic generator as a function which alternates between two different constant bit rates).
+
+{\it NOTE 2:} from a phone call done with Matteo, it emerged the need to redesign {\tt MPhy\_modem} to better identify the various components and to make easier the integration of other hardware and drivers into ns-miracle. Therefore we will move from {\tt MPhy\_modem} to {\tt UWMPhy\_modem} 
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. 
+
+{\bf Action items:}\\
+\ \\
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & Realization and testing of the {\tt UWCBR}. & Giovanni Toso & 25/11/2011\\ 
+A2 & Realization and testing of the {\tt UWUDP}. & Giovanni Toso & 25/11/2011\\ 
+A3 & Realization and testing of the {\tt UWIP}. & Giovanni Toso & 25/11/2011\\
+A4 & Implementation of VBR (low-high packet geenration rate). & Giovanni & 16/12/2011\\
+A5 & Redesigned of {\tt MPhy\_modem} into {\tt UWMPhy\_modem} and its implementation. & Riccardo & 16/12/2011\\
+\hline
+\end{tabular}
+\ \\
+\ \\
+{\it NOTE:} Saiful also referred about some problems he encountered regarding: i) computation of the delay with CBR; ii) computation of the interference with WOSS. We agreed on the fact that Saiful should prepare, whenever possible, a brief document illustrating the encountered problems and a .tcl file where these problems emerged. Once this document will be ready, we can help Saiful to overcome the encountered problems.
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+ \item {\bf A1} Done. See Agenda item A, of minutes5;
+ \item {\bf A2} Done. See Agenda item A, of minutes5;
+ \item {\bf A3} Done. See Agenda item A, of minutes5;
+ \item {\bf A4} Done. See svn repository of DESERT.
+ \item {\bf A5} Done. See code in svn and Agenda item A, of minutes6.
+\end{itemize}
+
+
+\end{document}

@@ -1,0 +1,236 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+\newcommand{\MP}[1]{\begin{color}{NavyBlue} (MP: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $9^{th}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting: } $8^{th}$ of May $2012$\\
+{\it Present: } Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD), Federico Favaro (DEI, UniPD), Matteo Petrani (DEI, UniPD), Paolo Casari (DEI, UniPD), Ivano Calabrese (DEI, UniPD)\\
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+
+\noindent {\bf Agenda item A:} Status of the documentation to prepare ({\it Doxygen documentation, module description, Tcl example, web site}).\\
+{\bf Presenters:} Riccardo Masiero\\
+{\bf Discussion:}\\
+
+{\bf Doxygen documentation}
+
+Anyone should provides comment for ``all the classes'' and files (see class and file lists in Doxygen).
+
+The main document presenting the library must be prepared (see WOSS for reference).
+
+
+{\bf Module description}
+
+Anyone should fill the new fields {\bf Tcl Scripts} and {\bf Parent Libraries} for his  own modules.
+
+Anyone should refine/complete and check the English, especially in the {\bf Warnings} field.
+
+
+{\bf Tcl Scripts}
+
+Do not use WOSS for the basic tcl script.
+
+Do not use databases with WOSS, even in the advanced tcl scripts, but only the physical of WOSS.
+
+Add terms of license end a comment for the author(s) also in the tcl scripts. 
+
+Put the examples sample in the folders DESERT/sample/basic or DESERT/sample/advanced.
+
+{\bf Web site}
+
+Content: 1) zip folder with DESERT; 2) zip folder with DESERT all-in-one (ns2.34, NS-Miracle, DESERT, WOSS, support libraries for WOSS, bash script to install everything); 3) possibly a virtual image of DESERT all-in-one (to check feasibility) for a quick ``download and play'' of DESERT on virtual machines; 4) all the documentation (to be but in a dedicated folder as done for WOSS).
+
+{\bf Conclusions:} See above.\\
+
+\  \\
+
+\noindent {\bf Agenda item B:} Refinements of the DESERT modules.\\
+{\bf Presenters:} Riccardo Masiero\\
+{\bf Discussion:}\\
+
+Referring to the action points of minutes8: A1, A2 and A9 done. 
+
+Concerning A3, instead, {\tt mgoby\_whoi\_mm} will not be release with the other DESERT libraries (because of problems with the installation of Goby); maybe it will be release as a stand-alone beta version. In any case, we should notify about this think in the documentation.
+
+Open problem: WOSS or uwmll give problems in 32 bits architectures. To have to clearly asses, also in the web sites, in which configurations our scripts worked. We are working on this problem.
+
+{\bf Conclusions:} see above.\\
+
+\  \\
+\noindent {\bf Agenda item C:} Compatibility issues of DESERT with ns2.35 and WOSS.\\
+{\bf Presenter:} Federico Favaro and Riccardo Masiero\\
+{\bf Discussion:} \\
+
+Open problem: DESERT does not work with ns2.35: several problems of different nature. Let for future work.
+
+Open problem: WOSS or uwmll give problems in 32 bits architectures. To have to clearly asses, also in the web sites, in which configurations our scripts worked. We are working on this problem.
+
+{\bf Conclusions:} see above\\
+
+\  \\
+\noindent {\bf Agenda item D:} Terms of license for the DESERT code to release.\\
+{\bf Presenter:} Paolo Casari\\
+{\bf Discussion:} Use the BSD license (as the one used for NS-Miracle).\\
+{\bf Conclusions:} Copy and paste the NS-Miracle license to all the file .h, .cc and .tcl we will release with DESERT \RM{remember also to update the year of the copyright, at the beginning of the file, to 2012!} \\
+
+\  \\
+\noindent {\bf Agenda item E:} Future work.\\
+{\bf Presenter:} Paolo Casari and Riccardo Masiero\\
+{\bf Discussion:} 
+\begin{itemize}
+\item planning experimentation campaigns for our projects;
+\item maintenance of the DESERT Underwater libraries;
+\item planning extensions of the DESERT Underwater libraries (external contribution? translation in ns3?).
+\end{itemize}
+{\bf Conclusions:} meetings will continue after OCEANS ... :-) \\
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. 
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 &  refinement module description (two new fields) & all  & 16/05/2012 \\ 
+A2 &  doxygen main & Riccardo  & 16/05/2012 \\
+A3 &  update INSTALL-INFO with WOSS or without.. & Riccardo  & 16/05/2012 \\ 
+A4 &  installation all-in-one & task force Fede-Teo-Ivano  & 16/05/2012 \\
+A5 &  DESERT all-in-one in virtual machine & Giovanni & 16/05/2012 \\  
+A6 &  create in the svn the folders DESERT/sample/basic or DESERT/sample/advanced & Riccardo & 10/05/2012 \\
+A7 &  put a README in the svn explaining which tcl example to use for which modules & Riccardo & 17/05/2012 \\
+\hline
+\end{tabular}
+\ \\
+
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+  \item {\bf A1} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A2} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A3} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A4} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A5} Done. See first release of DESERT (v 1.0.0).
+  \item {\bf A6} Done. See svn.
+  \item {\bf A7} Done. See first release of DESERT (v 1.0.0). 
+\end{itemize}
+
+
+\end{document}

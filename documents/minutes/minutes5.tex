@@ -1,0 +1,257 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $5^{th}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting: } $24^{th}$ of November $2011$\\
+{\it Present: } Saiful Azad (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD).
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} Illustration of the new modules {\tt UWCBR}, {\tt UWUDP} and {\tt UWIP}.\\
+{\bf Presenter:} Giovanni Toso\\
+{\bf Discussion:} 
+In general, we override the variable {\tt debug\_} of ns2 (defined in parent classes) to be able to set the debug mode independently for each module. We also introduced the methods {\tt getUWCBRHeaderSize() {return sizeof(struct)}}, and similarly {\tt getUWUDPHeaderSize()}, {\tt  getUWIPHeaderSize()} to easy return the size of packet headers in different modules.
+
+In particular, for
+\begin{itemize}
+ \item {\tt UWCBR}, we have now the following fields in the header: {\tt SN} (u32bit), {\tt RFTT} (double) and {\tt RFTT\_VALID} (bool, to signal if {\tt RFTT} is to be considered). We also keep the member {\tt destAddress\_}, {\tt destPort\_}. All the other modifications have been done accordingly to what discussed in the previous meeting;
+ \item {\tt UWUDP}, we have now the following fields in the header: {\tt sport\_} (u\_int16\_t), {\tt dport\_} (u\_int16\_t).  All the other modifications have been done accordingly to what discussed in the previous meeting;
+ \item {\tt UWIP}, we have now the following fields in the header: {\tt saddr\_} (nsaddr\_t, means u\_int32\_t), {\tt daddr\_} (nsaddr\_t, means u\_int32\_t), {\tt ttl} (u\_int8\_t, time to live).
+\end{itemize}
+{\bf Conclusions:} 
+We also need to implemente an UW module for the static routing based on {\tt UWIP} (i.e., using the code of the ns-miracle module {\tt IProuting}).
+
+
+\noindent {\bf Agenda item B:} Definition of {\tt UWTP}.\\
+{\bf Presenter:} Saiful Azad\\
+{\bf Discussion:} 
+ 
+Provide a framework for ACK that is as much general as possible, including: ACK, NACK, both ACK and NACK, cumulative ACKs (leave to the .tcl users the possibility of chosing).\\
+Problem: which mechanism to enable? how to deal with finite windows in both rx and tx?
+
+
+{\bf Conclusions:}
+Provide a framework for ACK that is as much general as possible, including: ACK, NACK, both ACK and NACK, cumulative ACKs and leave to the .tcl users the possibility of choosing which mechanism to use. Concerning the lenght of the rx and tx buffers, these must be set by the tcl-user, and  when full, (i) in tx discard the oldest pck and after a timeout we consider the pck lost and discard it; (ii) in rx when the buffer is full we do not accept more pcks. 
+
+
+\noindent {\bf Agenda item C:} Definition of a map to realize the stack\\ {\tt UWMPhy\_modem/CSMA-ALHOA/UWMLL/UWIP/UWROUTING/UWUDP/UWCBR}.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} 
+For each module above {\tt UWMPhy\_modem} we need
+\begin{itemize}
+ \item {\tt CSMA-ALOHA}
+ \begin{enumerate}
+  \item ack packet (at least 1 bit for the {\tt packet\_type}, from common header);
+  \item sequence number  (N bits to map from the universal id, {\tt uid\_} from common header, a cyclic {\tt uid\_} can be implemented). 
+ \end{enumerate}
+ \item {\tt UWMLL} \\
+  Discussion about how to realize this module in a user-blind perspective for a testbed setting.
+  Remember to set the {\tt ch-> addr\_type() = NS\_AF\_INET} in {\tt UWMPhy\_modem} when rx (flag for a correct interpretation of {\tt UWMLL}); 
+ \item {\tt UWIP}
+ \begin{enumerate}
+  \item {\tt TTL}, i.e., number of hops remained before discarding a pck, usually is 32 (0 bit, we can avoid to send it and always set it to a non zero value in {\tt UWMPhy\_modem} when rx);
+  \item SRC  (N bits);
+  \item DST (N bits);
+ \end{enumerate}
+ remember to set {\tt ch-> direction() = UP} in {\tt UWMPhy\_modem} when rx.
+ \item {\tt UWROUTING}\\
+ \begin{enumerate}
+  \item packet type in the common header (at least 4 bits, since we have 3 pck plus all the ones to be sent by above nodes)
+  \item {\tt next\_hop\_} (N bits for the IP address in the common header);
+  \item {\tt prev\_hop\_} (N bits for the IP address in the common header), this is not necessary if the STATUS packet (which guarantees a load balance in networks with long multi-hops packets) is disabled;
+  \item N\_max number of IP addresses to be put in the payload (equal to the longest path in number of hops before reaching one node able to communicate directly with the sink, other N bits)
+ \end{enumerate}
+ \item {\tt UWUDP}
+ \begin{enumerate}
+  \item {\tt dport} (N bits for the overall destination ports to support);
+  \item {\tt sport} (N bits for the overall source ports to support);
+ \end{enumerate}
+ \item {\tt UWCBR}
+  \begin{enumerate}
+  \item sequence number (N bits for the overall number of packet to support, a cyclic {\tt SN} can be implemented);
+ \end{enumerate}
+\end{itemize}
+
+{\bf Conclusions:}
+
+Proposed mapping in 13 bits:\\
+\ \\
+\begin{tabular}{|p{0.05\columnwidth}|p{0.05\columnwidth}|p{0.05\columnwidth}|p{0.07\columnwidth}|p{0.07\columnwidth}|p{0.05\columnwidth}|p{0.05\columnwidth}|p{0.05\columnwidth}|p{0.05\columnwidth}|p{0.06\columnwidth}|p{0.06\columnwidth}|p{0.05\columnwidth}|p{0.05\columnwidth}|}
+\hline
+ 1& 2& 3& 4& 5& 6& 7& 8& 9& 10& 11& 12& 13\\
+\hline
+\multicolumn{3}{|p{0.15\columnwidth}|}{Packet Type}& \multicolumn{2}{|p{0.14\columnwidth}|}{Destination IP} & \multicolumn{2}{|p{0.1\columnwidth}|}{IP $1^{st}$ hop} & \multicolumn{2}{|p{0.1\columnwidth}|}{IP $2^{nd}$ hop}& \multicolumn{2}{|p{0.12\columnwidth}|}{Port number} & \multicolumn{2}{|p{0.1\columnwidth}|}{Sequence Number (cyclic?)}\\
+\hline
+\end{tabular}
+\ \\
+{\bf NOTE:} 
+\begin{itemize}
+ \item the above map can support a network of at most 4 nodes and, e.g., a scenario in which a single sink can collect data from at most four different applications running in the remaining network's nodes;
+ \item the above map cannot support the ARQ mechanism implemented in {\tt CSMA-ALHOA}; this latter, in fact, relays on the unique identifier ID, contained in the common header and different from the sequence number saved in bits $12-13$, which is the one associated with a CBR application. 
+\end{itemize}
+
+
+
+
+\noindent {\bf Agenda item D:} Project's Title presentation and organization of the release.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} The project we are carrying on aims at providing a whole set of libraries developed in ns-miracle to simulate, emulate and realize testbed. It will be presented to the research community under the name of ``DESERT Underwater: an ns-miracle based framework to DEsign, Simulate, Emulate and Realize Testbeds for Underwater network protocols''.\\  
+{\bf Conclusion:}
+In order to start the organization of the first DESERT release and work all together with the same file, we need to create an svn repository organized as follows:
+\begin{itemize}
+ \item folder for the minutes. This folder will contains all the minutes of the meetings in which we discussed something of interested for the whole group. A .tex document editable by anyone will also be present to collect feedbacks on the published minutes, to possibly correct or improve them and, finally, to approve them;
+ \item folder for the available code. This folder will contain all the code (almost) ready to be used (i.e., code for {\tt UWCBR}, {\tt UWIP}, $\dots$)
+\end{itemize}
+
+{\bf NOTE:} We agreed that all the modules that will be included in the DESERT release (e.g., {\tt UWCBR}, {\tt UWIP}, $\dots$) should be called by a tcl-user in the following manner:\\
+{\tt
+set \$module [new Module/UW/CBR]\\ 
+set \$module [new Module/UW/IP]\\
+...\\
+}
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. 
+
+{\bf Action items:}\\
+\ \\ 
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & Realization and testing of UWstatic routing. & Giovanni & 02/12/2011\\ 
+A2 & Realization and testing of UWTP. & Saiful & 09/12/2011\\ 
+A3 & Realization and testing of UWMLL. & Saiful & 09/12/2011\\ 
+A4 & Realization of the svn. & Riccardo & 09/12/2011\\ 
+A5 & Implemention of the map for the MPhy\_modem. & Riccardo & 16/12/2011\\
+A6 & Scheduling of the next meeting. & Riccardo & 16/12/2011\\
+\hline
+\end{tabular}
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+ \item {\bf A1} Done. 
+ \item {\bf A2} Done. 
+ \item {\bf A3} Done.
+ \item {\bf A4} Done. Otherwise you would not be able to read this.
+ \item {\bf A5} Done. See minutes6.
+\end{itemize}
+
+
+
+\end{document}

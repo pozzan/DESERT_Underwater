@@ -1,0 +1,391 @@
+\section{Modules for the data link layer}\label{sec:data_link}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwmll}
+   \item {\bf Description:} Since node-to-node communications at the link layer are performed using MAC addresses whereas the communications at the upper layers employ IP addresses, a method to associate the latter to the former is required.
+   With {\tt uwmll}, it is possible to set the correspondence between IP and MAC addresses a priori, by filling an ARP table for each network node. Alternatively, ARP tables can be automatically filled using the Address Resolution Protocol (ARP). The {\tt uwmll} module must be placed between one (or more) IP module(s) and one MAC module.
+   \item {\bf Library name:} {\tt libuwmll.so}
+   \item {\bf Tcl name:} {\tt Module/UW/MLL}
+   \item {\bf Tcl parameters:} none
+   \item {\bf Tcl commands:} 
+    \begin{description}
+     \item{\tt reset} : reset the table entries (i.e., clear the ARP table).
+     \item{\tt addentry} : associate IP and MAC addresses in the ARP table (example: {\tt  addentry [\$ip\_ addr] [\$mac\_ addr]}, where {\tt [\$ip\_ addr]} and {\tt [\$ip\_ addr]} return the addresses of given {\tt IP} and {\tt MAC} modules, respectively). This command helps to reduce the overhead of resolving IP addresses in the whole network. 
+    \end{description}
+   \item {\bf Internal packet headers:} {\tt hdr\_mac} (mac header from ns-miracle)
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2) and  {\tt hdr\_uwip} (IP header from DESERT)
+   \item {\bf Warnings:} whilst this module appears to work properly in 64 bit OS, we experienced problems with some Tcl scripts in 32 bit OS. We are currently working to identify and solve the corresponding bugs. Please, contact our research team for more information.
+NOTE: alternatively to this module, it may be used the {\tt mll} module already included in NS-Miracle.
+   \item {\bf Parent Libraries:}
+       \begin{description}
+         \item {\tt libMiracle.so}
+	      \item {\tt libmphy.so} 
+	      \item {\tt libmmac.so}
+        \end{description}
+   \item {\bf Tcl Scripts:}  All the tcl samples provided with DESERT Underwater v1.0.0 use MLL layer. In each tcl sample you can see how MLL works.
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwaloha}
+   \item {\bf Description:} ALOHA is a random access scheme, i.e., a protocol that allows nodes to send data packets directly without any preliminary channel reservation process. In its original version~\cite{Abramson85}, neither channel sensing nor retransmission is implemented and each node can transmit whenever it has data packets to send. As a consequence, packet losses can occur. In later adaptations~\cite{GuoSingapore}, ALOHA has been enhanced with acknowledgment packets (ALOHA-ACK). The {\tt uwaloha} module implements the functionality of the basic ALOHA protocol as well as its enhanced version using ARQ for error control. It is possible to freely switch between basic ALOHA and ALOHA-ACK.
+   \item {\bf Library name:} {\tt libuwaloha.so} 
+   \item {\bf Tcl name:} {\tt Module/UW/ALOHA}
+   \item {\bf Tcl parameters:} 
+    \begin{description}
+     \item {\tt HDR\_size\_} : size of the packet header (to be used if there is any internal packet header);
+     \item {\tt ACK\_size\_} : size of the ACK packet (if the ARQ technique is enabled);
+     \item {\tt max\_tx\_tries\_} : maximum number of retransmission attempts;
+     \item {\tt wait\_constant\_} : time interval guard to handle the arrival of ACK packets according to different delays;
+     \item {\tt uwaloha\_debug\_} : flag to enable debug messages if set to any value different than $0$;
+     \item {\tt max\_payload\_} : maximum number of payload in a packet;
+     \item {\tt ACK\_timeout\_} : initialization value for the ACK timeout;
+     \item {\tt alpha\_} : smoothing factor variable used to compute the Round Trip Time (RTT);
+     \item {\tt buffer\_pkts\_} : maximum number of packets that can be stored in the buffer;
+     \item {\tt backoff\_tuner\_} : duration of the backoff period;
+     \item {\tt max\_backoff\_counter\_} : maximum number of backoff re-computations (the backoff is increased exponentially).
+    \end{description}(i.e., plain ALOHA);
+     \item {\tt initialize} : initialize the necessary parameters of the protocol;
+     \item {\tt setAckMode} : enable the ARQ technique (i.e., ALOHA-ARQ);
+     \item {\tt setNoAckMode} : disable the ARQ technique (i.e., plain ALOHA); 
+     \item {\tt printTransitions} : print the information about the protocol state machine transitions into a file;	
+     \item {\tt getQueueSize} : get the number of buffered packets;
+     \item {\tt setMacAddr:} set the MAC address of the node (NOTE: this value is an integer value and should be different for every node in the network. If this command is not used, the node will have a default MAC address computed according to counting variable in the corresponding base class). 
+      \item {\bf Internal packet headers:} none
+      \item {\bf External packet headers:} {hdr\_cmn} (common header from ns2) and {\tt hdr\_mac} (MAC header from ns-miracle)
+      \item {\bf Warnings:} none
+      \item {\bf Parent Libraries:} 
+        \begin{description}
+         \item {\tt libMiracle.so}
+	      \item {\tt libmphy.so} 
+	      \item {\tt libmmac.so}
+        \end{description}
+   \item {\bf Tcl Scripts:}
+      \begin{description}
+	    \item {\tt samples/basic/test\_uw\_aloha\_simple.tcl}
+	    \item {\tt samples/advanced/test\_uw\_aloha.tcl}
+      \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwsr}
+   \item {\bf Description:} Automatic Repeat reQuest (ARQ) is the basic mechanism to ensure that no erroneous packets are delivered to layers higher than the data-link. When a packet is received with errors, the receiver may ask for retransmissions by sending a small packet called NACK (Negative ACKnowledgment). Similarly, a successful transmission can be notified to the transmitter via an ACK packet. Selective Repeat ARQ allows the transmitter to send up to N consecutive packets before waiting for ACKs or NACKs. The packets sent and not yet acknowledged must be buffered by the transmitter; the receiver can also buffer packets and, in case of errors, only the erroneous packets are sent again. {\tt uwsr} implements a Selective Repeat ARQ mechanism in combination with an Additive Increase and Multiplicative Decrease (AIMD) congestion control technique, similar to TCP's congestion window size adaptation. This protocol has been shown to be effective because the underwater channel propagation delay is sufficiently large to accommodate more than one packet transmission within one round-trip time (RTT)~\cite{AzadSantander}. 
+   \item {\bf Library name:} {\tt libuwsr.so}
+   \item {\bf Tcl name:} {\tt Module/UW/USR}
+   \item {\bf Tcl parameters:} 
+    \begin{description}
+     \item {\tt HDR\_size\_} : size of the packet header (if applicable);
+     \item {\tt ACK\_size\_} : size of the ACK packet (if the ARQ technique is enabled);
+     \item {\tt max\_tx\_tries\_} : maximum number of retransmission attempts;
+     \item {\tt wait\_constant\_} : time interval guard to handle the arrival of ACK packets according to different delays;
+     \item {\tt uwsr\_debug\_} : flag to enable debug messages if set to any value different than $0$;
+     \item {\tt max\_payload\_} : maximum payload size in a DATA packet;
+     \item {\tt ACK\_timeout\_} : initialization value for the ACK timeout [s];
+     \item {\tt alpha\_} : smoothing factor variable used to compute the Round Trip Time (RTT);
+     \item {\tt buffer\_pkts\_} : maximum number of packets that can be stored in the buffer;
+     \item {\tt backoff\_tuner\_:} multiplying factor used in the calculation of the backoff timer;   
+     \item {\tt max\_backoff\_counter\_} : maximum number of times a backoff timer can be called (the backoff is increased exponentially);
+     \item {\tt listen\_time\_:} duration [s] of the channel sensing period;
+     \item {\tt guard\_time\_} : time interval guard to handle the arrival of DATA packets according to different times due variations on the sound speed and node mobility;
+     \item {\tt node\_speed\_} : speed of the node device;
+     \item {\tt var\_k\_} : variable used to decrease the number of packet transmissions if any packet loss is detected.
+    \end{description}
+   \item {\bf Tcl commands:}
+    \begin{description}
+     \item {\tt initialize} : initialize the necessary parameters of the protocol; 
+     \item {\tt printTransitions} : print the information about the protocol state machine transitions into a file;	
+     \item {\tt getQueueSize} : get the number of buffered packets; 
+     \item {\tt getBackoffCount} : get the number of times the node has been in the backoff state;
+     \item {\tt getAvgPktsTxIn1RTT} : get the average number of packets transmitted during a single RTT (NOTE: this MAC technique exploit the transmission of multiple packets during a single RTT);
+     \item {\tt setMacAddr:} set the MAC address of the node (NOTE: this value is an integer value and should be different for every node in the network. If this command is not used, the node will have a default MAC address computed according to counting variable in the corresponding base class).
+    \end{description}
+   \item {\bf Internal packet headers:} none
+   \item {\bf External packet headers:} {hdr\_cmn} (common header from ns2) and {\tt hdr\_mac} (MAC header from ns-miracle)
+   \item {\bf Warnings:} none
+   \item {\bf Parent Libraries:} 
+        \begin{description}
+         \item {\tt libMiracle.so}
+	      \item {\tt libmphy.so} 
+	      \item {\tt libmmac.so}
+        \end{description}
+   \item {\bf Tcl Scripts:} 
+       \begin{description}
+	      \item {\tt samples/basic/test\_uwsr\_simple.tcl}
+	      \item {\tt samples/advanced/test\_uwsr.tcl}
+      \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:}  {\tt uw-csma-aloha}
+   \item {\bf Description:} This module implements ALOHA-CS~\cite{GuoSingapore}, an enhanced version of the ALOHA protocol introduced above. ALOHA-CS adds a carrier sensing mechanism to basic ALOHA, in order to help reduce the occurrence of collisions.
+   \item {\bf Library name:} {\tt libuwcsmaaloha.so}
+   \item {\bf Tcl name:} {\tt Module/UW/CSMA\_ALOHA}
+   \item {\bf Tcl parameters:} 
+   \begin{description}
+     \item {\tt HDR\_size\_} : size of the packet header (if applicable);
+     \item {\tt ACK\_size\_} : size of the ACK packet (if the ARQ technique is enabled);
+     \item {\tt max\_tx\_tries\_} : maximum number of retransmission attempts;
+     \item {\tt max\_payload\_} : maximum payload size in a DATA packet;
+     \item {\tt ACK\_timeout\_} : initialization value for the ACK timeout [s];
+     \item {\tt alpha\_} : smoothing factor variable used to compute the Round Trip Time (RTT);
+     \item {\tt backoff\_tuner\_:} multiplying factor used in the calculation of the backoff timer;   
+     \item {\tt max\_backoff\_counter\_} : maximum number of times a backoff timer can be called (the backoff is increased exponentially);
+     \item {\tt listen\_time\_:} duration [s] of the channel sensing period; 
+     \item {\tt wait\_constant\_} : time interval guard to handle the arrival of ACK packets according to different delays;
+     \item {\tt debug\_:} : flag to enable debug messages if set to any value different than $0$;
+	\end{description}
+   \item {\bf Tcl commands:}
+   \begin{description}
+      \item {\tt initialize} : initialize the necessary parameters of the protocol;
+      \item {\tt setAckMode} : enable the ARQ technique (i.e., ALOHA-CSMA with ARQ);
+      \item {\tt setNoAckMode} : disable the ARQ technique (i.e., ALOHA-CSMA); 
+      \item {\tt printTransitions} : print the information about the protocol state machine transitions into a file;	
+      \item {\tt getQueueSize} : get the number of buffered packets;
+      \item {\tt setMacAddr:} set the MAC address of the node (NOTE: this value is an integer value and should be different for every node in the network. If this command is not used, the node will have a default MAC address computed according to counting variable in the corresponding base class).
+  \end{description}
+   \item {\bf Internal packet headers:}  none.
+   \item {\bf External packet headers:}  {\tt hdr\_cmn} (common header from ns2) and  {\tt hdr\_mac} (mac header from ns-miracle)
+   \item {\bf Warnings:} none.
+   \item {\bf Parent Libraries:}
+         \begin{description}
+         \item {\tt libMiracle.so}
+	      \item {\tt libmphy.so} 
+	      \item {\tt libmmac.so}
+        \end{description}
+   \item {\bf Tcl Scripts:} 
+      \begin{description}
+	     \item {\tt samples/basic/test\_uw\_csma\_aloha\_simple.tcl}
+	     \item {\tt samples/basic/test\_uw\_csma\_aloha\_fully\_connected.tcl}
+        \item {\tt samples/advanced/test\_uw\_csma\_aloha.tcl} 
+      \end{description}      
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwdacap} 
+   \item {\bf Description:}  This module implements DACAP (Distance Aware Collision Avoidance Protocol)~\cite{Peleato07}, which provides a collision avoidance mechanism via a handshake phase prior to packet transmission. This phase involves the exchange of signaling packets such as Request-To-Send (RTS) and Clear-To-Send (CTS). This protocol introduces also a very short warning packet in the RTS-CTS mechanism to further prevent collisions among nodes. DACAP is designed for underwater networks with long propagation delays and can be implemented with and without acknowledgements; {\tt uwdacap} implements both solutions.
+   \item {\bf Library name:} {\tt libuwdacap.so}
+   \item {\bf Tcl name:} {\tt Module/UW/DACAP}
+   \item {\bf Tcl parameters:} 
+   \begin{description}
+	\item {\tt t\_min:} the minimum time needed to do a RTS/CTS exchange. It depends from the distance between the nodes;
+	\item {\tt delta\_D:} minimum distance at which a transmitter node is not considered an interferer anymore;
+	\item {\tt max\_prop\_delay:} the maximum propagation delay between nodes in the network (It depends from the distance between the nodes and the velocity of the sound);
+	\item {\tt T\_W\_min:} Minimum Warning Time (time that a given node has to wait before transmitting the data packet, to leave the CTS packet propagating for {\tt delta\_D:} m);
+	\item {\tt delta\_data:} difference between the dimension of the various data packets (if different dimension of data packets are adopted);
+	\item {\tt CTS\_size:} dimension in Bytes of the CTS packet.
+	\item {\tt RTS\_size:} dimension in Bytes of the RTS packet.
+	\item {\tt WRN\_size:} dimension in Bytes of the WRN packet.
+	\item {\tt HDR\_size:} dimension in Bytes of the header added by the protocol (if any).
+	\item {\tt ACK\_size:} dimension in Bytes of the ACK packet.
+   \item {\tt backoff\_tuner\_:} multiplying factor used in the calculation of the backoff timer;
+   \item {\tt debug\_:} : flag to enable debug messages if set to any value different than $0$;
+   \item {\tt max\_payload\_} : maximum payload size in a DATA packet;
+   \item {\tt max\_tx\_tries\_} : maximum number of retransmission attempts;
+   \item {\tt alpha\_} : smoothing factor variable used to compute the Round Trip Time (RTT);
+   \item {\tt max\_backoff\_counter\_} : maximum number of times a backoff timer can be called (the backoff is increased exponentially);
+   \item {\tt wait\_constant\_} : time interval guard to handle the arrival of ACK packets according to different delays;   
+   \item {\tt buffer\_pkts\_} : maximum number of packets that can be stored in the buffer; 
+   \item {\tt max\_prop\_delay:} maximum time needed to propagate a packet throughout the network (it depends on the distances among nodes).
+   \end{description}
+   \item {\bf Tcl commands:}
+   \begin{description}
+      \item {\tt setAckMode} : enable the ARQ technique (i.e., ALOHA-CSMA with ARQ);
+      \item {\tt setNoAckMode} : disable the ARQ technique (i.e., ALOHA-CSMA); 
+      \item {\tt printTransitions} : print the information about the protocol state machine transitions into a file;	
+      \item {\tt getQueueSize} : get the number of buffered packets;
+      \item {\tt setMacAddr:} set the MAC address of the node (NOTE: this value is an integer value and should be different for every node in the network. If this command is not used, the node will have a default MAC address computed according to counting variable in the corresponding base class);
+	   \item {\tt setBackoffFreeze:} enable the possibility to freeze the Backoff timer;
+	   \item {\tt setBackoffNoFreeze:} disable the possibility to freeze the Backoff timer;
+	   \item {\tt setMultiHopMode:} enable the possibility to have a Multi-hop network to simulate routing protocols;
+	   \item {\tt getTotalDeferTimes:} get the number of transmission defers occurred during the simulation
+	   \item {\tt getMeanDeferTime:} get the mean time between two successive transmission defers calculated over the entire simulation
+	   \item {\tt getWrnPktsTx:} get the number of Warnings transmitted by the node.
+	   \item {\tt getWrnPktsRx:} get the number of Warnings transmitted by the node.
+	   \item {\tt getCtsPktsTx:} get the number of CTS packets transmitted by the node.
+	   \item {\tt getCtsPktsRx:} get the number of CTS packets received by the node.
+	   \item {\tt getRtsPktsTx:} get the number of RTS packets transmitted by the node.
+	   \item {\tt getRtsPktsRx:} get the number of RTS packets received by the node.
+   \end{description}
+   \item {\bf Internal packet headers:}  that has the following fields
+   	\begin{description}
+		\item {\tt ts:} Timestamp of the packet, i.e., its generation time	
+		\item {\tt sn:} Sequence number of the packet 
+		\item {\tt orig\_type:} Original type of the packet (e.g. CBR data packet)
+		\item {\tt data\_sn:} Original sequence number of the packet defined by the upper layers
+	\end{description}
+   \item {\bf External packet headers:}  {\tt hdr\_cmn} (common header from ns2) and  {\tt hdr\_mac} (mac header from ns-miracle)
+   \item {\bf Warnings:} Since dacap is a protocol that introduce high latency and a lot of control signalling, maybe it is not the best MAC protocol for a multihop network and complex routing protocols. This protocol is suitable for simple one-hop networks with light traffic load.
+   \item {\bf Parent Libraries:}
+         \begin{description}
+          \item {\tt libMiracle.so}
+	       \item {\tt libmphy.so} 
+	       \item {\tt libmmac.so}
+        \end{description}
+   \item {\bf Tcl Scripts:} 
+          \begin{description}
+	         \item {\tt /samples/basic/test\_uw\_dacap\_simple.tcl} 
+	         \item {\tt /samples/basic/test\_uw\_dacap\_fully\_connected.tcl}
+            \item {\tt /samples/advanced/test\_uw\_dacap.tcl}
+          \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwpolling}
+   \item {\bf Description:}  This module implements a MAC protocol which is based on a centralized polling scheme. To fix ideas, focus on an AUV patrolling an area covered by an underwater sensor field; the AUV coordinates the data gathering from the sensors in a centralized fashion using a polling mechanism. This mechanism is based on the exchange of three types of messages: a broadcast TRIGGER message, that the AUV sends to notify the sensor nodes of its presence; a PROBE message, that the sensors use to answer the initial TRIGGER message; and a POLL message, sent again by the AUV and containing the order in which the underwater nodes can access the channel to communicate their data. 
+   This order of polling is determined by the AUV, given the information collected from the PROBE messages which may include, among others, such metrics as the residual energy of the nodes, the time-stamp of the data to be transmitted or a measure of their priority. Because of its nature, the algorithm implemented by {\tt uwpolling} does not require any routing mechanism on top of it.
+   \item {\bf Library name:} {\tt libuwpolling.so}
+   \item {\bf Tcl name:} {\tt Module/UW/POLLING\_AUV} for the AUV; {\tt Module/UW/POLLING\_NODE} for the sensor nodes. 
+   \item {\bf Tcl parameters for AUV:} 
+   	\begin{description}
+		\item	{\tt T\_min\_:} minimum value that a sensor can choose to set up its backoff before transmit a PROBE packet;
+		\item	{\tt T\_max:} maximum value that a sensor can choose to set up its backoff before transmit a PROBE packet;
+		\item	{\tt T\_probe\_:} time in which the AUV ears the channel to receive PROBE packets;
+		\item	{\tt T\_guard\_:} guard time used to set up the timer for receiving the data packets from a node. It is useful to cope with the movement of the AUV and the changing of the channel condition;
+		\item	{\tt max\_polled\_node\_ :} maximum number of nodes that an AUV can POLL each time;
+		\item 	{\tt max\_payload\_:} maximum data payload dimension in bytes;
+		\item 	{\tt HDR\_size\_:} dimension (in bytes) of the header added by the protocol (if any).
+	\end{description}
+   \item {\bf Tcl parameters for NODE:} 
+	\begin{description}
+		\item  	{\tt T\_poll\_:} timeout duration for wai the POLL packet from the AUV;
+		\item 	{\tt backoff\_tuner\_:} multiplying factor used in the calculation of the backoff timer;
+		\item 	{\tt max\_payload\_:} maximum data payload dimension in bytes;
+		\item 	{\tt buffer\_data\_pkts\_:} dimension (in number of data packets) of the buffer;
+		\item 	{\tt HDR\_size\_:} dimension (in bytes) of the header added by the protocol (if any);
+		\item 	{\tt node\_id\_:} unique ID of the node.
+	\end{description}
+
+   \item {\bf Tcl commands for the AUV:} 
+      \begin{description}
+	  \item {\tt initialize} : initialize the necessary parameters of the protocol;
+	  \item {\tt run:} AUV starts to send TRIGGER to the network;
+	  \item {\tt setMacAddr:} provide the MAC address of the node. This value is an integer value and should be different for every node. If this command is not used, the node will have a default MAC address given by a variable in the father class;
+	  \item {\tt GetTotalReceivingTime:} return the total time that the AUV spent to receive from the nodes (from the reception of the first PROBE packet to the command {\tt stop\_count\_time});
+	  \item {\tt getProbeReceived:} return the number of PROBE packets received;
+	  \item {\tt getPollSent:} return the number of POLL packets received;
+	  \item {\tt getTriggerSent:} return the number of TRIGGER packets sent;
+	  \item {\tt stop\_count\_time:} stop to timer that count the time in which the AUV receives data from the AUV (this command should be scheduled a a little bit after the stop of the cbr generation of the nodes);
+	  \item {\tt getWrongNodeDataSent:} return the number of data packets received from nodes that are not polled (i.e. a node sent a packet after the time allowed);
+\item {\tt printTransitions} : print the information about the protocol state machine transitions into a file.
+       \end{description}
+   \item {\bf Tcl commands for the NODE:}
+      \begin{description}
+	  \item {\tt initialize:} initialize the necessary parameters of the protocol;
+	  \item {\tt printTransitions:} if this command is called, the protocol writes on a file all the state transition and the relative reason during simulation, for debug purposes; 
+	  \item {\tt getDataQueueSize:} return the actual size of the queue (i.e. the number of packets remained in queue at certain point of the simulation, or at the end of simulation);
+	  \item {\tt getProbeSent:} return the number of PROBE packets sent by the node;
+	  \item {\tt getTimesPolled:} return the number of times the node has been polled;
+	  \item {\tt getTriggerReceived:} return the number of TRIGGER packets received;
+     \item {\tt printTransitions} : print the information about the protocol state machine transitions into a file;
+	  \item {\tt setMacAddr:} provide the MAC address of the node. This value is an integer value and should be different for every node. If this command is not used, the node will have a default MAC address given by a variable in the father class.
+	   \end{description}
+
+   \item {\bf Internal packet headers:} 
+   	\item{\bf hdr\_TRIGGER:}
+   	\begin{description}
+		\item {\tt t\_in\_:} minimum amount of time that a node can choose for backoff before transmitting the PROBE to the AUV;
+		\item {\tt t\_fin\_:} maximum amount of time that a node can choose for backoff before transmitting the PROBE to the AUV. 
+	\end{description}
+	\item{\bf hdr\_PROBE:}
+	\begin{description}
+		\item{\tt backoff\_time\_:} backoff time chosen by the node;
+		\item{\tt ts\_:} timestamp of the most recent data packet generated by the node. The AUV needs this information for make a priority list of node to poll. The first node that will be "probbed", will be the one that will have the most recent data, as the most recent data generated may give a more up-to-date picture of the state of the physical quantity monitored;
+		\item{\tt n\_pkts\_:} number of packets that a node want to transmit to the sink (Usually the number of the packets that a node has in its buffer, or, a maximum value chosen by the user);
+		\item{\tt id\_node\_:} the id of the node that transmit the PROBE. 
+	\end{description}
+	\item{\bf hdr\_POLL}
+	\begin{description}
+		\item {\tt n\_polled\_node: } number of node that AUV are going to poll;
+		\item {\tt polling\_list\_:} this is an array where each location is a couple of values;
+		\begin {description}
+			\item {\tt id\_:} the id of the node that are polled;
+			\item {\tt t\_wait\_:} how may time has a node in queue to wait before being polled. (useful if a modem has a "sleep" mode).
+		\end{description}
+	\end{description}
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2) and  {\tt hdr\_mac} (mac header from ns-miracle) 
+   \item {\bf Warnings:} Since this protocol uses a polling policy and usually there's a moving AUV, add a complicated routing protocol doesn't make any sense. The AUV sort the nodes with a policy based on the most recent data packet generated. 
+    It is worth to start the AUV after few seconds from the beginning of the simulation (i.e. the start of the generation of the data packet). 
+    In this manner the nodes have already data to transmit to the AUV. Otherwise,no packet is generated yet and the nodes would not respond to the TRIGGER of the AUV until the first packet is generated.
+   \item {\bf Parent Libraries:}
+         \begin{description}
+          \item {\tt libMiracle.so}
+	       \item {\tt libmphy.so} 
+	       \item {\tt libmmac.so}
+        \end{description}
+   \item {\bf Tcl Scripts:} 
+    \begin{description}
+      \item {\tt /samples/advanced/test\_uwpolling.tcl}
+    \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+    \item {\bf Name:} {\tt uw-t-lohi}
+    \item {\bf Description:}  Tone-Lohi (T-Lohi)~\cite{SyedPhoenix} is a MAC protocol that uses tones during contention rounds to reserve the channel. Other nodes competing for channel access are detected during a contention round, by listening to the channel after sending the reservation tone. T-Lohi takes advantage of the long propagation delays present in underwater networks to count the number of contenders reliably, and act accordingly during the contention round. Tone-Lohi can be: 1) synchronized (ST-Lohi); 2) conservative unsynchronized (cUT-Lohi), which enables the counting of all contenders by extending the duration of the contention round to twice the maximum expected propagation delay, and 3) aggressive unsynchronized (aUT-Lohi), to reduce idle times (while increasing the probability of collisions). The {\tt uw-t-lohi} module implements all of three versions of T-Lohi above; the user can freely choose which one  to enable. However, since the possibility of transmitting actual tones depends on the available hardware, this module has not been considered for emulation and test-bed; differently, it can be exploited for simulation purposes using WOSS.
+    \item {\bf Library name:} {\tt libuwtlohi.so}
+    \item {\bf Tcl name:}  
+       {\tt Module/UW/TLOHI}
+    \item {\bf Tcl parameters:} 
+   	\begin{description}
+		\item {\tt max\_prop\_delay: } the maximum propagation delay in the network;
+		\item {\tt recontend\_time :} duration of the contention phase;
+		\item {\tt HDR\_size\_:} size of the header added by the protocol (if any header exists);
+		\item {\tt ACK\_size\_:} size of the ACK packet;
+		\item {\tt max\_tx\_rounds:} maximum transmission tries of a packet before dropping it;
+		\item {\tt wait\_constant:} this fixed time is used to componsate different time variations in the calculation of the ACK timeout;
+		\item {\tt debug\_:} this enable the print of the protocol in the terminal;
+		\item {\tt max\_payload:} maximum data payload dimension in bytes;
+		\item {\tt max\_tx\_tries:} the maximum number of retransmission that the protocol can make (in ACK mode) before discarding the packet.
+		\item {\tt buffer\_pkts:} dimension of Buffer in number of packets.
+	\end{description}
+   \item {\bf Tcl commands: }
+   	\begin{description}
+		\item {\tt setAckMode:} enable the ARQ mechanism;
+		\item {\tt setNoAckMode :} disable the ARQ mechanism;
+		\item{\tt addTonePhy:} define the type of PHY layer associated with the Tone;
+		\item{\tt addDataPhy:} define the type of PHY layer for the transmission of the data packets (i.e. {\tt WOSS/MPhy/BPSK})
+		\item {\tt setDataName:} define the name of the PHY for data packet transmission;
+		\item {\tt setConservativeUnsyncMode: } set the Conservative Mode for the protocol without synchronization among nodes (i.e. the time that the node protocol wait and ears if other tones coming from other nodes is coming is equal to twice the maximum propagation delay);
+		\item {\tt setAggressiveUnsyncMode:} set the Aggressive Mode for the protocol without synchronization among nodes (the previous waiting time is equal to the maximum propagation delay);
+	         \item {\tt setMacAddr:} provide the MAC address of the node. This value is an integer value and should be different for every node. If this command is not used, the node will have a default MAC address given by a variable in the father class;
+	         	  \item {\tt printTransitions:} if this command is called, the protocol writes on a file all the state transition and the relative reason during simulation, for debug purposes.
+		  \item {\tt getQueueSize:} return the actual size of the queue (i.e. the number of packets remained in queue at certain point of the simulation, or at the end of simulation);
+		  \item {\tt getCRTime:} return the duration of the actual Contention Round;
+		  \item {\tt initialize:} initialize all the variables at the beginning of the simulation;
+		  \item {\tt getTonePktsTx:} return the number of tones transmitted;
+		  \item {\tt getTonePktsRx:} return the number of tones received.
+ 	\end{description}
+   \item {\bf Internal packet headers: }  {\tt hdr\_wkup:}
+   	\begin{description}
+		\item {\tt startRx\_time:} time-stamp at which the reception starts.
+		\item {\tt endRx\_time:} time-stamp at which the reception ends.
+	\end{description}
+   \item {\bf External packet headers: }  {\tt hdr\_cmn} (common header from ns2) and  {\tt hdr\_mac} (mac header from ns-miracle) 
+   \item {\bf Warnings: } uw-t-lohi needs WOSS installed to work properly. Since the protocol requires some time for set-up the communications, use it with a complicated routing scheme that needs a lot of control signaling, may give poor performances in terms of throughput in the network, as it happen with uwdacap.
+			  This version of UW-T-LOHI is released without the SYNC mode of the protocol. This mode is still under construction and will be released in the next version of DESERT. In tcl examples, always the Aggressive mode is used.
+   \item {\bf Parent Libraries:}
+         \begin{description}
+         \item {\tt libMiracle.so}
+	      \item {\tt libmphy.so} 
+	      \item {\tt libmmac.so}
+        \end{description}
+          NOTE: {\tt uw-t-lohi} also needs a PHY layer for wake-up tones. For this reason {\tt Module/MPhy/Underwater/WKUP}, hence {\tt libUwmStd.so} is needed (this library is under WOSS). 
+   \item {\bf Tcl Scripts:} 
+    \begin{description}
+      \item {\tt /samples/basic/test\_uw\_t\_lohi.tcl}
+    \end{description}
+\end{description}
+
+
+
+

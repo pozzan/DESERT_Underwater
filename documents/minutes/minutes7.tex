@@ -1,0 +1,320 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+\newcommand{\MP}[1]{\begin{color}{NavyBlue} (MP: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $7^{th}$ meeting of the SIGNET Underwater Group's NS-Miracle Task Force.\\
+{\it Date of the meeting (Part I): } $29^{th}$ of February $2012$\\
+{\it Present: } Saiful Azad (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD), Federico Favaro (DEI, UniPD), Paolo Casari (DEI, UniPD)\\
+{\it Date of the meeting (Part II): } $1^{st}$ of March $2012$\\
+{\it Present: } Saiful Azad (DEI, UniPD), Riccardo Masiero (DEI, UniPD), Giovanni Toso (DEI, UniPD), Federico Favaro (DEI, UniPD), Paolo Casari (DEI, UniPD)
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+\noindent {\bf Agenda item A:} Sum up on the modules ready for DESERT Underwater.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} Following the current organization of the DESERT folder (which follows the TCP/IP stack) we have that
+
+\begin{itemize}
+ \item Application: {\tt UWCBR} ok; {\tt UWVBR} ready $\rightarrow$ Giovanni will put it on the svn asap;
+ \item Transport: {\tt UWTP} ok; {\tt UWUDP} ok;
+ \item Network: uwrouting must be removed from the final release (check with Matteo when to do this); {\tt UWIP}, {\tt UWICRP}, {\tt UWSUN} must be updated $\rightarrow$ Giovanni's due;
+ \item Data\_Link: {\tt UWMLL} now ok (check Agenda item D); uw-csma-aloha, uwdacap, uwpolling ok; to be added T-Lohi (see Agenda item E) $\rightarrow$ Federico F.'s due; {\tt ALOHA} and {\tt UWUSR} to be added $\rightarrow$ Saiful's due;
+ \item Physical: {\tt uwmphy\_modem} to be reorganized $\rightarrow$ Riccardo's due; {\tt uwmphypatch} ok;
+ \item Mobility: add the two modules {\tt UWGMMobility3D} (Gauss Markov Mobility Model in 3D), {\tt UWDriftMobility} (Drift Mobility Model) $\rightarrow$ Giovanni's due; add {\tt UWGM3DforWOSSMobility} (Gauss Markov Mobility Model in 3D for WOSS) and {\tt UWGroup3DforWOSSMobility} (Group Mobility Model in 3D for WOSS) $\rightarrow$ Saiful's due (since this module depends on WOSS, see Agenda item E).
+\end{itemize}
+{\bf Conclusions:}  Add/Update the DESERT repository according to the above.
+
+
+\  \\
+\noindent {\bf Agenda item B:} Updates of the UWSUN module.\\
+{\bf Presenter:} Giovanni Toso\\
+{\bf Discussion:} Two new features added to UWSUN:
+- buffer to store incoming data packets from the above layers;
+- Acknowledgement mechanism always enabled.
+Note: the old version of UWSUN can be re-obtained by playing with the parameters (i.e., buffer size set to one and ack's waiting time such that acks are not considered)\\
+{\bf Conclusions:}  UWSUN can be updated in the svn repository
+
+\  \\
+\noindent {\bf Agenda item C:} Updates of the UWIP module.\\
+{\bf Presenter:} Giovanni Toso\\
+{\bf Discussion:} \\
+Investigating the code of UWIP, we decided that the following modification must be done:
+\begin{itemize}
+ \item two {\tt free(p)} calls must be converted into {\tt drop(p, SOME\_REASON)} (i.e, when {\tt Packet with ttl = 0: dropped} and when {\tt uwiph->daddr() == 0})
+ \item add a WARNING message in debug (i.e., when {\tt ch->next\_hop() == 0 \&\& uwiph->daddr() != 0})
+ \item add a parameter to allow the tcl user to choose between the use of {\tt NS\_AF\_ILINK} (i.e., $IP$ addressing used at any layers to identify different nodes) and {\tt NS\_AF\_INET} (i.e., $IP$ addressing used only at the network layer to distinguish among different nodes)
+\end{itemize}
+{\bf Conclusions:} Do the above changes and update UWIP in the SVN repository.  
+
+\  \\
+\noindent {\bf Agenda item D:} The UWMLL module.\\
+{\bf Presenter:} Saiful Azad\\
+{\bf Discussion:} Code for the assignment of the {\tt macDA()} field as follows now:\\
+{\tt $\dots$\\
+ switch(ch->addr\_type()) \{\\
+        \begin{description}
+           \item case NS\_AF\_ILINK:
+           \item {2cm} mach->macDA() = ch->next\_hop();
+	   \item break;
+           \item \ 
+	   \item case NS\_AF\_INET:
+	   \item dst = ch->next\_hop();
+	   \item tx = arpResolve(dst, p);
+        \end{description}
+	\}\\
+$\dots$ } \\
+{\bf Conclusions:} The above code should fix all the problems we had so far. To exploit the enabling of the {\tt NS\_AF\_ILINK} (and also to facilitate and make more coherent the parameter set up in the testbed settings) we need to add a command to our MAC protocols to be able to set their {\tt addr} field.
+
+\  \\
+\noindent {\bf Agenda item E:} The T-Lohi module.\\
+{\bf Presenter:} Federico Favaro\\
+{\bf Discussion:} \\
+The {\tt T-Lohi} module (as well as the {\tt UWGM3DforWOSS} (Gauss Markov Mobility Model in 3D for WOSS) module of Saiful) depends on WOSS. Logically, we can put them in the svn repository as the others (i.e., {\tt T-Lohi} in the {\tt data\_link} folder and  {\tt UWGM3DforWOSS} in the {\tt mobility} folder), but we can also add in the configuration file an option (i.e., --with-woss=/pathToWOSS) to compile them (differently, they won't be compiled as, for instance, in the case of testbeds).\\
+{\bf Conclusions:}  Add the option of above in the configure file of DESERT (Saiful's due, with the help of Giovanni). Further, we can also 
+write a bash script to enable the automatic installation of all the libraries we need (ns2, NS-Miracle, WOSS, DESERT) in a sort of ``all-in-one'' fashion (Saiful's due, with the help of Giovanni).
+
+\  \\
+\noindent {\bf Agenda item F:} From NS-Miracle code to stand-alone code solutions (for the RACUN project).\\
+{\bf Presenter:} Paolo Casari\\
+{\bf Discussion:} The problem of extracting the code from DESERT to a stand-alone version written in C/C++ (i.e., monolithic solution) has been presented.\\
+In brief, we highlighted the following mechanism that must be reproduced (redesigned/rewritten) to let the DESERT protocols able to be extracted from the network simulation engine of ns2/NS-Miracle:
+\begin{itemize}
+ \item interfaces to exchange the packets among net layers;
+ \item mechanism to exchange the packets among net layers;
+ \item system to manage timers and events;
+ \item a mechanism to handle the dynamic allocation of memory (alloc, free, drop, copy);
+ \item a mechanism to enable the dynamic and easy creation of different net layers;
+ \item design an alternative mechanism to the tcl file in order to change parameters (i.e., node behaviour)
+ \item how to test the exported code?
+\end{itemize}
+{\bf Conclusions:} We have to prepare a list of all the mechanisms that we would need to re-design/re-write in order to be able of running the protocols in DESERT without ns2/NS-Miracle.  
+
+\  \\
+\noindent {\bf Agenda item G:} Discussion on how to standardize our tcl and C++ code and how to prepare the DESERT documentation (using Doxygen).\\
+{\bf Presenter:} Giovanni Toso\\
+{\bf Discussion:} Presentation of a brief guide to follow for code standardization\\
+{\bf Conclusions:} Put the guide in the svn repository and refine it as future activity\\  
+
+\  \\
+\noindent {\bf Agenda item H:} Discussion on how to standardize standardize the use of {\tt ch->uid()} field.\\
+{\bf Presenter:} Giovanni Toso\\
+{\bf Discussion:} Problem: how does the {\tt uid()} uniquely identify a packet?
+The ARQ at the TP layer only works with APPLICATION layers that set the {\tt ch $\rightarrow$ uid()} [considering the pair ({\tt ch $\rightarrow$ uid(),port)}]
+The ARQ at the MAC layer only works with APPLICATION layers that set the {\tt ch $\rightarrow$ uid()} [considering the pair ({\tt ch $\rightarrow$ uid(),macDA())}], currently it does not support CONTROL packets (e.g., coming from the modules of Giovanni) [possible solution: consider the triple ({\tt ch $\rightarrow$ uid()}, {\tt ch $\rightarrow$ ptype(), macDA()}) and set the {\tt ch $\rightarrow$ uid()} for the CONTROL packets also] \\
+{\bf Conclusions:} Highlight this mechanism in the documentation. Shall we extend the ARQ to CONTROL packets? (open problem). Still remain open the problem of Giovanni (ACK not working at the routing level using the {\tt uid()} filed instead of the {\tt sn} field of the {\tt cbr}). \\  
+
+\  \\
+\noindent {\bf Agenda item I:} Illustration of the collaboration with EvoLogics (RM experience + further steps).\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} EvoLogics is interested in the DESERT libraries and it will collaborate with us to optimize them for cross-compilation.\\
+{\bf Conclusions:} We will make Evologics able to access our svn repository before the public release of the code to facilitate the joint collaboration aim at optimizing DESERT.\\  
+
+\  \\
+\noindent {\bf Agenda item L:} Preparation of the paper for OCEANS.\\
+{\bf Presenter:} Riccardo Masiero\\
+{\bf Discussion:} \\
+Roughly, the paper will be organized as follows:
+\begin{enumerate}
+ \item Abstract + Introduction - 1.5 pp;
+ \item The DESERT Underwater library - 2.5 pp
+ \item Integration with NS-Miracle (to explain the simulation via the Underwater channel of Miracle) - 0.25 p
+ \item Integration with WOSS - 0.25 p
+ \item Emulation and Testbed settings: first feasibility tests (a little bit of results obtained in the campaign done with: WASS, EvoLogics?) 1 p 
+\end{enumerate}
+For the description of the DESERT libraries we should fill the following scheme:
+\begin{description}
+ \item {\bf Name:} The name of the module;
+ \item {\bf Description:} A brief description of the module capabilities and functionalities (3/4 lines);
+\item {\bf Tcl name:} The name of the module in Tcl, i.e., the tcl command to call in order to create the corresponding C++ object;
+\item {\bf Tcl parameters:} Parameters that can be set via Tcl, their ranges and usage, i.e., what they are needed for;
+\item {\bf Tcl commands:} Commands that can be set via Tcl with a specification of the mandatory commands that must be called to make everything running properly (e.g., initialization commands);
+\item {\bf Internal packet headers:} Packet headers defined by the module (if applicable);
+\item {\bf External packet headers:} External packet headers used by the module (if applicable);
+\item {\bf Warnings:} Possible warnings for the good usage of the module, e.g., the use of this module in conjunction with module A,B,C is deprecated and/or can lead to an undefined behaviour.
+\end{description}
+
+
+{\bf Conclusions:} Put the above scheme for the DESERT libraries in the svn repository, for each module of DESERT, so that anyone can fill it with the information of his own modules\\ 
+
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions (part I -  from A to F). 
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & upload {\tt UWVBR} in the svn & Giovanni & 02/03/2012\\ 
+A2 & update {\tt UWIP}, {\tt UWICRP} in the svn & Giovanni & 02/03/2012\\ 
+A3 & upload {\tt T-Lohi} in the svn & Federico F. & 02/03/2012\\ 
+A4 & upload {\tt ALOHA} and {\tt UWUSR} in the svn & Saiful & 02/03/2012\\
+A5 & reorganize {\tt uwmphy\_modem} in the svn & Riccardo & 16/03/2012\\
+A6 & upload {\tt UWGM3DMobility} and {\tt UWDriftMobility} in the svn & Giovanni & 02/03/2012\\
+A7 & upload {\tt UWGM3DforWOSSMobility} and {\tt UWGroup3DforWOSSMobility} in the svn & Saiful & 09/03/2012\\
+A8 & update {\tt UWSUN} in the svn & Giovanni & 02/03/2012\\
+A9 & update {\tt UWIP} (after the cheanges discuss in item C) in the svn & Giovanni & 02/03/2012\\
+A10 & add a command to all the MAC protocols of DESERT to allow the tcl user to be able to set the {\tt addr} field of these protocols & Federico F. and Saiful & 09/03/2012\\
+A11 & add the option ``--with-woss'' in the configure file of DESERT to allow also the compilation of the DESERT's modules that depend on WOSS & Saiful and Giovanni & 16/03/2012\\
+A12 & write a bash script to enable the automatic installation of all the libraries we need (ns2, NS-Miracle, WOSS, DESERT) in a sort of ``all-in-one'' fashion & Saiful and Giovanni & 01/05/2012\\
+A13 & prepare a list of all the mechanisms that we would need to re-design/re-write in order to be able to run the protocols of DESERT without ns2/NS-Miracle & Saiful, Giovanni, Fede, Riccardo & 05/03/2012 \\
+\hline
+\end{tabular}
+\ \\
+
+In the following we summarize the actions points decided up to the above discussions (part II - from G to L). 
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A14 & Put the base for the documentation in the svn & Giovanni & 05/03/2012\\ 
+A15 & Take a look to the doc that Giovanni will put in the svn & all & 16/03/2012\\ 
+A16 & Debug the ARQ mechanism in UWSUN & Giovanni & 16/03/2012\\ 
+A17 & Prepare in the svn a file where to find and fill the scheme for DESERT & Riccardo & 05/03/2012\\
+A18 & Fill the scheme for DESERT & all (each one for its module) & 16/03/2012\\
+\hline
+\end{tabular}
+\ \\
+
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+ \item {\bf A1} Done. See svn.  
+ \item {\bf A2} Done. See svn. 
+ \item {\bf A3} Done. See svn.
+ \item {\bf A4} Done. See svn.
+ \item {\bf A5} Done. See svn.
+ \item {\bf A6} Done. See svn. 
+ \item {\bf A7} Done. See svn. 
+ \item {\bf A8} Done. See svn.
+ \item {\bf A9} Done. See svn.
+ \item {\bf A10} Done. See svn. 
+ \item {\bf A11} Done. See svn.
+ \item {\bf A12} Done. See first release of DESERT (v 1.0.0).
+ \item {\bf A14} Done. See svn.
+ \item {\bf A15} Done. See agenda item B minutes8.
+ \item {\bf A16} Done. See svn.
+ \item {\bf A17} Done. See svn.
+ \item {\bf A18} Done. See svn
+\end{itemize}
+
+
+
+\end{document}

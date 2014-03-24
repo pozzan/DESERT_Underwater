@@ -1,0 +1,202 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+\newcommand{\MP}[1]{\begin{color}{NavyBlue} (MP: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $11^{th}$ meeting of the SIGNET Underwater Group.\\
+{\it Date of the meeting: } $12^{th}$ of June $2012$\\
+{\it Present: } Riccardo Masiero (DEI, UniPD), Giovanni Toso (CFR), Federico Favaro (CFR), Matteo Petrani (CFR), Paolo Casari (CFR and DEI, UniPD), Ivano Calabrese (CFR), Saiful Azad (DEI, UniPD), Beatrice Tomasi (DEI, UniPD),  El Hadi Cherkaoui (IIT)\\
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+
+\noindent {\bf Agenda item A:} WOSS v1.3 compatibility tests with DESERT.\\
+{\bf Presenters:} Riccardo Masiero and Federico Favaro\\
+
+{\bf Discussion:}\\
+
+\begin{itemize}
+\item First step: check all the TCL scripts released with DESERT with WOSS v.1.3;
+\item Second step: check all the new features added to WOSS v.1.3
+\item Third step: test the new features added to WOSS v 1.3 with DESERT (e.g., time variability)
+\end{itemize}
+
+{\bf Conclusions:}\\
+Federico F. by the end of June will test all the tcl scripts released with DESERT. By the end of the first week of July Federico F. will write a mail to be send to Federico G. summing up all the new feature of WOSS v. 1.3 and proposals about how to test their compatibility with DESERT in order to fully agree about how to do this test.
+
+\  \\
+
+\noindent {\bf Agenda item B:} DESERT: TO DO list and HTML change LOG.\\
+{\bf Presenters:} Riccardo Masiero\\
+
+{\bf Discussion:}\\
+We need a tool where to write down the changing done in the svn to DESERT (according to the rules established in the previous meeting, see minutes10). It will be also nice to have a place where to write down a ``to do'' list or a ``wish list'' where to write all the things that will would like to do about DESERT (e.g., additions, tests, documentations, refinements).
+
+{\bf Conclusions:}
+Give access to all the group to the site of NAUTILUS in order to create and modify the pages for the TO DO list and the CHANGE LOG.\\
+
+\  \\
+
+\noindent {\bf Agenda item C:} illustration of the RACUN scenarios.\\
+{\bf Presenter:} Matteo Petrani\\
+
+{\bf Discussion:}\\
+Presentation of the scenario of RACUN (foreseen for simulation, mainly), as well as the QoS associated and the available nodes to realize them practically. This presentation is intended to both give a general overview on RACUN for those of us that will work on it and also to inspire all of us in the definition of the experimental scenarios to be presented in the next meeting (scheduled for the 21st).
+
+{\bf Conclusions:}\\
+Use also the above presentation to take inspiration for the experimental scenarios to be proposed in the next meeting (scheduled for the 21st). The idea of the next meeting is to select around 6 scenarios tailored especially for static and hybrid network. It would be nice if anyone of us will be able to think about 3/4 scenarios focused on the above network.
+
+\  \\
+
+
+\noindent {\bf Agenda item D:} discussion on the thesis proposals for BSc and MSc students.\\
+{\bf Presenter:} Paolo Casari\\
+
+{\bf Discussion:}\\
+Illustration of the proposals written according to the document written for fulfill the A4 of minutes10. 
+
+{\bf Conclusions:}\\
+We need to modify proposals: ``Sviluppo di protocolli per l'accesso al mezzo in reti acustiche sottomarine utilizzando NS-2 e/o NS-3'' by making more explicit the research direction to investigate (e.g., implementation of D-MAC of EvoLogics) and ``Studio comparativo tra i simulatori di rete ns2/NS-Miracle e ns3 per protocolli di reti sottomarine'' by detailing the two possible approaches to follow (one more theoretical, the other one more pratical and brute force).
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. 
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 & test all the tcl scripts released with DESERT with WOSS v 1.3 & Fede F. & 30/06/2012\\
+A2 & send to Federico G. a mail summing up all the new feature of WOSS v. 1.3 and proposals about how to test their compatibility with DESERT & Fede F. & 06/07/2012 \\
+A3 & Give access to all the group to the site of NAUTILUS in order to create and modify the pages for the TO DO list and the CHANGE LOG & Riccardo & 21/06/2012\\
+A4 & modify the proposal ``Sviluppo di protocolli per l'accesso al mezzo in reti acustiche sottomarine utilizzando NS-2 e/o NS-3'' & Paolo & 21/06/2012\\
+A5 & modify the proposal ``Studio comparativo tra i simulatori di rete ns2/NS-Miracle e ns3 per protocolli di reti sottomarine'' & Riccardo & 21/06/2012\\ 
+\hline
+\end{tabular}
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+  \item {\bf A1}: Done. See shared document done by Federico Favaro.
+  \item {\bf A2}: \RM{Overall activity (i.e., test full compatibility of DESERT with WOSS v. 1.3) put in the TO DO list with low priority}.
+  \item {\bf A3}: Done. See DESERT web-site.
+  \item {\bf A4}: Done. See thesis proposal.
+  \item {\bf A5}: Done. See thesis proposal.
+\end{itemize}
+
+
+\end{document}

@@ -1,0 +1,73 @@
+\section{Modules for the transport layer}\label{sec:transport}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwudp}
+   \item {\bf Description:} This module implements the flow multiplexing and demultiplexing from and to the upper layers, respectively.  It does not support link reliability, error detection or flow control.
+   \item {\bf Library name:} {\tt libuwudp.so}
+   \item {\bf Tcl name:} {\tt Module/UW/UDP}
+   \item {\bf Tcl parameters:}
+    \begin{description}
+     \item {\tt debug\_}: flag to disable or enable debug messages [range in \{0,1\}] (optional, default value = 0).
+    \end{description}
+   \item {\bf Tcl commands:}
+    \begin{description}
+   	 \item {\tt getudpheadersize}: get the size of the {\tt UDP} packet header;
+   	 \item {\tt assignPort}: create an association between the {\tt UDP} module and an upper module (example: {\tt \$udp(\$id) assignPort \$cbr(\$id)}).
+ 	\end{description}
+   \item {\bf Internal packet headers:} {\tt hdr\_uwudp}.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_uwip} (uwip header from DESERT).
+   \item {\bf Warnings:} none.
+   \item {\bf Parent Libraries:}
+   \begin{description}
+   \item {\tt libuwip}
+   \end{description}
+   \item {\bf Tcl Scripts:} 
+   \begin{description}
+   \item {\tt samples/basic/uwvbr.tcl}
+   \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwtp}
+   \item {\bf Description:} As the previous {\tt uwudp}, this transport layer module handles the multiplexing and de-multiplexing of data    	flows, but it also supports an error control technique, as well as in-order data delivery to the upper layers. In more detail, {\tt uwtp} includes an Automatic Repeat reQuest (ARQ) error control technique.  This module can handle both ACK and NACK messages, as well as cumulative ACKs. To work correctly, {\tt uwtp} has to know the destination port number of each application flow it handles: this information must be provided during the setting of the parameters for the simulations or tests that have to be conducted.
+   \item {\bf Library name:} {\tt libuwtp.so}
+   \item {\bf Tcl name:} {\tt Module/UW/TP}
+   \item {\bf Tcl parameters:} 
+    \begin{description}
+      \item{\tt debug\_}: flag to disable or enable debug messages [range in \{0,1\}] (optional, default value = 0).
+      \item{\tt send\_buffer\_size\_}: size of the sender buffer. 
+      \item{\tt receive\_buffer\_size\_}: size of the receiver buffer.
+      \item{\tt delay\_interval\_}: the maximum delay time to be considered before transmitting a NACK packet.
+      \item{\tt destPort\_}: destination port number.
+      \item{\tt nack\_retx\_time\_}: timer for NACK retransmission. When this timer expires, the receiver is forced to send a given NACK packet again.
+      \item{\tt pkt\_delete\_time\_from\_queue\_}: timer to delete packets from the transmission queue (e.g., when the acknowledgement mechanism is not enabled or when an ACK packet is lost).
+      \item{\tt expected\_ACK\_threshold\_}: threshold used to tune the number of generated ACK packets when the cumulative ACK mode is on.\end{description}
+   \item {\bf Tcl commands:}
+    \begin{description}
+      \item{\tt getUWTPDataHSize}: get the size of data packet header in Bytes;
+      \item{\tt getUWTPAckHSize}: get the size of the ACK packet header in Bytes; 
+      \item{\tt getUWTPNackHSize}: get the size of the NACK packet header in Bytes;
+      \item{\tt getAckTxCount}: get the number of ACK packets transmitted by a node throughout the communication;
+      \item{\tt getNackTxCount}: get the number of NACK packets transmitted by a node throughout the communication;
+      \item{\tt getAckRxCount}: get the number of ACK packets received by a node throughout the communication;
+      \item{\tt getNackRxCount}: get the number of NACK packets received by a node throughout the communication;
+      \item{\tt setAckMode}: set the protocol to function with ARQ techniques;
+      \item{\tt setNoAckMode}: set the protocol to function without ARQ techniques (only packet buffering is performed);
+      \item{\tt setCumAckMode}: if ACK mode is set, then use the cumulative ACK technique;
+      \item{\tt setNoCumAckMode}: if ACK mode is set, then do not use the cumulative ACK technique.
+    \end{description}
+   \item {\bf Internal packet headers:} {\tt hdr\_uwtp}, {\tt hdr\_uwtp\_data}, {\tt hdr\_uwtp\_ack}, and {\tt hdr\_uwtp\_nack}.
+   \item {\bf External packet headers:} {\tt hdr\_cmn} (common header from ns2); {\tt hdr\_uwip} (uwip header from DESERT).
+   \item {\bf Warnings:} This module requires to pass the destination port number from TCL script (for instance, {\tt set destPort\_ \$destination\_port\_number}).
+   \item {\bf Parent Libraries:}
+   \begin{description}
+   \item {\tt libuwip}
+   \end{description}
+   \item {\bf Tcl Scripts:} 
+   \begin{description}
+   \item {\tt Not provided with DESERT v 1.0.0.}
+   \end{description}
+\end{description}
+

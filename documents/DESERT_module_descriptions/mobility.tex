@@ -1,0 +1,175 @@
+\section{Modules for mobility}\label{sec:mobility}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwdriftposition}  
+   \item {\bf Description:}  This module implements a mobility model that mimics the drift of a node caused by ocean currents. Given the   mean speed and direction of the waves, the initial node's position and its velocity, {\tt uwdriftposition} continuously updates the node's location in order to follow the direction of the current. At each update, the new node position is also affected by a random noise that aims at reproducing the waving movement typical of objects floating in the water.
+   \item {\bf Library name:} {\tt libuwdriftposition.so}
+   \item {\bf Tcl name:} {\tt Position/UW/DRIFT}
+   \item {\bf Tcl parameters:}
+   \begin{description}
+    \item {\tt xFieldWidth\_} : length of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+    \item {\tt yFieldWidth\_} : width of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+    \item {\tt zFieldWidth\_} : depth of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+    \item {\tt boundx\_} : flag to enable or disable the bounds on the x axis [range in \{0,1\}] (optional, default value = 0);
+    \item {\tt boundy\_} : flag to enable or disable the bounds on the y axis [range in \{0,1\}] (optional, default value = 1);
+    \item {\tt boundz\_} : flag to enable or disable the bounds on the z axis [range in \{0,1\}] (optional, default value = 1);
+    \item {\tt speed\_horizontal\_} : speed in the x axis in meters per second;
+    \item {\tt speed\_longitudinal\_} : speed in the y axis in meters per second;
+    \item {\tt speed\_vertical\_} : speed in the z axis in meters per second;
+    \item {\tt alpha\_} : 0: totally random values (Brownian motion) 1: linear motion. Used to compute the speed and the direction;
+    \item {\tt deltax\_} : max value of the Uniform Distribution: rRandom movement between [0, {\tt deltax\_)};
+    \item {\tt deltay\_} : max value of the Uniform Distribution: rRandom movement between [0, {\tt deltay\_)};
+    \item {\tt deltaz\_} : max value of the Uniform Distribution: rRandom movement between [0, {\tt deltaz\_)};
+    \item {\tt starting\_speed\_x\_} : starting speed of the node in the x axis, expressed in meters per second;
+    \item {\tt starting\_speed\_y\_} : starting speed of the node in the y axis, expressed in meters per second;
+    \item {\tt starting\_speed\_z\_} : starting speed of the node in the z axis, expressed in meters per second;
+    \item {\tt updateTime\_} : defines every how many seconds the module will update the position of the node, lower values lead to higher simulation time;
+    \item {\tt debug\_}: flag to disable or enable debug messages.
+   \end{description}
+   \item {\bf Tcl commands:} none.
+   \item {\bf Internal packet headers:} none.
+   \item {\bf External packet headers:} node.
+   \item {\bf Warnings:} The procedure to add this mobility model is:
+   \begin{itemize}
+    \item set the parameters of the Position/UWDRIFT module;
+    \item create the position module: {\tt set position(\$id) [new "Position/UWDRIFT"]};
+    \item add the module to the node: {\tt \$node(\$id) addPosition \$position(\$id)};
+    \item set the coordinates of the node: {\tt \$position(\$id) setX\_ \$curr\_x} (the same for y and z).
+   \end{itemize}
+   \item {\bf Parent Libraries:} none.
+   \item {\bf Tcl Scripts:} 
+   Basic scripts:
+   \begin{description}
+   \item {\tt uwdriftposition.tcl: } Script with a full stack that provides an example of an uwdriftposition module. An uwsun module is used to manage automatically and dinamically the routes.
+   \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt uwgmposition}
+   \item {\bf Description:} This module implements the Gauss-Markov Mobility Model~\cite{LiangNY} (both in 2D and 3D), a solution designed to produce smooth and realistic traces by appropriately tuning a correlation parameter $\alpha$. When required, {\tt uwgmposition} updates node speed and direction according to a finite state Markov process. Once the desired mean speed $v_{\mean}$ is fixed, $\alpha$ controls the correlation between the speed vector and direction at state $k$ and that at $k-1$.
+   \item {\bf Library name:} {\tt libuwgmposition.so} 
+   \item {\bf Tcl name:} {\tt Position/UW/GM}
+   \item {\bf Tcl parameters:}
+   \begin{description}
+    \item {\tt xFieldWidth\_} : length of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+    \item {\tt yFieldWidth\_} : width of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+    \item {\tt zFieldWidth\_} : depth of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+    \item {\tt alpha\_} : 0: totally random values (Brownian motion) 1: linear motion. Used to compute the speed and the direction;
+    \item {\tt alphaPitch\_} : 0: totally random values (Brownian motion) 1: linear motion. Used to compute the pitch;
+    \item {\tt updateTime\_} : defines every how many seconds the module will update the position of the node, lower values lead to higher simulation time;
+    \item {\tt directionMean\_}: defines the mean value of the direction, when it is setted to zero the node moves anyway;
+    \item {\tt pitchMean\_} : defines the mean value of the pitch, when it is setted to zero the node moves anyway;
+    \item {\tt debug\_}: flag to disable or enable debug messages.
+   \end{description}
+   \item {\bf Tcl commands:}
+   \begin{description}
+    \item {\tt bound} : defines the behaviour at bounds. {\tt SPHERIC}: return in the simulation field on the opposite side, {\tt THOROIDAL}: return in the centre of simulation field, {\tt HARDWALL}: the movement is stopped in the edge, {\tt REBOUNCE}: the node rebounce (i.e., the movement that should be outside the simulation field is mirrored inside);
+    \item {\tt speedMean} : defines the mean value of the speed in meters per second.
+   \end{description}
+   \item {\bf Internal packet headers:} none.
+   \item {\bf External packet headers:} node.
+   \item {\bf Warnings:} The procedure to add this mobility model is:
+   \begin{itemize}
+    \item set the parameters of the Position/UWGM module;
+    \item create the position module: {\tt set position(\$id) [new "Position/UWGM"]};
+    \item add the module to the node: {\tt \$node(\$id) addPosition \$position(\$id)};
+    \item set the coordinates of the node: {\tt \$position(\$id) setX\_ \$curr\_x} (the same for y and z);
+    \item define the behaviour at bounds; {\tt \$position(\$id) bound "REBOUNCE"};
+    \item define the mean speed: {\tt \$position(\$id) speedMean \$opt(speedMean)}.
+   \end{itemize}
+   \item {\bf Parent Libraries:} none.
+   \item {\bf Tcl Scripts:} 
+   Basic scripts:
+   \begin{description}
+   \item {\tt uwgmposition.tcl: } Script with a full stack that provides an example of an uwgmposition module. An uwsun module is used to manage automatically and dinamically the routes.
+   \end{description}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt wossgmmob3D}
+   \item {\bf Description:} This module also implements the Gauss Markov Mobility Model, but with some changes that make it directly usable with WOSS. For example, WOSS employs the geographic coordinate system (i.e., latitude, longitude and altitude/depth) for the positions of the nodes; therefore, {\tt wossgmmob3D} also adopts the geographical coordinate system to describe the node movements.
+   \item {\bf Library name:} {\tt libwossgmmobility.so}
+   \item {\bf Tcl name:} {\tt WOSS/GMMob3D}
+   \item {\bf Tcl parameters:} 
+    \begin{description}
+      \item {\tt xFieldWidth\_} : length of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+      \item {\tt yFieldWidth\_} : width of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+      \item {\tt zFieldWidth\_} : depth of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+      \item {\tt alpha\_} : 0: totally random values (Brownian motion) 1: linear motion. Used to compute the speed and the direction;
+      \item {\tt alphaPitch\_} : 0: totally random values (Brownian motion) 1: linear motion. Used to compute the pitch;
+      \item {\tt updateTime\_} : defines every how many seconds the module will update the position of the node, lower values lead to higher simulation time;
+      \item {\tt directionMean\_}: defines the mean value of the direction, when it is setted to zero the node moves anyway;
+      \item {\tt pitchMean\_} : defines the mean value of the pitch, when it is setted to zero the node moves anyway;
+      \item {\tt wossgm\_debug\_} : flag to disable or enable debug messages.
+      \item {\tt zmin\_} : Minimum depth at the z-axis.
+      \item {\tt sigmaPitch\_} : Standard deviation in the z-axis.
+    \end{description}
+   \item {\bf Tcl commands:}
+    \begin{description}
+      \item {\tt bound} : defines the behaviour at bounds. {\tt SPHERIC}: return in the simulation field on the opposite side, {\tt THOROIDAL}: return in the centre of simulation field, {\tt HARDWALL}: the movement is stopped in the edge, {\tt REBOUNCE}: the node rebounce (i.e., the movement that should be outside the simulation field is mirrored inside);
+      \item {\tt speedMean} : defines the mean value of the speed in meters per second.
+      \item {\tt maddr} : Mac address of the node. 
+      \item {\tt startLatitude} : Starting latitude of the area where nodes are going to move. 
+      \item {\tt startLongitude} : Starting longitude of the area where nodes are going to move. 
+      \item {\tt mtrace} : Whether or not to enable tracing of a node. $0$ means no tracing, and any integer number means start tracing.
+      \item {\tt mTraceOfNode} : Mac address of the node which is going to be traced.
+      \item {\tt gm3dTraceFile} : File name where trace inforamtion are going to be written.
+      \item {\tt start} : It starts the mobility model.
+    \end{description}
+   \item {\bf Internal packet headers:} none
+   \item {\bf External packet headers:} none
+   \item {\bf Warnings:} none
+   \item {\bf Tcl Scripts:} none
+   \item {\bf Parent Libraries:}
+\end{description}
+
+\vspace{1 cm}
+
+\begin{description}
+   \item {\bf Name:} {\tt wossgroupmob3D}
+   \item {\bf Description:} This module implements a leader-follower paradigm (also known as ``group mobility model''). According to this model, we have: $i$) a leader node, that moves either randomly (i.e., according to a Gauss-Markov Mobility Model) or by following a pre-determined path, and $ii$) one or more followers that tune their movements so as to mimic the route of the leader. The movement of the followers is generated as the sum of two components: a movement that attracts the follower towards the leader and a random movement. The first one is obtained according to the mathematical model that describes the attraction between two electrical charges~\cite{BadiaBangkok}, whereas the second one is still based on a Gauss-Markov Mobility Model. Three parameters regulate the attractive component of the overall movement of a follower: the ``charge of the leader'', the ``charge of the follower'', and a third parameter $\alpha$ which is used to determine the intensity of the ``attraction field''; in 
+particular, a negative value of $\alpha$ attracts the follower towards the leader, whereas a positive value pushes the follower away. Like {\tt wossgmmob3D}, also {\tt wossgroupmob3D} supports 3D mobility and, currently, can be used only in conjunction with WOSS.
+   \item {\bf Library name:} {\tt libwossgroupmobility.so}
+   \item {\bf Tcl name:} {\tt WOSS/GroupMob3D}
+   \item {\bf Tcl parameters:} 
+    \begin{description}
+      \item {\tt xFieldWidth\_} : length of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+      \item {\tt yFieldWidth\_} : width of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+      \item {\tt zFieldWidth\_} : depth of the area of simulation, if a node reaches this value its behaviour depends according to the field setted with the command {\tt bound};
+      \item {\tt alpha\_} : 0: totally random values (Brownian motion) 1: linear motion. Used to compute the speed and the direction;
+      \item {\tt updateTime\_} : defines every how many seconds the module will update the position of the node, lower values lead to higher simulation time;
+      \item {\tt directionMean\_}: defines the mean value of the direction, when it is setted to zero the node moves anyway;
+      \item {\tt pitchMean\_} : defines the mean value of the pitch, when it is setted to zero the node moves anyway;
+      \item {\tt wossgroup\_debug\_} : flag to disable or enable debug messages.
+      \item {\tt zmin\_} : Minimum depth at the z-axis.
+      \item {\tt sigmaPitch\_} : Standard deviation in the z-axis.
+      \item {\tt speedM\_} : Mean of the speed which is used to compute a Gaussian random variable.
+      \item {\tt speedS\_} : Standard deviation of speed which is also used to compute a Gaussian random variable.
+      \item {\tt eta\_} : A tunable variable which is the coefficient of the filter in that range between 0 and 1.
+      \item {\tt charge\_} : Nodes attraction charge.
+      \item {\tt leaderCharge\_} : Charge of the leader. 
+      \item {\tt galpha\_} : It tells the intensity of the attraction filed.
+    \end{description}
+   \item {\bf Tcl commands:}
+    \begin{description}
+      \item {\tt bound} : defines the behaviour at bounds. {\tt SPHERIC}: return in the simulation field on the opposite side, {\tt THOROIDAL}: return in the centre of simulation field, {\tt HARDWALL}: the movement is stopped in the edge, {\tt REBOUNCE}: the node rebounce (i.e., the movement that should be outside the simulation field is mirrored inside);
+      \item {\tt speedMean} : defines the mean value of the speed in meters per second.
+      \item {\tt maddr} : Mac address of the node. 
+      \item {\tt startLatitude} : Starting latitude of the area where nodes are going to move. 
+      \item {\tt startLongitude} : Starting longitude of the area where nodes are going to move. 
+      \item {\tt leader} : Pointer of the leader position.
+      \item {\tt mtrace} : Whether or not to enable tracing of a node. $0$ means no tracing, and any integer number means start tracing.
+      \item {\tt mTraceOfNode} : Mac address of the node which is going to be traced.
+      \item {\tt gm3dTraceFile} : File name where trace inforamtion are going to be written.
+      \item {\tt start} : It starts the mobility model.
+    \end{description}
+   \item {\bf Internal packet headers:} none
+   \item {\bf External packet headers:} none
+   \item {\bf Warnings:} To function this model correctly, this is necessary to pass the position pointer of the leader inside the follower's mobility model. Otherwise, follower will be unaware of the leader.
+   \item {\bf Tcl Scripts:} none
+   \item {\bf Parent Libraries:}  
+\end{description}

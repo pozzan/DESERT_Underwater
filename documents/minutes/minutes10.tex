@@ -1,0 +1,241 @@
+\documentclass[11pt,journal,draftclsnofoot,onecolumn,twoside,letterpaper]{IEEEtran}
+
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{times}
+\usepackage[dvips]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+\usepackage{bm}
+\usepackage{dsfont}
+\usepackage{stfloats}
+\usepackage[nolists, nomarkers]{endfloat}
+\usepackage{comment}
+\usepackage[normalem]{ulem}
+%\usepackage[right]{showlabels}
+\usepackage[usenames]{color}
+
+\newcommand{\figw}{1.0\linewidth}
+\newcommand{\figwless}{0.6\linewidth}
+\newcommand{\figws}{0.45\linewidth}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\bc}{\begin{cases}}
+\newcommand{\ec}{\end{cases}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\e}{\item}
+\newcommand{\eq}[1]{(\ref{#1})}
+\newcommand{\deeff}{\,\mathrm{d}\;\!\!f}
+\newcommand{\de}[1]{\,\mathrm{d}#1}
+\newcommand{\meas}[1]{\,\,\!\mathrm{#1}}
+\newcommand{\pc}[1]{\textbf{(PC: #1)}}
+\newcommand{\dc}[1]{\textbf{(DC: #1)}}
+\newcommand{\vup}{\vspace{-1mm}}
+\newcommand{\back}{\!\!\!\!\!}
+\newcommand{\bre}{\begin{bf}\begin{color}{BrickRed} }
+\newcommand{\ere}{\end{color} \end{bf}}
+\newcommand{\RM}[1]{\begin{color}{BrickRed} (RM: #1) \end{color}}
+\newcommand{\MP}[1]{\begin{color}{NavyBlue} (MP: #1) \end{color}}
+
+\theoremstyle{definition} \newtheorem{definition}[]{Definition}
+
+\theoremstyle{theorem} \newtheorem{theorem}[]{Theorem}
+
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VEC}{vec}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmax}{arg max}
+
+\def\C(#1){{\cal #1}} % calligraphic style
+\def\B(#1){\hbox{\boldmath$#1$}} % bold style
+
+
+
+
+\newcounter{mytempeqn}
+
+%\baselineskip 24pt
+\renewcommand{\baselinestretch}{1.75}
+
+%\setlength\floatsep{0.98\baselineskip}
+%\setlength\textfloatsep{0.98\baselineskip}
+
+\geometry{verbose,letterpaper,tmargin=1.05in,bmargin=1.0in,lmargin=0.75in,rmargin=0.75in}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\IEEEoverridecommandlockouts
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large} \noindent {\bf Department of Information Engineering (DEI), University of Padua}\\ \end{Large}
+\begin{large} {Meeting minutes} \end{large}
+
+\vspace{0.8cm}
+
+\noindent {\it Meeting: } $10^{th}$ meeting of the SIGNET Underwater Group.\\
+{\it Date of the meeting: } $30^{th}$ of May $2012$\\
+{\it Present: } Riccardo Masiero (DEI, UniPD), Giovanni Toso (CFR), Federico Favaro (CFR), Matteo Petrani (CFR), Paolo Casari (CFR and DEI, UniPD), Ivano Calabrese (CFR), Saiful Azad (DEI, UniPD), Beatrice Tomasi (DEI, UniPD), Nicol\`o Michelusi (DEI, UniPD),  El Hadi Cherkaoui (IIT)\\
+
+\vspace{0.5cm}
+
+\begin{tabular}{p{0.9\columnwidth}}
+ \hline \\
+\end{tabular}
+
+
+\noindent {\bf Agenda item A:} Look-up tables for the Physical Layer (RACUN project).\\
+{\bf Presenters:} Paolo Casari\\
+
+{\bf Discussion:}\\
+
+In RACUN the PHY layer is not modeled using WOSS, but by simulation the different modulations foreseen in the project offline, and by providing the resulting PER (Packet Error Rate) in the form of a look up table (LUT).
+
+The LUT for RACUN:
+\begin{itemize}
+  \item provides the PER;
+  \item as a function of the following parameters
+    \begin{itemize}
+      \item Area of measurement
+      \item Link type
+      \item Range
+      \item Modulation Scheme (20+ combinations of packet size and data rate)
+      \item SNR
+    \end{itemize}
+\end{itemize}
+
+NOTE: one PER estimate for each parameter combination will be provided.
+
+The question is now how to import and use this LUT in NS-Miracle.
+
+We have three levels of actions: 1) preparing the data so that it can be loaded in NS-Miracle as C++ code; 2) prepare the module in NS-Miracle to exploit the LUT (exported in C++); 3) decide the mechanism to retrieve, from the LUT (exported in C++), the actual PER to use in the simulations.
+
+So far we decided to:
+\begin{enumerate}
+ \item for each scenario (Area and Modulation scheme) convert the .mat structure that will be provided by Paul van Walree into a .txt file and parse it to retrieve the remaining desired values (ranges/SNR, Link types). The output of the parser will be a C++ code with all the commands required to insert the PER values into a C++ structure or class within an NS-Miracle PHY-level module.  
+ \item modify the dumb-wireless channel to enable the delivery of packets between two nodes according to a given PER that must be retrieved from the above structures (for each simulated scenario and modulation scheme), given the range and the link type (e.g., bottom node to bottom node, AUV to gateway); 
+ \item once the the desired scenario has been fixed in the tcl file, build an ordered list with the PER data (for each node link of interest) in order to quickly retrieve the PER values needed by the modified dumb-wireless channel
+\end{enumerate} 
+
+We need to know the exact organization of the MATLAB data before we can proceed further.
+
+{\bf Conclusions:}\\
+Ask Paul van Walree to provide us with an example of MATLAB data file.
+\  \\
+
+\noindent {\bf Agenda item B:} Maintenance of DESERT Underwater and future extensions (first ideas and possible methods).\\
+{\bf Presenters:} Riccardo Masiero\\
+{\bf Discussion:}\\
+
+\begin{itemize}
+  \item svn update: update svn autonomously (notification only via e-mails to the others) if the module behavior is not modified, otherwise discuss the new upload during meetings (as well as for new modules). Keep trace of new module version (independently of each other) writing the proper html change log (to be done by Giovanni) {\bf NOTE: when a new module version is created, clearly report the last svn version of the previous module version}. 
+  \item release update: when there is enough modifications (in terms of new modules or fixed bugs). To be decided during meetings;
+  \item documentation update: in correspondence with svn update (change-log, module description, doxygen)
+  \item possible external contributions? To decide during meetings.
+\end{itemize}
+
+{\bf Conclusions:}\\
+Giovanni will prepare the change log by the mid of June.\\
+Provide El Hadi with the permission to access the DESERT svn.\\
+Advertise DESERT for students to propose thesis, collaboration, contexts? 
+
+\  \\
+\noindent {\bf Agenda item C:} Definition of scenarios and experiments for the conclusive part of the RACUN and NAUTILUS projects  (first ideas and possible methods)\\
+{\bf Presenter:} Paolo Casari\\
+{\bf Discussion:} \\
+
+We need to start defining (at least to a conceptual level) possible scenarios for experiment, given what we have ready so far.
+
+In details, we need to define:
+\begin{itemize}
+ \item devices involved;
+ \item network topology;
+ \item possibly, mobility patterns;
+ \item traffic to generate
+\end{itemize}
+
+{\bf Conclusions:}\\
+13th of June Matteo will present the scenario of RACUN.\\
+21st of June anyone will present its ideas of possible scenarios for experiments.
+
+\  \\
+\noindent {\bf Agenda item D:} Brief report on MTS/IEEE OCEANS 2012, Yeosu, Korea.\\
+{\bf Presenter:} Riccardo Masiero and Saiful Azad \\
+{\bf Discussion:} \\
+{\bf Conclusions:} \\
+
+\  \\
+\noindent {\bf Note:} After the meeting the participants concluded the meeting with a social dinner at the pizzeria ``Rosso Pomodoro,'' Padova.\\
+
+\newpage
+
+\noindent {\bf Overall conclusions: } 
+
+In the following we summarize the actions points decided up to the above discussions. 
+
+\begin{tabular}{|p{0.05\columnwidth}|p{0.5\columnwidth}|p{0.2\columnwidth}|p{0.15\columnwidth}|}
+\hline
+{\it Item} & {\it Action's Description} & {\it Person responsible} & {\it Deadline (DD/MM/YYYY)}\\
+\hline
+A1 &  Ask to Paul to provide us with an example of struct organization. & Paolo  & 15/06/2012 \\ 
+A2 &  Prepare the change-log for DESERT & Giovanni & 15/06/2012\\
+A3 &  Provide El Hadi with the permission to access the DESERT svn & Riccardo & 15/06/2012\\
+A4 &  Discuss with Michele about how to advertise DESERT for students to propose thesis, collaboration, contexts & Riccardo and Paolo & 15/06/2012\\ 
+A5 & Presentation of the RACUN scenarios & Matteo & 13/06/2012\\
+A6 & Presentation of ideas about possible scenarios for experiments & all & 21/06/2012\\
+\hline
+\end{tabular}
+\ \\
+{\bf NOTE:} according to A5 and A6 of above, two meetings will be organized the 13th and the 21st of June, respectively. Save the date!
+\ \\
+\ \\
+{\bf Verification Points:}
+\begin{itemize}
+  \item {\bf A1}: Done (mail sent on 31/05/2012)
+  \item {\bf A2}: Done. See Agenda Item A of minutes12.
+  \item {\bf A3}: Done. See confirmation mail sent to Riccardo and Paolo by El Hadi.
+  \item {\bf A4}: discussed on 31/05/2012; a document with some proposal or a leaflet should be sent to Michele, who will leverage on opportunities to advertise our topics using the student mailing list. See also Agenda Item D of minutes11 and A3 of minutes12.
+  \item {\bf A5} Done. See Agenda Item C of minutes11. 
+  \item {\bf A6} Done. See Agenda Item B of minutes12.
+\end{itemize}
+
+
+\end{document}
