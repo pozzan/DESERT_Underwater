@@ -125,11 +125,11 @@ void uwApplicationModule::handleTCPclient(int clnSock)
 }
 
 
-void uwApplicationModule::initialize_DATA_pck_wth_TCP(){
+void uwApplicationModule::init_Packet_TCP(){
     if( queuePckReadTCP.empty() ) {
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::initialize_DATA_pck_wth_TCP() ---> Ther is no DATA packet to pass the below levels."<< std::endl;
+        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::init_Packet_TCP() ---> Ther is no DATA packet to pass the below levels."<< std::endl;
     } else {
-        //if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::initialize_DATA_pck_wth_TCP() ---> Start to initialize the fields of DATA packet."<< std::endl;
+        //if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::init_Packet_TCP() ---> Start to initialize the fields of DATA packet."<< std::endl;
         
         //Packet *ptmp = Packet::alloc();
         cout << " Number of DATA packets saved: " << queuePckReadTCP.size() << std::endl;
@@ -170,4 +170,4 @@ void uwApplicationModule::initialize_DATA_pck_wth_TCP(){
 
         sendDown(ptmp);
     }
-}//end initialize_DATA_pck_wth_TCP() method
+}//end init_Packet_TCP() method

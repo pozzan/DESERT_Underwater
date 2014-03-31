@@ -98,11 +98,11 @@ void *read_process_UDP(void* arg)
     
 }//end read_process_UDP() method
 
-void uwApplicationModule::initialize_DATA_pck_wth_UDP(){
+void uwApplicationModule::init_Packet_UDP(){
     if( queuePckReadUDP.empty() ) {
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::initialize_DATA_pck_wth_UDP() ---> There is no DATA packet to pass the below levels."<< std::endl;
+        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::init_Packet_UDP() ---> There is no DATA packet to pass the below levels."<< std::endl;
     } else {
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::initialize_DATA_pck_wth_UDP() ---> Start to initialize the fields of DATA packet."<< std::endl;
+        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::init_Packet_UDP() ---> Start to initialize the fields of DATA packet."<< std::endl;
         
         Packet *ptmp = queuePckReadUDP.front();
         queuePckReadUDP.pop();
@@ -130,9 +130,9 @@ void uwApplicationModule::initialize_DATA_pck_wth_UDP(){
         }
         uwApph->priority_ = 0; //Priority of the message
 
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::initialize_DATA_pck_wth_UDP() ---> DATA packet initialized. Identifier " << ch->uid() << ", Sequence Number " << uwApph->sn() << ","
+        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::init_Packet_UDP() ---> DATA packet initialized. Identifier " << ch->uid() << ", Sequence Number " << uwApph->sn() << ","
          << " Destination address IP " << uwiph->daddr() << ", Destination port: " << uwudph->dport() << std::endl;
      
         sendDown(ptmp);
     }
-}//end initialize_DATA_pck_wth_UDP() method
+}//end init_Packet_UDP() method
