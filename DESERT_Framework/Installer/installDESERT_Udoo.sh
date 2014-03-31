@@ -27,13 +27,13 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# @name_file:   installDESERT_Raspberry-Pi-yocto-poky.sh
+# @name_file:   installDESERT_Udoo.sh
 # @author:      Ivano Calabrese, Giovanni Toso
 # @last_update: 2014.03.28
 # --
 # @brief_description:
 
-# INCLUDE
+# INCLUDEIvano Calabrese, 
 #. ./commonVariables.sh
 . ${ROOT_DESERT}/commonFunctions.sh
 
@@ -79,7 +79,7 @@ main() {
     #     e.g addon_installation_list host/target <addon-list>
 
     ## only for the cross-compilation session
-    export CROSS_ENV_DIR="/opt/raspberry/"
+    export CROSS_ENV_DIR="/opt/udoo/"
     export CROSS_ENV_FILE="${CROSS_ENV_DIR}/environment"
     #*
 
