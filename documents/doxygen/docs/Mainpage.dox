@@ -3,7 +3,7 @@
 \mainpage The DESERT Underwater Libraries
 
 \image html http://nautilus.dei.unipd.it/images/DESERT.png
-\image latex http://nautilus.dei.unipd.it/images/DESERT.eps
+\image latex ./docs/DESERT.eps
 
 @version 2.0.0
 
@@ -516,7 +516,7 @@ The DESERT libraries also include two modules to simulate node mobility. These m
 
 \section refs References
 
-<b>[1]</b> R. Masiero, P. Casari, M. Zorzi, "The NAUTILUS project: Physical Parameters, Architectures and Network Scenarios," Proc. MTS/IEEE OCEANS </i>, Kona, HI, 2011.
+<b>[1]</b> R. Masiero, P. Casari, M. Zorzi, "The NAUTILUS project: Physical Parameters, Architectures and Network Scenarios," <i>Proc. MTS/IEEE OCEANS</i>, Kona, HI, 2011.
  
 <b>[2]</b> The Network Simulator - ns2. http://nsnam.isi.edu/nsnam/index.php/Main_Page
  
@@ -1076,7 +1076,7 @@ To install the virtual machine, your system must satisfy these requirements:
 </small>
 
 If you have a suitable system, go on the DESERT Underwater web site<br>
-http://nautilus.dei.unipd.it/desert-underwater/#software-download <br>
+http://nautilus.dei.unipd.it/desert-underwater-2/#virtual-machine <br>
 and double-click on the the virtual machine download link. This will trigger Virtual Box, which will prompt for settings.
 Click "Import" to start working with the machine.
 
