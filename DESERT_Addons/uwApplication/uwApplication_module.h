@@ -71,7 +71,6 @@
 #include <list>
 #include <queue>
 #include <rng.h>
-#include <pthread.h>
 
 
 #define UWAPPLICATION_DROP_REASON_UNKNOWN_TYPE "DPUT"   /**< Drop the packet. Packet received is an unknown type*/
@@ -125,6 +124,13 @@ public:
      * packets will be sent to the below levels of ISO/OSI stack protocol. 
      */
     virtual void incrPktsPushQueue() { pkts_push_queue++; }
+
+    /**
+     * Calculate the epoch of the event. Used in sea-trial mode
+     * @return the epoch of the system
+     */
+    inline unsigned long int getEpoch() {return time(NULL);}
+
 
     
     int servSockDescr; /**< socket descriptor for server */
@@ -216,7 +222,8 @@ protected:
      *          <i>false</i> communication with socket  
      */
     //virtual bool withoutSocket() {bool test;SOCKET_CMN == 0 ? test = true : test = false; return test;}
-    virtual bool withoutSocket() {bool test; socket_active == 0 ? test = true : test = false; return test;}
+    //virtual bool withoutSocket() {bool test; socket_active == false ? test = true : test = false; return test;}
+     virtual bool withoutSocket() {bool test; socket_active == false ? test = true : test = false; return test;}
     /**
      * If the communication take place using sockets verify if the protocol used
      * is TCP or UDP.
@@ -243,11 +250,6 @@ protected:
      *          <i>false</i> not enabled drop out of order 
      */
     virtual inline bool useDropOutOfOrder() {bool test;DROP_OUT_OF_ORDER == 1 ? test = true : test = false; return test;}
-    /**
-     * Calculate the epoch of the event. Used in sea-trial mode
-     * @return the epoch of the system
-     */
-    inline unsigned long int getEpoch() {return time(NULL);}
     /**
      * If the communication take place without sockets decide if the payload of data 
      * packet must be generated with a known sequence or must be generated with a 

@@ -109,7 +109,7 @@ if {[lindex $argv 2] == 1} {
 set opt(start_clock) [clock seconds]
 
 set opt(nn)                 1.0 ;# Number of Nodes
-set opt(starttime)          1
+set opt(starttime)          5
 if {[lindex $argv 2] == 1} {
 	set opt(stoptime) 200
 } else {
@@ -185,19 +185,14 @@ $data_mask setBandwidth  $opt(bw)
 # Module Configuration  #
 #########################
 #UW/APPLICATION
-Module/UW/APPLICATION set debug_ 1							;# 1= debug activated
+Module/UW/APPLICATION set debug_ 0							;# 1= debug activated
 Module/UW/APPLICATION set period_ $opt(cbr_period)
-#Module/UW/APPLICATION set socket_cmn_ $opt(socket_comm) ;# 1= use socket for communication 
 Module/UW/APPLICATION set PoissonTraffic_ 0		   ;# 1= use a Poisson process for generate packets
 Module/UW/APPLICATION set Payload_size_ $opt(pktsize)
 Module/UW/APPLICATION set drop_out_of_order_ 1 		;# 1= drop out of order activate 
 Module/UW/APPLICATION set pattern_sequence_ 0			;# 1= use pattern sequence for data payload message
-#Module/UW/APPLICATION set tcp_communication_ 1		   ;# 1= use TCP communication, 
 Module/UW/APPLICATION set Socket_Port_ 4000	
 
-#Module/UW/CBR set packetSize_          $opt(pktsize)
-#Module/UW/CBR set period_              $opt(cbr_period)
-#Module/UW/CBR set PoissonTraffic_      1
 
 # BPSK              
 Module/MPhy/BPSK  set BitRate_          $opt(bitrate)
@@ -324,7 +319,9 @@ proc createSink { } {
     $phy_data_sink setSpectralMask $data_mask
     $phy_data_sink setInterference $interf_data_sink
     $phy_data_sink setPropagation $propagation
-
+    for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
+        $cbr_sink($cnt) setSocketProtocol "TCP"
+    }
     $mac_sink $opt(ack_mode)
     $mac_sink initialize
 }
@@ -389,10 +386,7 @@ $ipr(0) addRoute [$ipif_sink addr] [$ipif_sink addr];#[$ipif(1) addr]
 #####################
 # Set here the timers to start and/or stop modules (optional)
 # e.g., 
-for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-    $ns at $opt(starttime)    "$cbr($id1) start"
-    $ns at $opt(stoptime)     "$cbr($id1) stop"
-}
+
 
 ###################
 # Final Procedure #
@@ -469,5 +463,10 @@ proc finish {} {
 #} else {
 #	$ns at [expr $opt(stoptime) + 3600]  "finish; $ns halt" 
 #}
+for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
+    $ns at $opt(starttime)    "$cbr($id1) start"
+    $ns at $opt(stoptime)     "$cbr($id1) stop"
+}
+
 $ns at [expr $opt(stoptime) + 30.0] "finish; $ns halt"
 $ns run

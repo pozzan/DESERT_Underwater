@@ -66,7 +66,6 @@ sumdt(0),
 hrsn(0),
 servSockDescr(0),
 servPort(0),
-socket_active(0),
 tcp_udp(-1)
 {
     bind("debug_", (int*) &debug_);
@@ -152,7 +151,6 @@ int uwApplicationModule::command(int argc, const char*const* argv) {
     } else if (argc == 3) {
         if (strcasecmp(argv[1],"SetSocketProtocol") == 0) {
             string protocol = argv[2];
-            cout << "Setting socket !!" << endl;
             if (strcasecmp(protocol.c_str(),"UDP") == 0)
             {
                 socket_active = true;
@@ -178,11 +176,8 @@ int uwApplicationModule::crLayCommand(ClMessage* m) {
 }//end crLayCommand() Method
 
 void uwApplicationModule::recv(Packet* p) {
-    
     if (withoutSocket()) {
-        //if (debug_ >= 1) std::cout << "Time: " << NOW << " uwApplicationModule::recv() ---> Using CBR without socket communication." << std::endl;
         if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_WITHOUT_SOCKET_MODE" << endl;
-        //uwApplicationModule::statistics(p);
         statistics(p);
     } else {
         //Communication take place with sockets 
@@ -248,8 +243,6 @@ void uwApplicationModule::statistics(Packet* p) {
     //Verify if a packet is lost
     if (useDropOutOfOrder()) {
         if (uwApph->sn_ > esn) {
-            if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::recv() ---> Packet lost. Packet received have SN " << uwApph->sn_ << ","
-                    << " the expected SN is " << esn << std::endl;
             if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PACKET_LOST_ID_RECEIVED" << (int)uwApph->sn_ << "_ID_EXPECTED_" << esn << endl;
             incrPktLost(uwApph->sn_ - (esn));
         }
@@ -261,7 +254,8 @@ void uwApplicationModule::statistics(Packet* p) {
     incrPktRecv(); //Increase the number of data packets received
 
     lrtime = Scheduler::instance().clock(); //Update the time in which the last packet is received.
-    cout << "Payload pacchetto " << endl;
+    if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_RECEIVED--> ";
+    //cout << "Payload pacchetto " << endl;
     for(int i=0;i<MAX_LENGTH_PAYLOAD;i++)
     {
         cout<<uwApph->payload_msg[i];
@@ -340,10 +334,10 @@ void uwApplicationModule::init_Packet() {
 
     //Show some DATA packet information 
     if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::INIT_PKT_UID_" << ch->uid() << std::endl;
-    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "UWAPPLICATION::SERIAL_NUMBER_" << uwApph->sn() << std::endl;
-    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "UWAPPLICATION::DADDR_" << (uint)uwiph->daddr() << std::endl;
-    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "UWAPPLICATION::DPORT_" << (uint)uwudp->dport() << std::endl;
-    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "UWAPPLICATION::PAYLOAD_SIZE_" << sizeof (uwApph->payload_msg) << std::endl;
+    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::SERIAL_NUMBER_" << uwApph->sn() << std::endl;
+    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::DADDR_" << (uint)uwiph->daddr() << std::endl;
+    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::DPORT_" << (uint)uwudp->dport() << std::endl;
+    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::PAYLOAD_SIZE_" << sizeof (uwApph->payload_msg) << std::endl;
 
     sendDown(p, delay);
     chkTimerPeriod.resched(getTimeBeforeNextPkt()); // schedule next transmission
@@ -363,20 +357,18 @@ void uwApplicationModule::stop() {
 
 double uwApplicationModule::getTimeBeforeNextPkt() {
     if (getPeriod() < 0) {
-        if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::getTimeBeforeNextPkt() ---> Error PERIOD < 0. Exit from the program." << std::endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::ERROR_TIMER SET TO NEGATIVE VALUE" << endl;
         exit(1);
     }
     if (usePoissonTraffic()) {
         //Data packets are generated with a Poisson process
         double u = RNG::defaultrng()->uniform_double();
         double lambda = 1.0 / PERIOD;
-        if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::getTimeBeforeNextPkt() ---> DATA packets are generated with a Poisson process."
-                << " Generation rate is: " << lambda << std::endl;
+        if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::PACKET_GENERATED_WITH_POISSON_PERIOD_"<<PERIOD<<endl;
         return (-log(u) / lambda);
     } else {
         //Data packets are generated wit a costant bit rate
-        if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::getTimeBeforeNextPkt() ---> DATA packets are generated with constant bit rate."
-                << " Generation rate is: " << PERIOD << "[s]" << std::endl;
+        if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::PACKET_GENERATED_WITH_FIXED_PERIOD_"<<PERIOD<<endl;
         return PERIOD;
     }
 } //end getTimeBeforeNextPkt() Method
@@ -394,7 +386,6 @@ double uwApplicationModule::GetRTTstd() const {
 } //end GetRTTstd() method
 
 void uwApplicationModule::updateRTT(const double& rtt) {
-    if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::updateRTT() ---> Update RTT." << std::endl;
     sumrtt += rtt;
     sumrtt2 += rtt*rtt;
     rttsamples++;
@@ -444,14 +435,12 @@ void uwApplicationModule::updateFTT(const double& ftt) {
 void uwApplicationModule::updateThroughput(const int& bytes, const double& dt) {
     sumbytes += bytes;
     sumdt += dt;
-    if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::updateThroughput ---> bytes= " << bytes << " dt=" << dt << std::endl;
 }//end updateThroughput() method
 
 
 
 
 void uwApplicationModule::uwSendTimerAppl::expire(Event* e) {
-    if (m_->debug_) std::cout << "Time: " << NOW << " uwSendTimer::expire() -->Period timeout expired." << std::endl;
     if (m_->withoutSocket()) {
         //Communication take placing without socket 
         if (m_->usePatternSequence()) {
