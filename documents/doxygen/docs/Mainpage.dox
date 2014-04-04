@@ -558,7 +558,7 @@ The DESERT libraries also include two modules to simulate node mobility. These m
 
 /** \page INSTALL1 Installation Guidelines
 
-\section requirements Installation Requirements
+\section requirements Installation requirements
 
 Before installing the DESERT framework, please check that your host device has the following packages installed:
 
@@ -577,7 +577,7 @@ Before installing the DESERT framework, please check that your host device has t
 </BLOCKQUOTE>
 </SMALL>
 
-If you are using a Debian-based Linux distro, you can type this command in a terminal
+If you are using a Debian-based Linux distribution, you can type this command in a terminal
 
 <small>
 
@@ -587,7 +587,7 @@ If you are using a Debian-based Linux distro, you can type this command in a ter
 
 in order to install all dependencies above.
 
-DESERT 2.0.0 is compatible with automake up to the version 1.11.x.
+DESERT 2.0.0 is compatible with automake up to the version 1.14.
 
 In order to check the version installed type this command in a terminal:
 
@@ -597,11 +597,12 @@ In order to check the version installed type this command in a terminal:
 
 </small>
 
-If the output is similar to
+If the command returns a version lower or equal to 1.14, e.g.:
 
 <small>
 
-    automake (GNU automake) 1.11.x
+    automake (GNU automake) 1.14
+    ...
 
 </small>
 
@@ -611,23 +612,13 @@ If you are using a Debian-based Linux distro, you can type this command
 
 <small>
 
-    sudo apt-get intall automake1.11
+    sudo apt-get intall automake
 
 </small>
-
-to install automake, and the following one in order to set automake1.11 as the default automake for your system
-
-<small>
-
-    update-alternatives --config automake
-
-</small>
-
-And choose the 1.11 version.
 
 <br>
 
-\section install Installtion procedures
+\section install Installation procedures
 
 To install DESERT Underwater, you can choose between two different approaches:
 
@@ -636,9 +627,25 @@ To install DESERT Underwater, you can choose between two different approaches:
 
 The wizard mode implements an interactive installation procedure. As such, it is easier and more user-friendly than the command-line mode.
 The command-line mode is recommended for more experienced users.
-Note that, after completing an installation with the wizard, you will be also provided a command-line string. You can note down this string and enter it at the command prompt in order to reproduce exactly the same installation steps (with the same options, the same packages installed, etc.) When you become more comfortable with DESERT's installation options, you can also modify the automatically generated command-line string to reflect your desired configuration.
+Note that, after completing an installation with the wizard, you will be also provided a command-line string. You can note down this string and enter it at the command prompt in order to reproduce exactly the same installation steps (with the same options, the same packages installed, etc.). When you become more comfortable with DESERT's installation options, you can also modify the automatically generated command-line string to reflect your desired configuration.
 
-To launch the installation in wizard mode, run the following command:
+To launch the installation in wizard mode, once you downloaded and unpacket the framework, you have to cd in the framework folder by using:
+
+<small>
+
+    cd DESERT_Underwater/DESERT_Framework
+
+</small>
+
+set the executable flag of the installer:
+
+<small>
+
+    chmod +x ./install.sh
+
+</small>
+
+and run the installer:
 
 <small>
 
@@ -726,9 +733,9 @@ https://mail.dei.unipd.it/mailman/listinfo/desert-usergroup.
 
 <br>
 
-<b> WHAT TO DO AFTER THE INSTALLATION HAS BEEN COMPLETED</b>
+\section todoafter After the installation has been completed
 
-When the installation of DESERT Underwater has been successfully completed, you need to update your environment variables by exporting the paths to the bin/ and lib/ folders. This is necessary in order to correctly use DESERT and its dependencies (ns, ns-miracle, etc.).
+When the installation of DESERT Underwater has been successfully completed, you need to update your environment variables by exporting the paths to the bin/ and lib/ folders created in the path specified during the installation. This is necessary in order to correctly use DESERT and its dependencies (ns, ns-miracle, etc.).
 This operation is made simpler via the <i>environment</i> file generated at the end of the installation session in the <destination-folder-path> only for the "development" installation-mode. So, by running the following command:
 
 <small>
