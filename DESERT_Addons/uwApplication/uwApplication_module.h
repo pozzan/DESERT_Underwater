@@ -71,6 +71,8 @@
 #include <list>
 #include <queue>
 #include <rng.h>
+#include <fstream>
+#include <ostream>
 
 
 #define UWAPPLICATION_DROP_REASON_UNKNOWN_TYPE "DPUT"   /**< Drop the packet. Packet received is an unknown type*/
@@ -402,6 +404,7 @@ protected:
     double sumbytes; /**< Sum of bytes received. */
     double sumdt; /**< Sum of the delays. */
     int hrsn; /**< Highest received sequence number. */
+    std::ofstream out_log; /**< Variable that handle the file in which the protocol write the statistics */
    
     
     

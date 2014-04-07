@@ -147,6 +147,12 @@ int uwApplicationModule::command(int argc, const char*const* argv) {
         } else if (strcasecmp(argv[1], "getthr") == 0) {
             tcl.resultf("%f", GetTHR());
             return TCL_OK;
+        } else if (strcasecmp(argv[1], "print_log") == 0) {
+            std::stringstream stat_file;
+            stat_file << "UwApplication.out";
+            out_log.open(stat_file.str().c_str(),std::ios_base::app);
+            out_log << left <<  "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::FILE_CREATED" << endl;
+            return TCL_OK;
         } 
     } else if (argc == 3) {
         if (strcasecmp(argv[1],"SetSocketProtocol") == 0) {
@@ -183,9 +189,11 @@ void uwApplicationModule::recv(Packet* p) {
         //Communication take place with sockets 
         if (useTCP()) {
             if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_USING_TCP" << endl;
+            out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_USING_TCP" << endl;
             statistics(p);
         } else {
             if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_USING_UDP" << endl;
+            out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_USING_UDP" << endl;
             statistics(p);
         }
     }
@@ -244,13 +252,14 @@ void uwApplicationModule::statistics(Packet* p) {
     if (useDropOutOfOrder()) {
         if (uwApph->sn_ > esn) {
             if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PACKET_LOST_ID_RECEIVED" << (int)uwApph->sn_ << "_ID_EXPECTED_" << esn << endl;
+            if (socket_active) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PACKET_LOST_ID_RECEIVED" << (int)uwApph->sn_ << "_ID_EXPECTED_" << esn << endl;
             incrPktLost(uwApph->sn_ - (esn));
         }
     }
 
     double dt = Scheduler::instance().clock() - lrtime;
     updateThroughput(ch->size(), dt); //Update Throughput
-
+    if (socket_active) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)ch->size() << endl;
     incrPktRecv(); //Increase the number of data packets received
 
     lrtime = Scheduler::instance().clock(); //Update the time in which the last packet is received.
@@ -263,14 +272,6 @@ void uwApplicationModule::statistics(Packet* p) {
     //cout<<endl;
 
     Packet::free(p);
-
-/*    if (useDropOutOfOrder()) {
-        if (pkts_lost + pkts_recv + pkts_last_reset != hrsn) {
-            if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::recv() ---> Number of packets lost " << pkts_lost << ","
-                    << " number of packets received " << pkts_recv << ","
-                    << " highest sequence number received " << hrsn << std::endl;
-        }
-    }*/
 }//end statistics method
 
 void uwApplicationModule::start_generation() {
