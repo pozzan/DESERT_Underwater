@@ -142,6 +142,8 @@ public:
     int servPort; /**< Server port*/
     std::queue<Packet*> queuePckReadTCP; /**< Queue that store the DATA packets recevied from the client by the server using a TCP protocol*/ 
     std::queue<Packet*> queuePckReadUDP; /**< Queue that store the DATA packets recevied from the client by the server using a UDP protocol*/
+    std::ofstream out_log; /**< Variable that handle the file in which the protocol write the statistics */
+    bool logging;
 protected:
     /**< uwSenderTimer class that manage the timer */
     class uwSendTimerAppl : public TimerHandler {
@@ -404,7 +406,6 @@ protected:
     double sumbytes; /**< Sum of bytes received. */
     double sumdt; /**< Sum of the delays. */
     int hrsn; /**< Highest received sequence number. */
-    std::ofstream out_log; /**< Variable that handle the file in which the protocol write the statistics */
    
     
     

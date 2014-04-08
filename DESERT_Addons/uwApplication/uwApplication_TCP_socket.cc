@@ -34,6 +34,7 @@ int uwApplicationModule::openConnectionTCP() {
     //Create socket for incoming connections
     if((servSockDescr=socket(AF_INET,SOCK_STREAM,0)) < 0){
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::SOCKET_CREATION_FAILED" << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::OPEN_CONNECTION_TCP::SOCKET_CREATION_FAILED" << endl;
         exit(1);
     }
     if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::SOCKET_CREATED" << endl;
@@ -48,12 +49,14 @@ int uwApplicationModule::openConnectionTCP() {
     //Bind to the local address       
     if(::bind(servSockDescr, (struct sockaddr *) &servAddr, sizeof (servAddr)) < 0) {
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::BINDING_FAILED_" << strerror(errno) << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::BINDING_FAILED_" << strerror(errno) << endl;
         exit(1);
     }
     
     //Listen for incoming connections    
     if(listen(servSockDescr,1)) {
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::LISTEN_FAILED" << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::LISTEN_FAILED" << endl;
         exit(1);
     }
     if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::SERVER_READY" << endl;
@@ -63,6 +66,7 @@ int uwApplicationModule::openConnectionTCP() {
     if (pthread_create(&pth, NULL, read_process_TCP, (void*) this) != 0)
     {
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::CANNOT_CREATE_PARRALEL_THREAD" << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::CANNOT_CREATE_PARRALEL_THREAD" << endl;
         exit(1);
     }
     
@@ -85,6 +89,7 @@ void *read_process_TCP(void* arg){
             if (debug_ >= 0) std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_TCP::CONNECTION_NOT_ACCEPTED" << endl;
         }
         if (debug_ >= 1) std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_TCP::NEW_CLIENT_IP_" << inet_ntoa(obj->clnAddr.sin_addr)<<std::endl; 
+        if (obj->logging) obj->out_log << left << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_TCP::NEW_CLIENT_IP_" << inet_ntoa(obj->clnAddr.sin_addr)<<std::endl; 
         obj->handleTCPclient(obj->clnSockDescr);
     }
     
@@ -115,10 +120,13 @@ void uwApplicationModule::handleTCPclient(int clnSock)
             {
                 if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::PTHREAD_MUTEX_LOCK_FAILED " << endl;
             }
-            if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_TCP::PAYLOAD_MESSAGE--> ";
-            for(int i = 0; i < recvMsgSize; i++)
+            if (debug_ >= 0) 
             {
-                cout << buffer_msg[i];
+                std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_TCP::PAYLOAD_MESSAGE--> ";
+                for(int i = 0; i < recvMsgSize; i++)
+                {
+                    cout << buffer_msg[i];
+                }
             }
             for (int i = 0; i < MAX_LENGTH_PAYLOAD; i++) {
                 hdr_Appl->payload_msg[i] = buffer_msg[i];
@@ -174,6 +182,12 @@ void uwApplicationModule::init_Packet_TCP(){
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::DEST_" << (int)uwiph->daddr() << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SIZE_" << (int)ch->size() << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::INIT_PACKET_TCP::SEND_DOWN_PACKET" << endl;
+
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::UID_" << ch->uid_ << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::TIMESTAMP_" << ch->timestamp() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::DEST_" << (int)uwiph->daddr() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SIZE_" << (int)ch->size() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::INIT_PACKET_TCP::SEND_DOWN_PACKET" << endl;
         sendDown(ptmp);
     }
 }//end init_Packet_TCP() method
