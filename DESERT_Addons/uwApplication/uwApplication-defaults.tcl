@@ -43,6 +43,8 @@ Module/UW/APPLICATION set Payload_size_			10
 Module/UW/APPLICATION set drop_out_of_order_ 	1
 Module/UW/APPLICATION set pattern_sequence_		0
 Module/UW/APPLICATION set Socket_Port_ 			4000	
+Module/UW/APPLICATION set node_ID_ 				1
+Module/UW/APPLICATION set EXP_ID_ 				1
 
 
 
