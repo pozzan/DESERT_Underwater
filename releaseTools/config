@@ -1,0 +1,20 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = git@github.com:uwsignet/DESERT_Underwater_private.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[remote "github_pub_release"]
+	url = git@github.com:uwsignet/DESERT_Underwater.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[branch "dev_udoo"]
+	remote = origin
+	merge = refs/heads/dev_udoo
+[branch "dev_uwapplication"]
+	remote = origin
+	merge = refs/heads/dev_uwapplication
