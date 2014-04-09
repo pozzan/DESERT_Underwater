@@ -144,6 +144,8 @@ public:
     std::queue<Packet*> queuePckReadUDP; /**< Queue that store the DATA packets recevied from the client by the server using a UDP protocol*/
     std::ofstream out_log; /**< Variable that handle the file in which the protocol write the statistics */
     bool logging;
+    int node_id;
+    int exp_id;
 protected:
     /**< uwSenderTimer class that manage the timer */
     class uwSendTimerAppl : public TimerHandler {

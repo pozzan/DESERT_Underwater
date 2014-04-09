@@ -191,7 +191,8 @@ Module/UW/APPLICATION set PoissonTraffic_ 0		   ;# 1= use a Poisson process for 
 Module/UW/APPLICATION set Payload_size_ $opt(pktsize)
 Module/UW/APPLICATION set drop_out_of_order_ 1 		;# 1= drop out of order activate 
 Module/UW/APPLICATION set pattern_sequence_ 0			;# 1= use pattern sequence for data payload message
-Module/UW/APPLICATION set Socket_Port_ 4000	
+Module/UW/APPLICATION set Socket_Port_ 4000
+Module/UW/APPLICATION set EXP_ID_ 1
 
 
 # BPSK              
@@ -253,6 +254,8 @@ proc createNode { id } {
 
     $phy($id) setPropagation $propagation
     $cbr($id) setSocketProtocol "TCP"
+    $cbr($id) set node_ID_  $tmp_
+    $cbr($id) print_log
     $phy($id) setSpectralMask $data_mask
     $phy($id) setInterference $interf_data($id)
     $mac($id) $opt(ack_mode)
@@ -321,6 +324,8 @@ proc createSink { } {
     $phy_data_sink setPropagation $propagation
     for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
         $cbr_sink($cnt) setSocketProtocol "TCP"
+        $cbr_sink($cnt) set node_ID_ 254
+        $cbr_sink($cnt) print_log
     }
     $mac_sink $opt(ack_mode)
     $mac_sink initialize

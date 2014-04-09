@@ -34,7 +34,7 @@ int uwApplicationModule::openConnectionTCP() {
     //Create socket for incoming connections
     if((servSockDescr=socket(AF_INET,SOCK_STREAM,0)) < 0){
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::SOCKET_CREATION_FAILED" << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::OPEN_CONNECTION_TCP::SOCKET_CREATION_FAILED" << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::OPEN_CONNECTION_TCP::SOCKET_CREATION_FAILED" << endl;
         exit(1);
     }
     if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_TCP::SOCKET_CREATED" << endl;
@@ -128,6 +128,7 @@ void uwApplicationModule::handleTCPclient(int clnSock)
                     cout << buffer_msg[i];
                 }
             }
+            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED"<< endl;
             for (int i = 0; i < MAX_LENGTH_PAYLOAD; i++) {
                 hdr_Appl->payload_msg[i] = buffer_msg[i];
             }
@@ -178,15 +179,15 @@ void uwApplicationModule::init_Packet_TCP(){
         }
         uwApph->priority_ = 0; //Priority of the message
         if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::UID_" << ch->uid_ << endl;
-        if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::TIMESTAMP_" << ch->timestamp() << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::DEST_" << (int)uwiph->daddr() << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SIZE_" << (int)ch->size() << endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SN_" << (int)uwApph->sn_ << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::INIT_PACKET_TCP::SEND_DOWN_PACKET" << endl;
 
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::UID_" << ch->uid_ << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::TIMESTAMP_" << ch->timestamp() << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::DEST_" << (int)uwiph->daddr() << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SIZE_" << (int)ch->size() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SN_" << (int)uwApph->sn_ << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::INIT_PACKET_TCP::SEND_DOWN_PACKET" << endl;
         sendDown(ptmp);
     }

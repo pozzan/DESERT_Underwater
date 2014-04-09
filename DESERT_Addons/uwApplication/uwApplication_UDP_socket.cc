@@ -33,7 +33,7 @@ int uwApplicationModule::openConnectionUDP() {
     //Create socket for incoming connections
     if((servSockDescr=socket(AF_INET,SOCK_DGRAM,0)) < 0){
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_UDP::SOCKET_CREATION_FAILED" << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::OPEN_CONNECTION_UDP::SOCKET_CREATION_FAILED" << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::OPEN_CONNECTION_UDP::SOCKET_CREATION_FAILED" << endl;
         exit(1);
     }
     if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_UDP::SOCKET_CREATED" << endl;
@@ -87,13 +87,14 @@ void *read_process_UDP(void* arg)
         }
         if (recvMsgSize > 0)
         {
-            cout << "UDP msg size " << recvMsgSize << endl;
             Packet* p = Packet::alloc();
             hdr_cmn *ch = HDR_CMN(p);
             ch->size() = recvMsgSize;
             hdr_DATA_APPLICATION* hdr_Appl = HDR_DATA_APPLICATION(p);
             if (debug_ >= 0) 
             {
+                std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED--> ";
+                if (obj->logging) obj->out_log << left << "[" << obj->getEpoch() << "]::" << NOW << "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED"<< endl;
                 std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::PAYLOAD_MESSAGE--> ";
                 for (int i = 0; i < recvMsgSize; i++) {
                     hdr_Appl->payload_msg[i] = buffer_msg[i];
@@ -142,15 +143,17 @@ void uwApplicationModule::init_Packet_UDP(){
         uwApph->priority_ = 0; //Priority of the message
 
         if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::UID_" << ch->uid_ << endl;
-        if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::TIMESTAMP_" << ch->timestamp() << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::DEST_" << (int)uwiph->daddr() << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)ch->size() << endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SN_" << (int)uwApph->sn_ << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SEND_DOWN_PACKET" << endl;
 
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::INIT_PACKET_UDP::DEST_" << (int)uwiph->daddr() << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)ch->size() << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::INIT_PACKET_UDP::UID_" << ch->uid_ << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::INIT_PACKET_UDP::SEND_DOWN_PACKET" << endl;
+
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::UID_" << ch->uid_ << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::DEST_" << (int)uwiph->daddr() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)ch->size() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SN_" << (int)uwApph->sn_ << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SEND_DOWN_PACKET" << endl;
      
         sendDown(ptmp);
     }
