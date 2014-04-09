@@ -26,5 +26,5 @@
 ./documents/uw_experiment_proposals/
 ./HOW_TO_add_a_new_package_in_DESERT
 ./HOW_TO_create_and_build_a_new_ADDON_package_for_DESERT
-./pre-commit
+./releaseTools/
 ./desert.gitignore
