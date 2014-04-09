@@ -1,0 +1,20 @@
+#!/bin/sh
+current_branch="$(git branch | grep -e "^*" | sed -e 's/^* //')"
+DIR_LIST_FROM_FILE=$(cat ${GIT_DIR}/../desert.gitignore)
+
+if [ "${current_branch}" = "release" ]; then
+    if [ ! -f "${GIT_DIR}/../desert.gitignore" ]; then
+        echo "ERROR: desert.gitignore not found!"
+        exit 1
+    fi
+    for dir in ${DIR_LIST_FROM_FILE}; do
+        if [ -e ${dir} ]; then
+            git rm -r --cach ${dir}
+            rm -rf ${dir}
+        else
+            echo "--   ${dir} not found!!"
+        fi
+    done
+    echo "------"
+fi
+exit 0
