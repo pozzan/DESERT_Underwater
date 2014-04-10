@@ -29,18 +29,6 @@
 # Author: Federico Favaro
 # Version: 1.0.0
 #
-######################
-# Simulation Options #
-######################
-#set opt(n_node) 5
-# if {$opt(n_node) <= 0} {
-#   puts "Number of nodes equal to zero! Please put a number of nodes >= 2"
-#   exit(1)
-# }
-
-# if {$opt(n_node) <= 1} {
-#   puts "WARNING!! number of nodes set to 1. Put a number of nodes >= 2"
-# }
 
 # Terminal's parameter check
 if {$argc != 9} {
@@ -177,10 +165,6 @@ UW/UDP/Packer set SPort_Bits 2
 UW/UDP/Packer set DPort_Bits 2
 UW/UDP/Packer set debug_ 0
 
-# UW/CBR/Packer set SN_bits 32
-# UW/CBR/Packer set RFFT_bits 0
-# UW/CBR/Packer set RFFT_VALID_bits 0
-# UW/CBR/Packer set debug_ 0
 UW/APP/uwApplication/Packer set sn_field_Bits 16
 UW/APP/uwApplication/Packer set rfft_field_Bits 16
 UW/APP/uwApplication/Packer set rfftvalid_field_Bits 4
@@ -188,7 +172,14 @@ UW/APP/uwApplication/Packer set priority_filed_Bits 4
 UW/APP/uwApplication/Packer set payloadmsg_field_Bits 32
 
 
-
+Module/UW/APPLICATION set debug_ 0              
+Module/UW/APPLICATION set period_ $opt(traffic)
+Module/UW/APPLICATION set PoissonTraffic_ 0      
+#Module/UW/APPLICATION set Payload_size_ $opt(pktsize)
+Module/UW/APPLICATION set drop_out_of_order_ 1    
+Module/UW/APPLICATION set pattern_sequence_ 0     
+Module/UW/APPLICATION set Socket_Port_ 4000
+Module/UW/APPLICATION set EXP_ID_ 1
 
 
 # variables for the S2C modem's interface
@@ -211,7 +202,7 @@ proc createNode { } {
 
     # define the module(s) you want to put in the node
     # APPLICATION LAYER
-    set app_ [new Module/UW/CBR]
+    set app_ [new Module/UW/APPLICATION]
     
     # TRANSPORT LAYER
     set transport_ [new Module/UW/UDP]
@@ -235,14 +226,14 @@ proc createNode { } {
     set modem_ [new "Module/UW/MPhy_modem/S2C" $socket_port]    
     puts "creo nodo"
     # insert the module(s) into the node
-	    $node_ addModule 8 $app_ 1 "UWA"
-	    $node_ addModule 7 $transport_ 1 "UDP"
-	   $node_ addModule 6 $routing_ 1 "IPR"
-	   $node_ addModule 5 $ipif_ 1 "IPIF"
-	   $node_ addModule 4 $mll_ 1 "ARP"  
-	   $node_ addModule 3 $mac_ 1 "ALOHA"
-	   $node_ addModule 2 $uwal_ 1 "UWAL"
-	   $node_ addModule 1 $modem_ 1 "S2C" 
+	  $node_ addModule 8 $app_ 1 "UWA"
+	  $node_ addModule 7 $transport_ 1 "UDP"
+	  $node_ addModule 6 $routing_ 1 "IPR"
+	  $node_ addModule 5 $ipif_ 1 "IPIF"
+	  $node_ addModule 4 $mll_ 1 "ARP"  
+	  $node_ addModule 3 $mac_ 1 "ALOHA"
+	  $node_ addModule 2 $uwal_ 1 "UWAL"
+	  $node_ addModule 1 $modem_ 1 "S2C" 
 
 	  $node_ setConnection $app_ $transport_ trace
     $node_ setConnection $transport_ $routing_ trace
@@ -279,6 +270,9 @@ proc createNode { } {
     $packer_ addPacker $packer_payload4
     $packer_ addPacker $packer_payload5
 
+    $app_ setSocketProtocol "TCP"
+    $app_ set node_ID_  $tmp_
+    $app_ print_log
 
     $uwal_ linkPacker $packer_
     
