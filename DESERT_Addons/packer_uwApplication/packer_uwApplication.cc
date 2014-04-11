@@ -153,8 +153,8 @@ void packer_uwApplication::printMyHdrFields(Packet* p) {
         hdr_DATA_APPLICATION* applh = HDR_DATA_APPLICATION(p);
         std::cout << "\033[1;37;45m 1st field \033[0m, SN_FIELD: " << applh->sn_ << std::endl;
         std::cout << "\033[1;37;45m 2nd field \033[0m, RFFT_FIELD: " << applh->rftt_ << std::endl;
-        std::cout << "\033[1;37;45m 3nd field \033[0m, RFFTVALID_FIELD: " << applh->rftt_valid_ << std::endl;
-        std::cout << "\033[1;37;45m 4nd field \033[0m, PRIORITY_FIELD: " << applh->priority_ << std::endl;
-        std::cout << "\033[1;37;45m 5nd field \033[0m, PAYLOADMSG_FIELD: " << applh->payload_msg << std::endl;
+        std::cout << "\033[1;37;45m 3rd field \033[0m, RFFTVALID_FIELD: " << applh->rftt_valid_ << std::endl;
+        std::cout << "\033[1;37;45m 4th field \033[0m, PRIORITY_FIELD: " << (int)applh->priority_ << std::endl;
+        //std::cout << "\033[1;37;45m 5th field \033[0m, PAYLOADMSG_FIELD: " << applh->payload_msg << std::endl;
     }
 } //end printMyHdrFields() method

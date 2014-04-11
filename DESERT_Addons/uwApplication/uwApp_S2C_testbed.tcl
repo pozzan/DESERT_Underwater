@@ -43,7 +43,7 @@ if {$argc != 9} {
   puts "8 - Port of the modem"
   puts "9 - Application socket port"
   puts "Please try again."
-  exit(1)
+  exit
 } else {
   set opt(node)     [lindex $argv 0]
   set opt(dest)     [lindex $argv 1]
@@ -159,17 +159,25 @@ NS2/MAC/Packer set Htype_Bits 0
 NS2/MAC/Packer set TXtime_Bits 0
 NS2/MAC/Packer set SStime_Bits 0
 NS2/MAC/Packer set Padding_Bits 0
-NS2/MAC/Packer set debug_ 0
+NS2/MAC/Packer set debug_ 1
 
 UW/UDP/Packer set SPort_Bits 2
 UW/UDP/Packer set DPort_Bits 2
 UW/UDP/Packer set debug_ 0
 
-UW/APP/uwApplication/Packer set sn_field_Bits 16
-UW/APP/uwApplication/Packer set rfft_field_Bits 16
-UW/APP/uwApplication/Packer set rfftvalid_field_Bits 4
-UW/APP/uwApplication/Packer set priority_filed_Bits 4
-UW/APP/uwApplication/Packer set payloadmsg_field_Bits 32
+# UW/APP/uwApplication/Packer set sn_field_Bits 8
+# UW/APP/uwApplication/Packer set rfft_field_Bits 8
+# UW/APP/uwApplication/Packer set rfftvalid_field_Bits 8
+# UW/APP/uwApplication/Packer set priority_filed_Bits 8
+# UW/APP/uwApplication/Packer set payloadmsg_field_Bits 32
+# UW/APP/uwApplication/Packer set debug_ 1
+
+UW/APP/uwApplication/Packer set SN_FIELD_ 8
+UW/APP/uwApplication/Packer set RFFT_FIELD_ 8
+UW/APP/uwApplication/Packer set RFFTVALID_FIELD_ 8
+UW/APP/uwApplication/Packer set PRIORITY_FIELD_ 8
+UW/APP/uwApplication/Packer set PAYLOADMSG_FIELD_ 32
+UW/APP/uwApplication/Packer set debug_ 1
 
 
 Module/UW/APPLICATION set debug_ 0              
@@ -178,7 +186,7 @@ Module/UW/APPLICATION set PoissonTraffic_ 0
 #Module/UW/APPLICATION set Payload_size_ $opt(pktsize)
 Module/UW/APPLICATION set drop_out_of_order_ 1    
 Module/UW/APPLICATION set pattern_sequence_ 0     
-Module/UW/APPLICATION set Socket_Port_ 4000
+Module/UW/APPLICATION set Socket_Port_ $opt(app_port)
 Module/UW/APPLICATION set EXP_ID_ 1
 
 
@@ -186,7 +194,7 @@ Module/UW/APPLICATION set EXP_ID_ 1
 #####
 Module/UW/MPhy_modem/S2C set period_ 			        1
 Module/UW/MPhy_modem/S2C set debug_ 			        1
-Module/UW/MPhy_modem/S2C set log_                 1
+Module/UW/MPhy_modem/S2C set log_                 0
 Module/UW/MPhy_modem/S2C set SetModemID_	 	      0
 #######
 
@@ -218,7 +226,7 @@ proc createNode { } {
     set mll_ [new Module/UW/MLL]
     
     # DATA LINK LAYER - MAC LAYER
-    set mac_ [new Module/UW/POLLING/NODE]
+    set mac_ [new Module/UW/CSMA_ALOHA]
 
     set uwal_             [new Module/UW/AL]
 
@@ -258,20 +266,19 @@ proc createNode { } {
     set packer_payload1 [new UW/IP/Packer]
 
     set packer_payload2 [new NS2/MAC/Packer]
-    set packer_payload3 [new NS2/MAC/Uwpolling/Packer]
-    set packer_payload4 [new UW/UDP/Packer]
-    set packer_payload5 [new UW/APP/uwApplication/Packer]
-    # $packer_payload3 printAllFields
+    set packer_payload3 [new UW/UDP/Packer]
+    set packer_payload4 [new UW/APP/uwApplication/Packer]
+    #$packer_payload4 printAllFields
+    $packer_payload4 printMap
 
     $packer_ addPacker $packer_payload0
     $packer_ addPacker $packer_payload1
     $packer_ addPacker $packer_payload2
     $packer_ addPacker $packer_payload3
     $packer_ addPacker $packer_payload4
-    $packer_ addPacker $packer_payload5
 
     $app_ setSocketProtocol "TCP"
-    $app_ set node_ID_  $tmp_
+    $app_ set node_ID_  $opt(node)
     $app_ print_log
 
     $uwal_ linkPacker $packer_
@@ -295,12 +302,12 @@ createNode
 # Put here all the commands required to connect nodes in the network (optional), namely, specify end to end connections, fill ARP tables, define routing settings
 
 # connections at the application level
-$app_ set destAddr_ $opt(sink)
+$app_ set destAddr_ [expr $opt(dest)]
 $app_ set destPort_ 1
 
 
-$routing_ addRoute [$opt(dest)] [$opt(dest)]
-$mll_ addentry  [$opt(dest)] [$opt(dest)]
+$routing_ addRoute $opt(dest) $opt(dest)
+$mll_ addentry  $opt(dest) $opt(dest)
 
 
 #####################
@@ -310,9 +317,11 @@ $mll_ addentry  [$opt(dest)] [$opt(dest)]
 # e.g., 
 
 $ns at 0 "$modem_ start"
-      
-$ns at $opt(start) "$app_ start"
-$ns at $opt(stop) "$app_ stop"
+
+if {$opt(node) == 1} {
+  $ns at $opt(start) "$app_ start"
+  $ns at $opt(stop) "$app_ stop"
+}
 
 $ns at $time_stop "$modem_ stop"
 
