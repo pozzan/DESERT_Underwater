@@ -95,7 +95,10 @@ size_t packer_uwApplication::packMyHdr(Packet* p, unsigned char* buffer, size_t 
         offset += put(buffer, offset, &(applh->rftt_), n_bits[RFFT_FIELD]);
         offset += put(buffer, offset, &(applh->rftt_valid_), n_bits[RFFTVALID_FIELD]);
         offset += put(buffer, offset, &(applh->priority_), n_bits[PRIORITY_FIELD]);
-        offset += put(buffer, offset, &(applh->payload_msg), n_bits[PAYLOADMSG_FIELD]);
+        int payload_size_bit = hcmn->size()*8;
+        cout << "Pack my header. Size = " << hcmn->size() << endl;
+        //offset += put(buffer, offset, &(applh->payload_msg), n_bits[PAYLOADMSG_FIELD]);
+        offset += put(buffer, offset, &(applh->payload_msg), payload_size_bit);
 
         if (debug_) {
             std::cout << "\033[1;37;45m (TX) UWAPPLICATION::DATA packer hdr \033[0m" << std::endl;
@@ -122,7 +125,10 @@ size_t packer_uwApplication::unpackMyHdr(unsigned char* buffer, size_t offset, P
         memset(&(applh->priority_), 0, sizeof (applh->priority_));
         offset += get(buffer, offset, &(applh->priority_), n_bits[PRIORITY_FIELD]);
         memset(&(applh->payload_msg), 0, sizeof (applh->payload_msg));
-        offset += get(buffer, offset, &(applh->payload_msg), n_bits[PAYLOADMSG_FIELD]);
+        int payload_size_bit = hcmn->size()*8;
+        cout << "Unpack my header. Size = " << hcmn->size() << endl;
+        //offset += get(buffer, offset, &(applh->payload_msg), n_bits[PAYLOADMSG_FIELD]);
+        offset += get(buffer, offset, &(applh->payload_msg), payload_size_bit);
                 
         if (debug_) {
             std::cout << "\033[1;32;40m (RX) UWAPPLICATION::DATA packer hdr \033[0m" << std::endl;
