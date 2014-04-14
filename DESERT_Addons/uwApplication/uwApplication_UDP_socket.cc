@@ -89,8 +89,9 @@ void *read_process_UDP(void* arg)
         {
             Packet* p = Packet::alloc();
             hdr_cmn *ch = HDR_CMN(p);
+            hdr_DATA_APPLICATION *hdr_Appl = HDR_DATA_APPLICATION(p);
+            hdr_Appl->payload_size() = recvMsgSize;
             ch->size() = recvMsgSize;
-            hdr_DATA_APPLICATION* hdr_Appl = HDR_DATA_APPLICATION(p);
             if (debug_ >= 0) 
             {
                 std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED--> ";
@@ -144,14 +145,14 @@ void uwApplicationModule::init_Packet_UDP(){
 
         if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::UID_" << ch->uid_ << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::DEST_" << (int)uwiph->daddr() << endl;
-        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)ch->size() << endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)uwApph->payload_size() << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SN_" << (int)uwApph->sn_ << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SEND_DOWN_PACKET" << endl;
 
 
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::UID_" << ch->uid_ << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::DEST_" << (int)uwiph->daddr() << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)ch->size() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)uwApph->payload_size() << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SN_" << (int)uwApph->sn_ << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SEND_DOWN_PACKET" << endl;
      

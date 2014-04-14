@@ -28,6 +28,7 @@ typedef struct hdr_DATA_APPLICATION {
     int rftt_;        /**< Forward Trip Time of the packet. */
     bool rftt_valid_;   /**< Flag used to set the validity of the fft field. */
     uint8_t priority_;     /**< Priority flag: 1 means high priority, 0 normal priority. */
+    uint16_t payload_size_; /**< Size (bytes) of the payload */
     char payload_msg[MAX_LENGTH_PAYLOAD]; /**< Message payload*/
     
     static int offset_; /**< Required by the PacketHeaderManager. */
@@ -66,6 +67,10 @@ typedef struct hdr_DATA_APPLICATION {
      */
     inline uint8_t& priority() {
         return priority_;
+    }
+
+    inline uint16_t& payload_size() {
+        return payload_size_;
     }
     
     /**

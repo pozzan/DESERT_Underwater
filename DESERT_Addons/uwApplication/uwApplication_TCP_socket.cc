@@ -134,6 +134,7 @@ void uwApplicationModule::handleTCPclient(int clnSock)
             }
             hdr_cmn *ch = HDR_CMN(p);
             ch->size() = recvMsgSize;
+            hdr_Appl->payload_size() = recvMsgSize;
             queuePckReadTCP.push(p);
             incrPktsPushQueue();
             status = pthread_mutex_unlock(&mutex_tcp);
@@ -180,13 +181,13 @@ void uwApplicationModule::init_Packet_TCP(){
         uwApph->priority_ = 0; //Priority of the message
         if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::UID_" << ch->uid_ << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::DEST_" << (int)uwiph->daddr() << endl;
-        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SIZE_" << (int)ch->size() << endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SIZE_" << (int)uwApph->payload_size() << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SN_" << (int)uwApph->sn_ << endl;
         if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::INIT_PACKET_TCP::SEND_DOWN_PACKET" << endl;
 
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::UID_" << ch->uid_ << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::DEST_" << (int)uwiph->daddr() << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SIZE_" << (int)ch->size() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SIZE_" << (int)uwApph->payload_size() << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::SN_" << (int)uwApph->sn_ << endl;
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::INIT_PACKET_TCP::SEND_DOWN_PACKET" << endl;
         sendDown(ptmp);

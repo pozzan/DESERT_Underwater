@@ -107,7 +107,7 @@ private:
         RFFT_FIELD,/**< Forward Trip Time of the packet. */
         RFFTVALID_FIELD,/**< Flag used to set the validity of the fft field. */
         PRIORITY_FIELD,/**< Priority flag: 1 means high priority, 0 normal priority. */
-        PAYLOADMSG_FIELD/**< Message payload */
+        PAYLOAD_SIZE_FIELD/**< Message payload */
         
     };
 
@@ -115,7 +115,7 @@ private:
     size_t rfft_field_Bits; /**< Bit length of the rfft_field to be put in the header stream of bits. */
     size_t rfftvalid_field_Bits; /**< Bit length of the rfftvalid_field to be put in the header stream of bits. */
     size_t priority_filed_Bits; /**< Bit length of the priority_field to be put in the header stream of bits. */
-    size_t payloadmsg_field_Bits; /**< Bit length of the payloadmsg_field to be put in the header stream of bits. */
+    size_t payload_size_field_Bits; /**< Bit length of the payloadmsg_field to be put in the header stream of bits. */
 };
 #endif	/* PACKER_UWAPPLICATION_H */
 

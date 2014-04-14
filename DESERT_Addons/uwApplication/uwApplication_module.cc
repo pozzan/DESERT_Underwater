@@ -268,7 +268,8 @@ void uwApplicationModule::statistics(Packet* p) {
 
 
     double dt = Scheduler::instance().clock() - lrtime;
-    updateThroughput(ch->size(), dt); //Update Throughput
+    //updateThroughput(ch->size(), dt); //Update Throughput
+    updateThroughput(uwApph->payload_size(), dt);
     incrPktRecv(); //Increase the number of data packets received
 
     lrtime = Scheduler::instance().clock(); //Update the time in which the last packet is received.
@@ -281,9 +282,9 @@ void uwApplicationModule::statistics(Packet* p) {
         }
     }
     if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::SN_RECEIVED_" << (int)uwApph->sn_ <<  endl;
-    if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)ch->size() << endl;
+    if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)uwApph->payload_size() << endl;
 
-    if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)ch->size() << endl;
+    if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)uwApph->payload_size() << endl;
     if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::SN_RECEIVED_" << (int)uwApph->sn_ <<  endl;
     Packet::free(p);
 }//end statistics method
@@ -309,6 +310,7 @@ void uwApplicationModule::init_Packet() {
     ch->uid() = uidcnt++; //Increase the id of data packet
     ch->ptype_ = PT_DATA_APPLICATION; //Assign the type of packet that is being created
     ch->size() = PAYLOADSIZE; //Assign the size of data payload 
+    uwApph->payload_size() = PAYLOADSIZE;
     ch->direction() = hdr_cmn::DOWN; //The packet must be forward at the level above of him
 
     //Transport header fields
@@ -349,13 +351,13 @@ void uwApplicationModule::init_Packet() {
     //Show some DATA packet information 
     if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::UID_" << ch->uid_ << endl;
     if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::DEST_" << (int)uwiph->daddr() << endl;
-    if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::SIZE_" << (int)ch->size() << endl;
+    if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::SIZE_" << (int)uwApph->payload_size() << endl;
     if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::SN_" << (int)uwApph->sn_ << endl;
     if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::SEND_DOWN_PACKET" << endl;
 
     if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::UID_" << ch->uid_ << endl;
     if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::DEST_" << (int)uwiph->daddr() << endl;
-    if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::SIZE_" << (int)ch->size() << endl;
+    if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::SIZE_" << (int)uwApph->payload_size() << endl;
     if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::SN_" << (int)uwApph->sn_ << endl;
     if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET::SEND_DOWN_PACKET" << endl;
 

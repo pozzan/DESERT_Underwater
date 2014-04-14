@@ -54,13 +54,13 @@ sn_field_Bits(0),
 rfft_field_Bits(0),
 rfftvalid_field_Bits(0),
 priority_filed_Bits(0),
-payloadmsg_field_Bits(0)
+payload_size_field_Bits(0)
 {
     bind("SN_FIELD_", (int*) &sn_field_Bits);
     bind("RFFT_FIELD_", (int*) &rfft_field_Bits);
     bind("RFFTVALID_FIELD_", (int*) &rfftvalid_field_Bits);
     bind("PRIORITY_FIELD_", (int*) &priority_filed_Bits);
-    bind("PAYLOADMSG_FIELD_", (int*) &payloadmsg_field_Bits);
+    bind("PAYLOADMSG_FIELD_SIZE_", (int*) &payload_size_field_Bits);
     
     this->init();
 } //end packer_uwApplication() constructor
@@ -80,7 +80,7 @@ void packer_uwApplication::init() {
     n_bits[RFFT_FIELD] = rfft_field_Bits;
     n_bits[RFFTVALID_FIELD] = rfftvalid_field_Bits;
     n_bits[PRIORITY_FIELD] = priority_filed_Bits;
-    n_bits[PAYLOADMSG_FIELD] = payloadmsg_field_Bits;
+    n_bits[PAYLOAD_SIZE_FIELD] = payload_size_field_Bits;
     
 } //end init()
 
@@ -95,10 +95,9 @@ size_t packer_uwApplication::packMyHdr(Packet* p, unsigned char* buffer, size_t 
         offset += put(buffer, offset, &(applh->rftt_), n_bits[RFFT_FIELD]);
         offset += put(buffer, offset, &(applh->rftt_valid_), n_bits[RFFTVALID_FIELD]);
         offset += put(buffer, offset, &(applh->priority_), n_bits[PRIORITY_FIELD]);
-        int payload_size_bit = hcmn->size()*8;
-        cout << "Pack my header. Size = " << hcmn->size() << endl;
-        //offset += put(buffer, offset, &(applh->payload_msg), n_bits[PAYLOADMSG_FIELD]);
-        offset += put(buffer, offset, &(applh->payload_msg), payload_size_bit);
+        offset += put(buffer, offset, &(applh->payload_size_), n_bits[PAYLOAD_SIZE_FIELD]);
+        int payload_size_bits = applh->payload_size()*8;
+        offset += put(buffer, offset, &(applh->payload_msg), payload_size_bits);
 
         if (debug_) {
             std::cout << "\033[1;37;45m (TX) UWAPPLICATION::DATA packer hdr \033[0m" << std::endl;
@@ -124,9 +123,10 @@ size_t packer_uwApplication::unpackMyHdr(unsigned char* buffer, size_t offset, P
         offset += get(buffer, offset, &(applh->rftt_valid_), n_bits[RFFTVALID_FIELD]);
         memset(&(applh->priority_), 0, sizeof (applh->priority_));
         offset += get(buffer, offset, &(applh->priority_), n_bits[PRIORITY_FIELD]);
+        memset(&(applh->payload_msg), 0, sizeof (applh->payload_size_));
+        offset += get(buffer, offset, &(applh->payload_size_), n_bits[PAYLOAD_SIZE_FIELD]);
         memset(&(applh->payload_msg), 0, sizeof (applh->payload_msg));
-        int payload_size_bit = hcmn->size()*8;
-        cout << "Unpack my header. Size = " << hcmn->size() << endl;
+        int payload_size_bit = applh->payload_size()*8;
         //offset += get(buffer, offset, &(applh->payload_msg), n_bits[PAYLOADMSG_FIELD]);
         offset += get(buffer, offset, &(applh->payload_msg), payload_size_bit);
                 
@@ -145,7 +145,7 @@ void packer_uwApplication::printMyHdrMap() {
     std::cout << "\033[1;37;45m Field: RFFT_FIELD: \033[0m:" << n_bits[RFFT_FIELD] << " bits\n";
     std::cout << "\033[1;37;45m Field: RFFTVALID_FIELD: \033[0m:" << n_bits[RFFTVALID_FIELD] << " bits\n";
     std::cout << "\033[1;37;45m Field: PRIORITY_FIELD: \033[0m:" <<  n_bits[PRIORITY_FIELD] << " bits\n";
-    std::cout << "\033[1;37;45m Field: PAYLOADMSG_FIELD: \033[0m:" << n_bits[PAYLOADMSG_FIELD] << " bits\n";
+    //std::cout << "\033[1;37;45m Field: PAYLOADMSG_FIELD: \033[0m:" << n_bits[PAYLOADMSG_FIELD] << " bits\n";
     
     std::cout << std::endl; // Only at the end do we actually flush the buffer and print
 } //end printMyHdrMap() method
