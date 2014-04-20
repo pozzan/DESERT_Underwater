@@ -5,6 +5,7 @@
 ./DESERT_Framework/DESERT/samples/desert_with_woss_samples/samples_description/go
 ./DESERT_Framework/DESERT/samples/desert_with_woss_samples/samples_description/lstdrvrs.dtx
 ./DESERT_Framework/DESERT/samples/desert_with_woss_samples/samples_description/sample_description.tex
+./DESERT_Framework/.addon.priv.list
 ./DESERT_Addons/bpsk_db/
 ./DESERT_Addons/mfsk_whoi_mm/
 ./DESERT_Addons/packer_uwApplication/
