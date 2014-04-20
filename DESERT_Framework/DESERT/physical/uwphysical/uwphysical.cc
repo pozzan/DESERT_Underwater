@@ -62,9 +62,8 @@ Interference_Model("CHUNK")
 
 int UnderwaterPhysical::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
-    
-    if(argc == 2)
-    {
+
+    if(argc == 2) {
         if(strcasecmp(argv[1],"getTxTime") == 0) {
             //return Get_Tx_Time();
             tcl.resultf("%f",Get_Tx_Time());
@@ -296,7 +295,7 @@ void UnderwaterPhysical::endRx(Packet* p) {
     if (PktRx != 0) {
         if (PktRx == p) {
             double per_ni; // packet error rate due to noise and/or interference
-            double per_n; // packet error rate due to noise only 
+            double per_n; // packet error rate due to noise only
 
             int nbits = ch->size()*8;
             double x = RNG::defaultrng()->uniform_double();
@@ -334,7 +333,7 @@ void UnderwaterPhysical::endRx(Packet* p) {
             }
             
             if (time_ready_to_end_rx_ > Scheduler::instance().clock()) {
-		Rx_Time_ = Rx_Time_ + ph->duration - time_ready_to_end_rx_ + Scheduler::instance().clock();
+                Rx_Time_ = Rx_Time_ + ph->duration - time_ready_to_end_rx_ + Scheduler::instance().clock();
             } else {
                 Rx_Time_ += ph->duration;
             }
