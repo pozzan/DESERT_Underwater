@@ -76,6 +76,7 @@ DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwmphy_modem'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/ms2c_evologics'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwmphypatch'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwphysical'
+DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwphysicalrogersmodel'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwgainfromdb'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwphysicaldb'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uw-al'
@@ -129,6 +130,7 @@ AC_CONFIG_FILES([
     physical/ms2c_evologics/Makefile
     physical/uwmphypatch/Makefile
     physical/uwphysical/Makefile
+    physical/uwphysicalrogersmodel/Makefile
     physical/uwgainfromdb/Makefile
     physical/uwphysicaldb/Makefile
     physical/uw-al/Makefile

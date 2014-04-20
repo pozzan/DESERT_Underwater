@@ -27,25 +27,25 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file   uwphysical.cc
- * @author Giovanni Toso and Federico Favaro
+ * @file   uwphysicalrogersmodel.cc
+ * @author Giovanni Toso
  * @version 1.0.0
- * 
- * \brief Implementation of UnderwaterPhysical class
- * 
+ *
+ * \brief Implementation of UnderwaterPhysicalRogersModelRogersModel class
+ *
  */
 
-#include "uwphysical.h"
+#include "uwphysicalrogersmodel.h"
 
-static class UwPhysicalClass : public TclClass {
+static class UwPhysicalRogersModelClass : public TclClass {
 public:
-  UwPhysicalClass() : TclClass("Module/UW/PHYSICAL") {}
+  UwPhysicalRogersModelClass() : TclClass("Module/UW/PHYSICALROGERSMODEL") {}
   TclObject* create(int, const char*const*) {
-    return (new UnderwaterPhysical);
+    return (new UnderwaterPhysicalRogersModel);
   }
 } class_module_uwphysical;
 
-UnderwaterPhysical::UnderwaterPhysical() :
+UnderwaterPhysicalRogersModel::UnderwaterPhysicalRogersModel() :
 modulation_name_("BPSK"),
 time_ready_to_end_rx_(0),
 Tx_Time_(0),
@@ -60,9 +60,9 @@ Interference_Model("CHUNK")
     bind("tx_power_consumption_", &tx_power_);
 }
 
-int UnderwaterPhysical::command(int argc, const char*const* argv) {
+int UnderwaterPhysicalRogersModel::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
-    
+
     if(argc == 2)
     {
         if(strcasecmp(argv[1],"getTxTime") == 0) {
@@ -133,13 +133,13 @@ int UnderwaterPhysical::command(int argc, const char*const* argv) {
                return TCL_ERROR;
             }
             return TCL_OK;
-	}
+    }
     }
     return UnderwaterMPhyBpsk::command(argc, argv);
-} /* UnderwaterPhysical::command */
+} /* UnderwaterPhysicalRogersModel::command */
 
 
-void UnderwaterPhysical::recv(Packet* p) {
+void UnderwaterPhysicalRogersModel::recv(Packet* p) {
     hdr_cmn *ch = HDR_CMN(p);
     hdr_MPhy *ph = HDR_MPHY(p);
 
@@ -209,18 +209,18 @@ void UnderwaterPhysical::recv(Packet* p) {
 
         startTx(p);
     }
-} /* UnderwaterPhysical::recv */
+}
 
-void UnderwaterPhysical::endTx(Packet* p) {
+void UnderwaterPhysicalRogersModel::endTx(Packet* p) {
     hdr_MPhy* ph = HDR_MPHY(p);
     
     Tx_Time_   += ph->duration;
     Energy_Tx_ += consumedEnergyTx(ph->duration);
     
     return UnderwaterMPhyBpsk::endTx(p);
-} /* UnderwaterPhysical::endTx */
+} /* UnderwaterPhysicalRogersModel::endTx */
 
-void UnderwaterPhysical::startRx(Packet* p) {
+void UnderwaterPhysicalRogersModel::startRx(Packet* p) {
     static int mac_addr = -1;
 
     ClMsgPhy2MacAddr msg;
@@ -285,9 +285,9 @@ void UnderwaterPhysical::startRx(Packet* p) {
             incrTotCrtl_pkts_lost();
         }
     }
-} /* UnderwaterPhysical::startRx */
+} /* UnderwaterPhysicalRogersModel::startRx */
 
-void UnderwaterPhysical::endRx(Packet* p) {
+void UnderwaterPhysicalRogersModel::endRx(Packet* p) {
     hdr_cmn* ch = HDR_CMN(p);
     hdr_MPhy* ph = HDR_MPHY(p);
     hdr_mac* mach = HDR_MAC(p);
@@ -334,7 +334,7 @@ void UnderwaterPhysical::endRx(Packet* p) {
             }
             
             if (time_ready_to_end_rx_ > Scheduler::instance().clock()) {
-		Rx_Time_ = Rx_Time_ + ph->duration - time_ready_to_end_rx_ + Scheduler::instance().clock();
+        Rx_Time_ = Rx_Time_ + ph->duration - time_ready_to_end_rx_ + Scheduler::instance().clock();
             } else {
                 Rx_Time_ += ph->duration;
             }
@@ -383,9 +383,9 @@ void UnderwaterPhysical::endRx(Packet* p) {
     } else {
         dropPacket(p);
     }
-} /* UnderwaterPhysical::endRx */
+} /* UnderwaterPhysicalRogersModel::endRx */
 
-double UnderwaterPhysical::getPER(double _snr, int _nbits, Packet* _p) {
+double UnderwaterPhysicalRogersModel::getPER(double _snr, int _nbits, Packet* _p) {
     double snr_with_penalty = _snr * pow(10, RxSnrPenalty_dB_ / 10.0);
 
     double ber_ = 0;
@@ -397,5 +397,5 @@ double UnderwaterPhysical::getPER(double _snr, int _nbits, Packet* _p) {
 
     // PER calculation
     return 1 - pow(1 - ber_, _nbits);
-} /* UnderwaterPhysical::getPER */
+} /* UnderwaterPhysicalRogersModel::getPER */
 
