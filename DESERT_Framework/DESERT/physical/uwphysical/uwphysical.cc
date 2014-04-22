@@ -233,25 +233,28 @@ void UnderwaterPhysical::startRx(Packet* p) {
         // The receiver is is not synchronized on any transmission
         // so we can sync on this packet
         double snr_dB = 10 * log10(ph->Pr / ph->Pn);
-        if (debug_) std::cout << NOW << "  MPhy_Bpsk(" << mac_addr << ")::startRx() " << "snr_dB = " << snr_dB
+        if (debug_)
+            std::cout << NOW << "  UnderwatePhy(" << mac_addr << ")::startRx() " << "snr_dB = " << snr_dB
                 << "; AcquisitionThreshold_dB_ = " << getAcquisitionThreshold() << " pr " << 10 * log10(ph->Pr)
-            << " pn " << 10 * log10(ph->Pn) << " end " << NOW + HDR_CMN(p)->txtime() << " src " << HDR_CMN(p)->prev_hop_
+                << " pn " << 10 * log10(ph->Pn) << " end " << NOW + HDR_CMN(p)->txtime() << " src " << HDR_CMN(p)->prev_hop_
                 << " dest " << HDR_CMN(p)->next_hop()
-            << " size " << HDR_CMN(p)->size() << std::endl;
+                << " size " << HDR_CMN(p)->size() << std::endl;
         if (snr_dB > getAcquisitionThreshold()) {
             if (ph->modulationType == modid) {
                 // This is a BPSK packet so we sync on it
                 PktRx = p;
                 // Notify the MAC
                 Phy2MacStartRx(p);
-                if (debug_) std::cout << NOW << "  MPhy_Bpsk(" << mac_addr << ")::startRx() " << " sync on PktRx = " << PktRx
+                if (debug_)
+                    std::cout << NOW << "  UnderwatePhy(" << mac_addr << ")::startRx() " << " sync on PktRx = " << PktRx
                         << " end " << NOW + HDR_CMN(p)->txtime() << " src " << HDR_CMN(p)->prev_hop_
                         << " dest " << HDR_CMN(p)->next_hop()
-                    << " size " << HDR_CMN(p)->size() << std::endl;
+                        << " size " << HDR_CMN(p)->size() << std::endl;
                 return;
             }
             else {
-                if (debug_) std::cout << NOW << "  MPhy_Bpsk(" << mac_addr << ")::startRx() dropping pkt, wrong mod id" << std::endl;
+                if (debug_)
+                    std::cout << NOW << "  UnderwatePhy(" << mac_addr << ")::startRx() dropping pkt, wrong mod id" << std::endl;
                 if ((mach->macDA() == mac_addr) && (mach->ftype() != MF_CONTROL)) {
                     incrTot_pkts_lost();
                 } else if ((mach->macDA() == mac_addr) && (mach->ftype() == MF_CONTROL)) {
@@ -259,7 +262,8 @@ void UnderwaterPhysical::startRx(Packet* p) {
                 }
             }
         } else {
-            if (debug_) std::cout << NOW << "  MPhy_Bpsk(" << mac_addr << ")::startRx() dropping pkt, below threshold" << std::endl;
+            if (debug_)
+                std::cout << NOW << "  UnderwatePhy(" << mac_addr << ")::startRx() dropping pkt, below threshold" << std::endl;
             incrErrorPktsNoise();
             if (mach->ftype() != MF_CONTROL) {
                 incrTot_pkts_lost();
@@ -269,7 +273,8 @@ void UnderwaterPhysical::startRx(Packet* p) {
             }
         }
     } else if (txPending == true) {
-        if (debug_) std::cout << NOW << "  MPhy_Bpsk(" << mac_addr << ")::startRx() dropping pkt, tx pending" << std::endl;
+        if (debug_)
+            std::cout << NOW << "  UnderwatePhy(" << mac_addr << ")::startRx() dropping pkt, tx pending" << std::endl;
         if (mach->ftype() != MF_CONTROL) {
             incrTot_pkts_lost();
         }
