@@ -145,9 +145,9 @@ void packer_uwApplication::printMyHdrMap() {
     std::cout << "\033[1;37;45m Field: RFFT_FIELD: \033[0m:" << n_bits[RFFT_FIELD] << " bits\n";
     std::cout << "\033[1;37;45m Field: RFFTVALID_FIELD: \033[0m:" << n_bits[RFFTVALID_FIELD] << " bits\n";
     std::cout << "\033[1;37;45m Field: PRIORITY_FIELD: \033[0m:" <<  n_bits[PRIORITY_FIELD] << " bits\n";
-    //std::cout << "\033[1;37;45m Field: PAYLOADMSG_FIELD: \033[0m:" << n_bits[PAYLOADMSG_FIELD] << " bits\n";
+    std::cout << "\033[1;37;45m Field: PAYLOADMSG_SIZE_FIELD: \033[0m:" << n_bits[PAYLOAD_SIZE_FIELD] << " bits\n";
     
-    std::cout << std::endl; // Only at the end do we actually flush the buffer and print
+    std::cout << std::endl;
 } //end printMyHdrMap() method
 
 void packer_uwApplication::printMyHdrFields(Packet* p) {
@@ -161,6 +161,10 @@ void packer_uwApplication::printMyHdrFields(Packet* p) {
         std::cout << "\033[1;37;45m 2nd field \033[0m, RFFT_FIELD: " << applh->rftt_ << std::endl;
         std::cout << "\033[1;37;45m 3rd field \033[0m, RFFTVALID_FIELD: " << applh->rftt_valid_ << std::endl;
         std::cout << "\033[1;37;45m 4th field \033[0m, PRIORITY_FIELD: " << (int)applh->priority_ << std::endl;
-        //std::cout << "\033[1;37;45m 5th field \033[0m, PAYLOADMSG_FIELD: " << applh->payload_msg << std::endl;
+        std::cout << "\033[1;37;45m 5th field \033[0m, PAYLOADMSG_SIZE_FIELD: " << applh->payload_size_ << std::endl;
+        //for(i=0;i<applh->payload_size();i++)
+        //{
+        std::cout << "\033[1;37;45m 5th field \033[0m, PAYLOADMSG_SIZE_FIELD: " << applh->payload_msg << std::endl;
+        //}
     }
 } //end printMyHdrFields() method

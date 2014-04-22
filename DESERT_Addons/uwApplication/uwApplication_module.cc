@@ -283,9 +283,11 @@ void uwApplicationModule::statistics(Packet* p) {
     }
     if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::SN_RECEIVED_" << (int)uwApph->sn_ <<  endl;
     if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)uwApph->payload_size() << endl;
+    if (debug_ >= 1 && !withoutSocket()) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_RECEIVED_" << uwApph->payload_msg << endl;
 
     if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)uwApph->payload_size() << endl;
     if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::SN_RECEIVED_" << (int)uwApph->sn_ <<  endl;
+    if (logging && !withoutSocket()) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_RECEIVED_" << uwApph->payload_msg << endl;
     Packet::free(p);
 }//end statistics method
 

@@ -165,18 +165,11 @@ UW/UDP/Packer set SPort_Bits 2
 UW/UDP/Packer set DPort_Bits 2
 UW/UDP/Packer set debug_ 0
 
-# UW/APP/uwApplication/Packer set sn_field_Bits 8
-# UW/APP/uwApplication/Packer set rfft_field_Bits 8
-# UW/APP/uwApplication/Packer set rfftvalid_field_Bits 8
-# UW/APP/uwApplication/Packer set priority_filed_Bits 8
-# UW/APP/uwApplication/Packer set payloadmsg_field_Bits 32
-# UW/APP/uwApplication/Packer set debug_ 1
-
 UW/APP/uwApplication/Packer set SN_FIELD_ 8
 UW/APP/uwApplication/Packer set RFFT_FIELD_ 8
 UW/APP/uwApplication/Packer set RFFTVALID_FIELD_ 8
 UW/APP/uwApplication/Packer set PRIORITY_FIELD_ 8
-UW/APP/uwApplication/Packer set PAYLOADMSG_FIELD_ 32
+UW/APP/uwApplication/Packer set PAYLOADMSG_FIELD_SIZE_ 32
 UW/APP/uwApplication/Packer set debug_ 1
 
 
