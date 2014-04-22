@@ -38,11 +38,13 @@
 #ifndef UWPHYSICALROGERSMODEL_H
 #define UWPHYSICALROGERSMODEL_H
 
-#include <undwerwater.h>
+#include <underwater-mpropagation.h>
+#include <node-core.h>
 
 #include <cmath>
+#include <iostream>
 
-class UnderwaterPhysicalRogersModel : public Underwater {
+class UnderwaterPhysicalRogersModel : public UnderwaterMPropagation {
 
 public:
     /**
@@ -66,6 +68,7 @@ public:
     virtual int command(int, const char*const*);
 
 protected:
+    virtual double getGain(Packet* p);
     /**
      * Attenuation of acoustic signal in underwater channel.
      * The value returned is base on Rogers model for shallow water.
@@ -75,38 +78,48 @@ protected:
      * @return Attenuation in dB
      *
      */
-    virtual double getAttenuation(double dist, double freq);
-    virtual double getM0();
-    virtual double getN0();
-    virtual double getKs();
-    virtual double getBeta(const double M0, const double N0, const double Ks);
+    virtual double getAttenuation (const double& _sound_speed_bottom, const double& _distance, const double& _frequency, const double& _bottom_depth);
+    virtual double getM0 ();
+    virtual double getN0 ();
+    virtual double getKs ();
+    virtual double getBeta ();
+    virtual double getBeta (const double& M0, const double& N0, const double& Ks);
 
-    inline double get_g () {
+    inline double get_g () const {
         return std::abs (sound_speed_surface - sound_speed_bottom);
     }
 
-    inline double getTheta_g (const double& height, const double& distance) const {
-        return std::sqrt ((1.7 * height) / (getBeta() * distance));
+    inline double getTheta_g (double& _height, const double& _distance) {
+        return std::sqrt ((1.7 * _height) / (getBeta() * _distance));
     }
 
-    inline double getTheta_g_max () const {
-        return std::sqrt ((2 * get_g) / (sound_speed_bottom));
+    inline double getTheta_g_max (const double& _sound_speed_bottom) const {
+        return std::sqrt ((2 * get_g()) / (_sound_speed_bottom));
     }
 
-    inline double getTheta_c (const double& frequency, const double& height) const {
-        return (sound_speed_bottom / (2 * frequency * height));
+    inline double getTheta_c (const double& _sound_speed_bottom, const double& _frequency, const double& _height) const {
+        return (_sound_speed_bottom / (2 * _frequency * _height));
     }
 
-    inline double getTheta_l () const {
-        return std::max (getTheta_g_max, getTheta_c);
+    inline double getTheta_l (const double& _sound_speed_bottom, const double& _frequency, const double& _height) const {
+        return std::max (
+            getTheta_g_max(_sound_speed_bottom),
+            getTheta_c(_sound_speed_bottom, _frequency, _height)
+            );
     }
 
-    inline double getWaterAttenutation(const double& frequency) const {
-        return 0.001936 * ((0.1 * pow (f, 2)) / (1 + pow (f, 2)) + (40 * pow (f, 2)) / (4100 + pow (f, 2)))
+    double getThorp(double _frequency) {
+        double f2_ = pow (_frequency, 2);
+        return (0.11 * f2_ / (1.0 + f2_) + 44.0 * f2_ / (4100.0 + f2_) +  2.75e-4 * f2_ + 0.003);
     }
 
 private:
     //Variables
+    double bottom_depth;
+    double water_attenuation;
+    double sound_speed_surface;
+    double sound_speed_bottom;
+    double frequency;
 };
 
 #endif /* UWPHYSICALROGERSMODEL_H  */
