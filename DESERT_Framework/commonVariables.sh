@@ -160,6 +160,13 @@ export _ADDONS=-1
 export WITHWOSS=0
 #*
 
+#***
+# OWNER_PERMISSION: 0(default setting. In this case the installer will be set for a public user)
+#                   1(to set this value you must pass the --wizard-asOwner options to install.sh script)
+#
+export OWNER_PERMISSION=0
+#*
+
 export TARGET=""
 export INST_MODE=""
 export DEST_FOLDER=""

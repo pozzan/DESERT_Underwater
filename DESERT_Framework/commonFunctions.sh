@@ -46,7 +46,7 @@ print_desert_logo() {
     echo "| |  | |/ _ \\/ __|/ _ \ '__| __| | |  | | '_ \\ / _\` |/ _ \\ '__\\ \\ /\\ / / _\` | __/ _ \\ '__|"
     echo "| |__| |  __/\\__ \\  __/ |  | |_  | |__| | | | | (_| |  __/ |   \\ V  V / (_| | ||  __/ |   "
     echo "|_____/ \\___||___/\\___|_|   \\__|  \\____/|_| |_|\\__,_|\\___|_|    \\_/\\_/ \\__,_|\\__\\___|_|   "
-    echo "_____\033[0m\033[0;30;49mCopyright (c) 2014 Regents of the SIGNET lab, University of Padova  (ver. 2.0.0)\033[0m_____"
+    echo "_____\033[0m\033[0;30;49mCopyright (c) 2014 Regents of the SIGNET lab, University of Padova  (ver. 2.0)\033[0m_____"
     echo "\n"
     if [ "${_DEBUG}" = "1" ]; then
         debug__print_screen_L1 "return of print_desert_logo(): ${output}"
@@ -387,7 +387,15 @@ wizard_function_addons(){
     echo ""
     wizard__print_L2 "Setting of the ADDONs (OPTIONAL)"
     wizard__print_L3 "list of the available ADDONs:"
-    wizard__print_L4 "$(cat ${ROOT_DESERT}/.addon.list | sed -e 's/\(.\)/*  \1/')"
+    case "${OWNER_PERMISSION}" in
+        "0")
+            wizard__print_L4 "$(cat ${ROOT_DESERT}/.addon.list | sed -e 's/\(.\)/*  \1/')"
+            ;;
+        "1")
+            wizard__print_L4 "$(cat ${ROOT_DESERT}/.addon.priv.list | sed -e 's/\(.\)/*  \1/')"
+            ;;
+    esac
+
     echo -n "Enter all ADDONs to be installed (separate entries with a space)"
     ADDONS=""
     read_input "ADDONS"
