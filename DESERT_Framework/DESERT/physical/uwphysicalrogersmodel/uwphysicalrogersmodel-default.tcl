@@ -30,5 +30,10 @@
 # @author Giovanni Toso
 # @version 1.0.0
 
-Module/UW/PHYSICALROGERSMODEL set tx_power_consumption_ 3.3
-Module/UW/PHYSICALROGERSMODEL set rx_power_consumption_ 0.620
+Module/UW/PROPAGATIONROGERSMODEL set bottom_depth_              100
+Module/UW/PROPAGATIONROGERSMODEL set sound_speed_water_bottom_  1500
+Module/UW/PROPAGATIONROGERSMODEL set sound_speed_water_surface_ 1520
+Module/UW/PROPAGATIONROGERSMODEL set sound_speed_sediment_      1650
+Module/UW/PROPAGATIONROGERSMODEL set density_sediment_          2
+Module/UW/PROPAGATIONROGERSMODEL set density_water_             1
+Module/UW/PROPAGATIONROGERSMODEL set debug_                     0

@@ -69,57 +69,124 @@ public:
 
 protected:
     virtual double getGain(Packet* p);
+
     /**
      * Attenuation of acoustic signal in underwater channel.
      * The value returned is base on Rogers model for shallow water.
      *
-     * @param dist distance in m
-     * @param freq freq in kHz
+     * @param _sound_speed_water_bottom sound speed of the sound at the bottom (in m/s)
+     * @param _distance distance between source and destination (in meters)
+     * @param _frequency frequency (in kHz)
+     * @param _bottom_depth height of the column of water (in meters)
+     *
      * @return Attenuation in dB
      *
      */
-    virtual double getAttenuation (const double& _sound_speed_bottom, const double& _distance, const double& _frequency, const double& _bottom_depth);
-    virtual double getM0 ();
-    virtual double getN0 ();
-    virtual double getKs ();
-    virtual double getBeta ();
-    virtual double getBeta (const double& M0, const double& N0, const double& Ks);
+    virtual double getAttenuation (const double& _sound_speed_water_bottom, const double& _distance, const double& _frequency, const double& _bottom_depth);
 
-    inline double get_g () const {
-        return std::abs (sound_speed_surface - sound_speed_bottom);
+    /**
+     * Bottom loss (dB/rad) derived from the expression for the Rayleigh reflection coefficient for a two-fluid lossy interface
+     *
+     * return Bottom loss (dB/rad)
+     */
+    inline const double getBeta () const {
+        return (0.477 * get_M0() * get_N0() * get_Ks()) / sqrt (pow ((1 - pow (get_N0(), 2)), 3));
     }
 
-    inline double getTheta_g (double& _height, const double& _distance) {
-        return std::sqrt ((1.7 * _height) / (getBeta() * _distance));
+    /**
+     * Sediment attenuation coefficient (dB/(m*kHz))
+     *
+     * @return Sediment attenuation coefficient
+     */
+    inline const double get_Ks () const {
+        //TODO: fix this and find the correct value
+        return 0.51;
     }
 
-    inline double getTheta_g_max (const double& _sound_speed_bottom) const {
-        return std::sqrt ((2 * get_g()) / (_sound_speed_bottom));
+    /**
+     * Ratio between the sound speed on sound at the surface and sound speed of sound in the sediment
+     */
+    inline const double get_N0 () const {
+        return (sound_speed_water_bottom / sound_speed_sediment);
     }
 
-    inline double getTheta_c (const double& _sound_speed_bottom, const double& _frequency, const double& _height) const {
-        return (_sound_speed_bottom / (2 * _frequency * _height));
+    /**
+     * Ratio between the density of the sediment and the density of the water
+     */
+    inline const double get_M0 () const {
+        return (density_sediment / density_water);
     }
 
-    inline double getTheta_l (const double& _sound_speed_bottom, const double& _frequency, const double& _height) const {
-        return std::max (
-            getTheta_g_max(_sound_speed_bottom),
-            getTheta_c(_sound_speed_bottom, _frequency, _height)
-            );
+    /**
+     * Magnitude of the negative sound speed profile
+     *
+     * @return Magnitude of the negative sound speed profile
+     */
+    inline const double get_g () const {
+        return std::abs (sound_speed_water_surface - sound_speed_water_bottom);
     }
 
+    /**
+     * Effective angle of the last mode striped
+     *
+     * @param _bottom_depth height of the column of water in meters
+     * @param _distance distance between source and destination (in meters)
+     *
+     * @return Effective angle of the last mode striped
+     */
+    inline const double getTheta_g (const double& _bottom_depth, const double& _distance) const {
+        return std::sqrt ((1.7 * _bottom_depth) / (getBeta() * _distance));
+    }
+
+    /**
+     * Maximum grazion angle for an RBR mode
+     *
+     * @param _sound_speed_bottom sound speed in m/s of the sound at the bottom
+     *
+     * @return Maximum grazion angle for an RBR mode
+     */
+    inline const double getTheta_g_max (const double& _sound_speed_water_bottom) const {
+        return std::sqrt ((2 * get_g()) / (_sound_speed_water_bottom));
+    }
+
+    /**
+     * Cutoff angle of the lowest mode
+     *
+     * @param _sound_speed_water_bottom sound speed in m/s of the sound at the bottom
+     * @param _frequency in kHz
+     * @param _bottom_depth height of the column of water in meters
+     *
+     * @return Cutoff angle of the lowest mode
+     */
+    inline const double getTheta_c (const double& _sound_speed_water_bottom, const double& _frequency, const double& _bottom_depth) const {
+        return (_sound_speed_water_bottom / (2 * _frequency * _bottom_depth));
+    }
+
+    /**
+     * Absorption coefficient calculated by using Thorp's equation.
+     *
+     * @param _frequency in kHz
+     *
+     * @return absorprion coefficient in dB/km
+     */
     double getThorp(double _frequency) {
         double f2_ = pow (_frequency, 2);
-        return (0.11 * f2_ / (1.0 + f2_) + 44.0 * f2_ / (4100.0 + f2_) +  2.75e-4 * f2_ + 0.003);
+        // Thor's eqution for frequencies above or below a few kHz is different.
+        if (_frequency >= 0.4)
+            return (0.11 * f2_ / (1.0 + f2_) + 44.0 * f2_ / (4100.0 + f2_) +  2.75e-4 * f2_ + 0.003);
+        else
+            return (0.002  + 0.11 * f2_ / (1 + f2_) + 0.011 * f2_);
     }
 
 private:
     //Variables
-    double bottom_depth;
-    double water_attenuation;
-    double sound_speed_surface;
-    double sound_speed_bottom;
-    double frequency;
+    double bottom_depth;         /**< Water depth (m) */
+    double sound_speed_water_bottom;   /**< Speed of sound in water at the sea bottom level (m/s). */
+    double sound_speed_water_surface;  /**< Speed of sound in water at the sea surface level (m/s). */
+    double sound_speed_sediment; /**< Speed of sound in the sediment (m/s). */
+    double density_sediment;     /**< Sediment density (g/cm^3). */
+    double density_water;        /**< Water density (g/cm^3). */
+    int debug_;                  /**< Debug level. */
 };
 
 #endif /* UWPHYSICALROGERSMODEL_H  */

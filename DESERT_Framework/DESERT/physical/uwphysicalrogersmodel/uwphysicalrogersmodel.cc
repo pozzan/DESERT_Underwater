@@ -39,44 +39,76 @@
 
 static class UwPhysicalRogersModelClass : public TclClass {
 public:
-  UwPhysicalRogersModelClass() : TclClass("Module/UW/PHYSICALROGERSMODEL") {}
+  UwPhysicalRogersModelClass() : TclClass("Module/UW/PROPAGATIONROGERSMODEL") {}
   TclObject* create(int, const char*const*) {
     return (new UnderwaterPhysicalRogersModel);
   }
 } class_module_uwphysical;
 
-UnderwaterPhysicalRogersModel::UnderwaterPhysicalRogersModel() {
+UnderwaterPhysicalRogersModel::UnderwaterPhysicalRogersModel() :
+    bottom_depth(100),
+    sound_speed_water_bottom(1500),
+    sound_speed_water_surface(1520),
+    sound_speed_sediment(1585),
+    density_sediment(1.740),
+    density_water(1),
+    debug_(0)
+{
+    bind("bottom_depth_", &bottom_depth);
+    bind("sound_speed_water_bottom_", &sound_speed_water_bottom);
+    bind("sound_speed_water_surface_", &sound_speed_water_surface);
+    bind("sound_speed_sediment_", &sound_speed_sediment);
+    bind("density_sediment_", &density_sediment);
+    bind("density_water_", &density_water);
+    bind("debug_", &debug_);
 }
 
 int UnderwaterPhysicalRogersModel::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
 
-    if(argc == 2) {
-        if(strcasecmp(argv[1],"getTxTime") == 0) {
-            //tcl.resultf("%f",Get_Tx_Time());
+    if( argc == 2) {
+        if (strcasecmp (argv[1], "get_bottom_depth") == 0) {
+            tcl.resultf("%f", bottom_depth);
+            return TCL_OK;
+        } else if (strcasecmp (argv[1], "get_sound_speed_water_bottom") == 0) {
+            tcl.resultf("%f", sound_speed_water_bottom);
+            return TCL_OK;
+        } else if (strcasecmp (argv[1], "get_sound_speed_water_surface") == 0) {
+            tcl.resultf("%f", sound_speed_water_surface);
+            return TCL_OK;
+        } else if (strcasecmp (argv[1], "get_sound_speed_sediment") == 0) {
+            tcl.resultf("%f", sound_speed_sediment);
+            return TCL_OK;
+        } else if (strcasecmp (argv[1], "get_density_sediment") == 0) {
+            tcl.resultf("%f", density_sediment);
+            return TCL_OK;
+        } else if (strcasecmp (argv[1], "get_density_water") == 0) {
+            tcl.resultf("%f", density_water);
             return TCL_OK;
         }
     } else if (argc == 3) {
         if (strcasecmp(argv[1], "set_bottom_depth") == 0) {
             bottom_depth = strtod(argv[2], NULL);
             return TCL_OK;
-        } else if (strcasecmp(argv[1], "set_water_attenuation") == 0) {
-            water_attenuation = strtod(argv[2], NULL);
+        } else if (strcasecmp(argv[1], "set_sound_speed_water_bottom") == 0) {
+            sound_speed_water_bottom = strtod(argv[2], NULL);
             return TCL_OK;
-        } else if (strcasecmp(argv[1], "set_sound_speed_surface") == 0) {
-            sound_speed_surface = strtod(argv[2], NULL);
+        } else if (strcasecmp(argv[1], "set_sound_speed_water_surface") == 0) {
+            sound_speed_water_surface = strtod(argv[2], NULL);
             return TCL_OK;
-        } else if (strcasecmp(argv[1], "set_sound_speed_bottom") == 0) {
-            sound_speed_bottom = strtod(argv[2], NULL);
+        } else if (strcasecmp(argv[1], "set_sound_speed_sediment") == 0) {
+            sound_speed_sediment = strtod(argv[2], NULL);
             return TCL_OK;
-        } else if (strcasecmp(argv[1], "set_frequency") == 0) {
-            frequency = strtod(argv[2], NULL);
+        } else if (strcasecmp(argv[1], "set_density_sediment") == 0) {
+            density_sediment = strtod(argv[2], NULL);
+            return TCL_OK;
+        } else if (strcasecmp(argv[1], "set_density_water") == 0) {
+            density_water = strtod(argv[2], NULL);
             return TCL_OK;
         }
     }
     return UnderwaterMPropagation::command(argc, argv);
 } /* UnderwaterPhysicalRogersModel::command */
-
 
 double UnderwaterPhysicalRogersModel::getGain(Packet* p) {
     hdr_MPhy *ph = HDR_MPHY(p);
@@ -90,38 +122,41 @@ double UnderwaterPhysicalRogersModel::getGain(Packet* p) {
     assert(rp);
     assert(sm);
 
-    const double freq = ph->srcSpectralMask->getFreq();
-    const double dist = sp->getDist(rp);
+    const double frequency_ = ph->srcSpectralMask->getFreq(); // Frequency of the carrier in Hz
+    const double distance_ = sp->getDist(rp); // Distance in meters
 
-    const double gain = getAttenuation(sound_speed_bottom, dist/1000.0, freq/1000.0, bottom_depth);
+    const double gain = getAttenuation(sound_speed_water_bottom, distance_, frequency_, bottom_depth);
 
+    std::cout << gain << std::endl;
     if (debug_)
-        std::cerr << NOW
+        std::cout << NOW
         << " UnderwaterPhysicalRogersMode::getGain()"
-        << " dist=" << dist
-        << " freq=" << freq
+        << " distance=" << distance_
+        << " frequency=" << frequency_
         << " gain=" << gain
         << std::endl;
-
     return (gain);
-
 } /* UnderwaterPhysicalRogersModel::getGain */
 
-double UnderwaterPhysicalRogersModel::getAttenuation(const double& _sound_speed_bottom, const double& _distance, const double& _frequency, const double& _bottom_depth) {
-    const double thetag_ = getTheta_g_max(_sound_speed_bottom);
-    const double thetal_ = getTheta_l(_sound_speed_bottom, _frequency, _bottom_depth);
+double UnderwaterPhysicalRogersModel::getAttenuation(const double& _sound_speed_water_bottom, const double& _distance, const double& _frequency, const double& _bottom_depth) {
+    const double theta_g_ = getTheta_g(_bottom_depth, _distance);
+    const double theta_l_ = std::max (getTheta_g_max(_sound_speed_water_bottom), getTheta_c(_sound_speed_water_bottom, _frequency, _bottom_depth));
 
-    if (thetag_ >= thetal_) {
-        return (15 * log (_distance) +
-            5 * log (_bottom_depth * getBeta()) +
-            (getBeta() * _distance * pow(thetal_, 2)) / (4 * _bottom_depth) -
-            7.18 +
-            getThorp(_frequency) * _distance);
+    if (_distance > 0) { // If the distane is known
+        if (theta_g_ >= theta_l_) {
+            return (15 * log (_distance) +
+                5 * log (_bottom_depth * getBeta()) +
+                (getBeta() * _distance * pow(theta_l_, 2)) / (4 * _bottom_depth) -
+                7.18 +
+                getThorp(_frequency/1000.0) * _distance);
+        } else {
+            return (10 * log (_distance) +
+                10 * log (_bottom_depth / (2 * theta_l_)) +
+                (getBeta() * _distance * pow(theta_l_, 2)) / (4 * _bottom_depth) +
+                getThorp(_frequency/1000.0) * _distance);
+        }
     } else {
-        return (10 * log (_distance) +
-            10 * log (_bottom_depth / (2 * thetal_)) +
-            (getBeta() * _distance * pow(thetal_, 2)) / (4 * _bottom_depth) +
-            getThorp(_frequency) * _distance);
+        return 1;
     }
 } /* UnderwaterPhysicalRogersModel::getAttenutation */
 
