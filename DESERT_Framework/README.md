@@ -1,59 +1,65 @@
+```
   _____                      _     _    _           _                         _
  |  __ \                    | |   | |  | |         | |                       | |
  | |  | | ___  ___  ___ _ __| |_  | |  | |_ __   __| | ___ _ ____      ____ _| |_ ___ _ __
  | |  | |/ _ \/ __|/ _ \ '__| __| | |  | | '_ \ / _` |/ _ \ '__\ \ /\ / / _` | __/ _ \ '__|
  | |__| |  __/\__ \  __/ |  | |_  | |__| | | | | (_| |  __/ |   \ V  V / (_| | ||  __/ |
  |_____/ \___||___/\___|_|   \__|  \____/|_| |_|\__,_|\___|_|    \_/\_/ \__,_|\__\___|_|
-_____Copyright (c) 2014 Regents of the SIGNET lab, University of Padova  (ver. 2.0.0)_____
-
+______Copyright (c) 2014 Regents of the SIGNET lab, University of Padova  (ver. 2.0)_______
+```
 
 README
+------
 
-    The following README explains how to use the Desert Underwater installation tools.
-    More details can be found in the Desert Underwater doxygen documentation at
-    http://telecom.dei.unipd.it/ns/desert/DESERT_HTML_doxygen_doc/
-
-
-AUTHORS
-
-    SIGNET lab, University of Padova
+The following README explains how to use the Desert Underwater installation tools.
+More details can be found in the Desert Underwater doxygen documentation at
+http://telecom.dei.unipd.it/ns/desert/DESERT_HTML_doxygen_doc/
 
 
-CONTACT
+__AUTHORS__
 
-    If you have problems, questions, ideas or sugestions, please contact us at
-    desert-usergroup@mail.dei.unipd.it
+SIGNET lab, University of Padova
 
 
-INSTALL
+__CONTACT__
 
-    To install the whole framework you can choose two different approaches:
-    - wizard mode
-    - command-line mode
+If you have problems, questions, ideas or sugestions, please contact us at
+desert-usergroup@mail.dei.unipd.it
 
-    The wizard mode implements an interactive installation procedure, and is easier than
-    the command-line mode. However, after completing an installation with the wizard,
-    you will be also provided a command-line string. You can enter this string at the
-    prompt to reproduce exactly the same installation (with the same options, packages
-    installed, etc.)
 
-    To launch the installation in wizard mode just run the following command:
-    ./install.sh --wizard
-    The procedure will guide you through 6 steps:
-        - setting of the installation-target
-        - setting of the installation mode
-        - setting of the destination folder
-        - choosing whether or not to install the Woss libraries
-        - setting of possible custom parameters (OPTIONAL)
-        - choosing which addons to install (OPTIONAL)
+__INSTALL__
 
-    To employ the command-line mode, you need to manually pass all installation settings
-    through the corresponding installation options. This mode makes it possible to embed
-    the DESERT Underwater installation tool into any other custom script.
-    For example, if you need to integrate the installation procedure into some more
-    general "installation project", with the "command-line" mode you can do this.
-    Here is a list of all options currently available:
+To install the whole framework you can choose two different approaches:
 
+- wizard mode
+- command-line mode
+
+The wizard mode implements an interactive installation procedure, and is easier than
+the command-line mode. However, after completing an installation with the wizard,
+you will be also provided a command-line string. You can enter this string at the
+prompt to reproduce exactly the same installation (with the same options, packages
+installed, etc.)
+
+To launch the installation in wizard mode just run the following command:
+```
+./install.sh --wizard
+```
+The procedure will guide you through 6 steps:
+
+- setting of the installation-target
+- setting of the installation mode
+- setting of the destination folder
+- choosing whether or not to install the Woss libraries
+- setting of possible custom parameters (OPTIONAL)
+- choosing which addons to install (OPTIONAL)
+
+To employ the command-line mode, you need to manually pass all installation settings
+through the corresponding installation options. This mode makes it possible to embed
+the DESERT Underwater installation tool into any other custom script.
+For example, if you need to integrate the installation procedure into some more
+general "installation project", with the "command-line" mode you can do this.
+Here is a list of all options currently available:
+```shell
     --help
         Print the help
 
@@ -110,57 +116,57 @@ INSTALL
         composed by all parameters, separated by a white space and enclosed in quotes,
         e.g.,
         "param1 param2 param3"
+```
+If you encounter any problem while building this library, we set up a desert-users
+mailing list that you can refer to. Please point to:
+    https://mail.dei.unipd.it/mailman/listinfo/desert-usergroup.
 
-    If you encounter any problem while building this library, we set up a desert-users
-    mailing list that you can refer to. Please point to:
-        https://mail.dei.unipd.it/mailman/listinfo/desert-usergroup.
+__WHAT TO DO AFTER THE INSTALLATION HAS BEEN COMPLETED__
 
-WHAT TO DO AFTER THE INSTALLATION HAS BEEN COMPLETED
+When the installation of DESERT Underwater has been successfully completed, you need
+to update your environment variables by exporting the paths to the bin/ and lib/
+folders. This is necessary in order to correctly use DESERT and its dependencies (ns,
+ns-miracle, etc.). This operation is made simpler via the environment file generated
+at the end of the installation session in the ``<destination-folder-path>`` only for the
+"development" installation-mode. So, by running the following command:
+```
+source <destination-folder-path>/environment
+```
+you will be able to call ns and all compiled libraries directly in the shell where
+you ran the above command. You may want to check the environment script to see what
+it exactly does.
 
-    When the installation of DESERT Underwater has been successfully completed, you need
-    to update your environment variables by exporting the paths to the bin/ and lib/
-    folders. This is necessary in order to correctly use DESERT and its dependencies (ns,
-    ns-miracle, etc.). This operation is made simpler via the environment file generated
-    at the end of the installation session in the <destination-folder-path> only for the
-    "development" installation-mode. So, by running the following command:
+With the "release" installation-mode, instead, you can set the environment via the
+following command:
+```
+cd <destination-folder-path> && ./make_environment.sh
+```
+before updating your environment variables. The "make_environment.sh" script is
+particularly useful after the DESERT framework has been cross-compiled and copied
+into the target device: in this case, the script dynamically generates the
+environment file in agreement with the destination folder path within the target
+device.
 
-        source <destination-folder-path>/environment
+__HOW TO ADD A CUSTOM INSTALLER__
 
-    you will be able to call ns and all compiled libraries directly in the shell where
-    you ran the above command. You may want to check the environment script to see what
-    it exactly does.
+First of all, enter the installation folder:
+```
+cd .../DESERT_Underwater/DESERT_Framework/Installation/
+```
+then create a new script. We suggest to copy an exiting installation script
+(e.g. installDESERT_PC.sh):
+```
+cp installDESERT_PC.sh installDESERT_<your-custom-installation-target>.sh
+```
+The ``<your-custom-installation-target>`` label will be the same parameter you will write
+later when indicating to the installation script which installation-target to choose.
+These steps are very easy but also very important, since the only way to call the
+correct installation script for your-custom-installation-target is that the script
+``installDESERT_<your-custom-installation-target>.sh`` exists in the folder
+``.../DESERT_Underwater/DESERT_Framework/Installation/``
 
-    With the "release" installation-mode, instead, you can set the environment via the
-    following command:
-
-        cd <destination-folder-path> && ./make_environment.sh
-
-    before updating your environment variables. The "make_environment.sh" script is
-    particularly useful after the DESERT framework has been cross-compiled and copied
-    into the target device: in this case, the script dynamically generates the
-    environment file in agreement with the destination folder path within the target
-    device.
-
-HOW TO ADD A CUSTOM INSTALLER
-
-    First of all, enter the installation folder:
-
-        cd .../DESERT_Underwater/DESERT_Framework/Installation/
-
-    then create a new script. We suggest to copy an exiting installation script
-    (e.g. installDESERT_PC.sh):
-
-        cp installDESERT_PC.sh installDESERT_<your-custom-installation-target>.sh
-
-    The <your-custom-installation-target> label will be the same parameter you will write
-    later when indicating to the installation script which installation-target to choose.
-    These steps are very easy but also very important, since the only way to call the
-    correct installation script for your-custom-installation-target is that the script
-    installDESERT_<your-custom-installation-target>.sh exists in the folder
-    .../DESERT_Underwater/DESERT_Framework/Installation/
-
-    Inside the script, in the first instance, we focus on the main block:
-
+Inside the script, in the first instance, we focus on the main block:
+```
         main() {
             #******************************************************************************
             # MAIN
@@ -192,11 +198,11 @@ HOW TO ADD A CUSTOM INSTALLER
             fi
             #******************************************************************************
         }
-
-    Notice the "host" directive. This tells the installation script to compile the
-    libraries for the current host. If you need to modify this script to cross-compile
-    for a different target, substitute all lines with the following ones:
-
+```
+Notice the "host" directive. This tells the installation script to compile the
+libraries for the current host. If you need to modify this script to cross-compile
+for a different target, substitute all lines with the following ones:
+```
         main() {
             #******************************************************************************
             # MAIN
@@ -229,37 +235,40 @@ HOW TO ADD A CUSTOM INSTALLER
             fi
             #******************************************************************************
         }
+```
+With these changes we instructed the installer to compile some modules only for the
+host ("host" directive), some for both the host and the target ("host/target"
+directive) and the remaining ones only for the target ("target" directive).
+This step is needed as some libraries must be compiled for the host, in order to
+correctly cross-compile DESERT and its addons for your-custom-installation-target.
 
-    With these changes we instructed the installer to compile some modules only for the
-    host ("host" directive), some for both the host and the target ("host/target"
-    directive) and the remaining ones only for the target ("target" directive).
-    This step is needed as some libraries must be compiled for the host, in order to
-    correctly cross-compile DESERT and its addons for your-custom-installation-target.
-
-    WARNING: be careful NOT TO CONFUSE the directive "target" with
+__WARNING__: *be careful NOT TO CONFUSE the directive "target" with
              "your-custom-installation-target". The former is just a directive to the
-             handle_package function of the installation script.
+             handle_package function of the installation script.*
 
-    We remark that you need the TOOLCHAIN of your-custom-installation-target in order to
-    correctly complete the installation.
+We remark that you need the TOOLCHAIN of your-custom-installation-target in order to
+correctly complete the installation.
 
 
 COPYING / LICENSE
+-----------------
 
-Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
-    All rights reserved.
-    Redistribution and use in source and binary forms, with or without modification,
-    are permitted provided that the following conditions are met:
-    1. Redistributions of source code must retain the above copyright notice,
-       this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright notice,
-       this list of conditions and the following disclaimer in the documentation
-       and/or other materials provided with the distribution.
-    3. Neither the name of the University of Padova (SIGNET lab) nor the names
-       of its contributors may be used to endorse or promote products derived
-       from this software without specific prior written permission.
+__Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.__
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+All rights reserved.
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+3. Neither the name of the University of Padova (SIGNET lab) nor the names
+   of its contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+**THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
@@ -268,4 +277,4 @@ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAG
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.**
