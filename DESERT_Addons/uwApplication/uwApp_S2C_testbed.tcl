@@ -30,30 +30,62 @@
 # Version: 1.0.0
 #
 
+set opt(AppSocket)  1
+set opt(protocol) "TCP"
+
 # Terminal's parameter check
-if {$argc != 9} {
-  puts "The script needs 7 input to work"
-  puts "1 - ID of the node"
-  puts "2 - ID of the receiver"
-  puts "3 - Start time"
-  puts "4 - Stop time"
-  puts "5 - Packet generation period"
-  puts "6 - ID of the experiment"
-  puts "7 - IP of the modem"
-  puts "8 - Port of the modem"
-  puts "9 - Application socket port"
-  puts "Please try again."
-  exit
+if {$opt(AppSocket) == 1} {
+  if {$argc != 10} {
+    puts "The script needs 7 input to work"
+    puts "1 - ID of the node"
+    puts "2 - ID of the receiver"
+    puts "3 - Start time"
+    puts "4 - Stop time"
+    puts "5 - Packet generation period"
+    puts "6 - ID of the experiment"
+    puts "7 - IP of the modem"
+    puts "8 - Port of the modem"
+    puts "9 - Application socket port"
+    puts "Please try again."
+    exit
+  } else {
+    set opt(node)     [lindex $argv 0]
+    set opt(dest)     [lindex $argv 1]
+    set opt(start)    [lindex $argv 2]
+    set opt(stop)     [lindex $argv 3]
+    set opt(traffic)  [lindex $argv 4]
+    set opt(n_run)    [lindex $argv 5]
+    set opt(ip)       [lindex $argv 6]
+    set opt(port)     [lindex $argv 7]
+    set opt(app_port) [lindex $argv 8]
+    set opt(exp_ID) [lindex $argv 9]
+  }
 } else {
-  set opt(node)     [lindex $argv 0]
-  set opt(dest)     [lindex $argv 1]
-  set opt(start)    [lindex $argv 2]
-  set opt(stop)     [lindex $argv 3]
-  set opt(traffic)  [lindex $argv 4]
-  set opt(n_run)    [lindex $argv 5]
-  set opt(ip)       [lindex $argv 6]
-  set opt(port)     [lindex $argv 7]
-  set opt(app_port) [lindex $argv 8]
+  if {$argc != 9} {
+    puts "The script needs 7 input to work"
+    puts "1 - ID of the node"
+    puts "2 - ID of the receiver"
+    puts "3 - Start time"
+    puts "4 - Stop time"
+    puts "5 - Packet generation period"
+    puts "6 - ID of the experiment"
+    puts "7 - IP of the modem"
+    puts "8 - Port of the modem"
+    puts "9 - Payload size (byte)"
+    puts "Please try again."
+    exit
+  } else {
+    set opt(node)     [lindex $argv 0]
+    set opt(dest)     [lindex $argv 1]
+    set opt(start)    [lindex $argv 2]
+    set opt(stop)     [lindex $argv 3]
+    set opt(traffic)  [lindex $argv 4]
+    set opt(n_run)    [lindex $argv 5]
+    set opt(ip)       [lindex $argv 6]
+    set opt(port)     [lindex $argv 7]
+    set opt(payload_size) [lindex $argv 8]
+    set opt(exp_ID) [lindex $argv 9]
+  }
 }
 
 #####################
@@ -176,11 +208,14 @@ UW/APP/uwApplication/Packer set debug_ 1
 Module/UW/APPLICATION set debug_ 0              
 Module/UW/APPLICATION set period_ $opt(traffic)
 Module/UW/APPLICATION set PoissonTraffic_ 0      
-#Module/UW/APPLICATION set Payload_size_ $opt(pktsize)
+if {$opt(AppSocket) == 1} {
+  Module/UW/APPLICATION set Socket_Port_ $opt(app_port)
+} else {
+  Module/UW/APPLICATION set Payload_size_ $opt(payload_size)
+}
 Module/UW/APPLICATION set drop_out_of_order_ 1    
 Module/UW/APPLICATION set pattern_sequence_ 0     
-Module/UW/APPLICATION set Socket_Port_ $opt(app_port)
-Module/UW/APPLICATION set EXP_ID_ 1
+Module/UW/APPLICATION set EXP_ID_ $opt(exp_ID)
 
 
 # variables for the S2C modem's interface
@@ -269,8 +304,11 @@ proc createNode { } {
     $packer_ addPacker $packer_payload2
     $packer_ addPacker $packer_payload3
     $packer_ addPacker $packer_payload4
-
-    $app_ setSocketProtocol "TCP"
+    if {$opt(AppSocket) == 1} {
+      $app_ setSocketProtocol $opt(protocol)
+    } else {
+      $app_ setSocketProtocol "NONE"
+    }
     $app_ set node_ID_  $opt(node)
     $app_ print_log
 
@@ -313,6 +351,9 @@ $ns at 0 "$modem_ start"
 
 if {$opt(node) == 1} {
   $ns at $opt(start) "$app_ start"
+  $ns at $opt(stop) "$app_ stop"
+} else {
+  $ns at [expr $opt(start) + 2] "$app_ start"
   $ns at $opt(stop) "$app_ stop"
 }
 

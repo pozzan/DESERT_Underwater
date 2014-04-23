@@ -94,7 +94,7 @@ void *read_process_UDP(void* arg)
             ch->size() = recvMsgSize;
             if (debug_ >= 0) 
             {
-                std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED--> ";
+                std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED--> " << endl;
                 if (obj->logging) obj->out_log << left << "[" << obj->getEpoch() << "]::" << NOW << "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED"<< endl;
                 std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::PAYLOAD_MESSAGE--> ";
                 for (int i = 0; i < recvMsgSize; i++) {

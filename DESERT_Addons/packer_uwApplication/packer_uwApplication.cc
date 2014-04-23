@@ -162,9 +162,11 @@ void packer_uwApplication::printMyHdrFields(Packet* p) {
         std::cout << "\033[1;37;45m 3rd field \033[0m, RFFTVALID_FIELD: " << applh->rftt_valid_ << std::endl;
         std::cout << "\033[1;37;45m 4th field \033[0m, PRIORITY_FIELD: " << (int)applh->priority_ << std::endl;
         std::cout << "\033[1;37;45m 5th field \033[0m, PAYLOADMSG_SIZE_FIELD: " << applh->payload_size_ << std::endl;
-        //for(i=0;i<applh->payload_size();i++)
-        //{
-        std::cout << "\033[1;37;45m 5th field \033[0m, PAYLOADMSG_SIZE_FIELD: " << applh->payload_msg << std::endl;
-        //}
+        std::cout << "\033[1;37;45m 5th field \033[0m, PAYLOADMSG_FIELD: ";
+        for(int i=0;i<applh->payload_size();i++)
+        {
+            cout << applh->payload_msg[i];
+        }
+        std::cout << endl;
     }
 } //end printMyHdrFields() method
