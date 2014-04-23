@@ -128,8 +128,9 @@ while true; do
                 OWNER_PERMISSION=1
             else
                 OWNER_PERMISSION=0
-                logWARN_L1 "the .addon.priv.list file not found."
-                logWARN_L1 "instal.sh script will start with --wizard option"
+                logWARN_L1 "the .addon.priv.list file not found. instal.sh script will start with --wizard option" ${INSTALL_LOG}
+                warn_L1 ".addon.priv.list file not found!"
+                warn_L2 "instal.sh script will start with --wizard option"
             fi
             _WIZARD_OPT=1
             log_L1 "_WIZARD_OPT=${_WIZARD_OPT}" ${INSTALL_LOG}
