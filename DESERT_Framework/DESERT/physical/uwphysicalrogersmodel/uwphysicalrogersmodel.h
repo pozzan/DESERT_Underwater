@@ -40,6 +40,7 @@
 
 #include <underwater-mpropagation.h>
 #include <node-core.h>
+#include <uwlib.h>
 
 #include <cmath>
 #include <iostream>
@@ -167,17 +168,18 @@ protected:
      *
      * @param _frequency in kHz
      *
-     * @return absorprion coefficient in dB/km
+     * @return absorprion coefficient in dB/m
      */
     double getThorp(double _frequency) {
         double f2_ = pow (_frequency, 2);
-        // Thor's eqution for frequencies above or below a few kHz is different.
+        // Thorp's eqution for frequencies above or below a few kHz is different.
         if (_frequency >= 0.4)
-            return (0.11 * f2_ / (1.0 + f2_) + 44.0 * f2_ / (4100.0 + f2_) +  2.75e-4 * f2_ + 0.003);
+            return (0.11 * f2_ / (1.0 + f2_) + 44.0 * f2_ / (4100.0 + f2_) +  2.75e-4 * f2_ + 0.003) * FROMDBPERKYARDTODMPERM;
         else
-            return (0.002  + 0.11 * f2_ / (1 + f2_) + 0.011 * f2_);
+            return (0.002  + 0.11 * f2_ / (1 + f2_) + 0.011 * f2_) * FROMDBPERKYARDTODMPERM;
     }
 
+    static const double FROMDBPERKYARDTODMPERM = 0.001093613298338; /**< Conversion factor from dB/kyard to dB/m. */
 private:
     //Variables
     double bottom_depth;         /**< Water depth (m) */

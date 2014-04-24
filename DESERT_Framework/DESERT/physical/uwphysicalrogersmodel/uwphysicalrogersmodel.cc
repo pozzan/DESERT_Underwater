@@ -125,9 +125,11 @@ double UnderwaterPhysicalRogersModel::getGain(Packet* p) {
     const double frequency_ = ph->srcSpectralMask->getFreq(); // Frequency of the carrier in Hz
     const double distance_ = sp->getDist(rp); // Distance in meters
 
-    const double gain = getAttenuation(sound_speed_water_bottom, distance_, frequency_, bottom_depth);
+    // getAttenuation is in dB. The attanuation is converted in linear and it is converted in gain.
+    const double gain = pow (10, -0.1 * getAttenuation(sound_speed_water_bottom, distance_, frequency_, bottom_depth));
+    //const double gainUrick = uwlib_AInv(distance_/1000.0, uw.practical_spreading, frequency_/1000.0);
 
-    std::cout << gain << std::endl;
+    //std::cout << (10*log10(gain) - 10*log10(gainUrick)) << std::endl;
     if (debug_)
         std::cout << NOW
         << " UnderwaterPhysicalRogersMode::getGain()"
@@ -144,14 +146,14 @@ double UnderwaterPhysicalRogersModel::getAttenuation(const double& _sound_speed_
 
     if (_distance > 0) { // If the distane is known
         if (theta_g_ >= theta_l_) {
-            return (15 * log (_distance) +
-                5 * log (_bottom_depth * getBeta()) +
+            return (15 * log10 (_distance) +
+                5 * log10 (_bottom_depth * getBeta()) +
                 (getBeta() * _distance * pow(theta_l_, 2)) / (4 * _bottom_depth) -
                 7.18 +
                 getThorp(_frequency/1000.0) * _distance);
         } else {
-            return (10 * log (_distance) +
-                10 * log (_bottom_depth / (2 * theta_l_)) +
+            return (10 * log10 (_distance) +
+                10 * log10 (_bottom_depth / (2 * theta_l_)) +
                 (getBeta() * _distance * pow(theta_l_, 2)) / (4 * _bottom_depth) +
                 getThorp(_frequency/1000.0) * _distance);
         }
