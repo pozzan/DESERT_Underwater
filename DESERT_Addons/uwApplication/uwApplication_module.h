@@ -71,7 +71,8 @@
 #include <list>
 #include <queue>
 #include <rng.h>
-#include <pthread.h>
+#include <fstream>
+#include <ostream>
 
 
 #define UWAPPLICATION_DROP_REASON_UNKNOWN_TYPE "DPUT"   /**< Drop the packet. Packet received is an unknown type*/
@@ -126,6 +127,13 @@ public:
      */
     virtual void incrPktsPushQueue() { pkts_push_queue++; }
 
+    /**
+     * Calculate the epoch of the event. Used in sea-trial mode
+     * @return the epoch of the system
+     */
+    inline unsigned long int getEpoch() {return time(NULL);}
+
+
     
     int servSockDescr; /**< socket descriptor for server */
     int clnSockDescr; /**< *socket descriptor for client */
@@ -134,6 +142,10 @@ public:
     int servPort; /**< Server port*/
     std::queue<Packet*> queuePckReadTCP; /**< Queue that store the DATA packets recevied from the client by the server using a TCP protocol*/ 
     std::queue<Packet*> queuePckReadUDP; /**< Queue that store the DATA packets recevied from the client by the server using a UDP protocol*/
+    std::ofstream out_log; /**< Variable that handle the file in which the protocol write the statistics */
+    bool logging;
+    int node_id;
+    int exp_id;
 protected:
     /**< uwSenderTimer class that manage the timer */
     class uwSendTimerAppl : public TimerHandler {
@@ -169,13 +181,15 @@ protected:
      * the payload of DATA packets are filled with a randomly sequence or with 
      * a pattern sequence.
      */
-    virtual void start_generation_pck_wth_socket();
+    //virtual void start_generation_pck_wth_socket();
+     virtual void start_generation();
     /**
      * Set all the field of the DATA packet that must be send down after the creation
      * to the below level. In this case the payload of DATA packet are generated in
      * a random way.
      */
-    virtual void initialize_DATA_pck_wth_socket();
+    //virtual void initialize_DATA_pck_wth_socket();
+     virtual void init_Packet();
     /**
      * When socket communication is used, this method establish a connection 
      * between client and server. This is required because a TCP protocol is used.
@@ -186,7 +200,8 @@ protected:
      * payload of DATA packet that will be transmitted. After that put down to the 
      * layer below
      */
-    virtual void initialize_DATA_pck_wth_TCP();
+    //virtual void initialize_DATA_pck_wth_TCP();
+     virtual void init_Packet_TCP();
     /**
      * When socket communication is used, this method establish a connection 
      * between client and server. This is required because a UDP protocol is used.
@@ -197,7 +212,8 @@ protected:
      * payload of DATA packet that will be transmitted. After that put down to the 
      * layer below
      */
-    virtual void initialize_DATA_pck_wth_UDP();
+    //virtual void initialize_DATA_pck_wth_UDP();
+    virtual void init_Packet_UDP();
     /**
      * Close the socket connection in the case the communication take place with 
      * socket, otherwise stop the execution of the process, so force the cancellation
@@ -211,7 +227,9 @@ protected:
      * @return <i>true</i> communication without socket
      *          <i>false</i> communication with socket  
      */
-    virtual bool withoutSocket() {bool test;SOCKET_CMN == 0 ? test = true : test = false; return test;}
+    //virtual bool withoutSocket() {bool test;SOCKET_CMN == 0 ? test = true : test = false; return test;}
+    //virtual bool withoutSocket() {bool test; socket_active == false ? test = true : test = false; return test;}
+     virtual bool withoutSocket() {bool test; socket_active == false ? test = true : test = false; return test;}
     /**
      * If the communication take place using sockets verify if the protocol used
      * is TCP or UDP.
@@ -219,7 +237,8 @@ protected:
      * @return <i>true</i> socket use TCP protocol
      *          <i>false</i> socket use UDP protocol  
      */
-    virtual bool useTCP() {bool test;TCP_CMN == 1 ? test = true : test = false; return test;}
+    //virtual bool useTCP() {bool test;TCP_CMN == 1 ? test = true : test = false; return test;}
+    virtual bool useTCP() {bool test; tcp_udp == 1 ? test = true : test = false; return test; }
     /**
      * If the communication take place without sockets verify if the data generation
      * period is constant or is choiche in according to a poisson process 
@@ -352,19 +371,22 @@ protected:
     //TCL VARIABLES
     int debug_; /**< Used for debug purposes <i>1</i> debug activated <i>0</i> debug not activated*/
     int PERIOD; /**< Interval time between two successive generation data packets */
-    int SOCKET_CMN; /**< Enable or not the communication with socket <i>1</i> enabled <i>0</i> not enabled*/
+    //int SOCKET_CMN; /**< Enable or not the communication with socket <i>1</i> enabled <i>0</i> not enabled*/
     int POISSON_TRAFFIC; /**< Enable or not the Poisson process for generation of data packets <i>1</i> enabled <i>0</i> not enabled*/
     int PAYLOADSIZE; /**< Size of each data packet payaload generated */
     int PORT_NUM; /**< Number of the port in which the server provide the service */
     int DROP_OUT_OF_ORDER; /**< Enable or not the ordering of data packet received <i>1</i> enabled <i>0</i> not enabled*/
     int PATTERN_SEQUENCE; /**< Enable or not the fill of payload of data packet with a known and pre-established sequence <i>1</i> enabled <i>0</i> not enabled*/
-    int TCP_CMN; /**< Enable or not the use of TCP protocol when is used the socket communication <i>1</i> use TCP <i>0</i> use UDP*/
+    //int TCP_CMN; /**< Enable or not the use of TCP protocol when is used the socket communication <i>1</i> use TCP <i>0</i> use UDP*/
     uint8_t DST_ADDR;    /**< IP destination address. */
     
     //TIMER VARIABLES
     uwSendTimerAppl chkTimerPeriod; /**< Timer that schedule the period between two successive generation of DATA packets*/
     
     //STATISTICAL VARIABLES
+    bool socket_active;
+    string socket_protocol;
+    int tcp_udp; //1 for tcp, 0 for udp, -1 for none
     bool* sn_check; /**< Used to keep track of the packets already received. */
     int uidcnt; /**< Identifier counter that identify uniquely the DATA packet generated*/
     int txsn; /**< Transmission sequence number of DATA packet */   

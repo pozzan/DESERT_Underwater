@@ -37,17 +37,14 @@ Scheduler/RealTime set adjust_new_width_interval_ 0
 Scheduler/RealTime set min_bin_width_ 0
 
 Module/UW/APPLICATION set debug_ 				0
-Module/UW/APPLICATION set period_ 				10
-Module/UW/APPLICATION set socket_cmn_ 			0
+Module/UW/APPLICATION set period_ 				30
 Module/UW/APPLICATION set PoissonTraffic_ 		1
-Module/UW/APPLICATION set Payload_size_ 		10
-Module/UW/APPLICATION set destAddr_ 			1
-Module/UW/APPLICATION set destPort_     		1
-Module/UW/APPLICATION set SocketPort_     		5000
-Module/UW/APPLICATION set drop_out_of_order_ 	0
-Module/UW/APPLICATION set pattern_sequence_ 	0
-Module/UW/APPLICATION set tcp_communication_ 	0
-
+Module/UW/APPLICATION set Payload_size_			10
+Module/UW/APPLICATION set drop_out_of_order_ 	1
+Module/UW/APPLICATION set pattern_sequence_		0
+Module/UW/APPLICATION set Socket_Port_ 			4000	
+Module/UW/APPLICATION set node_ID_ 				1
+Module/UW/APPLICATION set EXP_ID_ 				1
 
 
 

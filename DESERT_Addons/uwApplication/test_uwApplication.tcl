@@ -100,7 +100,7 @@ $ns use-Miracle
 
 #Declare the use of a Real Time Schedule (necessary for the interfacing with real hardware)
 if {[lindex $argv 2] == 1} {
-	$ns use-scheduler RealTime
+    $ns use-scheduler RealTime
 }
 
 ##################
@@ -109,7 +109,7 @@ if {[lindex $argv 2] == 1} {
 set opt(start_clock) [clock seconds]
 
 set opt(nn)                 1.0 ;# Number of Nodes
-set opt(starttime)          1
+set opt(starttime)          5
 if {[lindex $argv 2] == 1} {
 	set opt(stoptime) 200
 } else {
@@ -133,10 +133,9 @@ set rng_position [new RNG]
 if {$opt(bash_parameters)} {
     if {$argc != 3} {
         puts "ERROR!!!!!!"
-		  puts "The script requires three inputs:"
+		  puts "The script requires two inputs:"
         puts "---> The DATA packet size (byte)"
         puts "---> Period to generate DATA packets (s)"
-		  puts "---> Type of communication: with(1) or without(0) socket"
         puts "For example: ns test_uwApplication.tcl 125 60 1"
         puts "Please try again."
         return
@@ -155,7 +154,7 @@ if {$opt(bash_parameters)} {
 } else {
     set opt(pktsize)    125
     set opt(cbr_period) 60
-	 set opt(socket_comm) 0
+#	 set opt(socket_comm) 0
 }
 
 
@@ -186,19 +185,15 @@ $data_mask setBandwidth  $opt(bw)
 # Module Configuration  #
 #########################
 #UW/APPLICATION
-Module/UW/APPLICATION set debug_ 1							;# 1= debug activated
+Module/UW/APPLICATION set debug_ 0							;# 1= debug activated
 Module/UW/APPLICATION set period_ $opt(cbr_period)
-Module/UW/APPLICATION set socket_cmn_ $opt(socket_comm) ;# 1= use socket for communication 
 Module/UW/APPLICATION set PoissonTraffic_ 0		   ;# 1= use a Poisson process for generate packets
 Module/UW/APPLICATION set Payload_size_ $opt(pktsize)
 Module/UW/APPLICATION set drop_out_of_order_ 1 		;# 1= drop out of order activate 
 Module/UW/APPLICATION set pattern_sequence_ 0			;# 1= use pattern sequence for data payload message
-Module/UW/APPLICATION set tcp_communication_ 1		   ;# 1= use TCP communication, 
-Module/UW/APPLICATION set Socket_Port_ 4000	
+Module/UW/APPLICATION set Socket_Port_ 4000
+Module/UW/APPLICATION set EXP_ID_ 1
 
-#Module/UW/CBR set packetSize_          $opt(pktsize)
-#Module/UW/CBR set period_              $opt(cbr_period)
-#Module/UW/CBR set PoissonTraffic_      1
 
 # BPSK              
 Module/MPhy/BPSK  set BitRate_          $opt(bitrate)
@@ -258,7 +253,9 @@ proc createNode { id } {
     $interf_data($id) set debug_       0
 
     $phy($id) setPropagation $propagation
-    
+    $cbr($id) setSocketProtocol "TCP"
+    $cbr($id) set node_ID_  $tmp_
+    $cbr($id) print_log
     $phy($id) setSpectralMask $data_mask
     $phy($id) setInterference $interf_data($id)
     $mac($id) $opt(ack_mode)
@@ -325,7 +322,11 @@ proc createSink { } {
     $phy_data_sink setSpectralMask $data_mask
     $phy_data_sink setInterference $interf_data_sink
     $phy_data_sink setPropagation $propagation
-
+    for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
+        $cbr_sink($cnt) setSocketProtocol "TCP"
+        $cbr_sink($cnt) set node_ID_ 254
+        $cbr_sink($cnt) print_log
+    }
     $mac_sink $opt(ack_mode)
     $mac_sink initialize
 }
@@ -390,10 +391,7 @@ $ipr(0) addRoute [$ipif_sink addr] [$ipif_sink addr];#[$ipif(1) addr]
 #####################
 # Set here the timers to start and/or stop modules (optional)
 # e.g., 
-for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-    $ns at $opt(starttime)    "$cbr($id1) start"
-    $ns at $opt(stoptime)     "$cbr($id1) stop"
-}
+
 
 ###################
 # Final Procedure #
@@ -445,15 +443,15 @@ proc finish {} {
 #    set cbrheadersize       [$cbr(1) getcbrheadersize]
     
     puts "Mean Throughput          : [expr ($sum_cbr_throughput/($opt(nn)))]"
-    if { $opt(socket_comm) == 1 } {
-	 		puts "Packets stored by server : $sum_cbr_queue_pkts"
-    }
+#    if { $opt(socket_comm) == 1 } {
+#	 		puts "Packets stored by server : $sum_cbr_queue_pkts"
+#    }
 	 puts "Sent Packets             : $sum_cbr_sent_pkts"
 	 puts "Received Packets         : $sum_cbr_rcv_pkts"
     puts "Packet Delivery Ratio    : [expr $sum_cbr_rcv_pkts / $sum_cbr_sent_pkts * 100]"
-	 if { $opt(socket_comm) == 1 } {
-	     puts "Packets received by server but not yet passed to the below level: [expr ($sum_cbr_queue_pkts-$sum_cbr_rcv_pkts)]"
-	 }
+#	 if { $opt(socket_comm) == 1 } {
+#	     puts "Packets received by server but not yet passed to the below level: [expr ($sum_cbr_queue_pkts-$sum_cbr_rcv_pkts)]"
+#	 }
 #    puts "IP Pkt Header Size       : $ipheadersize"
 #    puts "UDP Header Size          : $udpheadersize"
 #    puts "CBR Header Size          : $cbrheadersize"
@@ -465,9 +463,15 @@ proc finish {} {
 ###################
 # start simulation
 ###################
-if { $opt(socket_comm) == 1 } {
-	$ns at [expr $opt(stoptime) + 30.0]  "finish; $ns halt"
-} else {
-	$ns at [expr $opt(stoptime) + 3600]  "finish; $ns halt" 
+#if { $opt(socket_comm) == 1 } {
+#	$ns at [expr $opt(stoptime) + 30.0]  "finish; $ns halt"
+#} else {
+#	$ns at [expr $opt(stoptime) + 3600]  "finish; $ns halt" 
+#}
+for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
+    $ns at $opt(starttime)    "$cbr($id1) start"
+    $ns at $opt(stoptime)     "$cbr($id1) stop"
 }
+
+$ns at [expr $opt(stoptime) + 30.0] "finish; $ns halt"
 $ns run

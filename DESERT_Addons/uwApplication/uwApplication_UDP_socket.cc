@@ -26,34 +26,33 @@
 #include <error.h>
 #include <errno.h>
 
+pthread_mutex_t mutex_udp = PTHREAD_MUTEX_INITIALIZER;
+
 int uwApplicationModule::openConnectionUDP() {
     int sockoptval = 1;
-    if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::openConnectionUDP() ---> Enable the server port number "<< servPort << "."
-            <<"With this port Server offer a service for any client."<< std::endl;
-    
     //Create socket for incoming connections
     if((servSockDescr=socket(AF_INET,SOCK_DGRAM,0)) < 0){
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::openConnectionUDP() ---> Socket creation failed." << std::endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_UDP::SOCKET_CREATION_FAILED" << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::OPEN_CONNECTION_UDP::SOCKET_CREATION_FAILED" << endl;
         exit(1);
     }
-    if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::openConnectionUDP() ---> Socket created."
-            <<" Socket descriptor is "<< servSockDescr << "."<< std::endl;
-
+    if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_UDP::SOCKET_CREATED" << endl;
     memset(&servAddr,0,sizeof(servAddr));
     servAddr.sin_family = AF_INET;
     servAddr.sin_port = htons(servPort);
     servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     
     if(::bind(servSockDescr, (struct sockaddr *) &servAddr, sizeof (servAddr)) < 0) {
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::openConnectionUDP() ---> Binding failed." << std::endl;
-        printf("Errore: %s\n", strerror(errno));
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_UDP::BINDING_FAILED_" << strerror(errno) << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_UDP::BINDING_FAILED_" << strerror(errno) << endl;
         exit(1);
-    }
-    if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::openConnectionUDP() ---> Binding executed."<< std::endl;
-    
+    }    
     pthread_t pth;
-    pthread_create(&pth, NULL, read_process_UDP, (void*) this);
-    
+    if (pthread_create(&pth, NULL, read_process_UDP, (void*) this) != 0)
+    {
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::OPEN_CONNECTION_UDP::CANNOT_CREATE_PARRALEL_THREAD" << endl;
+        exit(1);
+    }    
     chkTimerPeriod.resched(getPeriod());   
     
     return servSockDescr;
@@ -76,34 +75,49 @@ void *read_process_UDP(void* arg)
         }
         //Block until receive message from a client
         if( (recvMsgSize=recvfrom(obj->servSockDescr,buffer_msg,MAX_LENGTH_PAYLOAD,0,(struct sockaddr *)&(obj->clnAddr),&clnLen)) < 0 ) {
-            if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::read_process_UDP() ---> Reception of DATA packet failed."<< std::endl;
+            if (debug_ >= 0) std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::CONNECTION_NOT_ACCEPTED" << endl;
+            if (obj->logging) obj->out_log << left << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::CONNECTION_NOT_ACCEPTED" << endl;
         }
-
-        //if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::read_process_UDP() ---> Handling client with IP address "<< inet_ntoa((obj->clnAddr).sin_addr) << std::endl;        
-        
+        if (debug_ >= 1) std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_TCP::NEW_CLIENT_IP_" << inet_ntoa(obj->clnAddr.sin_addr)<<std::endl; 
+        if (obj->logging) obj->out_log << left << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::NEW_CLIENT_IP_" << inet_ntoa(obj->clnAddr.sin_addr)<<std::endl; 
+        int status = pthread_mutex_lock(&mutex_udp);
+        if (status != 0)
+        {
+            if (debug_ >= 0) std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::PTHREAD_MUTEX_LOCK_FAILED " << endl;
+        }
         if (recvMsgSize > 0)
         {
             Packet* p = Packet::alloc();
-            hdr_DATA_APPLICATION* hdr_Appl = HDR_DATA_APPLICATION(p);
-            for (int i = 0; i < MAX_LENGTH_PAYLOAD; i++) {
-                hdr_Appl->payload_msg[i] = buffer_msg[i];
+            hdr_cmn *ch = HDR_CMN(p);
+            hdr_DATA_APPLICATION *hdr_Appl = HDR_DATA_APPLICATION(p);
+            hdr_Appl->payload_size() = recvMsgSize;
+            ch->size() = recvMsgSize;
+            if (debug_ >= 0) 
+            {
+                std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED--> " << endl;
+                if (obj->logging) obj->out_log << left << "[" << obj->getEpoch() << "]::" << NOW << "::UWAPPLICATION::READ_PROCESS_UDP::NEW_PACKET_CREATED"<< endl;
+                std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::READ_PROCESS_UDP::PAYLOAD_MESSAGE--> ";
+                for (int i = 0; i < recvMsgSize; i++) {
+                    hdr_Appl->payload_msg[i] = buffer_msg[i];
+                    cout << buffer_msg[i];
+                }
             }
             obj->queuePckReadUDP.push(p);
             obj->incrPktsPushQueue();
-            if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::read_process_UDP() ---> Message saved in the queue."
-                << " Number of DATA packets saved: " << obj->queuePckReadUDP.size() << std::endl;
 
+        }
+        status = pthread_mutex_unlock(&mutex_udp);
+        if (status != 0)
+        {
+            if (debug_ >= 0) std::cout << "[" << obj->getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::PTHREAD_MUTEX_UNLOCK_FAILED " << endl;
         }
     }
     
 }//end read_process_UDP() method
 
-void uwApplicationModule::initialize_DATA_pck_wth_UDP(){
-    if( queuePckReadUDP.empty() ) {
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::initialize_DATA_pck_wth_UDP() ---> There is no DATA packet to pass the below levels."<< std::endl;
-    } else {
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::initialize_DATA_pck_wth_UDP() ---> Start to initialize the fields of DATA packet."<< std::endl;
-        
+void uwApplicationModule::init_Packet_UDP(){
+    if (! queuePckReadUDP.empty())
+    {      
         Packet *ptmp = queuePckReadUDP.front();
         queuePckReadUDP.pop();
         hdr_cmn *ch = HDR_CMN(ptmp);
@@ -113,7 +127,6 @@ void uwApplicationModule::initialize_DATA_pck_wth_UDP(){
         
         ch->uid_ = uidcnt++;
         ch->ptype_ = PT_DATA_APPLICATION;
-        ch->size_ = sizeof (ptmp);
         ch->direction_ = hdr_cmn::DOWN; 
         ch->timestamp() = Scheduler::instance().clock();
         
@@ -130,9 +143,19 @@ void uwApplicationModule::initialize_DATA_pck_wth_UDP(){
         }
         uwApph->priority_ = 0; //Priority of the message
 
-        if(debug_) std::cout << "Time: " << NOW << " uwApplicationModule::initialize_DATA_pck_wth_UDP() ---> DATA packet initialized. Identifier " << ch->uid() << ", Sequence Number " << uwApph->sn() << ","
-         << " Destination address IP " << uwiph->daddr() << ", Destination port: " << uwudph->dport() << std::endl;
+        if (debug_ >= 2) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::UID_" << ch->uid_ << endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::DEST_" << (int)uwiph->daddr() << endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)uwApph->payload_size() << endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SN_" << (int)uwApph->sn_ << endl;
+        if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_UDP::SEND_DOWN_PACKET" << endl;
+
+
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::UID_" << ch->uid_ << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::DEST_" << (int)uwiph->daddr() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SIZE_" << (int)uwApph->payload_size() << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SN_" << (int)uwApph->sn_ << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::INIT_PACKET_UDP::SEND_DOWN_PACKET" << endl;
      
         sendDown(ptmp);
     }
-}//end initialize_DATA_pck_wth_UDP() method
+}//end init_Packet_UDP() method

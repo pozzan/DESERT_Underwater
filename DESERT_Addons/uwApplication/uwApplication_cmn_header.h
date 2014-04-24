@@ -10,9 +10,13 @@
 
 #include <module.h>
 #include <packet.h>
+#include <pthread.h>
 
 #define MAX_LENGTH_PAYLOAD 4096
 #define HDR_DATA_APPLICATION(p) (hdr_DATA_APPLICATION::access(p))     /**< alias defined to access the TRIGGER HEADER */
+
+
+//pthread_mutex_t mutex_udp = PTHREAD_MUTEX_INITIALIZER;
 
 extern packet_t PT_DATA_APPLICATION; /**< DATA packet type */
 
@@ -23,7 +27,8 @@ typedef struct hdr_DATA_APPLICATION {
     uint16_t sn_;       /**< Serial number of the packet. */
     int rftt_;        /**< Forward Trip Time of the packet. */
     bool rftt_valid_;   /**< Flag used to set the validity of the fft field. */
-    char priority_;     /**< Priority flag: 1 means high priority, 0 normal priority. */
+    uint8_t priority_;     /**< Priority flag: 1 means high priority, 0 normal priority. */
+    uint16_t payload_size_; /**< Size (bytes) of the payload */
     char payload_msg[MAX_LENGTH_PAYLOAD]; /**< Message payload*/
     
     static int offset_; /**< Required by the PacketHeaderManager. */
@@ -60,8 +65,12 @@ typedef struct hdr_DATA_APPLICATION {
      * 
      * @return char priority_
      */
-    inline char& priority() {
+    inline uint8_t& priority() {
         return priority_;
+    }
+
+    inline uint16_t& payload_size() {
+        return payload_size_;
     }
     
     /**
