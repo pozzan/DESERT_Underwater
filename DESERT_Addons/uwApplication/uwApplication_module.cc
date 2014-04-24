@@ -189,18 +189,18 @@ int uwApplicationModule::crLayCommand(ClMessage* m) {
 
 void uwApplicationModule::recv(Packet* p) {
     if (withoutSocket()) {
-        if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_WITHOUT_SOCKET_MODE" << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_WITHOUT_SOCKET_MODE" << endl;
+        if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::RECV_PACKET_WITHOUT_SOCKET_MODE" << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::RECV_PACKET_WITHOUT_SOCKET_MODE" << endl;
         statistics(p);
     } else {
         //Communication take place with sockets 
         if (useTCP()) {
-            if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_USING_TCP" << endl;
-            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_USING_TCP" << endl;
+            if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::RECV_PACKET_USING_TCP" << endl;
+            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::RECV_PACKET_USING_TCP" << endl;
             statistics(p);
         } else {
-            if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_USING_UDP" << endl;
-            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::RECV_PACKET_USING_UDP" << endl;
+            if (debug_ >=1 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::RECV_PACKET_USING_UDP" << endl;
+            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::RECV_PACKET_USING_UDP" << endl;
             statistics(p);
         }
     }
@@ -211,8 +211,8 @@ void uwApplicationModule::statistics(Packet* p) {
     hdr_DATA_APPLICATION* uwApph = HDR_DATA_APPLICATION(p);
 
     if (ch->ptype_ != PT_DATA_APPLICATION) {
-        if (debug_ >=0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::DROP_PACKET_NOT_APPLICATION_TYPE" << endl;
-        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::DROP_PACKET_NOT_APPLICATION_TYPE" << endl;
+        if (debug_ >=0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_NOT_APPLICATION_TYPE" << endl;
+        if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_NOT_APPLICATION_TYPE" << endl;
         drop(p, 1, UWAPPLICATION_DROP_REASON_UNKNOWN_TYPE);
         incrPktInvalid(); //Increment the number of packet received invalid
         return;
@@ -222,8 +222,8 @@ void uwApplicationModule::statistics(Packet* p) {
     //Verify if the data packet is already processed. 
     if (!useDropOutOfOrder()) {
         if (sn_check[uwApph->sn_ & 0x00ffffff]) { // Packet already processed: drop it
-            if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::DROP_PACKET_PACKET_ALREADY_PROCESSED_ID_" << (int)uwApph->sn_ << endl;
-            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::DROP_PACKET_PACKET_ALREADY_PROCESSED_ID_" << (int)uwApph->sn_ << endl;
+            if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_PACKET_ALREADY_PROCESSED_ID_" << (int)uwApph->sn_ << endl;
+            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_PACKET_ALREADY_PROCESSED_ID_" << (int)uwApph->sn_ << endl;
             incrPktInvalid();
             drop(p, 1, UWAPPLICATION_DROP_REASON_DUPLICATED_PACKET);
             return;
@@ -239,8 +239,8 @@ void uwApplicationModule::statistics(Packet* p) {
             incrPktOoseq(); //Increase the number of data packets receive out of sequence.
             //if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::recv() ---> Packet received with SN " << uwApph->sn_ << " is out of sequence."
             //        << " The highest sequence number received is " << hrsn << ". DROP IT!" << std::endl;
-            if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::DROP_PACKET_PACKET_OOS_ID_" << (int)uwApph->sn_ << "_LAST_SN_" << hrsn << endl;
-            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::DROP_PACKET_PACKET_OOS_ID_" << (int)uwApph->sn_ << "_LAST_SN_" << hrsn << endl;
+            if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_PACKET_OOS_ID_" << (int)uwApph->sn_ << "_LAST_SN_" << hrsn << endl;
+            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_PACKET_OOS_ID_" << (int)uwApph->sn_ << "_LAST_SN_" << hrsn << endl;
             drop(p, 1, UWAPPLICATION_DROP_REASON_OUT_OF_SEQUENCE);
             return;
         }
@@ -260,8 +260,8 @@ void uwApplicationModule::statistics(Packet* p) {
     //Verify if a packet is lost
     if (useDropOutOfOrder()) {
         if (uwApph->sn_ > esn) {
-            if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PACKET_LOST_ID_RECEIVED" << (int)uwApph->sn_ << "_ID_EXPECTED_" << esn << endl;
-            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PACKET_LOST_ID_RECEIVED" << (int)uwApph->sn_ << "_ID_EXPECTED_" << esn << endl;
+            if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::PACKET_LOST_ID_RECEIVED" << (int)uwApph->sn_ << "_ID_EXPECTED_" << esn << endl;
+            if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::PACKET_LOST_ID_RECEIVED" << (int)uwApph->sn_ << "_ID_EXPECTED_" << esn << endl;
             incrPktLost(uwApph->sn_ - (esn));
         }
     }
@@ -275,26 +275,26 @@ void uwApplicationModule::statistics(Packet* p) {
     lrtime = Scheduler::instance().clock(); //Update the time in which the last packet is received.
     if (debug_ >= 0 && socket_active) 
     {
-        std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_RECEIVED--> ";
+        std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::PAYLOAD_RECEIVED--> ";
         for(int i=0;i<MAX_LENGTH_PAYLOAD;i++)
         {
             cout<<uwApph->payload_msg[i];
         }
     }
-    if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::SN_RECEIVED_" << (int)uwApph->sn_ <<  endl;
-    if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)uwApph->payload_size() << endl;
-    if (debug_ >= 1 && !withoutSocket()) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_RECEIVED_" << uwApph->payload_msg << endl;
+    if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::SN_RECEIVED_" << (int)uwApph->sn_ <<  endl;
+    if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)uwApph->payload_size() << endl;
+    if (debug_ >= 1 && !withoutSocket()) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::PAYLOAD_RECEIVED_" << uwApph->payload_msg << endl;
 
-    if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)uwApph->payload_size() << endl;
-    if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::SN_RECEIVED_" << (int)uwApph->sn_ <<  endl;
-    if (logging && !withoutSocket()) out_log << left << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::PAYLOAD_RECEIVED_" << uwApph->payload_msg << endl;
+    if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::PAYLOAD_SIZE_RECEIVED_" << (int)uwApph->payload_size() << endl;
+    if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::SN_RECEIVED_" << (int)uwApph->sn_ <<  endl;
+    if (logging && !withoutSocket()) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::PAYLOAD_RECEIVED_" << uwApph->payload_msg << endl;
     Packet::free(p);
 }//end statistics method
 
 void uwApplicationModule::start_generation() {
     //if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::start_generation() ---> Start the process to generate DATA packets." << std::endl;
-    if(debug_ >= 1) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::START_GENERATION_DATA" << endl;
-    if(logging) std::cout << "[" << getEpoch() << "]::" << NOW << "UWAPPLICATION::START_GENERATION_DATA" << endl;
+    if(debug_ >= 1) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::START_GENERATION_DATA" << endl;
+    if(logging) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::START_GENERATION_DATA" << endl;
     chkTimerPeriod.resched(getTimeBeforeNextPkt());
 } //end start_generation() method
 

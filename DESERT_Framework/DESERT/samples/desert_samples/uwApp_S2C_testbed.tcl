@@ -27,25 +27,25 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Author: Federico Favaro
-# Version: 1.0.0
 #
 
-set opt(AppSocket)  1
-set opt(protocol) "TCP"
+set opt(AppSocket)  0 ;# if set to 1 the Application listen from the socket port provided in input
+set opt(protocol) "TCP" ;# Protocol to use for the Application socket, TCP or UDP
 
 # Terminal's parameter check
 if {$opt(AppSocket) == 1} {
   if {$argc != 10} {
-    puts "The script needs 7 input to work"
+    puts "The script needs 10 input to work"
     puts "1 - ID of the node"
     puts "2 - ID of the receiver"
     puts "3 - Start time"
     puts "4 - Stop time"
-    puts "5 - Packet generation period"
+    puts "5 - Packet generation period (0 if the node doesn't generate data)"
     puts "6 - ID of the experiment"
     puts "7 - IP of the modem"
     puts "8 - Port of the modem"
     puts "9 - Application socket port"
+    puts "10 - Experiment ID"
     puts "Please try again."
     exit
   } else {
@@ -61,17 +61,18 @@ if {$opt(AppSocket) == 1} {
     set opt(exp_ID) [lindex $argv 9]
   }
 } else {
-  if {$argc != 9} {
-    puts "The script needs 7 input to work"
+  if {$argc != 10} {
+    puts "The script needs 10 input to work"
     puts "1 - ID of the node"
     puts "2 - ID of the receiver"
     puts "3 - Start time"
     puts "4 - Stop time"
-    puts "5 - Packet generation period"
+    puts "5 - Packet generation period (0 if the node doesn't generate data)"
     puts "6 - ID of the experiment"
     puts "7 - IP of the modem"
     puts "8 - Port of the modem"
     puts "9 - Payload size (byte)"
+    puts "10 - Experiment ID"
     puts "Please try again."
     exit
   } else {
@@ -147,10 +148,6 @@ $rnd_gen use-rng $rng
 # Module Configuration  #
 #########################
 # Put here all the commands to set globally the initialization values of the binded variables (optional)
-
-
-
-
 # # variables for the ALOHA-CSMA module
 
 # variables for the AL module
@@ -207,7 +204,7 @@ UW/APP/uwApplication/Packer set debug_ 1
 
 Module/UW/APPLICATION set debug_ 0              
 Module/UW/APPLICATION set period_ $opt(traffic)
-Module/UW/APPLICATION set PoissonTraffic_ 0      
+Module/UW/APPLICATION set PoissonTraffic_ 1
 if {$opt(AppSocket) == 1} {
   Module/UW/APPLICATION set Socket_Port_ $opt(app_port)
 } else {
@@ -222,8 +219,8 @@ Module/UW/APPLICATION set EXP_ID_ $opt(exp_ID)
 #####
 Module/UW/MPhy_modem/S2C set period_ 			        1
 Module/UW/MPhy_modem/S2C set debug_ 			        1
-Module/UW/MPhy_modem/S2C set log_                 0
-Module/UW/MPhy_modem/S2C set SetModemID_	 	      0
+Module/UW/MPhy_modem/S2C set log_                       0
+Module/UW/MPhy_modem/S2C set SetModemID_	 	        0
 #######
 
 ################################
@@ -262,16 +259,16 @@ proc createNode { } {
     set modem_ [new "Module/UW/MPhy_modem/S2C" $socket_port]    
     puts "creo nodo"
     # insert the module(s) into the node
-	  $node_ addModule 8 $app_ 1 "UWA"
-	  $node_ addModule 7 $transport_ 1 "UDP"
-	  $node_ addModule 6 $routing_ 1 "IPR"
-	  $node_ addModule 5 $ipif_ 1 "IPIF"
-	  $node_ addModule 4 $mll_ 1 "ARP"  
-	  $node_ addModule 3 $mac_ 1 "ALOHA"
-	  $node_ addModule 2 $uwal_ 1 "UWAL"
-	  $node_ addModule 1 $modem_ 1 "S2C" 
+	$node_ addModule 8 $app_ 1 "UWA"
+	$node_ addModule 7 $transport_ 1 "UDP"
+	$node_ addModule 6 $routing_ 1 "IPR"
+	$node_ addModule 5 $ipif_ 1 "IPIF"
+	$node_ addModule 4 $mll_ 1 "ARP"  
+	$node_ addModule 3 $mac_ 1 "ALOHA"
+	$node_ addModule 2 $uwal_ 1 "UWAL"
+	$node_ addModule 1 $modem_ 1 "S2C" 
 
-	  $node_ setConnection $app_ $transport_ trace
+	$node_ setConnection $app_ $transport_ trace
     $node_ setConnection $transport_ $routing_ trace
     $node_ setConnection $routing_ $ipif_ trace
     $node_ setConnection $ipif_ $mll_ trace
@@ -349,11 +346,8 @@ $mll_ addentry  $opt(dest) $opt(dest)
 
 $ns at 0 "$modem_ start"
 
-if {$opt(node) == 1} {
+if {$opt(traffic) != 0} {
   $ns at $opt(start) "$app_ start"
-  $ns at $opt(stop) "$app_ stop"
-} else {
-  $ns at [expr $opt(start) + 2] "$app_ start"
   $ns at $opt(stop) "$app_ stop"
 }
 
