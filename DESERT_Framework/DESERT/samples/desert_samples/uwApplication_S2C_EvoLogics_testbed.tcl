@@ -28,6 +28,29 @@
 #
 # Author: Federico Favaro
 #
+# README
+#
+# This tcl sample let you to test uwApplication module together with a simple and complete 
+# stack of DESERT Underwater and EvoLogics S2c modems.
+# Hence, this  script needs an S2C EvoLogics modem in the same subnet of the device running this script.
+# For more information just type 
+# $ns uwApplication_S2C_EvoLogics_testbed.tcl
+# a list of needed parameter will show up. 
+# uwApplication module has basically two working modality: (1) Socket and (2) Random data generation
+# 
+# (1) In the first modality, uwApplication module listen from any interface on the device on a port specified as an input
+# of the script. You can connect to this port with either a client software that generate dummy data or through netcat
+# Suppose that uwApplication listen from port 5000. After running this script, you can open a new terminal and type
+# $ nc localhost 5000
+# Now from that terminal you can type text and messages that will be sent to uwApplication, processed and sent to the destination
+# trough the modem.
+# You can set this modality setting "1" to the variable $opt(appSocket). Finally, you can choose also the socket protocol through which 
+# your client software and uwApplication can communicate. You can choose from "TCP" and "UDP". Any other values will de-activate the Server 
+# on the module, and uwApplication will start generate random data as explained hereafter.
+#
+# (2) In the second modality (activated putting "0" to the variable $opt(AppSocket) ), uwApplication will generate internally random text every 
+# x seconds (specified as an input parameter). In this case, the user doesn't have to send data, and uwApplication will automatically send a Packet
+# with random payload to the receiver through the modem.
 
 set opt(AppSocket)  0 ;# if set to 1 the Application listen from the socket port provided in input
 set opt(protocol) "TCP" ;# Protocol to use for the Application socket, TCP or UDP
