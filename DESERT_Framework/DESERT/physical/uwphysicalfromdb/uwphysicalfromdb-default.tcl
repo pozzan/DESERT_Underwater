@@ -29,3 +29,5 @@
 # @file   uwphysicalfromdb-default.tcl
 # @author Giovanni Toso
 # @version 1.0.0
+
+Module/UW/PHYSICALFROMDB set line_index_ 1

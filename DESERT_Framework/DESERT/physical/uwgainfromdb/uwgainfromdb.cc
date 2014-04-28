@@ -97,14 +97,14 @@ double UnderwaterGainFromDb::getPER(double _snr, int _nbits, Packet* p) {
     double gain_ = pow(10, (this->getGain(NOW, depth_src_, depth_dst_, dist_dst_) / 10));
     gain_ = gain_ * pow(frequency_correction_factor_, - dist_dst_);
     
-    double snr_;
+    double snir_;
     if ((ph->Pn + ph->Pi) != 0) {
-        snr_ = (ph->Pt * gain_) / (ph->Pn + ph->Pi);
+        snir_ = (ph->Pt * gain_) / (ph->Pn + ph->Pi);
     } else {
-        snr_ = - INT_MAX;
+        snir_ = - INT_MAX;
         cerr << "ph->Pn + ph->Pi = 0!" << endl;
     }
-    return UnderwaterPhysical::getPER(snr_, _nbits, p);
+    return UnderwaterPhysical::getPER(snir_, _nbits, p);
 } /* UnderwaterGainFromDb::getPER */
 
 void UnderwaterGainFromDb::setTimeRoughness(const int& _time) {

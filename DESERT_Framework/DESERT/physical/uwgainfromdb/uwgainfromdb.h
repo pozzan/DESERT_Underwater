@@ -179,6 +179,8 @@ protected:
     inline const bool isZero(const double& value) const { return std::fabs(value) < std::numeric_limits<double>::epsilon(); }
     
     char* path_;                /**< Name of the trace file writter for the current node. */
+    char token_separator_;      /**< Token used to parse the elements in a line of the database. */
+    ostringstream osstream_;    /**< Used to create strings. */
     
 private:
     // Variables
@@ -186,8 +188,6 @@ private:
     int depth_roughness_;       /**< Roughness of the depth samples. */
     int distance_roughness_;    /**< Roughness of the distance samples. */
     int total_time_;            /**< Maximum value of the temporal samples, after this limit the smilulation time will be reset to zero. */
-    char token_separator_;      /**< Token used to parse the elements in a line of the database. */
-    ostringstream osstream_;    /**< Used to create strings. */
     double frequency_correction_factor_; /**< used to shift from a frequency value to another one. */
 };
 

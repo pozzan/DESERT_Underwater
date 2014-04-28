@@ -46,122 +46,149 @@ public:
   }
 } class_UnderwaterPhysicalfromdb;
 
-UnderwaterPhysicalfromdb::UnderwaterPhysicalfromdb() {
+UnderwaterPhysicalfromdb::UnderwaterPhysicalfromdb() :
+line_index_(1)
+{
+    bind("line_index_", &line_index_);
 }
 
-int UnderwaterPhysicalfromdb::command(int argc, const char*const* argv) {
-    //if (argc == 3) {
-        //if (strcasecmp(argv[1], "addr") == 0) {
-            //ipAddr_ = static_cast<uint8_t>(atoi(argv[2]));
-            //if (ipAddr_ == 0) {
-                //fprintf(stderr, "0 is not a valid IP address");
-                //return TCL_ERROR;
-            //}
-            //return TCL_OK;
-        //} else if (strcasecmp(argv[1], "setCountry") == 0) {
-            //country = ((char *) argv[2]);
-            //return TCL_OK;
-        //} else if (strcasecmp(argv[1], "setModulation") == 0) {
-            //modulation = ((char *) argv[2]);
-            //return TCL_OK;
-        //} else if (strcasecmp(argv[1], "addSnr") == 0) {
-            //snr.insert(snr.end(), strtod(argv[2], NULL));
-            //return TCL_OK;
-        //} else if (strcasecmp(argv[1], "addSir") == 0) {
-            //sir.insert(sir.end(), strtod(argv[2], NULL));
-            //return TCL_OK;
-        //} else if (strcasecmp(argv[1], "addOverlap") == 0) {
-            //overlap.insert(overlap.end(), strtod(argv[2], NULL));
-            //return TCL_OK;
-        //} else if (strcasecmp(argv[1], "setPath") == 0) {
-            //path_ = (char*) (argv[2]);
-            //return TCL_OK;
-        //} else if (strcasecmp(argv[1], "setInterference") == 0) {
-            //interference_ = dynamic_cast<uwinterference*> (TclObject::lookup(argv[2]));
-            //if(!interference_)
-                //return TCL_ERROR;
-            //return TCL_OK;
-    //}
-    //return UnderwaterPhysical::command(argc, argv);
-} /* UnderwaterPhysicalfromdb::command */
-
-void UnderwaterPhysicalfromdb::recv(Packet* p) {
-    //hdr_cmn *ch = HDR_CMN(p);
-    //hdr_MPhy *ph = HDR_MPHY(p);
-
-    //if (ch->direction() == hdr_cmn::UP) {
-        //ph->dstSpectralMask = getRxSpectralMask(p);
-        //ph->dstPosition = getPosition();
-        //ph->dstAntenna = getRxAntenna(p);
-
-        //assert(ph->dstSpectralMask);
-        //assert(ph->dstPosition);
-
-        //ph->Pr = getRxPower(p);
-
-        //p->txinfo_.RxPr = 0;
-        //p->txinfo_.CPThresh = 0;
-
-        //if (ph->Pr > 0) {
-            //ph->Pn = getNoisePower(p);
-
-            //if (interference_) {
-                //interference_->addToInterference(p);
-            //}
-
-            //ph->rxtime = NOW;
-            //ph->worth_tracing = true;
-
-            //if (isOn == true) {
-                //PacketEvent* pe = new PacketEvent(p);
-                //Scheduler::instance().schedule(&rxtimer, pe, ph->duration);
-
-                //startRx(p);
-            //} else {
-                //Packet::free(p);
-            //}
-        //} else {
-            //Packet::free(p);
-        //}
-    //} else { // Direction DOWN
-        //assert(isOn);
-
-        //ph->Pr = 0;
-        //ph->Pn = 0;
-        //ph->Pi = 0;
-        //ph->txtime = NOW;
-        //ph->rxtime = ph->txtime;
-
-        //ph->worth_tracing = false;
-
-        //ph->srcSpectralMask = getTxSpectralMask(p);
-        //ph->srcAntenna = getTxAntenna(p);
-        //ph->srcPosition = getPosition();
-        //ph->dstSpectralMask = 0;
-        //ph->dstPosition = 0;
-        //ph->dstAntenna = 0;
-        //ph->modulationType = getModulationType(p);
-        //ph->duration = getTxDuration(p);
-
-        //ph->Pt = getTxPower(p);
-
-        //assert(ph->srcSpectralMask);
-        //assert(ph->srcPosition);
-        //assert(ph->duration > 0);
-        //assert(ph->Pt > 0);
-
-        //ch->prev_hop_ = ipAddr_;  // Must be added to ensure compatibility with uw-al
-
-        //PacketEvent* pe = new PacketEvent(p->copy());
-        //Scheduler::instance().schedule(&txtimer, pe, ph->duration);
-
-        //startTx(p);
-    //}
-}
-
-void UnderwaterPhysicalfromdb::endRx(Packet* p) {
-    hdr_cmn* ch = HDR_CMN(p);
+double UnderwaterPhysicalfromdb::getPER(double _snr, int _nbits, Packet* p) {
     hdr_MPhy* ph = HDR_MPHY(p);
 
-} /* UnderwaterPhysicalfromdb::endRx */
+    double x_ = (ph->srcPosition)->getX();
+    double y_ = (ph->srcPosition)->getY();
+    double z_ = (ph->srcPosition)->getZ();
+    double x_dst_ = (ph->dstPosition)->getX();
+    double y_dst_ = (ph->dstPosition)->getY();
+    double z_dst_ = (ph->dstPosition)->getZ();
+    double depth_src_ = z_;
+    double depth_dst_ = z_dst_;
+    double dist_dst_ = sqrt ((x_ - x_dst_)*(x_ - x_dst_) + (y_ - y_dst_)*(y_ - y_dst_));
+
+    double gain_ = pow(10, (getGain(NOW, depth_src_, depth_dst_, dist_dst_) / 10));
+    double self_interference_ = pow(10, (getSelfInterference(NOW, depth_src_, depth_dst_, dist_dst_) / 10));
+    //gain_ = gain_ * pow(frequency_correction_factor_, - dist_dst_);
+
+    double snir_;
+    if ((ph->Pn + ph->Pi + self_interference_) != 0) {
+        ph->Pi += self_interference_; // Add the self interference to the interference.
+        snir_ = (ph->Pt * gain_) / (ph->Pn + ph->Pi);
+    } else {
+        snir_ = - INT_MAX;
+    }
+    return UnderwaterPhysical::getPER(snir_, _nbits, p);
+}
+
+double UnderwaterPhysicalfromdb::getGain(const double& _time, const double& _source_depth, const double& _destination_depth, const double& _destination_distance) {
+    assert(_time >= 0);
+    assert(_source_depth <= 0);
+    assert(_destination_depth <= 0);
+    assert(_destination_distance >= 0);
+
+    // Quantize the input values.
+    int time_filename_ = static_cast<int> (static_cast<int> (ceil (_time) / getTimeRoughness()) * getTimeRoughness() % getTotalTime());
+    int source_depth_filename_ = static_cast<int> (ceil (_source_depth * -1) / getDepthRoughness() * getDepthRoughness());
+    int destination_depth_filename_ = static_cast<int> (ceil (_destination_depth * -1) / getDepthRoughness() * getDepthRoughness());
+    int distance_filename_ = static_cast<int> (ceil (_destination_distance) / getDistanceRoughness());
+
+    if (source_depth_filename_ == 0) {
+        source_depth_filename_ = getDepthRoughness();
+    }
+
+    if (destination_depth_filename_ == 0) {
+        destination_depth_filename_ = getDepthRoughness();
+    }
+
+    if (distance_filename_ == 0) {
+        distance_filename_ = getDistanceRoughness();
+    }
+
+    string file_name = createNameFile(time_filename_, source_depth_filename_, destination_depth_filename_, distance_filename_);
+
+    return retrieveFromFile(file_name, getLineIndex(), 1);
+} /* UnderwaterPhysicalfromdb::getGain */
+
+double UnderwaterPhysicalfromdb::getSelfInterference(const double& _time, const double& _source_depth, const double& _destination_depth, const double& _destination_distance) {
+    assert(_time >= 0);
+    assert(_source_depth <= 0);
+    assert(_destination_depth <= 0);
+    assert(_destination_distance >= 0);
+
+    // Quantize the input values.
+    int time_filename_ = static_cast<int> (static_cast<int> (ceil (_time) / getTimeRoughness()) * getTimeRoughness() % getTotalTime());
+    int source_depth_filename_ = static_cast<int> (ceil (_source_depth * -1) / getDepthRoughness() * getDepthRoughness());
+    int destination_depth_filename_ = static_cast<int> (ceil (_destination_depth * -1) / getDepthRoughness() * getDepthRoughness());
+    int distance_filename_ = static_cast<int> (ceil (_destination_distance) / getDistanceRoughness());
+
+    if (source_depth_filename_ == 0) {
+        source_depth_filename_ = getDepthRoughness();
+    }
+
+    if (destination_depth_filename_ == 0) {
+        destination_depth_filename_ = getDepthRoughness();
+    }
+
+    if (distance_filename_ == 0) {
+        distance_filename_ = getDistanceRoughness();
+    }
+
+    string file_name = createNameFile(time_filename_, source_depth_filename_, destination_depth_filename_, distance_filename_);
+
+    return retrieveFromFile(file_name, getLineIndex(), 2);
+} /* UnderwaterPhysicalfromdb::getSelfInterference */
+
+double UnderwaterPhysicalfromdb::retrieveFromFile(const string& _file_name, const int& _row_index, const int& _column_index) const {
+    int row_iterator_ = 0;
+    int column_iterator_ = 0;
+    ifstream input_file_;
+    istringstream stm;
+    string line_;
+    string token_;
+    string value_;
+    double return_value_;
+
+    char* tmp_ = new char[_file_name.length() + 1];
+    strcpy(tmp_, _file_name.c_str());
+    if (tmp_ == NULL) {
+        fprintf(stderr, "Empty string for the file name");
+    }
+
+    input_file_.open(tmp_);
+    if (input_file_.is_open()) {
+        while (std::getline(input_file_, line_)) {
+            row_iterator_++;
+            if (row_iterator_ == _row_index) {
+                break;
+            }
+        }
+    } else {
+        cerr << "Impossible to open file " << _file_name << endl;
+    }
+
+    istringstream iss(line_);
+    while (getline(iss, token_, token_separator_)) {
+        column_iterator_++;
+        if (column_iterator_ == _column_index) {
+            value_ = token_;
+        }
+    }
+
+    stm.str(value_);
+    stm >> return_value_;
+    cout << "file:" << _file_name << ":column:" << _column_index << ":row:" << _row_index << ":gain:" << return_value_ << endl;
+
+    delete[] tmp_;
+    if (this->isZero(return_value_)) {
+        return (- INT_MAX);
+    } else {
+        return return_value_ ;
+    }
+} /* UnderwaterPhysicalfromdb::retriveFromFile */
+
+string UnderwaterPhysicalfromdb::createNameFile(const int& _time, const int& _source_depth, const int& _destination_depth, const int& _distance) {
+    osstream_.clear();
+    osstream_.str("");
+    osstream_ << path_ << "/" << _time << "_" << _source_depth << "_" << _destination_depth << "_" << _distance;
+    return osstream_.str();
+} /* UnderwaterPhysicalfromdb::createNameFile */
 
