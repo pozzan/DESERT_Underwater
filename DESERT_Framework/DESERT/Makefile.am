@@ -55,6 +55,7 @@ SUBDIRS = m4 \
     physical/uwphysical \
     physical/uwgainfromdb \
     physical/uwphysicaldb\
+    physical/uwphysicalfromdb\
     physical/uwmphy_modem \
     physical/ms2c_evologics \
     physical/uwmphypatch \

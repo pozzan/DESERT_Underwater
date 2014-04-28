@@ -32,7 +32,7 @@
  * @author Toso Giovanni
  * @version 1.0.0
  * 
- * \brief file to initialize the libuwphysicalracun.so library
+ * \brief file to initialize the libuwphysicaldb.so library
  */
 #include <tclcl.h>
 
