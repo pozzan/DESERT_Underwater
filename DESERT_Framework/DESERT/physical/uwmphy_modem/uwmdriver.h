@@ -248,6 +248,10 @@ public:
           */
          virtual void emptyModemQueue() = 0;
 
+       	virtual inline bool getKeepOnlineMode() {return KeepOnline;}
+
+       	virtual inline void setKeepOnlineMode(bool ko) {KeepOnline = ko;}
+
          protected:
 
 	 UWMPhy_modem* pmModem; /**< link to the UWMPhy_modem object that contains this driver */
@@ -260,6 +264,8 @@ public:
 	 int ID; /**< ID of the modem. NOTE: UWMdriver::ID (i.e., modem ID, hardware side) is set equal to UWMPhy_modem::ID (i.e., node ID, simulator side) (therefore when node ID transmits, it also coincides with the source ID). @see UWMPhy_modem::start(), UWMdriver::setID(int) */
 	 
 	 int status; /**< Status of the driver's general state machine. Seven possible statuses = \e _IDLE, \e _TX, \e _RX , \e _IDLE_RX,\e _CFG, \e _TX_PAUSED and \e _TX_RX.*/
+
+	 bool KeepOnline;
 
 	 // TX VARIABLES (variables for the next packet to be transmitted)
 	 std::string payload_tx; /**< String where to save the payload of the next packet to send via modem. NOTE: an object of the class UWMcodec must write here after the host-to-modem mapping. */

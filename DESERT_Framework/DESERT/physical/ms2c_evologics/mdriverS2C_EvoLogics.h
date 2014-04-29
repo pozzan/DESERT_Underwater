@@ -52,6 +52,8 @@
 #define _IM 11 /**< Status 11 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): send instant message */
 #define _IMS 12 /**< Status 12 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): instant message sent to modem */
 #define _RXIM -1 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of an instant message */
+#define _TXKO 7
+#define _TXKOD 8
 
 
 /**

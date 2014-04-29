@@ -119,6 +119,19 @@ std::string MinterpreterAT::build_sendim(int _length, int _dest, std::string _fl
 	return at_string;
 }
 
+std::string MinterpreterAT::build_atko(int value)
+{
+    string at_string;
+    stringstream astr("");
+    astr << "AT!KO" << value;
+    astr >> at_string;
+    if (debug_ >= 1)
+    {
+        cout << "MS2C_EVOLOGICS_AT_MESSAGE_" << hexdumplog(at_string) << endl;
+    }    
+    return at_string;
+}
+
 
 std::string MinterpreterAT::build_atzn(int _drop_type) 
 {

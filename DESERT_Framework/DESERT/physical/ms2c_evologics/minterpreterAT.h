@@ -122,6 +122,8 @@ public:
      */    
     std::string build_atzn(int _drop_type);
 
+    std::string build_atko(int value);
+
     // METHODS to PARSE MESSAGES
     // NOTE: These methods must know and use the reception variable of the linked UWdriver object and the corresponding methods to update them
 

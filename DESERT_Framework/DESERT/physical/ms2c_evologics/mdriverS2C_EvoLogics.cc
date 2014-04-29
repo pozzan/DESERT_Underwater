@@ -96,6 +96,10 @@ void MdriverS2C_EvoLogics::start() {
         status = _CFG;
         m_status_tx = _SETID;
         modemTxManager();
+    } else if (getKeepOnlineMode()) {
+        status = _CFG;
+        m_status_tx = _TXKO;
+        modemTxManager();
     } else {
         status = _IDLE;
     }
@@ -308,7 +312,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     if (debug_ >= 2) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_" << m_status_tx << "_" << status << endl;
                     }
-                    if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET)) {
+                    if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET) || (m_status_tx == _TXKOD && status == _CFG)) {
                         // Update modem status
                         status = _IDLE;
                         m_status_tx = _IDLE;
@@ -437,7 +441,10 @@ void MdriverS2C_EvoLogics::modemTxManager() {
             case _DROPBUFFER:
                 if (debug_ >= 2) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUILDING_ATZ" << _DROPBUFFER << "_MESSAGE" << endl;
                 tx_msg = mInterpreter.build_atzn(_DROPBUFFER);
-                if (debug_) cout << "Building DROPBUFFER message = " << tx_msg << endl;
+                break;
+            case _TXKO:
+                if (debug_ >= 2) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUILDING_AT!KO" << endl;
+                tx_msg = mInterpreter.build_atko(0);
                 break;
             default:
 
@@ -450,7 +457,7 @@ void MdriverS2C_EvoLogics::modemTxManager() {
                     outLog.close();
                 }
         }//end switch
-        if (m_status_tx == _IM || m_status_tx == _SETID || m_status_tx == _DROPBUFFER) {
+        if (m_status_tx == _IM || m_status_tx == _SETID || m_status_tx == _DROPBUFFER || m_status_tx == _TXKO) {
             mConnector.writeToModem(tx_msg);
             m_status_tx++;
         }
