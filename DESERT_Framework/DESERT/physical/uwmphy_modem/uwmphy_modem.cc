@@ -209,6 +209,11 @@ int UWMPhy_modem::check_modem() {
         endTx(popTxBuff());
         startRx(PktRx);
         endRx(PktRx);
+    } else if (modemStatus == _CFG && modemStatus_old == _CFG) {
+
+        pmDriver->modemSetID();
+        //return modemStatus;
+
     } else if ((modemStatus == modemStatus_old) || ((modemStatus == _TX_RX) && modemStatus_old == _TX_PAUSED) || (modemStatus == _TX_PAUSED && modemStatus_old == _TX)) {
         // Do nothing
         return modemStatus;

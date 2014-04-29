@@ -79,6 +79,8 @@ class MdriverS2C_EvoLogics : public UWMdriver
 	         * @param pmModem_ pointer to the UWMPhy_modem object to link with this UWMdriver object.
 	         */
 		MdriverS2C_EvoLogics(UWMPhy_modem*);
+
+		virtual void modemSetID();
 		
 		/**
 	         * Class destructor.

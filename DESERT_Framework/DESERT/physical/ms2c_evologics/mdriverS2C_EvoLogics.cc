@@ -90,13 +90,14 @@ void MdriverS2C_EvoLogics::start() {
         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::START" << endl;
     }
     mConnector.openConnection();
-    if (SetModemID) {
-        if (debug_ >= 0)
-            cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::SETTING_MODEM_ID" << endl;
-        status = _CFG;
-        m_status_tx = _SETID;
-        modemTxManager();
-    } else if (getKeepOnlineMode()) {
+    //if (SetModemID) {
+    //    if (debug_ >= 0)
+    //        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::SETTING_MODEM_ID" << endl;
+    //    status = _CFG;
+    //    m_status_tx = _SETID;
+    //    modemTxManager();
+    //} else if (getKeepOnlineMode()) {
+    if (getKeepOnlineMode()) {
         status = _CFG;
         m_status_tx = _TXKO;
         modemTxManager();
@@ -118,6 +119,10 @@ void MdriverS2C_EvoLogics::stop() {
 void MdriverS2C_EvoLogics::modemTx() {
     status = _TX;
     m_status_tx = _IM;
+    modemTxManager();
+}
+
+void MdriverS2C_EvoLogics::modemSetID() {
     modemTxManager();
 }
 
@@ -312,12 +317,23 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     if (debug_ >= 2) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_" << m_status_tx << "_" << status << endl;
                     }
-                    if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET) || (m_status_tx == _TXKOD && status == _CFG)) {
+                    if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET)) {
                         // Update modem status
                         status = _IDLE;
                         m_status_tx = _IDLE;
                         cread = false;
                         //                        //do nothing  
+                    } else if ((m_status_tx == _TXKOD && status == _CFG)) {
+                        if (SetModemID)
+                        {
+                            status = _CFG;
+                            m_status_tx = _SETID;
+                            cread = false;
+                        } else {
+                            status = _IDLE;
+                            m_status_tx = _IDLE;
+                            cread = false;
+                        }
                     } else {
                         if (debug_ >= 0) {
                             cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_WRONG_STATUS_" << m_status_tx << "_" << status << endl;

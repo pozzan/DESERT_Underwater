@@ -85,6 +85,8 @@ public:
 	  */
 	 ~UWMdriver();
 
+	 virtual void modemSetID() = 0;
+
 	 /**
 	  *  Driver starter. This method starts the driver performing all the needed operations 
 	  *  to open an host-modem connection. 
