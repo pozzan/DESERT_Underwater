@@ -101,7 +101,7 @@ protected:
      */
     inline const double get_Ks () const {
         //TODO: fix this and find the correct value
-        return 0.51;
+        return attenuation_coeff_sediment;
     }
 
     /**
@@ -182,13 +182,14 @@ protected:
     static const double FROMDBPERKYARDTODMPERM = 0.001093613298338; /**< Conversion factor from dB/kyard to dB/m. */
 private:
     //Variables
-    double bottom_depth;         /**< Water depth (m) */
+    double bottom_depth;               /**< Water depth (m) */
     double sound_speed_water_bottom;   /**< Speed of sound in water at the sea bottom level (m/s). */
     double sound_speed_water_surface;  /**< Speed of sound in water at the sea surface level (m/s). */
-    double sound_speed_sediment; /**< Speed of sound in the sediment (m/s). */
-    double density_sediment;     /**< Sediment density (g/cm^3). */
-    double density_water;        /**< Water density (g/cm^3). */
-    int debug_;                  /**< Debug level. */
+    double sound_speed_sediment;       /**< Speed of sound in the sediment (m/s). */
+    double density_sediment;           /**< Sediment density (g/cm^3). */
+    double density_water;              /**< Water density (g/cm^3). */
+    double attenuation_coeff_sediment; /**< Attenuation coefficient of the sediment (dB/(m*kHz)). */
+    int debug_;                        /**< Debug level. */
 };
 
 #endif /* UWPHYSICALROGERSMODEL_H  */

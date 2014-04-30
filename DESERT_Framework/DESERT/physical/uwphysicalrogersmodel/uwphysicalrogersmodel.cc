@@ -39,11 +39,11 @@
 
 static class UwPhysicalRogersModelClass : public TclClass {
 public:
-  UwPhysicalRogersModelClass() : TclClass("Module/UW/PROPAGATIONROGERSMODEL") {}
-  TclObject* create(int, const char*const*) {
-    return (new UnderwaterPhysicalRogersModel);
-  }
-} class_module_uwphysical;
+    UwPhysicalRogersModelClass() : TclClass("Module/UW/PROPAGATIONROGERS") {}
+    TclObject* create(int, const char*const*) {
+        return (new UnderwaterPhysicalRogersModel);
+    }
+} class_module_UnderwaterPhysicalRogersModel;
 
 UnderwaterPhysicalRogersModel::UnderwaterPhysicalRogersModel() :
     bottom_depth(100),
@@ -52,6 +52,7 @@ UnderwaterPhysicalRogersModel::UnderwaterPhysicalRogersModel() :
     sound_speed_sediment(1585),
     density_sediment(1.740),
     density_water(1),
+    attenuation_coeff_sediment(0.51),
     debug_(0)
 {
     bind("bottom_depth_", &bottom_depth);
@@ -60,13 +61,14 @@ UnderwaterPhysicalRogersModel::UnderwaterPhysicalRogersModel() :
     bind("sound_speed_sediment_", &sound_speed_sediment);
     bind("density_sediment_", &density_sediment);
     bind("density_water_", &density_water);
+    bind("attenuation_coeff_sediment_", &attenuation_coeff_sediment);
     bind("debug_", &debug_);
 }
 
 int UnderwaterPhysicalRogersModel::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
 
-    if( argc == 2) {
+    if(argc == 2) {
         if (strcasecmp (argv[1], "get_bottom_depth") == 0) {
             tcl.resultf("%f", bottom_depth);
             return TCL_OK;

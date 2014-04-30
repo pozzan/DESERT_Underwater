@@ -39,10 +39,10 @@
 
 static class UwPhysicalClass : public TclClass {
 public:
-  UwPhysicalClass() : TclClass("Module/UW/PHYSICAL") {}
-  TclObject* create(int, const char*const*) {
-    return (new UnderwaterPhysical);
-  }
+    UwPhysicalClass() : TclClass("Module/UW/PHYSICAL") {}
+    TclObject* create(int, const char*const*) {
+        return (new UnderwaterPhysical);
+    }
 } class_module_uwphysical;
 
 UnderwaterPhysical::UnderwaterPhysical() :

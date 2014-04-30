@@ -30,10 +30,11 @@
 # @author Giovanni Toso
 # @version 1.0.0
 
-Module/UW/PROPAGATIONROGERSMODEL set bottom_depth_              100
-Module/UW/PROPAGATIONROGERSMODEL set sound_speed_water_bottom_  1500
-Module/UW/PROPAGATIONROGERSMODEL set sound_speed_water_surface_ 1520
-Module/UW/PROPAGATIONROGERSMODEL set sound_speed_sediment_      1650
-Module/UW/PROPAGATIONROGERSMODEL set density_sediment_          2
-Module/UW/PROPAGATIONROGERSMODEL set density_water_             1
-Module/UW/PROPAGATIONROGERSMODEL set debug_                     0
+Module/UW/PROPAGATIONROGERS set bottom_depth_               100
+Module/UW/PROPAGATIONROGERS set sound_speed_water_bottom_   1500
+Module/UW/PROPAGATIONROGERS set sound_speed_water_surface_  1520
+Module/UW/PROPAGATIONROGERS set sound_speed_sediment_       1650
+Module/UW/PROPAGATIONROGERS set density_sediment_           2
+Module/UW/PROPAGATIONROGERS set density_water_              1
+Module/UW/PROPAGATIONROGERS set attenuation_coeff_sediment_ 0.51
+Module/UW/PROPAGATIONROGERS set debug_                      0
