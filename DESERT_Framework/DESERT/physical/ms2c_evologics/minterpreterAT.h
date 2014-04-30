@@ -121,8 +121,22 @@ public:
      * @return at_string the requested AT message.
      */    
     std::string build_atzn(int _drop_type);
-
+    /** 
+     * Method to build an AT message to set the Keep Online Modality
+     * 
+     * @param value of the Keep Online (number of probe message exchanged before close the acoustic connection)
+     * @return at_string the requested AT message.
+     */    
     std::string build_atko(int value);
+    /** 
+     * Method to build an AT message to send instant messages. 
+     * 
+     * @param _length the length in bytes of the message to send (max is 64 bytes).
+     * @param _dest the ID of the modem that must receive the packet.
+     * @param _payload the payload to send
+     * @return at_string the requested AT message.
+     */
+    std::string build_atsend(int _length, int _dest, std::string _payload);
 
     // METHODS to PARSE MESSAGES
     // NOTE: These methods must know and use the reception variable of the linked UWdriver object and the corresponding methods to update them

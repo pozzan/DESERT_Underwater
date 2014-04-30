@@ -144,6 +144,17 @@ std::string MinterpreterAT::build_atzn(int _drop_type)
     return at_string;
 }
 
+std::string MinterpreterAT::build_atsend(int _length, int _dest, std::string _payload)
+{
+    string at_string;
+    stringstream astr("");
+
+    astr << "AT*SEND," << _length << "," << _dest << "," << _payload;
+    astr >> at_string;
+
+    return at_string;
+}
+
 void MinterpreterAT::parse_recvim(std::string at_string) {
     std::string _prefix, _length, _src, _dest, _flag, _bitrate, _rssi, _integrity, _ptime, _velox, _payload;
     

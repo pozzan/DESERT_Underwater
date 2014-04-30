@@ -90,16 +90,15 @@ void MdriverS2C_EvoLogics::start() {
         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::START" << endl;
     }
     mConnector.openConnection();
-    //if (SetModemID) {
-    //    if (debug_ >= 0)
-    //        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::SETTING_MODEM_ID" << endl;
-    //    status = _CFG;
-    //    m_status_tx = _SETID;
-    //    modemTxManager();
-    //} else if (getKeepOnlineMode()) {
     if (getKeepOnlineMode()) {
+        if (debug_ >= 0) cout << "MS2C_EVOLOGICS(" << ID << ")::SETTING_KEEP_ONLINE_MODALITY" << endl;
         status = _CFG;
         m_status_tx = _TXKO;
+        modemTxManager();
+    } else if (SetModemID) {
+        if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::SETTING_MODEM_ID" << endl; 
+        status = _CFG;
+        m_status_tx = _SETID;
         modemTxManager();
     } else {
         status = _IDLE;
@@ -119,6 +118,12 @@ void MdriverS2C_EvoLogics::stop() {
 void MdriverS2C_EvoLogics::modemTx() {
     status = _TX;
     m_status_tx = _IM;
+    modemTxManager();
+}
+
+void MdriverS2C_EvoLogics::modemTxBurst() {
+    status = _TX;
+    m_status_tx = _BURST;
     modemTxManager();
 }
 
@@ -238,16 +243,16 @@ int MdriverS2C_EvoLogics::updateStatus() {
 
 
                 } else if (pr_msg.find("DELIVERED") != string::npos) {
-                    if (debug_ >= 1) {
+/*                    if (debug_ >= 1) {
                         hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
-                    }
+                    }*/
                     if (getLog()) {
                         outLog.open((getLogFile()).c_str(), ios::app);
                         outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::DELIVERED = " << hexdumplog(pr_msg) << endl;
                         outLog.flush();
                         outLog.close();
                     }
-                    queue_tx.push(pr_msg);
+                    //queue_tx.push(pr_msg);
 
                 } else if (pr_msg.find("FAILEDIM") != string::npos) {
                     if (debug_ >= 0) {
@@ -317,15 +322,15 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     if (debug_ >= 2) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_" << m_status_tx << "_" << status << endl;
                     }
-                    if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET)) {
+                    if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET) || (m_status_tx == _BURSTS && status == _TX)) {
                         // Update modem status
                         status = _IDLE;
                         m_status_tx = _IDLE;
                         cread = false;
-                        //                        //do nothing  
                     } else if ((m_status_tx == _TXKOD && status == _CFG)) {
                         if (SetModemID)
                         {
+                            if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::SETTING_MODEM_ID" << endl;
                             status = _CFG;
                             m_status_tx = _SETID;
                             cread = false;
@@ -384,7 +389,20 @@ int MdriverS2C_EvoLogics::updateStatus() {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::FAILEDIM" << endl;
                     }
                     status = _IDLE;
-                } else {
+                } else if (rx_msg.find("FAILED") != string::npos) {
+                    if (debug_ >= 0) {
+                        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::FAILED" << endl;
+                    }
+                    status = _IDLE;
+                } else if (rx_msg.find("DELIVERED") != string::npos) {
+                    if (debug_ >= 0) {
+                        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::DELIVERED" << endl;
+                    }
+                    //cread = false;
+                    //status = _IDLE;
+                    //do nothing
+                } 
+                else {
                     if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UNKNOWN_PACKET_IN_QUEUE_" << rx_msg << endl;
                 }
             } else {
@@ -454,6 +472,17 @@ void MdriverS2C_EvoLogics::modemTxManager() {
                     outLog.close();
                 }
                 break;
+            case _BURST:
+                //build a burst data
+                if (debug_ >= 2) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUILDING_AT*SEND_MESSAGE" << endl;
+                tx_msg = mInterpreter.build_atsend(payload_tx.length(), dest, payload_tx);
+                if (getLog()) {
+                    outLog.open((getLogFile()).c_str(), ios::app);
+                    outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::MODEM_TX_MANAGER::SEND = " << hexdumplog(tx_msg) << endl;
+                    outLog.flush();
+                    outLog.close();
+                }
+                break;
             case _DROPBUFFER:
                 if (debug_ >= 2) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUILDING_ATZ" << _DROPBUFFER << "_MESSAGE" << endl;
                 tx_msg = mInterpreter.build_atzn(_DROPBUFFER);
@@ -473,7 +502,7 @@ void MdriverS2C_EvoLogics::modemTxManager() {
                     outLog.close();
                 }
         }//end switch
-        if (m_status_tx == _IM || m_status_tx == _SETID || m_status_tx == _DROPBUFFER || m_status_tx == _TXKO) {
+        if (m_status_tx == _IM || m_status_tx == _SETID || m_status_tx == _DROPBUFFER || m_status_tx == _TXKO || m_status_tx == _BURST) {
             mConnector.writeToModem(tx_msg);
             m_status_tx++;
         }

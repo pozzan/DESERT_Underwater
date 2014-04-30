@@ -52,8 +52,10 @@
 #define _IM 11 /**< Status 11 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): send instant message */
 #define _IMS 12 /**< Status 12 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): instant message sent to modem */
 #define _RXIM -1 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of an instant message */
-#define _TXKO 7
-#define _TXKOD 8
+#define _TXKO 7 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): TX of an AT!KO command */
+#define _TXKOD 8 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): TX of an AT!KO command done  */
+#define _BURST 13 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): send a BURST message  */
+#define _BURSTS 14 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): BURST message sent  */
 
 
 /**
@@ -112,6 +114,9 @@ class MdriverS2C_EvoLogics : public UWMdriver
 	         *  @return UWMdriver::status, the updated modem's status.
 	         */
 		virtual int updateStatus();
+
+
+		virtual void modemTxBurst();
 		
 		/** 
 	         *  Method to get the Integrity value of the last received packet. NOTE: This method is used by McodecS2C_EvoLogics.
