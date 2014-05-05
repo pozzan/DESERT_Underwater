@@ -110,6 +110,11 @@ public:
 	  *  NOTE: when this function is called (by an UWMPhy_modem object), the driver's status must be set to TX_ and the packet must be sent immediately to the modem.
 	  */
 	 virtual void modemTxBurst() = 0;
+	 /**
+	  *  Method to notify to the driver that there is a packet to be sent via modem.
+	  *  NOTE: when this function is called (by an UWMPhy_modem object), the driver's status must be set to TX_ and the packet must be sent immediately to the modem.
+	  */
+	 virtual void modemTxPBM() = 0;
 
 	 /** 
 	  *  Method to update modem status. This method has to update the modem status according to the  messages 

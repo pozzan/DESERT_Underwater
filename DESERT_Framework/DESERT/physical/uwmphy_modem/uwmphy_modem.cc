@@ -247,8 +247,8 @@ void UWMPhy_modem::startTx(Packet* p)
          cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::ERROR_DIRECTION_SET_UP " << endl;
     } else {
         //TODO: Add the burst data support
-        //pmDriver -> modemTxBurst();
-        pmDriver -> modemTx();
+        pmDriver -> modemTxBurst();
+        //pmDriver -> modemTx();
     }
 }
 

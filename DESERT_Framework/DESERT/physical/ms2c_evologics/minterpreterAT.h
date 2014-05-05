@@ -157,6 +157,18 @@ public:
      * @param at_string the received string.
      */
     void parse_recvim(std::string at_string);
+    /**
+     * Method to parse an AT message (reception of a burst message). 
+     * NOTE: this method calls UWMdriver::updateRx(int,int,std::string).
+     * @param at_string the received string.
+     */
+    void parse_recv(std::string at_string);
+    /**
+     * Method to parse an AT message (reception of a burst message). 
+     * NOTE: this method calls UWMdriver::updateRx(int,int,std::string).
+     * @param at_string the received string.
+     */
+    void parse_recvpbm(std::string at_string);
     /** 
      *  Method to get the Integrity value of the last received packet. NOTE: This method is used by McodecS2C_EvoLogics.
      * 

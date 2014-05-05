@@ -56,6 +56,10 @@
 #define _TXKOD 8 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): TX of an AT!KO command done  */
 #define _BURST 13 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): send a BURST message  */
 #define _BURSTS 14 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): BURST message sent  */
+#define _PBM 15 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): send a PiggyBack message  */
+#define _PBMS 16 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): PiggyBack message sent  */
+#define _RXBURST 20 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a BURST message */
+#define _RXPBM 21 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
 
 
 /**
@@ -117,6 +121,8 @@ class MdriverS2C_EvoLogics : public UWMdriver
 
 
 		virtual void modemTxBurst();
+
+		virtual void modemTxPBM();
 		
 		/** 
 	         *  Method to get the Integrity value of the last received packet. NOTE: This method is used by McodecS2C_EvoLogics.
