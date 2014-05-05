@@ -46,14 +46,14 @@ public:
 } class_module_UnderwaterPhysicalRogersModel;
 
 UnderwaterPhysicalRogersModel::UnderwaterPhysicalRogersModel() :
-    bottom_depth(100),
-    sound_speed_water_bottom(1500),
-    sound_speed_water_surface(1520),
-    sound_speed_sediment(1585),
-    density_sediment(1.740),
-    density_water(1),
-    attenuation_coeff_sediment(0.51),
-    debug_(0)
+bottom_depth(100),
+sound_speed_water_bottom(1500),
+sound_speed_water_surface(1520),
+sound_speed_sediment(1585),
+density_sediment(1.740),
+density_water(1),
+attenuation_coeff_sediment(0.51),
+debug_(0)
 {
     bind("bottom_depth_", &bottom_depth);
     bind("sound_speed_water_bottom_", &sound_speed_water_bottom);
@@ -68,7 +68,7 @@ UnderwaterPhysicalRogersModel::UnderwaterPhysicalRogersModel() :
 int UnderwaterPhysicalRogersModel::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
 
-    if(argc == 2) {
+    if (argc == 2) {
         if (strcasecmp (argv[1], "get_bottom_depth") == 0) {
             tcl.resultf("%f", bottom_depth);
             return TCL_OK;
@@ -86,6 +86,9 @@ int UnderwaterPhysicalRogersModel::command(int argc, const char*const* argv) {
             return TCL_OK;
         } else if (strcasecmp (argv[1], "get_density_water") == 0) {
             tcl.resultf("%f", density_water);
+            return TCL_OK;
+        } else if (strcasecmp (argv[1], "get_attenuation_coeff_sediment") == 0) {
+            tcl.resultf("%f", attenuation_coeff_sediment);
             return TCL_OK;
         }
     } else if (argc == 3) {
@@ -106,6 +109,9 @@ int UnderwaterPhysicalRogersModel::command(int argc, const char*const* argv) {
             return TCL_OK;
         } else if (strcasecmp(argv[1], "set_density_water") == 0) {
             density_water = strtod(argv[2], NULL);
+            return TCL_OK;
+        } else if (strcasecmp(argv[1], "set_attenuation_coeff_sediment") == 0) {
+            attenuation_coeff_sediment = strtod(argv[2], NULL);
             return TCL_OK;
         }
     }
