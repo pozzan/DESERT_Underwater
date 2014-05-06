@@ -93,25 +93,25 @@ int UnderwaterPhysicalRogersModel::command(int argc, const char*const* argv) {
         }
     } else if (argc == 3) {
         if (strcasecmp(argv[1], "setBottomDepth") == 0) {
-            bottom_depth = strtod(argv[2], NULL);
+            bottom_depth = static_cast<double>(atof(argv[2]));
             return TCL_OK;
         } else if (strcasecmp(argv[1], "setSoundSpeedWaterBottom") == 0) {
-            sound_speed_water_bottom = strtod(argv[2], NULL);
+            sound_speed_water_bottom = static_cast<double>(atof(argv[2]));
             return TCL_OK;
         } else if (strcasecmp(argv[1], "setSoundSpeedWaterSurface") == 0) {
-            sound_speed_water_surface = strtod(argv[2], NULL);
+            sound_speed_water_surface = static_cast<double>(atof(argv[2]));
             return TCL_OK;
         } else if (strcasecmp(argv[1], "setSoundSpeedSediment") == 0) {
-            sound_speed_sediment = strtod(argv[2], NULL);
+            sound_speed_sediment = static_cast<double>(atof(argv[2]));
             return TCL_OK;
         } else if (strcasecmp(argv[1], "setDensitySediment") == 0) {
-            density_sediment = strtod(argv[2], NULL);
+            density_sediment = static_cast<double>(atof(argv[2]));
             return TCL_OK;
         } else if (strcasecmp(argv[1], "setDensityWater") == 0) {
-            density_water = strtod(argv[2], NULL);
+            density_water = static_cast<double>(atof(argv[2]));
             return TCL_OK;
         } else if (strcasecmp(argv[1], "setAttenuationCoeffSediment") == 0) {
-            attenuation_coeff_sediment = strtod(argv[2], NULL);
+            attenuation_coeff_sediment = static_cast<double>(atof(argv[2]));
             return TCL_OK;
         }
     }

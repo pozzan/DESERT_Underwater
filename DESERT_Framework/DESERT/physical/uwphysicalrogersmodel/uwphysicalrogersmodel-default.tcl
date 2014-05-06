@@ -30,6 +30,9 @@
 # @author Giovanni Toso
 # @version 1.0.0
 
+Module/UW/PROPAGATIONROGERS set shipping_                    0.5
+Module/UW/PROPAGATIONROGERS set windspeed_                   0.0
+Module/UW/PROPAGATIONROGERS set practicalSpreading_          1.75
 Module/UW/PROPAGATIONROGERS set bottom_depth_                100
 Module/UW/PROPAGATIONROGERS set sound_speed_water_bottom_    1500
 Module/UW/PROPAGATIONROGERS set sound_speed_water_surface_   1520

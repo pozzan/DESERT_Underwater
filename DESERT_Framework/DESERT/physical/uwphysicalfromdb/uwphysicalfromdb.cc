@@ -40,16 +40,16 @@
 
 static class UnderwaterPhysicalfromdbClass : public TclClass {
 public:
-  UnderwaterPhysicalfromdbClass() : TclClass("Module/UW/PHYSICALFROMDB") {}
-  TclObject* create(int, const char*const*) {
-    return (new UnderwaterPhysicalfromdb);
-  }
+    UnderwaterPhysicalfromdbClass() : TclClass("Module/UW/PHYSICALFROMDB") {}
+    TclObject* create(int, const char*const*) {
+        return (new UnderwaterPhysicalfromdb);
+    }
 } class_UnderwaterPhysicalfromdb;
 
 UnderwaterPhysicalfromdb::UnderwaterPhysicalfromdb() :
-line_index_(1)
+line_index(1)
 {
-    bind("line_index_", &line_index_);
+    bind("line_index_", &line_index);
 }
 
 double UnderwaterPhysicalfromdb::getPER(double _snr, int _nbits, Packet* p) {
@@ -87,9 +87,9 @@ double UnderwaterPhysicalfromdb::getGain(const double& _time, const double& _sou
 
     // Quantize the input values.
     int time_filename_ = static_cast<int> (static_cast<int> (ceil (_time) / getTimeRoughness()) * getTimeRoughness() % getTotalTime());
-    int source_depth_filename_ = static_cast<int> (ceil (_source_depth * -1) / getDepthRoughness() * getDepthRoughness());
-    int destination_depth_filename_ = static_cast<int> (ceil (_destination_depth * -1) / getDepthRoughness() * getDepthRoughness());
-    int distance_filename_ = static_cast<int> (ceil (_destination_distance) / getDistanceRoughness());
+    int source_depth_filename_ = static_cast<int> ((_source_depth * -1) / getDepthRoughness()) * getDepthRoughness() + 5;
+    int destination_depth_filename_ = static_cast<int> ((_destination_depth * -1) / getDepthRoughness()) * getDepthRoughness() + 5;
+    int distance_filename_ = static_cast<int> (_destination_distance / getDistanceRoughness()) * getDistanceRoughness();
 
     if (source_depth_filename_ == 0) {
         source_depth_filename_ = getDepthRoughness();
@@ -116,9 +116,9 @@ double UnderwaterPhysicalfromdb::getSelfInterference(const double& _time, const 
 
     // Quantize the input values.
     int time_filename_ = static_cast<int> (static_cast<int> (ceil (_time) / getTimeRoughness()) * getTimeRoughness() % getTotalTime());
-    int source_depth_filename_ = static_cast<int> (ceil (_source_depth * -1) / getDepthRoughness() * getDepthRoughness());
-    int destination_depth_filename_ = static_cast<int> (ceil (_destination_depth * -1) / getDepthRoughness() * getDepthRoughness());
-    int distance_filename_ = static_cast<int> (ceil (_destination_distance) / getDistanceRoughness());
+    int source_depth_filename_ = static_cast<int> ((_source_depth * -1) / getDepthRoughness()) * getDepthRoughness() + 5;
+    int destination_depth_filename_ = static_cast<int> ((_destination_depth * -1) / getDepthRoughness()) * getDepthRoughness() + 5;
+    int distance_filename_ = static_cast<int> (_destination_distance / getDistanceRoughness()) * getDistanceRoughness();
 
     if (source_depth_filename_ == 0) {
         source_depth_filename_ = getDepthRoughness();
@@ -162,7 +162,7 @@ double UnderwaterPhysicalfromdb::retrieveFromFile(const string& _file_name, cons
             }
         }
     } else {
-        cerr << "Impossible to open file " << _file_name << endl;
+        std::cerr << "Impossible to open file " << _file_name << std::endl;
     }
 
     istringstream iss(line_);
@@ -175,7 +175,7 @@ double UnderwaterPhysicalfromdb::retrieveFromFile(const string& _file_name, cons
 
     stm.str(value_);
     stm >> return_value_;
-    cout << "file:" << _file_name << ":column:" << _column_index << ":row:" << _row_index << ":gain:" << return_value_ << endl;
+    //std::cout << "file:" << _file_name << ":column:" << _column_index << ":row:" << _row_index << ":gain:" << return_value_ << std::endl;
 
     delete[] tmp_;
     if (this->isZero(return_value_)) {
@@ -185,10 +185,10 @@ double UnderwaterPhysicalfromdb::retrieveFromFile(const string& _file_name, cons
     }
 } /* UnderwaterPhysicalfromdb::retriveFromFile */
 
-string UnderwaterPhysicalfromdb::createNameFile(const int& _time, const int& _source_depth, const int& _destination_depth, const int& _distance) {
+string UnderwaterPhysicalfromdb::createNameFile(const int& _time, const int& _source_depth, const int& _destination_depth, const int& _destination_distance) {
     osstream_.clear();
     osstream_.str("");
-    osstream_ << path_ << "/" << _time << "_" << _source_depth << "_" << _destination_depth << "_" << _distance;
+    osstream_ << path_ << "/" << _time << "_" << _source_depth << "_" << _destination_depth << "_" << _destination_distance;
     return osstream_.str();
 } /* UnderwaterPhysicalfromdb::createNameFile */
 

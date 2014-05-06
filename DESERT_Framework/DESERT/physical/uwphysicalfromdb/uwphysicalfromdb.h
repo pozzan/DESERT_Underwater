@@ -39,18 +39,7 @@
 #ifndef UWPHYSICALFROMDB_H
 #define UWPHYSICALFROMDB_H
 
-#include <uwip-module.h>
 #include <uwgainfromdb.h>
-
-#include <packet.h>
-#include <module.h>
-#include <tclcl.h>
-
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <stdint.h>
-#include <set>
 
 class UnderwaterPhysicalfromdb : public UnderwaterGainFromDb {
 
@@ -66,20 +55,6 @@ public:
     virtual ~UnderwaterPhysicalfromdb() {}
 
 protected:
-    /**
-     * Set the line_index_ parameter.
-     *
-     * @param Line index to load in the file
-     */
-    virtual void setLineIndex(const int&);
-
-    /**
-     * Return the value of the line_index_ parameter.
-     *
-     * @return line_index_
-     */
-    inline const int& getLineIndex() const { return line_index_; }
-
     /**
      * Return the Packet Error Rate of the packet p passed as input.
      *
@@ -114,7 +89,16 @@ protected:
      * @return Self Interference in dB.
      */
     virtual double getSelfInterference(const double& _time, const double& _source_depth, const double& _destination_depth, const double& _destination_distance);
-    virtual string createNameFile(const int& _time, const int& _source_depth, const int& _destination_depth, const int& _distance);
+
+    /**
+     * Create the name of the file to read.
+     *
+     * @param _time Timestamp (in s)
+     * @param _source_depth Source depth (in m)
+     * @param _destination_depth Destination depth (in m)
+     * @param _destination_distance Destination distance (in m)
+     */
+    virtual string createNameFile(const int& _time, const int& _source_depth, const int& _destination_depth, const int& _destination_distance);
 
     /**
      * Read from a file the value in a specific row - column.
@@ -127,8 +111,22 @@ protected:
      */
     virtual double retrieveFromFile(const string& _file_name, const int& _row_index, const int& _column_index) const;
 
+    /**
+     * Set the line_index parameter.
+     *
+     * @param Line index to load in the file
+     */
+    inline void setLineIndex(const int& _line_index) { line_index = _line_index; }
+
+    /**
+     * Return the value of the line_index parameter.
+     *
+     * @return line_index
+     */
+    inline const int& getLineIndex() const { return line_index; }
+
 private:
-    int line_index_;               /**< Line index to load in the file. */
+    int line_index;               /**< Line index to load in the file. */
 };
 
 #endif /* UWPHYSICALFROMDB_H  */
