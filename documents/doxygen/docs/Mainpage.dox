@@ -1058,7 +1058,7 @@ Yocto is a very good opportunity to start with the world of embedded system, but
 - Arch: http://archlinuxarm.org/platforms/armv6/raspberry-pi/
 - Moebius (minimal based on Raspbian): http://moebiuslinux.sourceforge.net/
 
-We tested DESERT successfully with Raspbian adn Moebius.
+We tested DESERT successfully with Raspbian and Moebius.
 
 In order to cross-compile DESERT you need a toolchain. You can download one from the network (https://github.com/raspberrypi/tools) or you can compile one by using crosstool-ng (http://crosstool-ng.org/)
 

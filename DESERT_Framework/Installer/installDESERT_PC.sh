@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2013 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 
 # @name_file:   installDESERT_PC.sh
 # @author:      Ivano Calabrese
-# @last_update: 2014.01.14
+# @last_update: 2014.05.07
 # --
 # @brief_description:
 
@@ -524,7 +524,7 @@ build_DESERT() {
 
     (
         cd ${ROOT_DESERT}/${DESERT_DIR}
-            ./autogen.sh >> /dev/null
+            ./autogen.sh >> /dev/null  2>&1
             ./autogen.sh >> "${currentBuildLog}/desert-${DESERT_VERSION}-$*.log"  2>&1
     )
 
