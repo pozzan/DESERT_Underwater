@@ -112,6 +112,9 @@ void MdriverS2C_EvoLogics::emptyModemQueue() {
 }
 
 void MdriverS2C_EvoLogics::stop() {
+    m_status_tx = _CLOSE;
+    status = _QUIT;
+    modemTxManager();
     mConnector.closeConnection();
 }
 
@@ -347,6 +350,11 @@ int MdriverS2C_EvoLogics::updateStatus() {
                             m_status_tx = _IDLE;
                             cread = false;
                         }
+                    } else if (m_status_tx == _CLOSED && status == _IDLE) {
+                        status = _IDLE;
+                        m_status_tx = _IDLE;
+                        if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::ACOUSTIC_CONNECTION_CLOSED" << endl;
+                        cread = false;
                     } else {
                         if (debug_ >= 0) {
                             cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_WRONG_STATUS_" << m_status_tx << "_" << status << endl;
@@ -360,8 +368,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     }
 
                 } else if (rx_msg.find("ERROR") != string::npos) {
-                    if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET)) {
-
+                    if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET) || (m_status_tx == _BURSTS && status == _TX) || (m_status_tx == _PBMS && status == _TX)) {
                         if (debug_ >= 0) {
                             cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::ERROR" << endl;
                         }
@@ -478,7 +485,7 @@ void MdriverS2C_EvoLogics::modemTxManager() {
 
     // Variable to store the message to be sent to the modem
     std::string tx_msg;
-    if (status == _TX || status == _CFG || status == _RESET) {
+    if (status == _TX || status == _CFG || status == _RESET || status == _QUIT) {
         switch (m_status_tx) {
             case _SETID:
                 // Build the configuration message
@@ -500,6 +507,7 @@ void MdriverS2C_EvoLogics::modemTxManager() {
                 //build a burst data
                 if (debug_ >= 2) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUILDING_AT*SEND_MESSAGE" << endl;
                 tx_msg = mInterpreter.build_atsend(payload_tx.length(), dest, payload_tx);
+                cout << "AT*SEND_MESSAGE = " << hexdumplog(tx_msg) << endl;
                 if (getLog()) {
                     outLog.open((getLogFile()).c_str(), ios::app);
                     outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::MODEM_TX_MANAGER::SEND = " << hexdumplog(tx_msg) << endl;
@@ -525,6 +533,10 @@ void MdriverS2C_EvoLogics::modemTxManager() {
                 if (debug_ >= 2) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUILDING_AT!KO" << endl;
                 tx_msg = mInterpreter.build_atko(0);
                 break;
+            case _CLOSE:
+                if (debug_ >= 2) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUILDING_ATH0 TO CLOSE CONNECTION" << endl;
+                tx_msg = mInterpreter.build_ath(0);
+                break;
             default:
 
                 if (debug_ >= 2) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::MODEM_TX_MANAGER::UNEXPECTED_CALL" << endl;
@@ -536,7 +548,7 @@ void MdriverS2C_EvoLogics::modemTxManager() {
                     outLog.close();
                 }
         }//end switch
-        if (m_status_tx == _IM || m_status_tx == _SETID || m_status_tx == _DROPBUFFER || m_status_tx == _TXKO || m_status_tx == _BURST || m_status_tx == _PBM) {
+        if (m_status_tx == _IM || m_status_tx == _SETID || m_status_tx == _DROPBUFFER || m_status_tx == _TXKO || m_status_tx == _BURST || m_status_tx == _PBM || m_status_tx == _CLOSE) {
             mConnector.writeToModem(tx_msg);
             m_status_tx++;
         }

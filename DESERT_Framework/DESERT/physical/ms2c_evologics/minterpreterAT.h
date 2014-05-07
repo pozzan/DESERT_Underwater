@@ -103,6 +103,11 @@ public:
     std::string build_di() {
         return "AT?DI";
     }
+    /** 
+     * Method to build an AT message to close an acoustic connection
+     * @param  _type_connection_close type of close (1 = brutal, 0 = gentle)
+     */
+    std::string build_ath(int _type_connection_close);
 
     /** 
      * Method to build an AT message to send instant messages. 

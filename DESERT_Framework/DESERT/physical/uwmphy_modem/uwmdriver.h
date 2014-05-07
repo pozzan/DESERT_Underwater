@@ -60,6 +60,7 @@
 #define _TX_PAUSED 5 /** Status 5 of the driver's general state machine (see UWMdriver::status): modem is buffering the packet to transmit, waiting for the end of an concurring reception. */
 #define _TX_RX 6 /** Status 6 of the driver's general state machine (see UWMdriver::status): modem is transmitting after the reception of a packet. */ 
 #define _RESET 7 /**Reset modem's queue before starting connections */
+#define _QUIT 8
 using namespace std;
 
 // Forward declaration(s)

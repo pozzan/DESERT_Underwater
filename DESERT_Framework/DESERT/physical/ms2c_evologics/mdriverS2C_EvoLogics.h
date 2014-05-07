@@ -60,6 +60,8 @@
 #define _PBMS 16 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): PiggyBack message sent  */
 #define _RXBURST 20 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a BURST message */
 #define _RXPBM 21 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
+#define _CLOSE 23 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
+#define _CLOSED 24 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
 
 
 /**
