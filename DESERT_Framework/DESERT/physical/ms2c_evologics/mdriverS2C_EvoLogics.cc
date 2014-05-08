@@ -112,10 +112,14 @@ void MdriverS2C_EvoLogics::emptyModemQueue() {
 }
 
 void MdriverS2C_EvoLogics::stop() {
-    m_status_tx = _CLOSE;
-    status = _QUIT;
-    modemTxManager();
-    mConnector.closeConnection();
+    if (getKeepOnlineMode())
+    {
+        m_status_tx = _CLOSE;
+        status = _QUIT;
+        modemTxManager();
+    } else {
+        mConnector.closeConnection();
+    }
 }
 
 void MdriverS2C_EvoLogics::modemTx() {
@@ -313,7 +317,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
         } // End if (rx_msg!="")
     } // End of while (cread)
     cread = true;
-    if (status == _TX || status == _CFG || status == _RESET) {// read from queue_tx only
+    if (status == _TX || status == _CFG || status == _RESET || status == _QUIT) {// read from queue_tx only
 
         if (m_status_rx == _RXIM && status == _TX) {
             // Update S2C RX status
@@ -350,11 +354,12 @@ int MdriverS2C_EvoLogics::updateStatus() {
                             m_status_tx = _IDLE;
                             cread = false;
                         }
-                    } else if (m_status_tx == _CLOSED && status == _IDLE) {
+                    } else if (m_status_tx == _CLOSED && status == _QUIT) {
                         status = _IDLE;
                         m_status_tx = _IDLE;
                         if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::ACOUSTIC_CONNECTION_CLOSED" << endl;
                         cread = false;
+                        mConnector.closeConnection();
                     } else {
                         if (debug_ >= 0) {
                             cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_WRONG_STATUS_" << m_status_tx << "_" << status << endl;

@@ -203,7 +203,6 @@ void *read_process_msocket(void *pMsocket_me_)
 		    cout << "File descriptor: " << pMsocket_me->getSocket() << "\n";
                 }
 
-		cout << "Reading from the modem buffer " << endl;
 		// Set end of string
 		msg_rx[tmp_.msg_length]='\0';		
 		

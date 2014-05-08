@@ -290,7 +290,7 @@ public:
 	 int src; /**< Variable storing the source ID of the last packet received via modem. NOTE: an object of the class UWMinterpreter must write here after a the parsing of a received data packet; instead, an object of the class UWMcodec reads here before the modem-to-host mapping. */
 	 int dstPktRx;  /**< Variable where to save the destination ID of the last packet received via modem. NOTE: an object of the class UWMinterpreter must write here after a the parsing of a received data packet; instead, an object of the class UWMcodec reads here before the modem-to-host mapping. */
 
-         bool SetModemID; /**< Variable to decide whether the interface has to set the acoustic ID of the modem or not */   
+	 bool SetModemID; /**< Variable to decide whether the interface has to set the acoustic ID of the modem or not */   
 	 int debug_; /**< Flag to enable debug mode (i.e., printing of debug messages) if set to 1 */
 	 std::ofstream outLog; /**< output strem to print into a disk-file log messages. See UWMPhy_modem::logFile.*/
 

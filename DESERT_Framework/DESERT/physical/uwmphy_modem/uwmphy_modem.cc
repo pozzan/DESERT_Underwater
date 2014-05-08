@@ -45,7 +45,7 @@ UWMPhy_modem::UWMPhy_modem(std::string pToDevice_) {
     bind("debug_", &debug_);
     bind("log_", &log_);
     bind("SetModemID_", &SetModemID);
-    bind("UseKeepOnline", &UseKeepOnline);
+    bind("RemoteControl_", &UseKeepOnline);
     t = -1;
     PktRx = NULL;
     pcheckTmr = NULL;
@@ -178,9 +178,14 @@ void UWMPhy_modem::start() {
 }
 
 void UWMPhy_modem::stop() {
-    pmDriver -> stop();
-    pcheckTmr -> force_cancel();
-
+    if (getKeepOnline()) {
+        pmDriver -> stop();
+        check_modem();
+        pcheckTmr -> force_cancel();
+    } else {
+        pmDriver->stop();
+        pcheckTmr->force_cancel();
+    }
 }
 
 int UWMPhy_modem::check_modem() {
@@ -222,10 +227,12 @@ int UWMPhy_modem::check_modem() {
     else if (modemStatus == _IDLE && modemStatus_old == _CFG) {
         if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::CONFIGURATION DONE!!!" << endl;
         pmDriver->emptyModemQueue();
-    } else if (modemStatus == _IDLE && modemStatus_old == _RESET)
+    } else if (modemStatus == _IDLE && modemStatus_old == _RESET) {
         return modemStatus;
-
-    else {
+    } else if (modemStatus == _IDLE && modemStatus_old == _QUIT) {
+        //do nothing
+        if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::QUITTING_INTERFACE_BYE" << endl;
+    } else {
         if (debug_ >= 0) {
             cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::ERROR_UNEXPECTED_STATE_TRANSITION_FROM_" << modemStatus_old << "_TO_" << modemStatus << endl;
         }
@@ -246,9 +253,13 @@ void UWMPhy_modem::startTx(Packet* p)
     if (ch->direction() == hdr_cmn::UP) {
          cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::ERROR_DIRECTION_SET_UP " << endl;
     } else {
-        //TODO: Add the burst data support
-        pmDriver -> modemTxBurst();
-        //pmDriver -> modemTx();
+        if (getKeepOnline())
+        {
+            //TODO: add header reader in order to see which TX mode use: burst, pbm, im
+            pmDriver -> modemTxBurst();
+        } else {
+            pmDriver -> modemTx();
+        }
     }
 }
 
