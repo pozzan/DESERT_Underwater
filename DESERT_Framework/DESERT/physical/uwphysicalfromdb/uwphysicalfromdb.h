@@ -54,6 +54,16 @@ public:
      */
     virtual ~UnderwaterPhysicalfromdb() {}
 
+    /**
+     * TCL command interpreter. It implements the following OTcl methods:
+     *
+     * @param argc Number of arguments in <i>argv</i>.
+     * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
+     * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
+     *
+     */
+    virtual int command(int, const char*const*);
+
 protected:
     /**
      * Return the Packet Error Rate of the packet p passed as input.
@@ -98,7 +108,7 @@ protected:
      * @param _destination_depth Destination depth (in m)
      * @param _destination_distance Destination distance (in m)
      */
-    virtual string createNameFile(const int& _time, const int& _source_depth, const int& _destination_depth, const int& _destination_distance);
+    virtual string createNameFile(const char* _path, const int& _time, const int& _source_depth, const int& _tau_index);
 
     /**
      * Read from a file the value in a specific row - column.
@@ -116,17 +126,19 @@ protected:
      *
      * @param Line index to load in the file
      */
-    inline void setLineIndex(const int& _line_index) { line_index = _line_index; }
+    inline void setTauIndex(const int& _tau_index) { tau_index = _tau_index; }
 
     /**
-     * Return the value of the line_index parameter.
+     * Return the value of the tau_index parameter.
      *
-     * @return line_index
+     * @return tau_index
      */
-    inline const int& getLineIndex() const { return line_index; }
+    inline const int& getTauIndex() const { return tau_index; }
 
 private:
-    int line_index;               /**< Line index to load in the file. */
+    char* path_gainmaps;          /**< Name of the trace file writter for the current node. */
+    char* path_selfinterference;  /**< Name of the trace file writter for the current node. */
+    int tau_index;                /**< Tau index to load in the file. */
 };
 
 #endif /* UWPHYSICALFROMDB_H  */

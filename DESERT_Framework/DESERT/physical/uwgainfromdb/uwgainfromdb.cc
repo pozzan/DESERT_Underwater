@@ -72,11 +72,11 @@ int UnderwaterGainFromDb::command(int argc, const char*const* argv) {
             path_ = new char[tmp_.length() + 1];
             strcpy(path_, tmp_.c_str());
             if (path_ == NULL) {
-                fprintf(stderr, "Empty string for the trace file name");
+                fprintf(stderr, "Empty string for the path_ file name");
                 return TCL_ERROR;
             }
             return TCL_OK;
-        } 
+        }
     }
     return UnderwaterPhysical::command(argc, argv);
 } /* UnderwaterGainFromDb::command */

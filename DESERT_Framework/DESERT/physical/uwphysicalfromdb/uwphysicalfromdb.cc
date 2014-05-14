@@ -30,7 +30,7 @@
 /**
  * @file   uwphysicalfromdb.cc
  * @author Giovanni Toso
- * @version 1.0.0
+ * @version 1.0.1
  *
  * \brief Implementation of UnderwaterPhysicalfromdb class.
  *
@@ -47,10 +47,39 @@ public:
 } class_UnderwaterPhysicalfromdb;
 
 UnderwaterPhysicalfromdb::UnderwaterPhysicalfromdb() :
-line_index(1)
+tau_index(1)
 {
-    bind("line_index_", &line_index);
+    bind("tau_index_", &tau_index);
+    path_gainmaps = "";
+    path_selfinterference = "";
 }
+
+int UnderwaterPhysicalfromdb::command(int argc, const char*const* argv) {
+    if (argc == 3) {
+        if (strcasecmp(argv[1], "setPathGainmaps") == 0) {
+            string tmp_ = ((char *) argv[2]);
+            path_gainmaps = new char[tmp_.length() + 1];
+            strcpy(path_gainmaps, tmp_.c_str());
+            if (path_ == NULL) {
+                fprintf(stderr, "Empty string for the path_gainmaps_ file name");
+                return TCL_ERROR;
+            }
+            return TCL_OK;
+        }
+        else if (strcasecmp(argv[1], "setPathSelfInterference") == 0) {
+            string tmp_ = ((char *) argv[2]);
+            path_selfinterference = new char[tmp_.length() + 1];
+            strcpy(path_selfinterference, tmp_.c_str());
+            if (path_ == NULL) {
+                fprintf(stderr, "Empty string for the path_selfinterference_ file name");
+                return TCL_ERROR;
+            }
+            return TCL_OK;
+        }
+    }
+    return UnderwaterGainFromDb::command(argc, argv);
+} /* UnderwaterPhysicalfromdb::command */
+
 
 double UnderwaterPhysicalfromdb::getPER(double _snr, int _nbits, Packet* p) {
     hdr_MPhy* ph = HDR_MPHY(p);
@@ -85,27 +114,30 @@ double UnderwaterPhysicalfromdb::getGain(const double& _time, const double& _sou
     assert(_destination_depth <= 0);
     assert(_destination_distance >= 0);
 
-    // Quantize the input values.
-    int time_filename_ = static_cast<int> (static_cast<int> (ceil (_time) / getTimeRoughness()) * getTimeRoughness() % getTotalTime());
-    int source_depth_filename_ = static_cast<int> ((_source_depth * -1) / getDepthRoughness()) * getDepthRoughness() + 5;
-    int destination_depth_filename_ = static_cast<int> ((_destination_depth * -1) / getDepthRoughness()) * getDepthRoughness() + 5;
-    int distance_filename_ = static_cast<int> (_destination_distance / getDistanceRoughness()) * getDistanceRoughness();
+    // Quantize the input values
+    int time_filename_ = static_cast<int> (static_cast<int> (floor (_time) / getTimeRoughness()) * getTimeRoughness() % getTotalTime());
+#if __cplusplus > 199711L
+    // C++11
+    // The column index corresponds to the depth of the receiver
+    int source_depth_filename_ = static_cast<int> (round ((_source_depth * -1) / getDepthRoughness()) * getDepthRoughness());
+    // The line index is relative to the distance of the receiver
+    int line_index_ = static_cast<int> (round (_destination_distance / getDistanceRoughness()));
+    // The column index corresponds to the depth of the receiver
+    int column_index_= static_cast<int> (round ((_destination_depth * -1) / getDepthRoughness()));
+#else
+    // Adding 0.5 and cast is equivalent to use round only because we are dealing with positive integers
+    int source_depth_filename_ = static_cast<int> ((_source_depth * -1) / getDepthRoughness() + 0.5) * getDepthRoughness();
+    int line_index_ = static_cast<int> (_destination_distance / getDistanceRoughness() + 0.5);
+    int column_index_= static_cast<int> ((_destination_depth * -1) / getDepthRoughness() + 0.5);
+#endif
 
     if (source_depth_filename_ == 0) {
         source_depth_filename_ = getDepthRoughness();
     }
 
-    if (destination_depth_filename_ == 0) {
-        destination_depth_filename_ = getDepthRoughness();
-    }
+    string file_name_ = createNameFile(path_gainmaps, time_filename_, source_depth_filename_, getTauIndex());
 
-    if (distance_filename_ == 0) {
-        distance_filename_ = getDistanceRoughness();
-    }
-
-    string file_name = createNameFile(time_filename_, source_depth_filename_, destination_depth_filename_, distance_filename_);
-
-    return retrieveFromFile(file_name, getLineIndex(), 1);
+    return retrieveFromFile(file_name_, column_index_, line_index_);
 } /* UnderwaterPhysicalfromdb::getGain */
 
 double UnderwaterPhysicalfromdb::getSelfInterference(const double& _time, const double& _source_depth, const double& _destination_depth, const double& _destination_distance) {
@@ -116,25 +148,24 @@ double UnderwaterPhysicalfromdb::getSelfInterference(const double& _time, const 
 
     // Quantize the input values.
     int time_filename_ = static_cast<int> (static_cast<int> (ceil (_time) / getTimeRoughness()) * getTimeRoughness() % getTotalTime());
-    int source_depth_filename_ = static_cast<int> ((_source_depth * -1) / getDepthRoughness()) * getDepthRoughness() + 5;
-    int destination_depth_filename_ = static_cast<int> ((_destination_depth * -1) / getDepthRoughness()) * getDepthRoughness() + 5;
-    int distance_filename_ = static_cast<int> (_destination_distance / getDistanceRoughness()) * getDistanceRoughness();
+    int source_depth_filename_ = static_cast<int> ((_source_depth * -1) / getDepthRoughness()) * getDepthRoughness();
+    // The line index is relative to the distance of the receiver
+    int column_index_= static_cast<int> ((_destination_depth * -1) / getDepthRoughness());
+    // The column index corresponds to the depth of the receiver
+    int line_index_ = static_cast<int> (_destination_distance / getDistanceRoughness());
+
+
+    if (time_filename_ == 0) {
+        time_filename_ = getTimeRoughness();
+    }
 
     if (source_depth_filename_ == 0) {
         source_depth_filename_ = getDepthRoughness();
     }
 
-    if (destination_depth_filename_ == 0) {
-        destination_depth_filename_ = getDepthRoughness();
-    }
+    string file_name_ = createNameFile(path_selfinterference, time_filename_, source_depth_filename_, getTauIndex());
 
-    if (distance_filename_ == 0) {
-        distance_filename_ = getDistanceRoughness();
-    }
-
-    string file_name = createNameFile(time_filename_, source_depth_filename_, destination_depth_filename_, distance_filename_);
-
-    return retrieveFromFile(file_name, getLineIndex(), 2);
+    return retrieveFromFile(file_name_, column_index_, line_index_);
 } /* UnderwaterPhysicalfromdb::getSelfInterference */
 
 double UnderwaterPhysicalfromdb::retrieveFromFile(const string& _file_name, const int& _row_index, const int& _column_index) const {
@@ -150,6 +181,7 @@ double UnderwaterPhysicalfromdb::retrieveFromFile(const string& _file_name, cons
     char* tmp_ = new char[_file_name.length() + 1];
     strcpy(tmp_, _file_name.c_str());
     if (tmp_ == NULL) {
+        std::cerr << "Impossible to open file " << _file_name << std::endl;
         fprintf(stderr, "Empty string for the file name");
     }
 
@@ -185,10 +217,10 @@ double UnderwaterPhysicalfromdb::retrieveFromFile(const string& _file_name, cons
     }
 } /* UnderwaterPhysicalfromdb::retriveFromFile */
 
-string UnderwaterPhysicalfromdb::createNameFile(const int& _time, const int& _source_depth, const int& _destination_depth, const int& _destination_distance) {
+string UnderwaterPhysicalfromdb::createNameFile(const char* _path, const int& _time, const int& _source_depth, const int& _tau_index) {
     osstream_.clear();
     osstream_.str("");
-    osstream_ << path_ << "/" << _time << "_" << _source_depth << "_" << _destination_depth << "_" << _destination_distance;
+    osstream_ << _path << "/" << _time << "_" << _source_depth << "_" << _tau_index;
     return osstream_.str();
 } /* UnderwaterPhysicalfromdb::createNameFile */
 
