@@ -131,6 +131,13 @@ void UnderwaterGainFromDb::setTotalTime(const int& _total_time) {
     return;
 } /* UnderwaterGainFromDb::setTotalTime */
 
+void UnderwaterGainFromDb::setFrequencyCorrectionFactor(const double& _frequency_correction_factor) {
+    assert(_frequency_correction_factor > 0);
+    frequency_correction_factor_ = _frequency_correction_factor;
+    return;
+} /* UnderwaterGainFromDb::setFrequencyCorrectionFactor */
+
+
 double UnderwaterGainFromDb::getGain(const double& _time, const double& _source_depth, const double& _destination_depth, const double& _destination_distance) {
     assert(_time >= 0);
     assert(_source_depth <= 0);
