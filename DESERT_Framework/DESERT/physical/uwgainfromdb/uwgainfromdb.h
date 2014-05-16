@@ -111,6 +111,13 @@ protected:
     virtual void setTotalTime(const int&);
 
     /**
+     * Sets the frequency_correction_factor_ parameter.
+     * 
+     * @param Frequency correction factor.
+     */
+    virtual void setFrequencyCorrectionFactor(const double&);
+
+    /**
      * Returns the time_roughness_ parameter.
      * 
      * @return time_roughness_
@@ -137,6 +144,13 @@ protected:
      * @return total_time_
      */
     inline const int& getTotalTime() const { return total_time_; }
+
+    /**
+     * Returns the frequency_correction_factor_ parameter.
+     * 
+     * @return frequency_correction_factor_
+     */
+    inline const double& getFrequencyCorrectionFactor() const { return frequency_correction_factor_; }
 
     /**
      * 
