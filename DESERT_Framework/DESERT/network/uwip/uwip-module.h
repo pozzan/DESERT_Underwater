@@ -43,7 +43,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-                       
+
 #define NOT_FOR_ME_REASON "NFM"         /**< Reason for a drop in a <i>UWIP</i> module. */
 #define DESTINATION_ADDR_UNSET "DAU"    /**< Reason for a drop in a <i>UWIP</i> module. */
 #define ORIGINATED_BY_ME "OBM"          /**< Reason for a drop in a <i>UWIP</i> module. */
@@ -53,7 +53,7 @@
 
 using namespace std;
 
-static const uint8_t UWIP_BROADCAST        = static_cast<uint8_t>(0x000000ff);  /**< Variable used to represent a broadcast UWIP. */
+static const uint8_t UWIP_BROADCAST = static_cast<uint8_t>(0x000000ff);  /**< Variable used to represent a broadcast UWIP. */
 
 extern packet_t PT_UWIP;
 

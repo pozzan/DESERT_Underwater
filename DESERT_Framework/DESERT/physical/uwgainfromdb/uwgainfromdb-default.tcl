@@ -34,3 +34,4 @@ Module/UW/GAINFROMDB set time_roughness_ 1
 Module/UW/GAINFROMDB set depth_roughness_ 1
 Module/UW/GAINFROMDB set distance_roughness_ 1
 Module/UW/GAINFROMDB set total_time_ 1
+Module/UW/GAINFROMDB set frequency_correction_factor_ 1

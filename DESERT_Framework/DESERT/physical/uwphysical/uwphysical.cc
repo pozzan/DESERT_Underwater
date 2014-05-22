@@ -39,10 +39,10 @@
 
 static class UwPhysicalClass : public TclClass {
 public:
-  UwPhysicalClass() : TclClass("Module/UW/PHYSICAL") {}
-  TclObject* create(int, const char*const*) {
-    return (new UnderwaterPhysical);
-  }
+    UwPhysicalClass() : TclClass("Module/UW/PHYSICAL") {}
+    TclObject* create(int, const char*const*) {
+        return (new UnderwaterPhysical);
+    }
 } class_module_uwphysical;
 
 UnderwaterPhysical::UnderwaterPhysical() :
@@ -116,25 +116,23 @@ int UnderwaterPhysical::command(int argc, const char*const* argv) {
     } else if (argc == 3) {
         if (strcasecmp(argv[1], "modulation") == 0) {
             modulation_name_ = ((char *) argv[2]);
-            if (modulation_name_ == "" || (modulation_name_ != "BPSK" && modulation_name_ != "BFSK")) {
-                fprintf(stderr, "Empty or wrong name for the modulation scheme");
+            if (modulation_name_ == "" || (modulation_name_ != "BPSK" && modulation_name_ != "BFSK" && modulation_name_ != "8PSK" && modulation_name_ != "16PSK" && modulation_name_ != "32PSK")) {
+                std::cerr << "Empty or wrong name for the modulation scheme" << std::endl;
                 return TCL_ERROR;
             }
             return TCL_OK;
         }
         else if(strcasecmp(argv[1],"setInterferenceModel") == 0) {
             Interference_Model = (string) argv[2];
-            if (Interference_Model != "CHUNK" && Interference_Model != "MEANPOWER")
-            {
-                fprintf(stderr, "Empty or wrong name of the Interference Model: CHUNK or MEANPOWER are valid interference models");
+            if (Interference_Model != "CHUNK" && Interference_Model != "MEANPOWER") {
+                std::cerr <<  "Empty or wrong name of the Interference Model: CHUNK or MEANPOWER are valid interference models" << std::endl;
                 return TCL_ERROR;
             }
             return TCL_OK;
         } else if (strcasecmp(argv[1], "setInterference") == 0) {
             interference_ = dynamic_cast<uwinterference*> (TclObject::lookup(argv[2]));
-            if(!interference_)
-            {
-               return TCL_ERROR;
+            if(!interference_) {
+                return TCL_ERROR;
             }
             return TCL_OK;
         }
