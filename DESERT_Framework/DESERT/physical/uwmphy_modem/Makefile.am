@@ -43,7 +43,9 @@ uwmdriver.h\
 uwminterpreter.cc\
 uwminterpreter.h\
 uwmphy_modem.cc\
-uwmphy_modem.h 
+uwmphy_modem.h\
+uwmphy_modem_cmn_hdr.cpp\
+uwmphy_modem_cmn_hdr.h
 
 libuwmphy_modem_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
 libuwmphy_modem_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
