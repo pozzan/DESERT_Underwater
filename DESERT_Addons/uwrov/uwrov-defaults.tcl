@@ -38,7 +38,7 @@ Module/UW/ROV set destPort_           0
 Module/UW/ROV set destAddr_           0
 Module/UW/ROV set debug_              0
 Module/UW/ROV set PoissonTraffic_     1
-Module/UW/ROV set drop_out_of_order_  1
+Module/UW/ROV set drop_out_of_order_  0
 
 Module/UW/ROV instproc init {args} {
     $self next $args

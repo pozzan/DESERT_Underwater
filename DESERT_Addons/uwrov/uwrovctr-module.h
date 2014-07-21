@@ -28,7 +28,7 @@
 //
 
 /**
- * @file   uwROV-module.h
+ * @file   uwrovctr-module.h
  * @author Filippo Campagnaro
  * @version 1.1.0
  * 
@@ -39,86 +39,59 @@
  * than 2^16 packets, they will be dropped.
  */
 
-#ifndef UWROV_MODULE_H
-#define UWROV_MODULE_H
+#ifndef UWROV_CTR_MODULE_H
+#define UWROV_CTR_MODULE_H
 
 #include <uwcbr-module.h>
-//#include <uwgmposition.h>
+#include "uwrov-packet.h"
 #include "node-core.h"
 
 #define UWROV_DROP_REASON_UNKNOWN_TYPE "UKT"      /**< Reason for a drop in a <i>UWROV</i> module. */
 #define UWROV_DROP_REASON_OUT_OF_SEQUENCE "OOS"   /**< Reason for a drop in a <i>UWROV</i> module. */
 #define UWROV_DROP_REASON_DUPLICATED_PACKET "DPK" /**< Reason for a drop in a <i>UWROV</i> module. */
 
-#define HDR_UWROV(p)      (hdr_uwROV::access(p))
+#define HDR_UWROV_MONITORING(p)      (hdr_uwROV_monitoring::access(p))
+#define HDR_UWROV_CTR(p)      (hdr_uwROV_ctr::access(p))
 
 using namespace std;
-
-/**
- * <i>hdr_uwROV</i> describes <i>UWROV</i> packets.
- */
-typedef struct hdr_uwROV {
-    float x_;
-    float y_;
-    float z_;
-
-    static int offset_; /**< Required by the PacketHeaderManager. */
-
-    /**
-     * Reference to the offset_ variable.
-     */
-    inline static int& offset() {
-        return offset_;
-    }
-
-    inline static struct hdr_uwROV * access(const Packet * p) {
-        return (struct hdr_uwROV*) p->access(offset_);
-    }
-
-    inline float& x() {
-        return x_;
-    }
-
-    inline float& y() {
-        return y_;
-    }
-
-    inline float& z() {
-        return z_;
-    }
-} hdr_uwROV;
-
-
-class UwROVModule;
+class UwROVCtrModule;
 
 /**
  * UwSendTimer class is used to handle the scheduling period of <i>UWROV</i> packets.
  */
-class UwROVSendTimer : public UwSendTimer {
+class UwROVCtrSendTimer : public UwSendTimer {
 public:
-    UwROVSendTimer(UwROVModule *m) : UwSendTimer((UwCbrModule*)(m)){
+    UwROVCtrSendTimer(UwROVCtrModule *m) : UwSendTimer((UwCbrModule*)(m)){
     };
 
 };
 /**
- * UwROVModule class is used to manage <i>UWROV</i> packets and to collect statistics about them.
+ * UwROVCtrModule class is used to manage <i>UWROVCtr</i> packets and to collect statistics about them.
  */
-class UwROVModule : public UwCbrModule {
+class UwROVCtrModule : public UwCbrModule {
 
 public:
     //UwGMPosition posit;
     Position posit;
-
+	float x_rov;
+	float y_rov;
+	float z_rov;
+	float newX;
+	float newY;
+	float newZ;
+    float speed;
 
     /**
-     * Constructor of UwROVModule class.
+     * Constructor of UwROVCtrModule class.
      */
-    UwROVModule();
+    UwROVCtrModule();
+    
+    UwROVCtrModule(Position p);
     
     /**
-     * Destructor of UwROVModule class.
+     * Destructor of UwROVCtrModule class.
      */
-    virtual ~UwROVModule();
+    virtual ~UwROVCtrModule();
 
 
     virtual int command(int argc, const char*const* argv);
@@ -128,6 +101,11 @@ public:
      * 
      * @param Packet* Pointer to the packet will be received.
      */
+    virtual void initPkt(Packet* p) ;
+
+    virtual void setPosition(Position p);
+    virtual Position getPosition();
+
     virtual void recv(Packet*);
     
     /**
@@ -143,7 +121,8 @@ public:
      * 
      * @return The size of a <i>hdr_uwcbr</i> packet header.
      */
-    static inline int getROVHeaderSize() { return sizeof(hdr_uwROV); }
+    static inline int getROVMonHeaderSize() { return sizeof(hdr_uwROV_monitoring); }
+    static inline int getROVCTRHeaderSize() { return sizeof(hdr_uwROV_ctr); }
 };
 
-#endif // UWROV_MODULE_H
+#endif // UWROVCtr_MODULE_H

@@ -41,7 +41,7 @@
 # and permits to detect the reason for packet dropping
 #
 #
-# Author: Federico Favaro <favarofe@dei.unipd.it>
+# Author: Filippo Campagnaro
 # Version: 1.0.0
 #
 # NOTE: tcl sample tested on Ubuntu 11.10, 64 bits OS
@@ -86,7 +86,8 @@ load libuwip.so
 load libuwstaticrouting.so
 load libuwmll.so
 load libuwudp.so
-load libuwROV.so
+load libuwrov.so
+#load libuwrovctr.so
 load libuwcbr.so
 load libuwcsmaaloha.so
 load libuwinterference.so
@@ -108,16 +109,16 @@ set opt(start_clock) [clock seconds]
 set opt(nn)                 2.0 ;# Number of Nodes
 set opt(pktsize)            125  ;# Pkt sike in byte
 set opt(starttime)          1	
-set opt(stoptime)           100000 
+set opt(stoptime)           10000 
 set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration of the simulation
 
 set opt(txpower)            180.0  ;#Power transmitted in dB re uPa
 
 
-set opt(maxinterval_)       20.0
-set opt(freq)               25000.0 ;#Frequency used in Hz
-set opt(bw)                 5000.0	;#Bandwidth used in Hz
-set opt(bitrate)            4800.0	;#bitrate in bps
+set opt(maxinterval_)       1.0
+set opt(freq)               340000.0 ;#Frequency used in Hz
+set opt(bw)                 100000.0	;#Bandwidth used in Hz
+set opt(bitrate)            86000.0	;#bitrate in bps
 if {$opt(ACK_Active)} {
     set opt(ack_mode)           "setAckMode"    
 } else {
@@ -141,12 +142,12 @@ if {$opt(bash_parameters)} {
 		return
 	} else {
 		set opt(seedROV)    [lindex $argv 0]
-		set opt(ROV_period) [lindex $argv 1]
+		set opt(ROV_period) [lindex $argv 10]
 		set opt(pktsize)    [lindex $argv 2]
 		$rng seed         $opt(seedROV)
 	}
 } else {
-	set opt(ROV_period) 60
+	set opt(ROV_period) 1
 	set opt(pktsize)	125
 	set opt(seedROV)	1
 }
@@ -154,9 +155,9 @@ if {$opt(bash_parameters)} {
 set rnd_gen [new RandomVariable/Uniform]
 $rnd_gen use-rng $rng
 if {$opt(trace_files)} {
-	set opt(tracefilename) "./test_uwinterference.tr"
+	set opt(tracefilename) "./test_uwrovmovement.tr"
 	set opt(tracefile) [open $opt(tracefilename) w]
-	set opt(cltracefilename) "./test_uwinterference.cltr"
+	set opt(cltracefilename) "./test_uwrovmovement.cltr"
 	set opt(cltracefile) [open $opt(tracefilename) w]
 } else {
 	set opt(tracefilename) "/dev/null"
@@ -180,10 +181,16 @@ $data_mask setBandwidth  $opt(bw)
 #########################
 # Module Configuration  #
 #########################
-Module/UW/ROV set packetSize_          $opt(pktsize)
-Module/UW/ROV set period_              $opt(ROV_period)
-Module/UW/ROV set PoissonTraffic_      1
+Module/UW/ROV set packetSize_          $opt(pktsize)*10
+Module/UW/ROV set period_              $opt(ROV_period)/10
+Module/UW/ROV set PoissonTraffic_      10^4
 Module/UW/ROV set debug_               0
+
+Module/UW/ROV/CTR set packetSize_          $opt(pktsize)
+Module/UW/ROV/CTR set period_              $opt(ROV_period)
+Module/UW/ROV/CTR set PoissonTraffic_      1
+Module/UW/ROV/CTR set debug_               0
+
 
 
 Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate)
@@ -202,17 +209,12 @@ Module/UW/PHYSICAL  set debug_                      0
 ################################
 # Procedure(s) to create nodes #
 ################################
-proc createNode { id } {
+proc createNode {node application id} {
 
-    global channel propagation data_mask ns ROV position node udp portnum ipr ipif channel_estimator
+    global channel propagation data_mask ns  position udp portnum ipr ipif channel_estimator
     global phy posdb opt rvposx rvposy rvposz mhrouting mll mac woss_utilities woss_creator db_manager
     global node_coordinates interf_data
     
-
-    set node($id) [$ns create-M_Node $opt(tracefile) $opt(cltracefile)] 
-	for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-		set ROV($id,$cnt)  [new Module/UW/ROV] 
-	}
     set udp($id)  [new Module/UW/UDP]
     set ipr($id)  [new Module/UW/StaticRouting]
     set ipif($id) [new Module/UW/IP]
@@ -220,26 +222,22 @@ proc createNode { id } {
     set mac($id)  [new Module/UW/CSMA_ALOHA] 
     set phy($id)    [new Module/UW/PHYSICAL]
 	
-	for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-		$node($id) addModule 7 $ROV($id,$cnt)   1  "ROV"
-	}
-    $node($id) addModule 6 $udp($id)   1  "UDP"
-    $node($id) addModule 5 $ipr($id)   1  "IPR"
-    $node($id) addModule 4 $ipif($id)  1  "IPF"   
-    $node($id) addModule 3 $mll($id)   1  "MLL"
-    $node($id) addModule 2 $mac($id)   1  "MAC"
-    $node($id) addModule 1 $phy($id)   0  "PHY"
+	$node addModule 7 $application   1  "ROV"
+    $node addModule 6 $udp($id)   1  "UDP"
+    $node addModule 5 $ipr($id)   1  "IPR"
+    $node addModule 4 $ipif($id)  1  "IPF"   
+    $node addModule 3 $mll($id)   1  "MLL"
+    $node addModule 2 $mac($id)   1  "MAC"
+    $node addModule 1 $phy($id)   0  "PHY"
 
-	for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-		$node($id) setConnection $ROV($id,$cnt)   $udp($id)   1
-		set portnum($id,$cnt) [$udp($id) assignPort $ROV($id,$cnt) ]
-	}
-    $node($id) setConnection $udp($id)      $ipr($id)   1
-    $node($id) setConnection $ipr($id)      $ipif($id)  1
-    $node($id) setConnection $ipif($id)     $mll($id)   1
-    $node($id) setConnection $mll($id)      $mac($id)   1
-    $node($id) setConnection $mac($id)      $phy($id)   1
-    $node($id) addToChannel  $channel       $phy($id)   1
+	$node setConnection $application  $udp($id)   1
+	set portnum($id) [$udp($id) assignPort $application ]
+    $node setConnection $udp($id)      $ipr($id)   1
+    $node setConnection $ipr($id)      $ipif($id)  1
+    $node setConnection $ipif($id)     $mll($id)   1
+    $node setConnection $mll($id)      $mac($id)   1
+    $node setConnection $mac($id)      $phy($id)   1
+    $node addToChannel  $channel       $phy($id)   1
 
     if {$id > 254} {
 		puts "hostnum > 254!!! exiting"
@@ -249,17 +247,17 @@ proc createNode { id } {
     set ip_addr_value [expr $id + 1]
     $ipif($id) addr $ip_addr_value
     
-    set position($id) [new "Position/BM"]
-    $node($id) addPosition $position($id)
+    set position($id) [new "Position/SM"]
+    $node addPosition $position($id)
     set posdb($id) [new "PlugIn/PositionDB"]
-    $node($id) addPlugin $posdb($id) 20 "PDB"
+    $node addPlugin $posdb($id) 20 "PDB"
     $posdb($id) addpos [$ipif($id) addr] $position($id)
     
     #Setup positions
-    $position($id) setX_ [expr $id*200]
-    $position($id) setY_ [expr $id*200]
-    $position($id) setZ_ -100
-    
+    $position($id) setX_ [expr $id*5]
+    $position($id) setY_ [expr $id*5]
+    $position($id) setZ_ -10
+    $application setPosition $position($id)
     #Interference model
     set interf_data($id)  [new "Module/UW/INTERFERENCE"]
     $interf_data($id) set maxinterval_ $opt(maxinterval_)
@@ -270,45 +268,35 @@ proc createNode { id } {
     
     $phy($id) setSpectralMask $data_mask
     $phy($id) setInterference $interf_data($id)
-    #$phy($id) setInterferenceModel "CHUNK"
     $phy($id) setInterferenceModel "MEANPOWER"
     $mac($id) $opt(ack_mode)
     $mac($id) initialize
 }
 
+
+
 #################
 # Node Creation #
 #################
 # Create here all the nodes you want to network together
-for {set id 0} {$id < $opt(nn)} {incr id}  {
-    createNode $id
-}
-
-
-################################
-# Inter-node module connection #
-################################
-proc connectNodes {id1 des1} {
-    global ipif ipr portnum ROV ROV_sink ipif_sink portnum_sink ipr_sink opt 
-
-    $ROV($id1,$des1) set destAddr_ [$ipif($des1) addr]
-    $ROV($id1,$des1) set destPort_ $portnum($des1,$id1)
-
-    $ROV($des1,$id1) set destAddr_ [$ipif($id1) addr]
-    $ROV($des1,$id1) set destPort_ $portnum($id1,$des1) 
-
-}
-
+global nodeCTR nodeROV applicationCTR applicationROV
+set nodeCTR [$ns create-M_Node $opt(tracefile) $opt(cltracefile)] 
+set applicationCTR  [new Module/UW/ROV/CTR]
+createNode $nodeCTR $applicationCTR 0
+set nodeROV [$ns create-M_Node $opt(tracefile) $opt(cltracefile)] 
+set applicationROV  [new Module/UW/ROV]
+createNode $nodeROV $applicationROV 1
+ 
+ puts "positions CTR: [$position(0) getX_]"
+ puts "positions rov: [$position(1) getX_]"
 ##################
 # Setup flows    #
 ##################
-for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-	for {set id2 0} {$id2 < $opt(nn)} {incr id2}  {
-		if {$id1 != $id2} {
-			connectNodes $id1 $id2
-		}
-	}
-}
+ $applicationCTR set destAddr_ [$ipif(1) addr]
+ $applicationCTR set destPort_ $portnum(1)
+ $applicationROV set destAddr_ [$ipif(0) addr]
+ $applicationROV set destPort_ $portnum(0)
+
 
 ##################
 # ARP tables     #
@@ -336,24 +324,34 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 #####################
 # Set here the timers to start and/or stop modules (optional)
 # e.g., 
-for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-	for {set id2 0} {$id2 < $opt(nn)} {incr id2} {
-		if {$id1 != $id2} {
-			$ns at $opt(starttime)    "$ROV($id1,$id2) start"
-			$ns at $opt(stoptime)     "$ROV($id1,$id2) stop"
-		}
-	}
-}
 
+set fp [open "path.csv" r]
+set file_data [read $fp]
+set data [split $file_data "\n"]
+foreach line $data {
+	if {[regexp {^(.*),(.*),(.*),(.*)$} $line -> t x y z]} {
+        $ns at $t "update_and_check"
+		$ns at $t "$applicationCTR sendPosition $x $y $z"
+    }
+}
+$ns at $opt(starttime)    "$applicationROV start"
+$ns at $opt(stoptime)     "$applicationROV stop"
+
+proc update_and_check {} {
+    global position applicationROV
+    $position(1) update
+    puts "positions ROV: x = [$applicationROV getX], y = [$applicationROV getY], z =  [$applicationROV getZ]"
+}
 ###################
 # Final Procedure #
 ###################
 # Define here the procedure to call at the end of the simulation
+
 proc finish {} {
     global ns opt outfile
     global mac propagation ROV_sink mac_sink phy phy_data_sink channel db_manager propagation
     global node_coordinates
-    global ipr_sink ipr ipif udp ROV phy phy_data_sink
+    global ipr_sink ipr ipif udp position applicationROV applicationCTR phy phy_data_sink
     global node_stats tmp_node_stats sink_stats tmp_sink_stats
     if ($opt(verbose)) {
         puts "---------------------------------------------------------------------"
@@ -381,22 +379,14 @@ proc finish {} {
     set sum_rtx                0.0    
     set ROV_throughput         0.0
     set ROV_per                0.0
-    for {set i 0} {$i < $opt(nn)} {incr i}  {
-		for {set j 0} {$j < $opt(nn)} {incr j} {
-			if {$i != $j} {
-                set ROV_throughput              [$ROV($i,$j) getthr]
-                set ROV_per                     [$ROV($i,$j) getper]
-				set ROV_sent_pkts               [$ROV($i,$j) getsentpkts]
-				set ROV_rcv_pkts                [$ROV($i,$j) getrecvpkts]
-			}
-			if ($opt(verbose)) {
-                if {$i != $j} {
-				    puts "ROV($i,$j) Throughput     : $ROV_throughput"
-                    puts "ROV($i,$j) PER            : $ROV_per       "
-                    puts "-------------------------------------------"
-                }
-			}
-		}
+    set ROV_throughput              [$applicationROV getthr]
+    set ROV_per                     [$applicationROV getper]
+	set ROV_sent_pkts               [$applicationROV getsentpkts]
+	set ROV_rcv_pkts                [$applicationROV getrecvpkts]
+		if ($opt(verbose)) {
+			    puts "applicationROV Throughput     : $ROV_throughput"
+	            puts "applicationROV PER            : $ROV_per       "
+	            puts "-------------------------------------------"
         if {$opt(ack_mode) == "setAckMode"} {
             set DataPktsTx                  [$mac($i) getDataPktsTx]
             set UpDataPktsRx                [$mac($i) getUpLayersDataRx]
@@ -413,7 +403,7 @@ proc finish {} {
         
     set ipheadersize        [$ipif(1) getipheadersize]
     set udpheadersize       [$udp(1) getudpheadersize]
-    set ROVheadersize       [$ROV(1,0) getROVheadersize]
+    set ROVheadersize       [$applicationROV getROVMonheadersize]
     
     if ($opt(verbose)) {
         puts "Mean Throughput           : [expr ($sum_ROV_throughput/(($opt(nn))*($opt(nn)-1)))]"
@@ -434,6 +424,8 @@ proc finish {} {
         puts "Tot. collision DATA vs CTRL : [$phy(1) getCollisionsDATAvsCTRL]"
         puts "Tot. CTRL pkts lost       : [$phy(1) getTotCtrlPktsLost]"
         puts "Tot. CTRL pkts lost due to Interference   : [$phy(1) getErrorCtrlPktsInterf]"
+        puts "positions CTR: [$applicationCTR getX]"
+        update_and_check 
         puts "done!"
     }
     

@@ -45,7 +45,7 @@
 #include <uwcbr-module.h>
 #include <uwrov-packet.h>
 //#include <uwgmposition.h>
-#include "node-core.h"
+#include "smposition.h"
 
 #define UWROV_DROP_REASON_UNKNOWN_TYPE "UKT"      /**< Reason for a drop in a <i>UWROV</i> module. */
 #define UWROV_DROP_REASON_OUT_OF_SEQUENCE "OOS"   /**< Reason for a drop in a <i>UWROV</i> module. */
@@ -72,8 +72,8 @@ public:
 class UwROVModule : public UwCbrModule {
 
 public:
-    //UwGMPosition posit;
-    Position posit;
+    //UwGMSMPosition posit;
+    SMPosition* posit;
 
 
     /**
@@ -81,6 +81,7 @@ public:
      */
     UwROVModule();
     
+    UwROVModule(SMPosition* p);
     /**
      * Destructor of UwROVModule class.
      */
@@ -97,6 +98,9 @@ public:
     virtual void initPkt(Packet* p) ;
 
     virtual void recv(Packet*);
+
+    virtual void setPosition(SMPosition* p);
+    virtual SMPosition* getPosition();
     
     /**
      * Performs the reception of packets from upper and lower layers.

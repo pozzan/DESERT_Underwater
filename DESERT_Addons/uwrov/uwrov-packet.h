@@ -46,6 +46,7 @@ typedef struct hdr_uwROV_ctr {
     float x_;
     float y_;
     float z_;
+    float speed_;
 
     static int offset_; /**< Required by the PacketHeaderManager. */
 
@@ -70,6 +71,10 @@ typedef struct hdr_uwROV_ctr {
 
     inline float& z() {
         return z_;
+    }
+
+    inline float& speed() {
+        return speed_;
     }
 } hdr_uwROV_ctr;
 /**

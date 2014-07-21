@@ -67,35 +67,89 @@ public:
 
 
 UwROVModule::UwROVModule() : UwCbrModule() {
-        //posit = UwGMPosition();
-	posit = Position();
-	posit.setX(0);
-	posit.setY(0);
-	posit.setZ(0);
+        //posit = UwGMSMPosition();
+	SMPosition p = SMPosition();
+    posit=&p;
 }
+
+UwROVModule::UwROVModule(SMPosition* p) : UwCbrModule() {
+    posit=p;
+}
+
 UwROVModule::~UwROVModule() {
 }
 
-
+void UwROVModule::setPosition(SMPosition* p){
+    posit=p;
+}
+SMPosition* UwROVModule::getPosition(){
+    return posit;
+}
 int UwROVModule::command(int argc, const char*const* argv) {
 	Tcl& tcl = Tcl::instance();
 	if(argc == 2){
 		if (strcasecmp(argv[1], "getROVMonheadersize") == 0) {
-            tcl.resultf("%d", this->getROVMonHeaderSize());
+            tcl.resultf("%d", getROVMonHeaderSize());
             return TCL_OK;
         } 
         else if(strcasecmp(argv[1], "getROVctrheadersize") == 0) {
-            tcl.resultf("%d", this->getROVCTRHeaderSize());
+            tcl.resultf("%d", getROVCTRHeaderSize());
+            return TCL_OK;
+        } 
+        else if(strcasecmp(argv[1], "getX") == 0) {
+            tcl.resultf("%f", posit->getX());
+            return TCL_OK;
+        } 
+        else if(strcasecmp(argv[1], "getY") == 0) {
+            tcl.resultf("%f", posit->getY());
+            return TCL_OK;
+        } 
+        else if(strcasecmp(argv[1], "getZ") == 0) {
+            tcl.resultf("%f", posit->getZ());
             return TCL_OK;
         } 
 	}
+    else if(argc == 3){
+        if (strcasecmp(argv[1], "setPosition") == 0) {
+            SMPosition* p = dynamic_cast<SMPosition*> (tcl.lookup(argv[2]));
+            posit=p;
+            tcl.resultf("%s", "position Setted\n");
+            return TCL_OK;
+        } 
+    } 
+    else if(argc == 5){
+        if (strcasecmp(argv[1], "setdest") == 0) {
+            if (debug_ > 10)
+		    cerr << NOW << "SMPosition::command(setdest, "
+			 << argv[2] << ", "
+			 << argv[3] << ", "
+			 << argv[4] << ")"
+			 << endl;
+			posit->setdest(atof(argv[2]),atof(argv[3]),atof(argv[4]));
+			return TCL_OK;
+        } 
+    }
+    else if(argc == 6){
+        if (strcasecmp(argv[1], "setdest") == 0) {
+            if (debug_ > 10)
+		    cerr << NOW << "SMPosition::command(setdest, "
+			 << argv[2] << ", "
+			 << argv[3] << ", "
+			 << argv[4] << ", "
+			 << argv[5] << ")"
+			 << endl;
+		      
+			posit->setdest(atof(argv[2]),atof(argv[3]),atof(argv[4]),atof(argv[5]));
+			return TCL_OK;
+        } 
+    }
 	return UwCbrModule::command(argc,argv);
 }
 void UwROVModule::initPkt(Packet* p) {
     hdr_uwROV_monitoring* uwROVh  = HDR_UWROV_MONITORING(p);
-    uwROVh->x()       = posit.getX()+10;
-    uwROVh->y()       = posit.getY()+10;
-    uwROVh->z()       = posit.getZ()+10;
+    uwROVh->x()       = posit->getX();
+    uwROVh->y()       = posit->getY();
+    uwROVh->z()       = posit->getZ();
     /*uwROVh->x()       = 10;
     uwROVh->y()       = 10;
     uwROVh->z()       = 10;*/
@@ -116,9 +170,10 @@ void UwROVModule::recv(Packet* p, Handler* h) {
 void UwROVModule::recv(Packet* p) {
 
     hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
-    posit.setX(uwROVh->x());
-    posit.setY(uwROVh->y());
-    posit.setZ(uwROVh->z());
+    /*posit->setX(uwROVh->x());
+    posit->setY(uwROVh->y());
+    posit->setZ(uwROVh->z());*/
+    posit->setdest(uwROVh->x(),uwROVh->y(),uwROVh->z(),uwROVh->speed());
     if (debug_ > 10)
 	    printf("ROV get new position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
     UwCbrModule::recv(p);

@@ -25,6 +25,22 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @file   uwcbr-defaults.tcl
+# @author Giovanni Toso
+# @version 1.1.0
 
-EXTRA_DIST = nsallinone.m4 nsmiracle.m4 underwatermiracle.m4 woss.m4 desert.m4
+PacketHeaderManager set tab_(PacketHeader/UWCBR) 1
 
+Module/UW/CBR set packetSize_         500
+Module/UW/CBR set period_             60
+Module/UW/CBR set destPort_           0
+Module/UW/CBR set destAddr_           0
+Module/UW/CBR set debug_              0
+Module/UW/CBR set PoissonTraffic_     1
+Module/UW/CBR set drop_out_of_order_  1
+
+Module/UW/CBR instproc init {args} {
+    $self next $args
+    $self settag "UW/CBR"
+}
