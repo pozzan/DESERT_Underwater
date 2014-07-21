@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,31 +25,9 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @file   uwphysicalfromdb-default.tcl
+# @author Giovanni Toso
+# @version 1.0.0
 
-AM_CXXFLAGS = -Wall -ggdb3
-
-lib_LTLIBRARIES = libuwphysicalrogersmodel.la
-check_PROGRAMS =
-
-SUBDIRS =
-
-TESTS =
-
-libuwphysicalrogersmodel_la_SOURCES = initlib.cc\
-	uwphysicalrogersmodel.cc\
-	uwphysicalrogersmodel.h
-
-libuwphysicalrogersmodel_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
-libuwphysicalrogersmodel_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
-libuwphysicalrogersmodel_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
-
-nodist_libuwphysicalrogersmodel_la_SOURCES = InitTcl.cc
-BUILT_SOURCES = InitTcl.cc
-CLEANFILES = InitTcl.cc
-
-TCL_FILES =  uwphysicalrogersmodel-default.tcl
-
-InitTcl.cc: Makefile $(TCL_FILES)
-		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwPhysicalRogersModelInitTclCode > InitTcl.cc
-
-EXTRA_DIST = $(TCL_FILES)
+Module/UW/PHYSICALFROMDB set tau_index_ 1

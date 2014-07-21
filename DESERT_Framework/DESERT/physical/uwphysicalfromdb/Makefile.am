@@ -28,28 +28,28 @@
 
 AM_CXXFLAGS = -Wall -ggdb3
 
-lib_LTLIBRARIES = libuwphysicalrogersmodel.la
+lib_LTLIBRARIES = libuwphysicalfromdb.la
 check_PROGRAMS =
 
 SUBDIRS =
 
 TESTS =
 
-libuwphysicalrogersmodel_la_SOURCES = initlib.cc\
-	uwphysicalrogersmodel.cc\
-	uwphysicalrogersmodel.h
+libuwphysicalfromdb_la_SOURCES = initlib.cc\
+uwphysicalfromdb.cc\
+uwphysicalfromdb.h
 
-libuwphysicalrogersmodel_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
-libuwphysicalrogersmodel_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
-libuwphysicalrogersmodel_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
+libuwphysicalfromdb_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+libuwphysicalfromdb_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
+libuwphysicalfromdb_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
 
-nodist_libuwphysicalrogersmodel_la_SOURCES = InitTcl.cc
-BUILT_SOURCES = InitTcl.cc
-CLEANFILES = InitTcl.cc
+nodist_libuwphysicalfromdb_la_SOURCES = initTcl.cc
+BUILT_SOURCES = initTcl.cc
+CLEANFILES = initTcl.cc
 
-TCL_FILES =  uwphysicalrogersmodel-default.tcl
+TCL_FILES =  uwphysicalfromdb-default.tcl
 
-InitTcl.cc: Makefile $(TCL_FILES)
-		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwPhysicalRogersModelInitTclCode > InitTcl.cc
+initTcl.cc: Makefile $(TCL_FILES)
+		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwphysicalFromDbTclCode > initTcl.cc
 
 EXTRA_DIST = $(TCL_FILES)
