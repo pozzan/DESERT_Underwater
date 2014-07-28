@@ -72,6 +72,7 @@ public:
     TclObject* create(int, const char*const*) {
         return (new UwCbrModule());
     }
+    const char* TclClass;
 } class_module_uwcbr;
 
 void UwSendTimer::expire(Event *e) {
@@ -276,6 +277,7 @@ void UwCbrModule::recv(Packet* p, Handler* h) {
 //    hdr_cmn* ch = hdr_cmn::access(p);
     recv(p);
 }
+
 
 void UwCbrModule::recv(Packet* p) {
     hdr_cmn* ch = hdr_cmn::access(p);

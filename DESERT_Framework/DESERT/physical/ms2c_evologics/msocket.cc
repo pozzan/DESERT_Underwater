@@ -82,7 +82,6 @@ static std::string hexdumplog(std::string str)
     const char *data = str.c_str();
     
     std::string str_out = "";
-   
     for (int i = 0; i < len; i++)
     {
        if (std::isalnum(data[i]) || std::ispunct(data[i]))
