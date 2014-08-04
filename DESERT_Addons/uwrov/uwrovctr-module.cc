@@ -60,11 +60,11 @@ public:
 } class_module_uwROV_ctr;
 
 
-UwROVCtrModule::UwROVCtrModule(Position p) : UwCbrModule() {
+UwROVCtrModule::UwROVCtrModule(Position p) : UwCbrModule(), sn(0) {
     posit=p;speed=1;
 }
 
-UwROVCtrModule::UwROVCtrModule() : UwCbrModule() {
+UwROVCtrModule::UwROVCtrModule() : UwCbrModule(), sn(0) {
         //posit = UwGMPosition();
 	posit = Position();speed=1;
 }
@@ -130,6 +130,11 @@ int UwROVCtrModule::command(int argc, const char*const* argv) {
 	return UwCbrModule::command(argc,argv);
 }
 
+void UwROVCtrModule::transmit() {
+   sendPkt();
+}
+void UwROVCtrModule::start() {
+}
 void UwROVCtrModule::setPosition(Position p){
     posit=p;
 }
@@ -142,6 +147,7 @@ void UwROVCtrModule::initPkt(Packet* p) {
     uwROVh->y()       = newY;
     uwROVh->z()       = newZ;
     uwROVh->speed()       = speed;
+    uwROVh->sn() = ++sn;
     /*uwROVh->x()       = 10;
     uwROVh->y()       = 10;
     uwROVh->z()       = 10;*/
@@ -152,6 +158,7 @@ void UwROVCtrModule::initPkt(Packet* p) {
     	uwROVh  = HDR_UWROV_CTR(p);
     	printf("ROV check new position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
     }
+    buffer.push(p);
 }
 
 void UwROVCtrModule::recv(Packet* p, Handler* h) {
@@ -165,6 +172,9 @@ void UwROVCtrModule::recv(Packet* p) {
     x_rov=monitoring->x(); 
     y_rov=monitoring->y(); 
     z_rov= monitoring->z();
+    //buffer.pop();
+    if((monitoring->ack())<0)
+        printf("Errore");
     if (debug_ > 10)
 	    printf("ROV get new position: X = %f, Y = %f, Z  = %f\n", x_rov,y_rov,z_rov);
     UwCbrModule::recv(p);

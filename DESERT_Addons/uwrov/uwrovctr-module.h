@@ -45,6 +45,7 @@
 #include <uwcbr-module.h>
 #include "uwrov-packet.h"
 #include "node-core.h"
+#include <queue>
 
 #define UWROV_DROP_REASON_UNKNOWN_TYPE "UKT"      /**< Reason for a drop in a <i>UWROV</i> module. */
 #define UWROV_DROP_REASON_OUT_OF_SEQUENCE "OOS"   /**< Reason for a drop in a <i>UWROV</i> module. */
@@ -80,48 +81,78 @@ public:
 	float newY;
 	float newZ;
     float speed;
-
-    /**
-     * Constructor of UwROVCtrModule class.
-     */
+    int sn;
+    std::queue<Packet*> buffer;
+/**
+ * Constructor of UwROVCtrModule class.
+ */
     UwROVCtrModule();
-    
+/**
+ * Constructor of UwROVCtrModule class with position setting.
+ */
     UwROVCtrModule(Position p);
     
-    /**
-     * Destructor of UwROVCtrModule class.
-     */
+/**
+ * Destructor of UwROVCtrModule class.
+ */
     virtual ~UwROVCtrModule();
 
-
+/**
+ * Tcl command management
+ */
     virtual int command(int argc, const char*const* argv);
 
-    /**
-     * Performs the reception of packets from upper and lower layers.
-     * 
-     * @param Packet* Pointer to the packet will be received.
-     */
+  
+/**
+ * Performs the initialization of a control packet.
+ */
     virtual void initPkt(Packet* p) ;
-
+/**
+* Set the position of the ROV
+*/
     virtual void setPosition(Position p);
+/**  
+* Get the position of the ROV
+*/
     virtual Position getPosition();
-
+/**
+ * Performs the reception of packets from upper and lower layers.
+ * 
+ * @param Packet* Pointer to the packet will be received.
+ */
     virtual void recv(Packet*);
     
-    /**
-     * Performs the reception of packets from upper and lower layers.
-     * 
-     * @param Packet* Pointer to the packet will be received.
-     * @param Handler* Handler.
-     */
+/**
+ * Performs the reception of packets from upper and lower layers.
+ * 
+ * @param Packet* Pointer to the packet will be received.
+ * @param Handler* Handler.
+ */
     virtual void recv(Packet* p, Handler* h);
-
-    /**
-     * Returns the size in byte of a <i>hdr_uwcbr</i> packet header.
+     /**
+     * Creates and transmits a packet.
      * 
-     * @return The size of a <i>hdr_uwcbr</i> packet header.
+     * @see UwCbrModule::sendPkt()
      */
+    virtual void transmit();
+    
+    /**
+     * Start .
+     */
+    virtual void start();
+    
+
+/**
+ * Returns the size in byte of a <i>hdr_uwROV_monitoring</i> packet header.
+ * 
+ * @return The size of a <i>hdr_uwROV_monitoring</i> packet header.
+ */
     static inline int getROVMonHeaderSize() { return sizeof(hdr_uwROV_monitoring); }
+/**
+ * Returns the size in byte of a <i>hdr_uwROV_ctr</i> packet header.
+ * 
+ * @return The size of a <i>hdr_uwROV_monitoring</i> packet header.
+ */
     static inline int getROVCTRHeaderSize() { return sizeof(hdr_uwROV_ctr); }
 };
 

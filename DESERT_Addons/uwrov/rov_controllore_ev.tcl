@@ -106,10 +106,10 @@ $ns use-Miracle
 set opt(start_clock) [clock seconds]
 
 set opt(nn)                 2.0 ;# Number of Nodes
-set opt(ROV_pktsize)            10000;#125  ;# Pkt size in byte
+set opt(ROV_pktsize)            1000;#125  ;# Pkt size in byte
 set opt(CTR_pktsize)            1024;#125  ;# Pkt size in byte
 
-set opt(ROV_period) 			1
+set opt(ROV_period) 			2.5
 
 set opt(starttime)          1
 set opt(stoptime)           10000 
@@ -118,10 +118,10 @@ set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration 
 set opt(txpower)            185.8  ;#Power transmitted in dB re uPa
 
 
-set opt(maxinterval_)       200
-set opt(freq)               375000.0 ;#Frequency used in Hz
-set opt(bw)                 76000.0	;#Bandwidth used in Hz
-set opt(bitrate)             87768.0 ;#150000;#bitrate in bps
+set opt(maxinterval_)       20.0
+set opt(freq)               25000.0 ;#Frequency used in Hz
+set opt(bw)                 5000.0  ;#Bandwidth used in Hz
+set opt(bitrate)            4800.0  ;#bitrate in bps
 if {$opt(ACK_Active)} {
     set opt(ack_mode)           "setAckMode"    
 } else {
@@ -328,7 +328,7 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 # Set here the timers to start and/or stop modules (optional)
 # e.g., 
 
-set fp [open "path.csv" r]
+set fp [open "path_evol.csv" r]
 set file_data [read $fp]
 set data [split $file_data "\n"]
 foreach line $data {

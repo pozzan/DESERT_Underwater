@@ -44,8 +44,9 @@
 
 #include <uwcbr-module.h>
 #include <uwrov-packet.h>
-//#include <uwgmposition.h>
 #include "smposition.h"
+#include <queue>
+
 
 #define UWROV_DROP_REASON_UNKNOWN_TYPE "UKT"      /**< Reason for a drop in a <i>UWROV</i> module. */
 #define UWROV_DROP_REASON_OUT_OF_SEQUENCE "OOS"   /**< Reason for a drop in a <i>UWROV</i> module. */
@@ -72,50 +73,69 @@ public:
 class UwROVModule : public UwCbrModule {
 
 public:
-    //UwGMSMPosition posit;
     SMPosition* posit;
-
+    int last_sn_confirmed;
+    int ack;
+	std::queue<Packet*> buffer;
 
     /**
-     * Constructor of UwROVModule class.
+     * Default Constructor of UwROVModule class.
      */
     UwROVModule();
     
+    /**
+     * Constructor with position setting of UwROVModule class.
+     */
     UwROVModule(SMPosition* p);
     /**
      * Destructor of UwROVModule class.
      */
     virtual ~UwROVModule();
-
-
+/**
+ * Tcl command management
+ */
     virtual int command(int argc, const char*const* argv);
-
-    /**
-     * Performs the reception of packets from upper and lower layers.
-     * 
-     * @param Packet* Pointer to the packet will be received.
-     */
-    virtual void initPkt(Packet* p) ;
-
-    virtual void recv(Packet*);
-
-    virtual void setPosition(SMPosition* p);
-    virtual SMPosition* getPosition();
+/**
+ * Performs the initialization of a monitoring packet.
+ */
     
-    /**
-     * Performs the reception of packets from upper and lower layers.
-     * 
-     * @param Packet* Pointer to the packet will be received.
-     * @param Handler* Handler.
-     */
+    virtual void initPkt(Packet* p) ;
+/**
+ * Performs the reception of packets from upper and lower layers.
+ * 
+ * @param Packet* Pointer to the packet will be received.
+ */
+    virtual void recv(Packet*);    
+/**
+ * Performs the reception of packets from upper and lower layers.
+ * 
+ * @param Packet* Pointer to the packet will be received.
+ * @param Handler* Handler.
+ */
     virtual void recv(Packet* p, Handler* h);
 
-    /**
-     * Returns the size in byte of a <i>hdr_uwcbr</i> packet header.
-     * 
-     * @return The size of a <i>hdr_uwcbr</i> packet header.
-     */
+/**
+* Set the position of the ROV
+*/
+
+    virtual void setPosition(SMPosition* p);
+/**  
+* Get the position of the ROV
+*/
+    virtual SMPosition* getPosition();
+    
+
+/**
+ * Returns the size in byte of a <i>hdr_uwROV_monitoring</i> packet header.
+ * 
+ * @return The size of a <i>hdr_uwROV_monitoring</i> packet header.
+ */
     static inline int getROVMonHeaderSize() { return sizeof(hdr_uwROV_monitoring); }
+/**
+ * Returns the size in byte of a <i>hdr_uwROV_ctr</i> packet header.
+ * 
+ * @return The size of a <i>hdr_uwROV_ctr</i> packet header.
+ */
     static inline int getROVCTRHeaderSize() { return sizeof(hdr_uwROV_ctr); }
 };
 

@@ -66,13 +66,13 @@ public:
 
 
 
-UwROVModule::UwROVModule() : UwCbrModule() {
+UwROVModule::UwROVModule() : UwCbrModule(), last_sn_confirmed(0), ack(0){
         //posit = UwGMSMPosition();
 	SMPosition p = SMPosition();
     posit=&p;
 }
 
-UwROVModule::UwROVModule(SMPosition* p) : UwCbrModule() {
+UwROVModule::UwROVModule(SMPosition* p) : UwCbrModule(), last_sn_confirmed(0), ack(0){
     posit=p;
 }
 
@@ -150,16 +150,14 @@ void UwROVModule::initPkt(Packet* p) {
     uwROVh->x()       = posit->getX();
     uwROVh->y()       = posit->getY();
     uwROVh->z()       = posit->getZ();
+    uwROVh->ack()     = ack;
+    ack=0;
     /*uwROVh->x()       = 10;
     uwROVh->y()       = 10;
     uwROVh->z()       = 10;*/
     if (debug_ > 10)
-    	printf("ROV set new position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
+    	printf("ROV send realtime position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
     UwCbrModule::initPkt(p);
-    if (debug_ > 10){
-    	uwROVh  = HDR_UWROV_MONITORING(p);
-    	printf("ROV check new position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
-    }
 }
 
 void UwROVModule::recv(Packet* p, Handler* h) {
@@ -170,11 +168,16 @@ void UwROVModule::recv(Packet* p, Handler* h) {
 void UwROVModule::recv(Packet* p) {
 
     hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
-    /*posit->setX(uwROVh->x());
-    posit->setY(uwROVh->y());
-    posit->setZ(uwROVh->z());*/
-    posit->setdest(uwROVh->x(),uwROVh->y(),uwROVh->z(),uwROVh->speed());
-    if (debug_ > 10)
-	    printf("ROV get new position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
-    UwCbrModule::recv(p);
+   // if((uwROVh->sn())==last_sn_confirmed+1){
+        posit->setdest(uwROVh->x(),uwROVh->y(),uwROVh->z(),uwROVh->speed());
+        ack=++last_sn_confirmed;
+        if (debug_ > 10)
+            printf("ROV get new position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
+        UwCbrModule::recv(p);
+    /*} else {
+        ack=-(last_sn_confirmed+1);
+        buffer.push(p);
+    }*/
+    UwCbrModule::sendPkt();
+    
 }
