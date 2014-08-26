@@ -132,6 +132,7 @@ int UwROVCtrModule::command(int argc, const char*const* argv) {
 
 void UwROVCtrModule::transmit() {
    sendPkt();
+   sendTmr_.resched(100);
 }
 void UwROVCtrModule::start() {
 }
@@ -172,9 +173,15 @@ void UwROVCtrModule::recv(Packet* p) {
     x_rov=monitoring->x(); 
     y_rov=monitoring->y(); 
     z_rov= monitoring->z();
+    if(monitoring->ack()>0){
+        sendTmr_.force_cancel();
+        printf("Ack ok \n");
+        if (debug_ > 10)
+            printf("Ack ok \n");
+    }
     //buffer.pop();
     if((monitoring->ack())<0)
-        printf("Errore");
+        printf("Errore \n");
     if (debug_ > 10)
 	    printf("ROV get new position: X = %f, Y = %f, Z  = %f\n", x_rov,y_rov,z_rov);
     UwCbrModule::recv(p);

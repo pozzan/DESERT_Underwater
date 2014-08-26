@@ -170,7 +170,8 @@ void UwROVModule::recv(Packet* p) {
     hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
    // if((uwROVh->sn())==last_sn_confirmed+1){
         posit->setdest(uwROVh->x(),uwROVh->y(),uwROVh->z(),uwROVh->speed());
-        ack=++last_sn_confirmed;
+        last_sn_confirmed=uwROVh->sn();
+        ack=last_sn_confirmed+1;
         if (debug_ > 10)
             printf("ROV get new position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
         UwCbrModule::recv(p);
