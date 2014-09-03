@@ -145,7 +145,6 @@ void SMPosition::update(double now)
 		else 
 			gamma = atan((Ydest_-Ysorg_)/(Xdest_-Xsorg_));
 		if ((Xdest_-Xsorg_)<0.0) gamma += (Ysorg_-Ydest_)>=0.0?pi:-pi;
-		//printf("At %f prec pos (%f,%f)",now,x_,y_);
 		x_ = Xsorg_ + (speed_*(now - trgTime_) )*sin(theta)*cos(gamma);
 		y_ = Ysorg_ + (speed_*(now - trgTime_) )*sin(theta)*sin(gamma);
 		z_ = Zsorg_ + (speed_*(now - trgTime_) )*cos(theta);

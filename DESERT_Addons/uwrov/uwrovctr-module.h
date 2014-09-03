@@ -72,7 +72,6 @@ public:
 class UwROVCtrModule : public UwCbrModule {
 
 public:
-    //UwGMPosition posit;
     Position posit;
 	float x_rov;
 	float y_rov;
@@ -82,7 +81,8 @@ public:
 	float newZ;
     float speed;
     int sn;
-    std::queue<Packet*> buffer;
+    Packet * p = NULL;
+  //  std::queue<Packet*> buffer;
 /**
  * Constructor of UwROVCtrModule class.
  */
@@ -107,6 +107,10 @@ public:
  * Performs the initialization of a control packet.
  */
     virtual void initPkt(Packet* p) ;
+ /**
+* Reset retransmissions
+*/   
+    inline void reset_retx() {p=NULL;sendTmr_.force_cancel();}
 /**
 * Set the position of the ROV
 */

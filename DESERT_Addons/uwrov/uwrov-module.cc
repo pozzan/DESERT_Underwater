@@ -152,9 +152,6 @@ void UwROVModule::initPkt(Packet* p) {
     uwROVh->z()       = posit->getZ();
     uwROVh->ack()     = ack;
     ack=0;
-    /*uwROVh->x()       = 10;
-    uwROVh->y()       = 10;
-    uwROVh->z()       = 10;*/
     if (debug_ > 10)
     	printf("ROV send realtime position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
     UwCbrModule::initPkt(p);
@@ -172,7 +169,7 @@ void UwROVModule::recv(Packet* p) {
         posit->setdest(uwROVh->x(),uwROVh->y(),uwROVh->z(),uwROVh->speed());
         last_sn_confirmed=uwROVh->sn();
         ack=last_sn_confirmed+1;
-        if (debug_ > 10)
+        if (debug_ < 0)
             printf("ROV get new position: X = %f, Y = %f, Z  = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
         UwCbrModule::recv(p);
     /*} else {
