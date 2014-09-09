@@ -44,3 +44,20 @@ Module/UW/ROV instproc init {args} {
     $self next $args
     $self settag "UW/ROV"
 }
+
+Module/UW/ROV/CTR set packetSize_         500
+Module/UW/ROV/CTR set period_             60
+Module/UW/ROV/CTR set destPort_           0
+Module/UW/ROV/CTR set destAddr_           0
+Module/UW/ROV/CTR set debug_              0
+Module/UW/ROV/CTR set PoissonTraffic_     1
+Module/UW/ROV/CTR set drop_out_of_order_  0
+
+Module/UW/ROV/CTR instproc init {args} {
+    $self next $args
+    $self settag "UW/ROV/CTR"
+}
+
+Position/SM set debug_ 0
+
+PlugIn/PositionDB set debug_ 0

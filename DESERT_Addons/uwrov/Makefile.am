@@ -14,7 +14,7 @@
 #    names of its contributors may be used to endorse or promote products 
 #    derived from this software without specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+# THIS SOFTWARE IS ProvIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
 # TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
 # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
@@ -27,6 +27,25 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-Position/SM set debug_ 0
+AM_CXXFLAGS = -Wall -ggdb3
 
-PlugIn/PositionDB set debug_ 0
+lib_LTLIBRARIES = libuwrov.la
+
+libuwrov_la_SOURCES = uwrov-module.cc uwrov-tracer.cc uwrov-module.h uwrov-packet.h uwrovctr-module.cc uwrovctr-tracer.cc uwrovctr-module.h smposition.h smposition.cc initlib.cc
+
+libuwrov_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
+libuwrov_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
+libuwrov_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@
+
+nodist_libuwrov_la_SOURCES = initTcl.cc
+
+BUILT_SOURCES = initTcl.cc
+
+CLEANFILES = initTcl.cc
+
+TCL_FILES =  uwrov-init.tcl
+
+initTcl.cc: Makefile $(TCL_FILES)
+		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwrovTclCode > initTcl.cc 
+
+EXTRA_DIST = $(TCL_FILES)
