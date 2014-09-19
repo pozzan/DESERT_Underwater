@@ -30,13 +30,16 @@
 /**
  * @file   uwrov-module.h
  * @author Filippo Campagnaro
- * @version 1.1.0
+ * @version 1.0.0
  * 
- * \brief Provides the <i>UWROV</i> packets header description and the definition of the class <i>UWROV</i>.
+ * \brief Provides the definition of the class <i>UWROV</i>.
  * 
- * Provides the <i>UWROV</i> packets header description and the definition of the class <i>UWROV</i>.
+ * Provides the definition of the class <i>UWROV</i>, based on <i>UwCbr</i>.
  * <i>UWROV</i> can manage no more than 2^16 packets. If a module generates more
- * than 2^16 packets, they will be dropped.
+ * than 2^16 packets, they will be dropped, according with <i>UwCbr</i>.
+ * <i>UWROV</i>  sends periodically monitoring packets containing information about 
+ * the current position and acknowledges the last control packet received.
+ * Each control packet contains the next waypoint that has to be reach.
  */
 
 #ifndef UWROV_MODULE_H

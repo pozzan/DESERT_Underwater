@@ -30,13 +30,18 @@
 /**
  * @file   uwrovctr-module.h
  * @author Filippo Campagnaro
- * @version 1.1.0
+ * @version 1.0.0
  * 
- * \brief Provides the <i>UWROV</i> packets header description and the definition of the class <i>UWROV</i>.
- * 
- * Provides the <i>UWROV</i> packets header description and the definition of the class <i>UWROV</i>.
- * <i>UWROV</i> can manage no more than 2^16 packets. If a module generates more
- * than 2^16 packets, they will be dropped.
+ * \brief Provides the definition of the class <i>UWROV</i>.
+ *
+ * Provides the definition of the class <i>UWROVCTR</i>, based on <i>UwCbr</i>.
+ * <i>UWROVCTR</i> can manage no more than 2^16 packets. If a module generates more
+ * than 2^16 packets, they will be dropped, according with <i>UwCbr</i>.
+ * <i>UWROVCTR</i> sends control packets containing the next waypoint that has to be 
+ * reach by a ROV. In addition it receives monitoring packets containing the current
+ * ROV position and acks of the sent packets. Whether the ack is not received, the
+ * control packet is resent, according to the priority. In particular, last waypoint
+ * transmitted has the highest priority, whereas the others are forgotten.:
  */
 
 #ifndef UWROV_CTR_MODULE_H

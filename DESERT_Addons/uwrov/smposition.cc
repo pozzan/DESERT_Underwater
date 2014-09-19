@@ -27,6 +27,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+ /**
+ * @file   smposition.cc
+ * @author Filippo Campagnaro
+ * @version 1.0.0
+ * 
+ * \brief Provides the <i>SMPosition</i> class implementation.
+ * 
+ * Provides the <i>SMPosition</i> class implementation.
+ */
+
+
 
 #include<iostream>
 #include "smposition.h"

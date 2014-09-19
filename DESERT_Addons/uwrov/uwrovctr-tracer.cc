@@ -30,11 +30,11 @@
 /**
  * @file   uwrovtct-tracer.cc
  * @author Filippo Campagnaro
- * @version 1.1.0
+ * @version 1.0.0
  * 
- * \brief Provides a tracer class for <i>UWROV</i> packets.
+ * \brief Provides a tracer class for <i>UWROVCTR</i> packets.
  * 
- * Provides a tracer class for <i>UWROV</i> packets.
+ * Provides a tracer class for <i>UWROVCTR</i> packets.
  */
 
 

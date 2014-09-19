@@ -30,13 +30,12 @@
 /**
  * @file   uwrov-packet.h
  * @author Filippo Campagnaro
- * @version 1.1.0
+ * @version 1.0.0
  * 
- * \brief Provides the <i>UWROV</i> packets header description and the definition of the class <i>UWROV</i>.
+ * \brief Provides both <i>UWROV</i> monitoring and control packets header description.
  * 
- * Provides the <i>UWROV</i> packets header description and the definition of the class <i>UWROV</i>.
- * <i>UWROV</i> can manage no more than 2^16 packets. If a module generates more
- * than 2^16 packets, they will be dropped.
+ * Provides both <i>UWROV</i> monitoring and control packets header description, in 
+ * particular the header structure.
  */
 
 /**

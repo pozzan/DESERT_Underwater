@@ -28,16 +28,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SMPOSITION_
-#define _SMPOSITION_
-
-#include <node-core.h>
-
-
-#define sgn(x) ( ((x)==0.0) ? 0.0 : ((x)/fabs(x)) )
-#define pi (4*atan(1.0))
-
 /**
+ * @file   smposition.h
+ * @author Filippo Campagnaro
+ * @version 1.0.0
+ * 
+ * \brief Provides the definition of the class <i>SMPosition</i>.
+ *
+ * Provides the definition of the class <i>SMPosition</i>.
  * This class implements the a simple movement behaviour: it is possible to define
  * the direction and the speed of the linear movement thanks to a TCL command
  * in which the user has to define the destination point an the speed of the
@@ -47,6 +45,17 @@
  *
  * @see NodeCore, Position
  **/
+
+#ifndef _SMPOSITION_
+#define _SMPOSITION_
+
+#include <node-core.h>
+
+
+#define sgn(x) ( ((x)==0.0) ? 0.0 : ((x)/fabs(x)) )
+#define pi (4*atan(1.0))
+
+
 class SMPosition : public Position
 {
 	public:

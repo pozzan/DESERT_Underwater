@@ -30,7 +30,7 @@
 /**
  * @file   uwrovctr-module.cc
  * @author Filippo Campagnaro
- * @version 1.1.0
+ * @version 1.0.0
  * 
  * \brief Provides the <i>UWROVCtr</i> class implementation.
  * 
