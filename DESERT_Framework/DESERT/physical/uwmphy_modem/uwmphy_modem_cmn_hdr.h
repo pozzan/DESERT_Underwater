@@ -50,7 +50,7 @@ typedef struct hdr_uwmphy_modem
  		return (hdr_uwmphy_modem*)p->access(offset_); 
  	}
 
- 	uint8_t comm_type_; // 0 = IM, 2 = IMS, 3 = BURST, ...
+ 	uint8_t comm_type_; // 0 = IM, 1 = IMS, 2 = BURST, ...
  	inline uint8_t& comm_type() {return comm_type_;}
 };
 
