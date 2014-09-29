@@ -57,18 +57,17 @@ set opt(protocol) "TCP" ;# Protocol to use for the Application socket, TCP or UD
 
 # Terminal's parameter check
 if {$opt(AppSocket) == 1} {
-  if {$argc != 10} {
+  if {$argc != 9} {
     puts "The script needs 10 input to work"
     puts "1 - ID of the node"
     puts "2 - ID of the receiver"
     puts "3 - Start time"
     puts "4 - Stop time"
     puts "5 - Packet generation period (0 if the node doesn't generate data)"
-    puts "6 - ID of the experiment"
-    puts "7 - IP of the modem"
-    puts "8 - Port of the modem"
-    puts "9 - Application socket port"
-    puts "10 - Experiment ID"
+    puts "6 - IP of the modem"
+    puts "7 - Port of the modem"
+    puts "8 - Application socket port"
+    puts "9 - Experiment ID"
     puts "Please try again."
     exit
   } else {
@@ -77,25 +76,23 @@ if {$opt(AppSocket) == 1} {
     set opt(start)    [lindex $argv 2]
     set opt(stop)     [lindex $argv 3]
     set opt(traffic)  [lindex $argv 4]
-    set opt(n_run)    [lindex $argv 5]
-    set opt(ip)       [lindex $argv 6]
-    set opt(port)     [lindex $argv 7]
-    set opt(app_port) [lindex $argv 8]
-    set opt(exp_ID) [lindex $argv 9]
+    set opt(ip)       [lindex $argv 5]
+    set opt(port)     [lindex $argv 6]
+    set opt(app_port) [lindex $argv 7]
+    set opt(exp_ID) [lindex $argv 8]
   }
 } else {
-  if {$argc != 10} {
+  if {$argc != 9} {
     puts "The script needs 10 input to work"
     puts "1 - ID of the node"
     puts "2 - ID of the receiver"
     puts "3 - Start time"
     puts "4 - Stop time"
     puts "5 - Packet generation period (0 if the node doesn't generate data)"
-    puts "6 - ID of the experiment"
-    puts "7 - IP of the modem"
-    puts "8 - Port of the modem"
-    puts "9 - Payload size (byte)"
-    puts "10 - Experiment ID"
+    puts "6 - IP of the modem"
+    puts "7 - Port of the modem"
+    puts "8 - Payload size (byte)"
+    puts "9 - Experiment ID"
     puts "Please try again."
     exit
   } else {
@@ -104,11 +101,10 @@ if {$opt(AppSocket) == 1} {
     set opt(start)    [lindex $argv 2]
     set opt(stop)     [lindex $argv 3]
     set opt(traffic)  [lindex $argv 4]
-    set opt(n_run)    [lindex $argv 5]
-    set opt(ip)       [lindex $argv 6]
-    set opt(port)     [lindex $argv 7]
-    set opt(payload_size) [lindex $argv 8]
-    set opt(exp_ID) [lindex $argv 9]
+    set opt(ip)       [lindex $argv 5]
+    set opt(port)     [lindex $argv 6]
+    set opt(payload_size) [lindex $argv 7]
+    set opt(exp_ID) [lindex $argv 8]
   }
 }
 
