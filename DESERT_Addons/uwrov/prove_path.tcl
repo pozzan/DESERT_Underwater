@@ -87,7 +87,9 @@ load libuwstaticrouting.so
 load libuwmll.so
 load libuwudp.so
 load libuwrov.so
+load libuwtdma.so
 load libuwcbr.so
+load libuwaloha.so
 load libuwcsmaaloha.so
 load libuwinterference.so
 load libUwmStd.so
@@ -106,13 +108,13 @@ $ns use-Miracle
 set opt(start_clock) [clock seconds]
 
 set opt(nn)                 2.0 ;# Number of Nodes
-set opt(ROV_pktsize)            1024;#125  ;# Pkt size in byte
-set opt(CTR_pktsize)            1024;#125  ;# Pkt size in byte
+set opt(ROV_pktsize)            [expr 4024];#125  ;# Pkt size in byte
+set opt(CTR_pktsize)            [expr 1024/8];#125  ;# Pkt size in byte
 
-set opt(ROV_period) 			1.2
+set opt(ROV_period) 			0.5
 
 set opt(starttime)          1
-set opt(stoptime)           50000
+set opt(stoptime)           3000
 set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration of the simulation
 
 set opt(txpower)            160;#158.263 ;#Power transmitted in dB re uPa 185.8 is the maximum
@@ -124,12 +126,12 @@ set opt(bw)                 76000.0	;#Bandwidth used in Hz
 set opt(bitrate)            87768.0 ;#150000;#bitrate in bps
 set opt(max_rtt)            [expr 2*$opt(maxinterval_)/$opt(propagation_speed) + $opt(CTR_pktsize)/$opt(bitrate) + $opt(ROV_pktsize)/$opt(bitrate)];
 
-set opt(CTR_timeout)             [expr 2*($opt(max_rtt)+$opt(ROV_period))];#time out before retransmission which [] ?
-if {$opt(ACK_Active)} {
-    set opt(ack_mode)           "setAckMode"    
-} else {
-    set opt(ack_mode)           "setNoAckMode"
-}
+set opt(CTR_timeout)             [expr 6+2*($opt(max_rtt)+$opt(ROV_period))];#time out before retransmission which [] ?
+#if {$opt(ACK_Active)} {
+#    set opt(ack_mode)           "setAckMode"    
+#} else {
+#    set opt(ack_mode)           "setNoAckMode"
+#}
 
 
 set rng [new RNG]
@@ -187,13 +189,25 @@ $data_mask setPropagationSpeed  $opt(propagation_speed)
 #########################
 Module/UW/ROV set packetSize_          $opt(ROV_pktsize)
 Module/UW/ROV set period_              $opt(ROV_period)
-Module/UW/ROV set debug_               0
 
 Module/UW/ROV/CTR set packetSize_          $opt(CTR_pktsize)
 #timeout
 Module/UW/ROV/CTR set period_              $opt(CTR_timeout)
+
+Module/UW/ROV set debug_               0
+
 Module/UW/ROV/CTR set debug_               0
 
+#TDMA
+
+Module/UW/TDMA set frame_time 6 
+Module/UW/TDMA set debug_               0
+Module/UW/TDMA set guard_time 0.5 
+Module/UW/TDMA set ACK_size_           0
+Module/UW/TDMA set max_tx_tries_               1
+Module/UW/TDMA set wait_constant_              0
+Module/UW/TDMA set max_payload_                10000
+Module/UW/TDMA set ACK_timeout_                10000.0
 
 
 Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate)
@@ -209,6 +223,8 @@ Module/UW/PHYSICAL  set BandwidthOptimization_      0
 Module/UW/PHYSICAL  set SPLOptimization_            0
 Module/UW/PHYSICAL  set debug_                      0
 
+
+
 ################################
 # Procedure(s) to create nodes #
 ################################
@@ -222,7 +238,21 @@ proc createNode {node application id} {
     set ipr($id)  [new Module/UW/StaticRouting]
     set ipif($id) [new Module/UW/IP]
     set mll($id)  [new Module/UW/MLL] 
-    set mac($id)  [new Module/UW/CSMA_ALOHA] 
+  #  set mac($id)  [new Module/UW/ALOHA] 
+ #   set mac($id)  [new Module/UW/CSMA_ALOHA]
+    
+    set mac($id)  [new Module/UW/TDMA]
+    if {$id == 1} {
+        $mac($id) setSlotStatus 2
+        $mac($id) setHostId 1
+        $mac($id) setSlotDuration 5
+    } else {
+        $mac($id) setSlotStatus 1
+        $mac($id) setHostId 2
+        $mac($id) setSlotDuration 1        
+    }
+    
+    #$mac($id)  setNoAckMode
     set phy($id)    [new Module/UW/PHYSICAL]
 
 	$node addModule 7 $application   1  "ROV"
@@ -252,10 +282,7 @@ proc createNode {node application id} {
     
     set position($id) [new "Position/SM"]
     $node addPosition $position($id)
-    #set posdb($id) [new "PlugIn/PositionDB"]
-   # $node addPlugin $posdb($id) 20 "PDB"
- #   $posdb($id) addpos [$ipif($id) addr] $position($id)
-    
+
     #Setup positions
     $position($id) setX_ [expr $id*100]
     $position($id) setZ_ -15
@@ -272,8 +299,8 @@ proc createNode {node application id} {
     $phy($id) setSpectralMask $data_mask
     $phy($id) setInterference $interf_data($id)
     $phy($id) setInterferenceModel "MEANPOWER"
-    $mac($id) $opt(ack_mode)
-    $mac($id) initialize
+ #   $mac($id) $opt(ack_mode)
+#    $mac($id) initialize
 }
 
 
@@ -349,8 +376,12 @@ foreach line $data {
 		$ns at $t "$applicationCTR sendPosition $x $y $z"
     }
 }
-$ns at $opt(starttime)    "$applicationROV start"
+$ns at [expr $opt(starttime)+0.0000000]    "$applicationROV start"
+$ns at [expr $opt(starttime)+0.00000002]    "$applicationCTR start"
+$ns at [expr $opt(starttime)+0.00000001]    "$mac(0) start"
+$ns at [expr $opt(starttime)+0.00000003]    "$mac(1) start"
 $ns at $opt(stoptime)     "$applicationROV stop"
+$ns at $opt(stoptime)     "$applicationCTR stop"
 
 proc update_and_check {t} {
     global position applicationROV
@@ -386,11 +417,11 @@ proc finish {} {
         puts "tx frequency     : $opt(freq) Hz"
         puts "tx bandwidth     : $opt(bw) Hz"
         puts "bitrate          : $opt(bitrate) bps"
-        if {$opt(ack_mode) == "setNoAckMode"} {
-            puts "ACKNOWLEDGEMENT   : disabled"
-        } else {
-            puts "ACKNOWLEDGEMENT   : active"
-        }
+   #     if {$opt(ack_mode) == "setNoAckMode"} {
+    #        puts "ACKNOWLEDGEMENT   : disabled"
+     #   } else {
+      #      puts "ACKNOWLEDGEMENT   : active"
+      #  }
         puts "---------------------------------------------------------------------"
     } 
     set ROV_throughput              [$applicationROV getthr]
@@ -410,22 +441,22 @@ proc finish {} {
             puts "applicationCTR PER            : $CTR_per       "
             puts "-------------------------------------------"
 
-        if {$opt(ack_mode) == "setAckMode"} {
-            set DataPktsTx_CTR                  [$mac(0) getDataPktsTx]
-            set UpDataPktsRx_CTR                [$mac(0) getUpLayersDataRx]
-            set DataPktsTx_ROV                  [$mac(1) getDataPktsTx]
-            set UpDataPktsRx_ROV                [$mac(1) getUpLayersDataRx]
-            set rtx_CTR                         [expr (($DataPktsTx_CTR/$ROV_rcv_pkts) - 1)]
-            set rtx_ROV                         [expr (($DataPktsTx_ROV/$CTR_rcv_pkts) - 1)]
-        }
+ #       if {$opt(ack_mode) == "setAckMode"} {
+ #           set DataPktsTx_CTR                  [$mac(0) getDataPktsTx]
+ #           set UpDataPktsRx_CTR                [$mac(0) getUpLayersDataRx]
+ #           set DataPktsTx_ROV                  [$mac(1) getDataPktsTx]
+ #           set UpDataPktsRx_ROV                [$mac(1) getUpLayersDataRx]
+ #           set rtx_CTR                         [expr (($DataPktsTx_CTR/$ROV_rcv_pkts) - 1)]
+ #           set rtx_ROV                         [expr (($DataPktsTx_ROV/$CTR_rcv_pkts) - 1)]
+ #       }
 
         set sum_throughput [expr $ROV_throughput + $CTR_throughput]
         set sum_sent_pkts [expr $ROV_sent_pkts + $CTR_sent_pkts]
         set sum_rcv_pkts  [expr $ROV_rcv_pkts + $CTR_rcv_pkts]
-        if {$opt(ack_mode) == "setAckMode"} {
-            set sum_rtx           [expr $rtx_ROV + $rtx_CTR]
-        }
-    }
+ #       if {$opt(ack_mode) == "setAckMode"} {
+ #           set sum_rtx           [expr $rtx_ROV + $rtx_CTR]
+ #       }
+ #   }
         
     set ipheadersize        [$ipif(1) getipheadersize]
     set udpheadersize       [$udp(1) getudpheadersize]
@@ -446,9 +477,9 @@ proc finish {} {
         puts "UDP Header Size           : $udpheadersize"
         puts "ROV Header Size           : $ROVheadersize"
         puts "CTR Header Size           : $CTRheadersize"
-        if {$opt(ack_mode) == "setAckMode"} {
-            puts "MAC-level average retransmissions per node : [expr $sum_rtx/($opt(nn))]"
-        }
+ #       if {$opt(ack_mode) == "setAckMode"} {
+ #           puts "MAC-level average retransmissions per node : [expr $sum_rtx/($opt(nn))]"
+ #       }
         puts "---------------------------------------------------------------------"
         set ROV_packet_lost             [$phy(1) getTotPktsLost]
         set CTR_packet_lost             [$phy(0) getTotPktsLost]
@@ -472,6 +503,9 @@ proc finish {} {
         puts "- Global situation -"
         puts "Tot. pkts lost            : $packet_lost"
         puts "done!"
+	set sum_pcks_in_buffer [expr [$mac(1) get_buffer_size] + [$mac(0) get_buffer_size]]
+   	puts "Pckts in buffer : $sum_pcks_in_buffer"
+
     }
     
     $ns flush-trace
@@ -487,7 +521,6 @@ if ($opt(verbose)) {
 }
 
 
-$ns at [expr $opt(stoptime) + 250.0]  "finish; $ns halt" 
+$ns at [expr $opt(stoptime) + 50.0]  "finish; $ns halt" 
 
 $ns run
-
