@@ -207,7 +207,7 @@ double UwHermesPhy::getDistance(Packet* _p){
     double x_dst = (ph->dstPosition)->getX();
     double y_dst = (ph->dstPosition)->getY();
     double z_dst = (ph->dstPosition)->getZ();
-    return pow(pow(x_src-x_dst,2.0)+pow(y_src-y_dst,2.0)+pow(z_src-z_dst,2.0),0.5);
+    return sqrt(pow(x_src-x_dst,2.0)+pow(y_src-y_dst,2.0)+pow(z_src-z_dst,2.0));
 } /* */
 
 int UwHermesPhy::getSize(Packet* _p){

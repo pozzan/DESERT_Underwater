@@ -84,6 +84,7 @@ DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uw-al'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uw-al/packer_common'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uw-al/packer_mac'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwphysicalracun'
+DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwhermesphy'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/mobility/uwdriftposition'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/mobility/uwgmposition'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/interference/uwinterference'
@@ -137,7 +138,8 @@ AC_CONFIG_FILES([
     physical/uwphysicalfromdb/Makefile
     physical/uw-al/Makefile
     physical/uw-al/packer_common/Makefile
-    physical/uw-al/packer_mac/Makefile
+    physical/uw-al/packer_mac/Makefile    
+    physical/uwhermesphy/Makefile
     mobility/uwdriftposition/Makefile
     mobility/uwgmposition/Makefile
     interference/uwinterference/Makefile
