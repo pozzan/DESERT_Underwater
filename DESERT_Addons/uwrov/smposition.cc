@@ -39,7 +39,7 @@
 
 
 
-#include<iostream>
+#include <iostream>
 #include "smposition.h"
 
 

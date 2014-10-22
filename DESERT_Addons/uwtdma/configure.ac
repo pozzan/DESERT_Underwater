@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,50 +26,46 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# @file   uwrov-defaults.tcl
-# @author Filippo Campagnaro
-# @version 1.1.0
 
-PacketHeaderManager set tab_(PacketHeader/UWROV) 1
+AC_INIT(uwtdma, 1.0.0)
+AM_INIT_AUTOMAKE
+AM_PROG_AR
 
-Module/UW/ROV set packetSize_         500
-Module/UW/ROV set period_             60
-Module/UW/ROV set destPort_           0
-Module/UW/ROV set destAddr_           0
-Module/UW/ROV set debug_              0
-Module/UW/ROV set PoissonTraffic_     1
-Module/UW/ROV set drop_out_of_order_  0
+AC_CONFIG_MACRO_DIR([m4])
 
-Module/UW/ROV instproc init {args} {
-    $self next $args
-    $self settag "UW/ROV"
-}
+AC_PROG_CXX
+AC_PROG_MAKE_SET
 
-Module/UW/ROV/CTR set packetSize_         500
-Module/UW/ROV/CTR set period_             60
-Module/UW/ROV/CTR set destPort_           0
-Module/UW/ROV/CTR set destAddr_           0
-Module/UW/ROV/CTR set debug_              0
-Module/UW/ROV/CTR set PoissonTraffic_     1
-Module/UW/ROV/CTR set drop_out_of_order_  0
+AC_DISABLE_STATIC
+ 
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
 
-Module/UW/ROV/CTR instproc init {args} {
-    $self next $args
-    $self settag "UW/ROV/CTR"
-}
+AC_PATH_NS_ALLINONE
 
-#Module/UW/TDMA set slot_status  0 
-#Module/UW/TDMA set num_hosts  2 
-#Module/UW/TDMA set host_id  2
-#Module/UW/TDMA set frame_time  10
-#Module/UW/TDMA set guard_time 1
-#Module/UW/TDMA set slot_duration  4
+AC_ARG_WITH_NSMIRACLE
 
-#Module/UW/TDMA instproc init {args} {
-#    $self next $args
-#    $self settag "UW/TDMA"
-#}
+AC_CHECK_NSMIRACLE([have_nsmiracle=yes],[have_nsmiracle=no])
+if test x$have_nsmiracle != xyes ; then
+  AC_MSG_ERROR([Could not find nsmiracle, is --with-nsmiracle set correctly?])
+fi  
 
-Position/SM set debug_ 0
+AC_ARG_WITH_DESERT
+AC_ARG_WITH_DESERT_BUILD
 
-PlugIn/PositionDB set debug_ 0
+AC_CHECK_DESERT([have_desert=yes],[have_desert=no])
+if test x$have_desert != xyes ; then
+  AC_MSG_ERROR([Could not find desert, is --with-desert set correctly?])
+fi  
+
+AC_ARG_WITH_DESERT_ADDON
+AC_ARG_WITH_DESERT_ADDON_BUILD
+
+AC_DEFINE(CPP_NAMESPACE,std)
+
+AC_CONFIG_FILES([
+		m4/Makefile
+		Makefile
+      ])
+
+AC_OUTPUT

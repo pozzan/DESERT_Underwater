@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2013 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,50 +27,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# @file   uwrov-defaults.tcl
-# @author Filippo Campagnaro
-# @version 1.1.0
+#
 
-PacketHeaderManager set tab_(PacketHeader/UWROV) 1
 
-Module/UW/ROV set packetSize_         500
-Module/UW/ROV set period_             60
-Module/UW/ROV set destPort_           0
-Module/UW/ROV set destAddr_           0
-Module/UW/ROV set debug_              0
-Module/UW/ROV set PoissonTraffic_     1
-Module/UW/ROV set drop_out_of_order_  0
-
-Module/UW/ROV instproc init {args} {
-    $self next $args
-    $self settag "UW/ROV"
-}
-
-Module/UW/ROV/CTR set packetSize_         500
-Module/UW/ROV/CTR set period_             60
-Module/UW/ROV/CTR set destPort_           0
-Module/UW/ROV/CTR set destAddr_           0
-Module/UW/ROV/CTR set debug_              0
-Module/UW/ROV/CTR set PoissonTraffic_     1
-Module/UW/ROV/CTR set drop_out_of_order_  0
-
-Module/UW/ROV/CTR instproc init {args} {
-    $self next $args
-    $self settag "UW/ROV/CTR"
-}
-
-#Module/UW/TDMA set slot_status  0 
-#Module/UW/TDMA set num_hosts  2 
-#Module/UW/TDMA set host_id  2
-#Module/UW/TDMA set frame_time  10
-#Module/UW/TDMA set guard_time 1
-#Module/UW/TDMA set slot_duration  4
-
-#Module/UW/TDMA instproc init {args} {
-#    $self next $args
-#    $self settag "UW/TDMA"
-#}
-
-Position/SM set debug_ 0
-
-PlugIn/PositionDB set debug_ 0
+aclocal -I m4 --force && libtoolize --force && automake --foreign --add-missing && autoconf

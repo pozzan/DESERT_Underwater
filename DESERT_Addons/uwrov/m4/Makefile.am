@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
 #    names of its contributors may be used to endorse or promote products 
 #    derived from this software without specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+# THIS SOFTWARE IS ProvIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
 # TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
 # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
@@ -26,50 +26,26 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# @file   uwrov-defaults.tcl
-# @author Filippo Campagnaro
-# @version 1.1.0
 
-PacketHeaderManager set tab_(PacketHeader/UWROV) 1
+AM_CXXFLAGS = -Wall -ggdb3
 
-Module/UW/ROV set packetSize_         500
-Module/UW/ROV set period_             60
-Module/UW/ROV set destPort_           0
-Module/UW/ROV set destAddr_           0
-Module/UW/ROV set debug_              0
-Module/UW/ROV set PoissonTraffic_     1
-Module/UW/ROV set drop_out_of_order_  0
+lib_LTLIBRARIES = libuwrov.la
 
-Module/UW/ROV instproc init {args} {
-    $self next $args
-    $self settag "UW/ROV"
-}
+libuwrov_la_SOURCES = uwrov-module.cc uwrov-tracer.cc uwrov-module.h uwrov-packet.h uwrovctr-module.cc uwrovctr-tracer.cc uwrovctr-module.h smposition.h smposition.cc uw-tdma.h uw-tdma.cc initlib.cc
 
-Module/UW/ROV/CTR set packetSize_         500
-Module/UW/ROV/CTR set period_             60
-Module/UW/ROV/CTR set destPort_           0
-Module/UW/ROV/CTR set destAddr_           0
-Module/UW/ROV/CTR set debug_              0
-Module/UW/ROV/CTR set PoissonTraffic_     1
-Module/UW/ROV/CTR set drop_out_of_order_  0
+libuwrov_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
+libuwrov_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
+libuwrov_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@
 
-Module/UW/ROV/CTR instproc init {args} {
-    $self next $args
-    $self settag "UW/ROV/CTR"
-}
+nodist_libuwrov_la_SOURCES = initTcl.cc
 
-#Module/UW/TDMA set slot_status  0 
-#Module/UW/TDMA set num_hosts  2 
-#Module/UW/TDMA set host_id  2
-#Module/UW/TDMA set frame_time  10
-#Module/UW/TDMA set guard_time 1
-#Module/UW/TDMA set slot_duration  4
+BUILT_SOURCES = initTcl.cc
 
-#Module/UW/TDMA instproc init {args} {
-#    $self next $args
-#    $self settag "UW/TDMA"
-#}
+CLEANFILES = initTcl.cc
 
-Position/SM set debug_ 0
+TCL_FILES =  uwrov-init.tcl
 
-PlugIn/PositionDB set debug_ 0
+initTcl.cc: Makefile $(TCL_FILES)
+		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwrovTclCode > initTcl.cc 
+
+EXTRA_DIST = $(TCL_FILES)
