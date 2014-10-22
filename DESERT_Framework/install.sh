@@ -109,6 +109,7 @@ while true; do
         -a|--wizard)
             shift;
             OWNER_PERMISSION=0
+            ADDONS_FILE=".addon.list"
             _WIZARD_OPT=1
             log_L1 "_WIZARD_OPT=${_WIZARD_OPT}" ${INSTALL_LOG}
             if [ -n "$1" ]; then
@@ -126,8 +127,10 @@ while true; do
             shift;
             if [ -f .addon.priv.list ]; then
                 OWNER_PERMISSION=1
+                ADDONS_FILE=".addon.priv.list"
             else
                 OWNER_PERMISSION=0
+                ADDONS_FILE=".addon.list"
                 logWARN_L1 "the .addon.priv.list file not found. instal.sh script will start with --wizard option" ${INSTALL_LOG}
                 warn_L1 ".addon.priv.list file not found!"
                 warn_L2 "instal.sh script will start with --wizard option"

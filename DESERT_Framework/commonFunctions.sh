@@ -383,16 +383,17 @@ wizard_function_customPar() {
 }
 
 wizard_function_addons(){
+    #TODO replace the case statement with a single call to: wizard__print_L4
     sleep ${SLEEP05}
     echo ""
     wizard__print_L2 "Setting of the ADDONs (OPTIONAL)"
     wizard__print_L3 "list of the available ADDONs:"
     case "${OWNER_PERMISSION}" in
         "0")
-            wizard__print_L4 "$(cat ${ROOT_DESERT}/.addon.list | sed -e 's/\(.\)/*  \1/')"
+            wizard__print_L4 "$(cat ${ROOT_DESERT}/${ADDONS_FILE} | sed -e 's/\(.\)/*  \1/')"
             ;;
         "1")
-            wizard__print_L4 "$(cat ${ROOT_DESERT}/.addon.priv.list | sed -e 's/\(.\)/*  \1/')"
+            wizard__print_L4 "$(cat ${ROOT_DESERT}/${ADDONS_FILE} | sed -e 's/\(.\)/*  \1/')"
             ;;
     esac
 
@@ -402,14 +403,24 @@ wizard_function_addons(){
     _ADDONS=1
     log_L1 "_ADDONS=${_ADDONS}" install.log
     log_L2 "ADDONS=${ADDONS}" install.log
-    ALL_ADDONS=$(cat ./.addon.list | awk '{print $1}' | grep -v "ALL" | awk '{printf "%s ",$0} END {print ""}')
     case "${ADDONS}" in
         "")
             continue
             ;;
         "ALL")
-            ADDONS=${ALL_ADDONS}
-            echo -n "--addons \"${ALL_ADDONS}\"" >> ${INSTALL_CONF}
+            case "${WITHWOSS}" in
+                "0")
+                    ALL_ADDONS=$(cat ./${ADDONS_FILE} | awk '{print $1}' | grep -v "ALL" | grep -v "wossgmmob3D" | grep -v "wossgroupmob3D" | awk '{printf "%s ",$0} END {print ""}')
+                    ADDONS=${ALL_ADDONS}
+                    echo -n "--addons \"${ADDONS}\"" >> ${INSTALL_CONF}
+                    ;;
+
+                "1")
+                    ALL_ADDONS=$(cat ./${ADDONS_FILE} | awk '{print $1}' | grep -v "ALL" | awk '{printf "%s ",$0} END {print ""}')
+                    ADDONS=${ALL_ADDONS}
+                    echo -n "--addons \"${ADDONS}\"" >> ${INSTALL_CONF}
+                    ;;
+            esac
             ;;
         *)
             echo -n "--addons \"${ADDONS}\" " >> ${INSTALL_CONF}

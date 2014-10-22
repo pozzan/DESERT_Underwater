@@ -181,6 +181,7 @@ export BUILD_TARGET=""
 
 export CUSTOM_PAR=""
 export ADDONS=""
+export ADDONS_FILE=".addon.list"
 # #
 # ###
 export TMP_INPUT=""
