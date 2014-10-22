@@ -35,7 +35,7 @@
  *
  */
 
-#include "uwphysical.h"
+#include "uwhermesphy.h"
 
 static class UwHermesPhyClass : public TclClass {
 public:
@@ -46,19 +46,8 @@ public:
 } class_module_uwhermesphy;
 
 UwHermesPhy::UwHermesPhy() :
-modulation_name_("BPSK"),
-time_ready_to_end_rx_(0),
-Tx_Time_(0),
-Rx_Time_(0),
-Energy_Tx_(0),
-Energy_Rx_(0),
-tx_power_(3.3),
-rx_power_(0.620),
-Interference_Model("CHUNK")
-{
-    bind("rx_power_consumption_", &rx_power_);
-    bind("tx_power_consumption_", &tx_power_);
-}
+UnderwaterPhysical()
+{}
 
 void UwHermesPhy::endRx(Packet* p) {
     hdr_cmn* ch = HDR_CMN(p);
@@ -171,28 +160,6 @@ void UwHermesPhy::endRx(Packet* p) {
     }
 } /* UnderwaterPhysical::endRx */
 
-/*double UwHermesPhy::getPER(double _snr, int _nbits, Packet* _p) {
-    double snr_with_penalty = _snr * pow(10, RxSnrPenalty_dB_ / 10.0);
-
-    double ber_ = 0;
-    if (modulation_name_ == "BPSK") {
-        ber_ = 0.5 * erfc(sqrt(snr_with_penalty));
-    } else if (modulation_name_ == "BFSK") {
-        ber_ = 0.5 * exp(-snr_with_penalty / 2);
-    } else if (modulation_name_ == "8PSK") {
-        double const M = 8;
-        ber_ = (1 / this->log2(M)) * get_prob_error_symbol_mpsk(snr_with_penalty, M);
-    } else if (modulation_name_ == "16PSK") {
-        double const M = 16;
-        ber_ = (1 / this->log2(M)) * get_prob_error_symbol_mpsk(snr_with_penalty, M);
-    } else if (modulation_name_ == "32PSK") {
-        double const M = 32;
-        ber_ = (1 / this->log2(M)) * get_prob_error_symbol_mpsk(snr_with_penalty, M);
-    }
-
-    // PER calculation
-    return 1 - pow(1 - ber_, _nbits);
-} */
 double UwHermesPhy::getPER(double _snr, int _nbits, Packet* _p) {
     double distance = getDistance(_p);
     int size = getSize(_p);
@@ -211,10 +178,11 @@ double UwHermesPhy::getDistance(Packet* _p){
 } /* */
 
 int UwHermesPhy::getSize(Packet* _p){
-    hdr_cmn* ch = HDR_CMN(p);
+    hdr_cmn* ch = HDR_CMN(_p);
     return ch->size()*8;
 }
 
 double matchPER(double distance, int size){
+	//TODO: match PER with linear interpolation
     return 0.0;
 }
