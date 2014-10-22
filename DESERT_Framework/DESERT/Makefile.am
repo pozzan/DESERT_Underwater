@@ -60,6 +60,7 @@ SUBDIRS = m4 \
     physical/uwmphy_modem \
     physical/ms2c_evologics \
     physical/uwmphypatch \
+    physical/uwhermesphy \
     physical/uw-al \
     physical/uw-al/packer_common \
     physical/uw-al/packer_mac \
