@@ -46,7 +46,7 @@ public:
 } class_module_uwhermesphy;
 
 UwHermesPhy::UwHermesPhy() :
-UnderwaterPhysical(), L{ 25, 50, 95, 120, 140, 160, 180, 190 }, P_SUCC{ 0.923077*39/40, 0.913793*58/60, 0.924528*53/60, 0.876712*73/80, 0.61643*73/80, 0.75*28/40, 0.275862*29/40, 0 }
+UnderwaterPhysical()
 {}
 
 void UwHermesPhy::endRx(Packet* p) {
@@ -73,13 +73,24 @@ void UwHermesPhy::endRx(Packet* p) {
             bool error_ni = 0;
             if (!error_n) {
                 if (interference_) {
-                    if (Interference_Model == "MEANPOWER") {
+                    if (Interference_Model == "CHUNK") {
+                        const PowerChunkList& power_chunk_list = interference_->getInterferencePowerChunkList(p);
+                        for (PowerChunkList::const_iterator itInterf = power_chunk_list.begin(); itInterf != power_chunk_list.end(); itInterf++) {
+                            if (itInterf->first > (ph->Pn / 2)) {
+                                int nbits2 = itInterf->second * BitRate_;
+                                per_ni = getPER(ph->Pr / (ph->Pn + itInterf->first), nbits2, p);
+                                x = RNG::defaultrng()->uniform_double();
+                                error_ni = x <= per_ni;
+                                if (error_ni) {
+                                    break;
+                                }
+                            }
+                        }
+                    } else if (Interference_Model == "MEANPOWER") {
                         double interference = interference_->getInterferencePower(p);
-                        per_ni = interference>0;
-                        if (per_ni)
-                            std::cout <<"INTERF" << interference << std::endl;
+                        per_ni = getPER(ph->Pr / (ph->Pn + interference), nbits, p);
                     } else {
-                        std::cerr << "Please choose only MEANPOWER" << std::endl;
+                        std::cerr << "Please choose the right interference model to use: CHUNK or MEANPOWER" << std::endl;
                         exit(1);
                     }
                     interferent_pkts = interference_->getCounters(p);
@@ -124,7 +135,10 @@ void UwHermesPhy::endRx(Packet* p) {
                     } else {
                         if (interferent_pkts.first > 0) {
                             incrCollisionDATAvsCTRL();
-                        } 
+                        } else {
+//                            std::cerr << "Logical error on counting the packet interference!!!" << std::endl;
+                            ;
+                        }
                     }
                 }
                 else if (mach->ftype() == MF_CONTROL) {
@@ -134,6 +148,7 @@ void UwHermesPhy::endRx(Packet* p) {
                         incrCollisionCTRL();
                     }
                 }
+
             }
             sendUp(p);
             PktRx = 0;
@@ -147,7 +162,8 @@ void UwHermesPhy::endRx(Packet* p) {
 
 double UwHermesPhy::getPER(double _snr, int _nbits, Packet* _p) {
     double distance = getDistance(_p);
-    return 1-matchPS(distance,_nbits);
+    int size = getSize(_p);
+    return matchPER(distance,size);
 }/* UnderwaterPhysical::getPER */
 
 double UwHermesPhy::getDistance(Packet* _p){
@@ -161,48 +177,12 @@ double UwHermesPhy::getDistance(Packet* _p){
     return sqrt(pow(x_src-x_dst,2.0)+pow(y_src-y_dst,2.0)+pow(z_src-z_dst,2.0));
 } /* */
 
-/*int UwHermesPhy::getSize(Packet* _p){
+int UwHermesPhy::getSize(Packet* _p){
     hdr_cmn* ch = HDR_CMN(_p);
     return ch->size()*8;
-}*/
+}
 
-double UwHermesPhy::matchPS(double distance, int size){
-    if (debug_)
-        std::cout << "distance = " << distance <<  " packet size = " << size << std::endl;
+double matchPER(double distance, int size){
 	//TODO: match PER with linear interpolation
-    int n = sizeof(L)/sizeof(double);
-    if ( distance <= L[0] )
-        return chunckInterpolator(P_SUCC[ 0 ], size );
-    if ( distance >= L[n-1] )
-        return chunckInterpolator(P_SUCC[ n-1 ], size );
-    int first_geq = 0;
-    for ( ; L[first_geq] < distance and first_geq < n; first_geq++){}
-    int l_inf = L[first_geq-1];
-    double p_inf = P_SUCC[first_geq-1];
-    int l_sup = L[ first_geq ];
-    double p_sup = P_SUCC[first_geq];
-    double p_succ_frame= linearInterpolator( distance, l_inf, p_inf, l_sup, p_sup );
-    if (debug_)
-        std::cout << "Psucc_frame = " << p_succ_frame << std::endl;
-    double ps = chunckInterpolator( p_succ_frame, size );
-    if (debug_)
-      std::cout << "Ps = " << ps << std::endl;
-    return ps;
-}
-
-
-double UwHermesPhy::linearInterpolator( double x, double x1, double y1, 
-    double x2, double y2 ){
-    
-    double m = (y1-y2)/(x1-x2);
-    double q = y1 - m * x1;
-    return m * x + q;
-}
-
-double UwHermesPhy::chunckInterpolator( double p, int size ){
-    int n_chunck_coded_frame=FRAME_BIT/11; //BCH(15,11,1)
-    int n_chunck_coded_packet=ceil(size/11);
-    if (debug_)
-        std::cout << "n_chunck_coded_frame = " << n_chunck_coded_frame <<  " n_chunck_coded_packet = " << n_chunck_coded_packet << std::endl;
-    return pow(p,((n_chunck_coded_packet+0.0)/n_chunck_coded_frame));
+    return 0.0;
 }

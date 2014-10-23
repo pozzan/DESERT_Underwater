@@ -28,22 +28,22 @@
  
 AM_CXXFLAGS = -Wall -ggdb3
 
-lib_LTLIBRARIES = libuwphysical.la
+lib_LTLIBRARIES = libuwhermesphy.la
 check_PROGRAMS = 
 
 SUBDIRS = 
 
 TESTS = 
 
-libuwphysical_la_SOURCES = initlib.cc\
+libuwhermesphy_la_SOURCES = initlib.cc\
 	uwhermesphy.cc\
 	uwhermesphy.h
 
-libuwphysical_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
-libuwphysical_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
-libuwphysical_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
+libuwhermesphy_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+libuwhermesphy_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
+libuwhermesphy_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
 
-nodist_libuwphysical_la_SOURCES = InitTcl.cc
+nodist_libuwhermesphy_la_SOURCES = InitTcl.cc
 BUILT_SOURCES = InitTcl.cc
 CLEANFILES = InitTcl.cc
 

@@ -33,31 +33,12 @@
  *
  * \brief Definition of UwHermesPhy class.
  *
-**/
+ */
 
 #ifndef UWHERMESPHY_H
 #define UWHERMESPHY_H
 
 #include "uwphysical.h"
-#include <math.h> 
-
-#include <iostream>
-//#include <vector>
-
-#define FRAME_BIT 9152 // 9120 info bit +32 CRC bit
-
-/**
- *
- * BCH(n,k,t) : correction of t errors via BCH code
- * new frame length= 9152/11*15
- *
-**/
-#define BCH_N 15 // BCH(n,k,t)
-#define BCH_K 11
-#define BCH_T 1
-
-
-using namespace std;
 
 class UwHermesPhy : public UnderwaterPhysical {
 
@@ -94,27 +75,12 @@ protected:
     
     
 private:
-    /**
-    *
-    * Arrays containing distance in methers and relative Psuccess
-    *
-    **/
-    
-    double const L[8];
-    //double const L[7] = {25, 50, 95, 120, 140, 160, 180};
-
-    double const P_SUCC[8];
-    //double const PSUCC[7] = {98.45*90.4762, 96.83*97.2973, 97.08*97.561, };
-
-/*
     /**    
     * Return the packet size, in bit.
     *
     * @param p Packet.
     **/
-    /*
-    virtual int getSize(Packet*);*/
-    
+    virtual int getSize(Packet*);
     /**    
     * Return the distance between source and destination.
     *
@@ -127,18 +93,7 @@ private:
     * @param distance: distance between source and destination.
     * @param size: Packet size in bit.
     **/
-    virtual double matchPS(double distance, int size);
-    /**    
-    * Return y via linear interpolation given two points.
-    *
-    * @param x: input.
-    * @param x1, y1: coordinates of the first point.
-    * @param x2, y2: coordinates of the second point.
-    **/
-    virtual double linearInterpolator( double x, double x1, double y1, double x2, double y2 );
-
-    virtual double chunckInterpolator( double p, int size );
-
+    virtual double matchPER(double distance, int size);
 };
 
 #endif /* UWHERMESPHY_H  */
