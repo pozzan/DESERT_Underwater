@@ -47,7 +47,9 @@ public:
 
 UwHermesPhy::UwHermesPhy() :
 UnderwaterPhysical(), L{ 25, 50, 95, 120, 140, 160, 180, 190 }, P_SUCC{ 0.923077*39/40, 0.913793*58/60, 0.924528*53/60, 0.876712*73/80, 0.61643*73/80, 0.75*28/40, 0.275862*29/40, 0 }
-{}
+{
+    Interference_Model = "MEANPOWER";
+}
 
 void UwHermesPhy::endRx(Packet* p) {
     hdr_cmn* ch = HDR_CMN(p);
@@ -60,7 +62,6 @@ void UwHermesPhy::endRx(Packet* p) {
     ClMsgPhy2MacAddr msg;
     sendSyncClMsg(&msg);
     mac_addr = msg.getAddr();
-
     if (PktRx != 0) {
         if (PktRx == p) {
             double per_ni; // packet error rate due to noise and/or interference
@@ -76,7 +77,7 @@ void UwHermesPhy::endRx(Packet* p) {
                     if (Interference_Model == "MEANPOWER") {
                         double interference = interference_->getInterferencePower(p);
                         per_ni = interference>0;
-                        if (per_ni)
+                        if (per_ni and debug_)
                             std::cout <<"INTERF" << interference << std::endl;
                     } else {
                         std::cerr << "Please choose only MEANPOWER" << std::endl;
@@ -181,6 +182,12 @@ double UwHermesPhy::matchPS(double distance, int size){
     double p_inf = P_SUCC[first_geq-1];
     int l_sup = L[ first_geq ];
     double p_sup = P_SUCC[first_geq];
+
+    if (debug_){
+        std::cout << "Distance between " << l_inf << " and " << l_sup << std::endl;
+        std::cout << "Succ Prob between " << p_inf << " and " << p_sup << std::endl;
+    }
+    
     double p_succ_frame= linearInterpolator( distance, l_inf, p_inf, l_sup, p_sup );
     if (debug_)
         std::cout << "Psucc_frame = " << p_succ_frame << std::endl;
@@ -196,12 +203,14 @@ double UwHermesPhy::linearInterpolator( double x, double x1, double y1,
     
     double m = (y1-y2)/(x1-x2);
     double q = y1 - m * x1;
+    if (debug_)
+        std::cout << "m = " << m << " q= " << q << std::endl;
     return m * x + q;
 }
 
 double UwHermesPhy::chunckInterpolator( double p, int size ){
-    int n_chunck_coded_frame=FRAME_BIT/11; //BCH(15,11,1)
-    int n_chunck_coded_packet=ceil(size/11);
+    int n_chunck_coded_frame=(FRAME_BIT+0.0)/11; //BCH(15,11,1)
+    int n_chunck_coded_packet=ceil((size+0.0)/11);
     if (debug_)
         std::cout << "n_chunck_coded_frame = " << n_chunck_coded_frame <<  " n_chunck_coded_packet = " << n_chunck_coded_packet << std::endl;
     return pow(p,((n_chunck_coded_packet+0.0)/n_chunck_coded_frame));

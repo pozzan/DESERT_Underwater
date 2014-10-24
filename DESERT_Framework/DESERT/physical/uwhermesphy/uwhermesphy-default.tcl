@@ -32,3 +32,5 @@
 
 Module/UW/HERMES/PHY set tx_power_consumption_ 3.3
 Module/UW/HERMES/PHY set rx_power_consumption_ 0.620
+Module/UW/HERMES/PHY  set AcquisitionThreshold_dB_    15.0 
+Module/UW/HERMES/PHY  set MaxTxSPL_dB_               185.8
