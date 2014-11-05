@@ -79,9 +79,9 @@ int UwTDMA::command(int argc, const char*const* argv)
 }
 
 void UwTDMA::recvFromUpperLayers(Packet* p) {
-  buffer.push(p);
-  incrUpperDataRx();
-  txData();
+ 	buffer.push(p);
+	incrUpperDataRx();
+  	txData();
 }
 
 
@@ -93,40 +93,41 @@ void UwTDMA::stateTxData(){
 void UwTDMA::txData(){
 	if(slot_status==UW_TDMA_STATUS_MY_SLOT && channel_status==UW_CHANNEL_IDLE){
 		if(buffer.size()>0){
-      Packet* p = buffer.front();
-     	buffer.pop();
-      Mac2PhyStartTx(p);
-     	incrDataPktsTx();
-    }
-  }
-  else if(debug_<-5){
-    if(slot_status!=UW_TDMA_STATUS_MY_SLOT)
-      std::cout << NOW << " Wait my slot to send id " << host_id << "" << std::endl;
-      //printf("wait my slot to send id %f\n", host_id);
-    else
-      std::cout << NOW << " Wait earlier packet expires to send the current one id " << host_id << "" << std::endl;
-     // printf("wait earlier packet expires to send the current one id %f\n", host_id);
+	    	Packet* p = buffer.front();
+	     	buffer.pop();
+	      	Mac2PhyStartTx(p);
+	     	incrDataPktsTx();
+    	}
+  	}
+  	else if(debug_<-5){
+    	if(slot_status!=UW_TDMA_STATUS_MY_SLOT)
+      		std::cout << NOW << " Wait my slot to send id " << host_id << "" << std::endl;
+      	//printf("wait my slot to send id %f\n", host_id);
+    	else
+      		std::cout << NOW << " Wait earlier packet expires to send the current one id " 
+ 	     		 << host_id << "" << std::endl;
+    	// printf("wait earlier packet expires to send the current one id %f\n", host_id);
 	}
 }
 void UwTDMA::Mac2PhyStartTx(Packet* p)
 {
-  channel_status=UW_CHANNEL_BUSY;
-  MMac::Mac2PhyStartTx(p);
-  //sendDown(p,0.00000001);
+	channel_status=UW_CHANNEL_BUSY;
+  	MMac::Mac2PhyStartTx(p);
+  	//sendDown(p,0.00000001);
   	buffer_timer.resched(Mac2PhyTxDuration(p)*1.001);
   //}
-  if(debug_<-5)
-    std::cout << NOW << " Send packet id " << host_id << "" << std::endl;
+  	if(debug_<-5)
+    	std::cout << NOW << " Send packet id " << host_id << "" << std::endl;
   	//printf("Send packet id %f\n", host_id);
 }
 
 void UwTDMA::Phy2MacEndRx(Packet* p){
-  incrDataPktsRx();
-  sendUp(p);
-  channel_status=UW_CHANNEL_IDLE;
-  if(slot_status==UW_TDMA_STATUS_MY_SLOT){
-    txData();
-  }
+	incrDataPktsRx();
+	sendUp(p);
+	channel_status=UW_CHANNEL_IDLE;
+	if(slot_status==UW_TDMA_STATUS_MY_SLOT){
+		txData();
+	}
 }
 
 void UwTDMA::Phy2MacStartRx(const Packet* p){
@@ -135,26 +136,29 @@ void UwTDMA::Phy2MacStartRx(const Packet* p){
 //printf("----------------------------Error Packet!! id %f status %d -------------- \n", host_id, slot_status);
 void UwTDMA::change_tdma_status(){
 	if(slot_status==UW_TDMA_STATUS_MY_SLOT){
-    tdma_timer.resched(frame_time-slot_duration+guard_time);
-    slot_status=UW_TDMA_STATUS_NOT_MY_SLOT;
-    if(debug_<-5)
-      std::cout << NOW << " Off id " << host_id << " " << frame_time-slot_duration+guard_time << "" << std::endl;
-      //printf("Off id %f %f \n", host_id, frame_time-slot_duration+guard_time);
-  }
-  else{
-  	tdma_timer.resched(slot_duration-guard_time);
-    slot_status=UW_TDMA_STATUS_MY_SLOT;
-    if(debug_<-5)
-      std::cout << NOW << " On id " << host_id << " " << slot_duration-guard_time << "" << std::endl;
-      //printf("On id %f %f \n", host_id, slot_duration-guard_time);
-  	stateTxData();
-  }
+	    tdma_timer.resched(frame_time-slot_duration+guard_time);
+	    slot_status=UW_TDMA_STATUS_NOT_MY_SLOT;
+	    if(debug_<-5)
+	      std::cout << NOW << " Off id " << host_id << " " 
+	  		<< frame_time-slot_duration+guard_time << "" << std::endl;
+	      //printf("Off id %f %f \n", host_id, frame_time-slot_duration+guard_time);
+  	}
+	else{
+	  	tdma_timer.resched(slot_duration-guard_time);
+	    slot_status=UW_TDMA_STATUS_MY_SLOT;
+	    if(debug_<-5)
+	      std::cout << NOW << " On id " << host_id << " " << slot_duration-guard_time 
+	  		<< "" << std::endl;
+	      //printf("On id %f %f \n", host_id, slot_duration-guard_time);
+	  	stateTxData();
+  	}
 }
+
 void UwTDMA::start(){
-  if(slot_status==UW_TDMA_STATUS_MY_SLOT)
-    tdma_timer.resched(1);
-  else
-    tdma_timer.resched(1+guard_time);
-  if(debug_<-5)
-    std::cout << NOW << " Status " << slot_status << " id " << host_id << "" << std::endl;
+	if(slot_status==UW_TDMA_STATUS_MY_SLOT)
+		tdma_timer.resched(1); // go off
+	else
+		tdma_timer.resched(1+guard_time); // go on and start to transmit
+	if(debug_<-5)
+		std::cout << NOW << " Status " << slot_status << " id " << host_id << "" << std::endl;
 }
