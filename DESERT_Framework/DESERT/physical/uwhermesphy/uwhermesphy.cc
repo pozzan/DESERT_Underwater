@@ -46,9 +46,15 @@ public:
 } class_module_uwhermesphy;
 
 UwHermesPhy::UwHermesPhy() :
-UnderwaterPhysical(), L{ 25, 50, 95, 120, 140, 160, 180, 190 }, P_SUCC{ 0.923077*39/40, 0.913793*58/60, 0.924528*53/60, 0.876712*73/80, 0.61643*73/80, 0.75*28/40, 0.275862*29/40, 0 }
+UnderwaterPhysical(), L{ 25, 50, 95, 120, 140, 160, 180, 190 }, 
+P_SUCC{ 0.923077*39/40, 0.913793*58/60, 0.924528*53/60, 0.876712*73/80,
+	0.61643*73/80, 0.75*28/40, 0.275862*29/40, 0 }
 {
     Interference_Model = "MEANPOWER";
+    bind("BCH_N", &BCH_N);
+    bind("BCH_N", &BCH_K);
+    bind("BCH_N", &BCH_T);
+    bind("FRAME_BIT", &FRAME_BIT);
 }
 
 void UwHermesPhy::endRx(Packet* p) {
@@ -209,9 +215,9 @@ double UwHermesPhy::linearInterpolator( double x, double x1, double y1,
 }
 
 double UwHermesPhy::chunckInterpolator( double p, int size ){
-    int n_chunck_coded_frame=(FRAME_BIT+0.0)/11; //BCH(15,11,1)
-    int n_chunck_coded_packet=ceil((size+0.0)/11);
+    int n_chunck_coded_frame=ceil(float(FRAME_BIT)/11); //BCH(15,11,1)
+    int n_chunck_coded_packet=ceil(float(size)/11);
     if (debug_)
         std::cout << "n_chunck_coded_frame = " << n_chunck_coded_frame <<  " n_chunck_coded_packet = " << n_chunck_coded_packet << std::endl;
-    return pow(p,((n_chunck_coded_packet+0.0)/n_chunck_coded_frame));
+    return pow(p,(float(n_chunck_coded_packet)/n_chunck_coded_frame));
 }

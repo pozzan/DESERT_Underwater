@@ -44,7 +44,7 @@
 #include <iostream>
 //#include <vector>
 
-#define FRAME_BIT 9152 // 9120 info bit +32 CRC bit
+//#define FRAME_BIT 9152 // 9120 info bit +32 CRC bit
 
 /**
  *
@@ -52,9 +52,9 @@
  * new frame length= 9152/11*15
  *
 **/
-#define BCH_N 15 // BCH(n,k,t)
-#define BCH_K 11
-#define BCH_T 1
+//#define BCH_N 15 // BCH(n,k,t)
+//#define BCH_K 11
+//#define BCH_T 1
 
 
 using namespace std;
@@ -71,6 +71,20 @@ public:
      * Destructor of UwHermesPhy class.
      */
     virtual ~UwHermesPhy() { }
+
+	/**
+	 *
+	 * BCH(n,k,t) : correction of t errors via BCH code
+	 * new frame length= 9152/11*15
+	 *
+	**/
+
+    static int BCH_N;// = 15; // BCH(n,k,t)
+    static int BCH_K;// = 11;
+    static int BCH_T;// = 1;  //unused, just for completation
+
+    static int FRAME_BIT;// = 9152; // 9120 info bit +32 CRC bit
+
     
     
 protected:
@@ -140,5 +154,11 @@ private:
     virtual double chunckInterpolator( double p, int size );
 
 };
+
+int UwHermesPhy::BCH_N = 15; // BCH(n,k,t)
+int UwHermesPhy::BCH_K = 11;
+int UwHermesPhy::BCH_T = 1;  //unused, just for completation
+
+int UwHermesPhy::FRAME_BIT = 9152; // 9120 info bit +32 CRC bit
 
 #endif /* UWHERMESPHY_H  */
