@@ -46,20 +46,20 @@ extern packet_t PT_UWCBR;
 */
 
 static class UwROVCtrModuleClass : public TclClass {
-	public:
-		UwROVCtrModuleClass() : TclClass("Module/UW/ROV/CTR") {
-		}
-		TclObject* create(int, const char*const*) {
-			return (new UwROVCtrModule());
-		}
+public:
+	UwROVCtrModuleClass() : TclClass("Module/UW/ROV/CTR") {
+	}
+	TclObject* create(int, const char*const*) {
+		return (new UwROVCtrModule());
+	}
 } class_module_uwROV_ctr;
 
 UwROVCtrModule::UwROVCtrModule(Position p) : UwCbrModule(), sn(0) {
 	posit=p;speed=1;
 }
 UwROVCtrModule::UwROVCtrModule() : UwCbrModule(), sn(0) {
-	//posit = UwGMPosition();
-	posit = Position();speed=1;
+	posit = Position();
+	speed = 1;
 }
 
 UwROVCtrModule::~UwROVCtrModule() {}
@@ -91,7 +91,7 @@ int UwROVCtrModule::command(int argc, const char*const* argv) {
 	else if(argc == 3){
 		if (strcasecmp(argv[1], "setPosition") == 0) {
 			Position* p = dynamic_cast<Position*> (tcl.lookup(argv[2]));
-			posit=*p;
+			posit = *p;
 			return TCL_OK;
 		} else if (strcasecmp(argv[1], "setSpeed") == 0) {
 			speed = atof(argv[2]);
@@ -100,24 +100,22 @@ int UwROVCtrModule::command(int argc, const char*const* argv) {
 	}
 	else if(argc == 5){
 		if (strcasecmp(argv[1], "sendPosition") == 0) {
-			newX=atof(argv[2]);
-			newY=atof(argv[3]);
-			newZ=atof(argv[4]);
+			newX = atof(argv[2]);
+			newY = atof(argv[3]);
+			newZ = atof(argv[4]);
 			this->reset_retx();
 			this->transmit();
-			//this->sendPkt();
 			tcl.resultf("%s", "position Setted");
 			return TCL_OK;
 		}
 	}else if(argc == 6){
 		if (strcasecmp(argv[1], "sendPosition") == 0) {
-			newX=atof(argv[2]);
-			newY=atof(argv[3]);
-			newZ=atof(argv[4]);
-			speed=atof(argv[5]);
+			newX = atof(argv[2]);
+			newY = atof(argv[3]);
+			newZ = atof(argv[4]);
+			speed = atof(argv[5]);
 			this->reset_retx();
 			this->transmit();
-			//this->sendPkt();
 			tcl.resultf("%s", "position Setted");
 			return TCL_OK;
 		}
@@ -133,7 +131,7 @@ void UwROVCtrModule::transmit() {
 void UwROVCtrModule::start() {}
 
 void UwROVCtrModule::setPosition(Position p){
-	posit=p;
+	posit = p;
 }
 
 Position UwROVCtrModule::getPosition(){
@@ -141,17 +139,14 @@ Position UwROVCtrModule::getPosition(){
 }
 
 void UwROVCtrModule::initPkt(Packet* p) {
-	if(this->p==NULL){
+	if(this->p == NULL){
 		hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
-		uwROVh->x() = newX;
+		uwROVh -> x() = newX;
 		uwROVh->y() = newY;
 		uwROVh->z() = newZ;
 		uwROVh->speed() = speed;
 		uwROVh->sn() = ++sn;
-		/*uwROVh->x() = 10;
-		uwROVh->y() = 10;
-		uwROVh->z() = 10;*/
-		this->p=p;
+		this->p = p;
 	}
 	else{
 		hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
@@ -160,7 +155,6 @@ void UwROVCtrModule::initPkt(Packet* p) {
 		uwROVh->z() = newZ;
 		uwROVh->speed() = speed;
 		uwROVh->sn() = sn;
-		//p=this->p;
 		if (debug_ > 10){ 
 			printf("RITRASMETTO \n");
 		}
@@ -178,22 +172,19 @@ void UwROVCtrModule::recv(Packet* p, Handler* h) {
 }
 void UwROVCtrModule::recv(Packet* p) {
 	hdr_uwROV_monitoring* monitoring = HDR_UWROV_MONITORING(p);
-	x_rov=monitoring->x();
-	y_rov=monitoring->y();
-	z_rov= monitoring->z();
+	x_rov = monitoring->x();
+	y_rov = monitoring->y();
+	z_rov = monitoring->z();
 
 	if(monitoring->ack()>0){
 		sendTmr_.force_cancel();
-		this->p=NULL;
+		this->p = NULL;
 		if (debug_ > 10)
-		printf("Ack ok \n");
+			printf("Ack ok \n");
 	}
-	//buffer.pop();
 	if((monitoring->ack())<0 && debug_ > 10)
 		printf("Errore \n");
-	
 	if (debug_ > 10)
-		printf("ROV get new position: X = %f, Y = %f, Z = %f\n", x_rov,y_rov,z_rov);
-	
+		printf("ROV CTR monitoring position: X = %f, Y = %f, Z = %f\n", x_rov,y_rov,z_rov);
 	UwCbrModule::recv(p);
 }

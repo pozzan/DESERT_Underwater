@@ -29,7 +29,7 @@
 
 /**
  * @file   uwrov-tracer.cc
- * @author Giovanni Toso
+ * @author Filippo Campagnaro
  * @version 1.0.0
  * 
  * \brief Provides a tracer class for <i>UWROV</i> packets.

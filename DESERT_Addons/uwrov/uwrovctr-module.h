@@ -67,85 +67,85 @@ class UwROVCtrSendTimer : public UwSendTimer {
 	* UwROVCtrModule class is used to manage <i>UWROVCtr</i> packets and to collect statistics about them.
 	*/
 class UwROVCtrModule : public UwCbrModule {
-	public:
-		Position posit;
-		float x_rov;
-		float y_rov;
-		float z_rov;
-		float newX;
-		float newY;
-		float newZ;
-		float speed;
-		int sn;
-		Packet * p = NULL;
-		// std::queue<Packet*> buffer;
-		/**
-		* Constructor of UwROVCtrModule class.
-		*/
-		UwROVCtrModule();
-		/**
-		* Constructor of UwROVCtrModule class with position setting.
-		*/
-		UwROVCtrModule(Position p);
-		/**
-		* Destructor of UwROVCtrModule class.
-		*/
-		virtual ~UwROVCtrModule();
-		/**
-		* Tcl command management
-		*/
-		virtual int command(int argc, const char*const* argv);
-		/**
-		* Performs the initialization of a control packet.
-		*/
-		virtual void initPkt(Packet* p) ;
-		/**
-		* Reset retransmissions
-		*/
-		inline void reset_retx() {p=NULL;sendTmr_.force_cancel();}
-		/**
-		* Set the position of the ROV
-		*/
-		virtual void setPosition(Position p);
-		/**
-		* Get the position of the ROV
-		*/
-		virtual Position getPosition();
-		/**
-		* Performs the reception of packets from upper and lower layers.
-		*
-		* @param Packet* Pointer to the packet will be received.
-		*/
-		virtual void recv(Packet*);
-		/**
-		* Performs the reception of packets from upper and lower layers.
-		*
-		* @param Packet* Pointer to the packet will be received.
-		* @param Handler* Handler.
-		*/
-		virtual void recv(Packet* p, Handler* h);
-		/**
-		* Creates and transmits a packet.
-		*
-		* @see UwCbrModule::sendPkt()
-		*/
-		virtual void transmit();
-		/**
-		* Start .
-		*/
-		virtual void start();
-		/**
-		* Returns the size in byte of a <i>hdr_uwROV_monitoring</i> packet header.
-		*
-		* @return The size of a <i>hdr_uwROV_monitoring</i> packet header.
-		*/
-		static inline int getROVMonHeaderSize() { return sizeof(hdr_uwROV_monitoring); }
-		/**
-		* Returns the size in byte of a <i>hdr_uwROV_ctr</i> packet header.
-		*
-		* @return The size of a <i>hdr_uwROV_monitoring</i> packet header.
-		*/
-		static inline int getROVCTRHeaderSize() { return sizeof(hdr_uwROV_ctr); }
+public:
+	Position posit;
+	float x_rov;
+	float y_rov;
+	float z_rov;
+	float newX;
+	float newY;
+	float newZ;
+	float speed;
+	int sn;
+	Packet * p = NULL;
+	// std::queue<Packet*> buffer;
+	/**
+	* Constructor of UwROVCtrModule class.
+	*/
+	UwROVCtrModule();
+	/**
+	* Constructor of UwROVCtrModule class with position setting.
+	*/
+	UwROVCtrModule(Position p);
+	/**
+	* Destructor of UwROVCtrModule class.
+	*/
+	virtual ~UwROVCtrModule();
+	/**
+	* Tcl command management
+	*/
+	virtual int command(int argc, const char*const* argv);
+	/**
+	* Performs the initialization of a control packet.
+	*/
+	virtual void initPkt(Packet* p) ;
+	/**
+	* Reset retransmissions
+	*/
+	inline void reset_retx() {p=NULL;sendTmr_.force_cancel();}
+	/**
+	* Set the position of the ROV
+	*/
+	virtual void setPosition(Position p);
+	/**
+	* Get the position of the ROV
+	*/
+	virtual Position getPosition();
+	/**
+	* Performs the reception of packets from upper and lower layers.
+	*
+	* @param Packet* Pointer to the packet will be received.
+	*/
+	virtual void recv(Packet*);
+	/**
+	* Performs the reception of packets from upper and lower layers.
+	*
+	* @param Packet* Pointer to the packet will be received.
+	* @param Handler* Handler.
+	*/
+	virtual void recv(Packet* p, Handler* h);
+	/**
+	* Creates and transmits a packet.
+	*
+	* @see UwCbrModule::sendPkt()
+	*/
+	virtual void transmit();
+	/**
+	* Start .
+	*/
+	virtual void start();
+	/**
+	* Returns the size in byte of a <i>hdr_uwROV_monitoring</i> packet header.
+	*
+	* @return The size of a <i>hdr_uwROV_monitoring</i> packet header.
+	*/
+	static inline int getROVMonHeaderSize() { return sizeof(hdr_uwROV_monitoring); }
+	/**
+	* Returns the size in byte of a <i>hdr_uwROV_ctr</i> packet header.
+	*
+	* @return The size of a <i>hdr_uwROV_monitoring</i> packet header.
+	*/
+	static inline int getROVCTRHeaderSize() { return sizeof(hdr_uwROV_ctr); }
 };
 
 #endif // UWROVCtr_MODULE_H

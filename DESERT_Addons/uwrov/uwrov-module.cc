@@ -49,24 +49,25 @@ int hdr_uwROV_ctr::offset_; /**< Offset used to access in <i>hdr_uwROV</i> packe
 * Adds the module for UwROVModuleClass in ns2.
 */
 static class UwROVModuleClass : public TclClass {
-	public:
-		UwROVModuleClass() : TclClass("Module/UW/ROV") {
-		}
-		TclObject* create(int, const char*const*) {
+public:
+	UwROVModuleClass() : TclClass("Module/UW/ROV") {
+	}
+	TclObject* create(int, const char*const*) {
 		return (new UwROVModule());
-		}
+	}
 } class_module_uwROV;
-UwROVModule::UwROVModule() : UwCbrModule(), last_sn_confirmed(0), ack(0){
-	//posit = UwGMSMPosition();
+UwROVModule::UwROVModule() : UwCbrModule(), last_sn_confirmed(0), ack(0), send_ack_immediately(0){
 	SMPosition p = SMPosition();
 	posit=&p;
+    bind("send_ack_immediately", (int*) &send_ack_immediately);
 }
-UwROVModule::UwROVModule(SMPosition* p) : UwCbrModule(), last_sn_confirmed(0), ack(0){
-	posit=p;
+UwROVModule::UwROVModule(SMPosition* p) : UwCbrModule(), last_sn_confirmed(0), ack(0), send_ack_immediately(0){
+	posit = p;
+    bind("send_ack_immediately", (int*) &send_ack_immediately);
 }
 UwROVModule::~UwROVModule() {}
 void UwROVModule::setPosition(SMPosition* p){
-	posit=p;
+	posit = p;
 }
 SMPosition* UwROVModule::getPosition(){
 	return posit;
@@ -136,22 +137,17 @@ void UwROVModule::initPkt(Packet* p) {
 	UwCbrModule::initPkt(p);
 }
 void UwROVModule::recv(Packet* p, Handler* h) {
-	// hdr_cmn* ch = hdr_cmn::access(p);
 	recv(p);
 }
 void UwROVModule::recv(Packet* p) {
 	hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
-	// if((uwROVh->sn())==last_sn_confirmed+1){
 	posit->setdest(uwROVh->x(),uwROVh->y(),uwROVh->z(),uwROVh->speed());
-	last_sn_confirmed=uwROVh->sn();
+	last_sn_confirmed = uwROVh->sn();
 	ack=last_sn_confirmed+1;
-	if (debug_ < 0)
+	if (debug_ > 10)
 		printf("ROV get new position: X = %f, Y = %f, Z = %f\n", uwROVh->x(), uwROVh->y(), 
 			uwROVh->z());
 	UwCbrModule::recv(p);
-	/*} else {
-	ack=-(last_sn_confirmed+1);
-	buffer.push(p);
-	}*/
-	UwCbrModule::sendPkt();
+	if (send_ack_immediately > 0)
+		UwCbrModule::sendPkt();
 }

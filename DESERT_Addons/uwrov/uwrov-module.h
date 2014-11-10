@@ -59,7 +59,7 @@ class UwROVModule;
 * UwSendTimer class is used to handle the scheduling period of <i>UWROV</i> packets.
 */
 class UwROVSendTimer : public UwSendTimer {
-	public:
+public:
 	UwROVSendTimer(UwROVModule *m) : UwSendTimer((UwCbrModule*)(m)){
 	};
 };
@@ -67,10 +67,11 @@ class UwROVSendTimer : public UwSendTimer {
 * UwROVModule class is used to manage <i>UWROV</i> packets and to collect statistics about them.
 */
 class UwROVModule : public UwCbrModule {
-	public:
+public:
 	SMPosition* posit;
 	int last_sn_confirmed;
 	int ack;
+	int send_ack_immediately; //flag either to send acks immediately or not.
 	std::queue<Packet*> buffer;
 	/**
 	* Default Constructor of UwROVModule class.
