@@ -84,7 +84,6 @@ void UwTDMA::recvFromUpperLayers(Packet* p) {
   	txData();
 }
 
-
 void UwTDMA::stateTxData(){
 	channel_status=UW_CHANNEL_IDLE;
 	txData();
@@ -133,7 +132,7 @@ void UwTDMA::Phy2MacEndRx(Packet* p){
 void UwTDMA::Phy2MacStartRx(const Packet* p){
   channel_status=UW_CHANNEL_BUSY;
 }
-//printf("----------------------------Error Packet!! id %f status %d -------------- \n", host_id, slot_status);
+
 void UwTDMA::change_tdma_status(){
 	if(slot_status==UW_TDMA_STATUS_MY_SLOT){
 	    tdma_timer.resched(frame_time-slot_duration+guard_time);
