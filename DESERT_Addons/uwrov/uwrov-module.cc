@@ -42,6 +42,7 @@
 extern packet_t PT_UWCBR;
 int hdr_uwROV_monitoring::offset_; /**< Offset used to access in <i>hdr_uwROV</i> packets header. */
 int hdr_uwROV_ctr::offset_; /**< Offset used to access in <i>hdr_uwROV</i> packets header. */
+
 /**
 * Adds the header for <i>hdr_uwROV</i> packets in ns2.
 */
@@ -50,28 +51,35 @@ int hdr_uwROV_ctr::offset_; /**< Offset used to access in <i>hdr_uwROV</i> packe
 */
 static class UwROVModuleClass : public TclClass {
 public:
+
 	UwROVModuleClass() : TclClass("Module/UW/ROV") {
 	}
 	TclObject* create(int, const char*const*) {
 		return (new UwROVModule());
 	}
 } class_module_uwROV;
+
 UwROVModule::UwROVModule() : UwCbrModule(), last_sn_confirmed(0), ack(0), send_ack_immediately(0){
 	SMPosition p = SMPosition();
 	posit=&p;
     bind("send_ack_immediately", (int*) &send_ack_immediately);
 }
+
 UwROVModule::UwROVModule(SMPosition* p) : UwCbrModule(), last_sn_confirmed(0), ack(0), send_ack_immediately(0){
 	posit = p;
     bind("send_ack_immediately", (int*) &send_ack_immediately);
 }
+
 UwROVModule::~UwROVModule() {}
+
 void UwROVModule::setPosition(SMPosition* p){
 	posit = p;
 }
+
 SMPosition* UwROVModule::getPosition(){
 	return posit;
 }
+
 int UwROVModule::command(int argc, const char*const* argv) {
 	Tcl& tcl = Tcl::instance();
 	if(argc == 2){
@@ -124,6 +132,7 @@ int UwROVModule::command(int argc, const char*const* argv) {
 	}
 	return UwCbrModule::command(argc,argv);
 }
+
 void UwROVModule::initPkt(Packet* p) {
 	hdr_uwROV_monitoring* uwROVh = HDR_UWROV_MONITORING(p);
 	uwROVh->x() = posit->getX();
@@ -136,9 +145,11 @@ void UwROVModule::initPkt(Packet* p) {
 			uwROVh->y(), uwROVh->z());
 	UwCbrModule::initPkt(p);
 }
+
 void UwROVModule::recv(Packet* p, Handler* h) {
 	recv(p);
 }
+
 void UwROVModule::recv(Packet* p) {
 	hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
 	posit->setdest(uwROVh->x(),uwROVh->y(),uwROVh->z(),uwROVh->speed());

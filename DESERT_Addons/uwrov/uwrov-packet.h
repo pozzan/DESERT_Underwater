@@ -80,6 +80,7 @@ typedef struct hdr_uwROV_ctr {
         return sn_;
     }
 } hdr_uwROV_ctr;
+
 /**
  * <i>hdr_uwROV_monitoring</i> describes <i>UWROV_monitoring</i> packets sent by the ROV to the base station for monitoring the ROV state.
  */
@@ -113,7 +114,9 @@ typedef struct hdr_uwROV_monitoring {
     inline float& z() {
         return z_;
     }
+
     inline double& ack() {
         return ack_;
     }
+    
 } hdr_uwROV_monitoring;

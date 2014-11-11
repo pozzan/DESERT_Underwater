@@ -44,7 +44,6 @@ extern packet_t PT_UWCBR;
 /**
 * Adds the module for UwROVModuleClass in ns2.
 */
-
 static class UwROVCtrModuleClass : public TclClass {
 public:
 	UwROVCtrModuleClass() : TclClass("Module/UW/ROV/CTR") {
@@ -57,6 +56,7 @@ public:
 UwROVCtrModule::UwROVCtrModule(Position p) : UwCbrModule(), sn(0) {
 	posit=p;speed=1;
 }
+
 UwROVCtrModule::UwROVCtrModule() : UwCbrModule(), sn(0) {
 	posit = Position();
 	speed = 1;
@@ -165,15 +165,16 @@ void UwROVCtrModule::initPkt(Packet* p) {
 		printf("CTR set new ROV position: X = %f, Y = %f, Z = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
 	}
 }
+
 void UwROVCtrModule::recv(Packet* p, Handler* h) {
 	recv(p);
 }
+
 void UwROVCtrModule::recv(Packet* p) {
 	hdr_uwROV_monitoring* monitoring = HDR_UWROV_MONITORING(p);
 	x_rov = monitoring->x();
 	y_rov = monitoring->y();
 	z_rov = monitoring->z();
-
 	if(monitoring->ack()>0){
 		sendTmr_.force_cancel();
 		this->p = NULL;

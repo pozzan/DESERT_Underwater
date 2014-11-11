@@ -7,17 +7,20 @@
 
 static class TDMAModuleClass : public TclClass {
 public:
-  /**
-   * Constructor of the class
-   */
-  TDMAModuleClass() : TclClass("Module/UW/TDMA") {}
-  /**
-   * Creates the TCL object needed for the tcl language interpretation
-   * @return Pointer to an TclObject
-   */
-  TclObject* create(int, const char*const*) {
-    return (new UwTDMA());
-  }
+
+	/**
+	 * Constructor of the class
+	*/
+	TDMAModuleClass() : TclClass("Module/UW/TDMA") {}
+
+	/**
+	* Creates the TCL object needed for the tcl language interpretation
+	* @return Pointer to an TclObject
+	*/
+	TclObject* create(int, const char*const*) {
+		return (new UwTDMA());
+	}
+
 } class_uwtdma;
 
 void UwTDMATimer::expire(Event *e) {
@@ -101,23 +104,19 @@ void UwTDMA::txData(){
   	else if(debug_<-5){
     	if(slot_status!=UW_TDMA_STATUS_MY_SLOT)
       		std::cout << NOW << " Wait my slot to send id " << host_id << "" << std::endl;
-      	//printf("wait my slot to send id %f\n", host_id);
     	else
       		std::cout << NOW << " Wait earlier packet expires to send the current one id " 
  	     		 << host_id << "" << std::endl;
-    	// printf("wait earlier packet expires to send the current one id %f\n", host_id);
 	}
 }
+
 void UwTDMA::Mac2PhyStartTx(Packet* p)
 {
 	channel_status=UW_CHANNEL_BUSY;
   	MMac::Mac2PhyStartTx(p);
-  	//sendDown(p,0.00000001);
   	buffer_timer.resched(Mac2PhyTxDuration(p)*1.001);
-  //}
   	if(debug_<-5)
     	std::cout << NOW << " Send packet id " << host_id << "" << std::endl;
-  	//printf("Send packet id %f\n", host_id);
 }
 
 void UwTDMA::Phy2MacEndRx(Packet* p){
@@ -140,7 +139,6 @@ void UwTDMA::change_tdma_status(){
 	    if(debug_<-5)
 	      std::cout << NOW << " Off id " << host_id << " " 
 	  		<< frame_time-slot_duration+guard_time << "" << std::endl;
-	      //printf("Off id %f %f \n", host_id, frame_time-slot_duration+guard_time);
   	}
 	else{
 	  	tdma_timer.resched(slot_duration-guard_time);
@@ -148,7 +146,6 @@ void UwTDMA::change_tdma_status(){
 	    if(debug_<-5)
 	      std::cout << NOW << " On id " << host_id << " " << slot_duration-guard_time 
 	  		<< "" << std::endl;
-	      //printf("On id %f %f \n", host_id, slot_duration-guard_time);
 	  	stateTxData();
   	}
 }
