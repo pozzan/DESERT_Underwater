@@ -37,24 +37,33 @@
 
 #include "uwhermesphy.h"
 
+/**
+ * Adds the module for UwCbrModuleClass in ns2.
+ */
 static class UwHermesPhyClass : public TclClass {
 public:
+
     UwHermesPhyClass() : TclClass("Module/UW/HERMES/PHY") {}
     TclObject* create(int, const char*const*) {
         return (new UwHermesPhy);
     }
 } class_module_uwhermesphy;
 
-UwHermesPhy::UwHermesPhy() :
-UnderwaterPhysical(), L{ 25, 50, 95, 120, 140, 160, 180, 190 }, 
+UwHermesPhy::UwHermesPhy() 
+:
+UnderwaterPhysical(), 
+L{ 25, 50, 95, 120, 140, 160, 180, 190 }, 
 P_SUCC{ 0.923077*39/40, 0.913793*58/60, 0.924528*53/60, 0.876712*73/80,
 	0.61643*73/80, 0.75*28/40, 0.275862*29/40, 0 }
-{
-    Interference_Model = "MEANPOWER";
+{ // binding to TCL variables
     bind("BCH_N", &BCH_N);
     bind("BCH_N", &BCH_K);
     bind("BCH_N", &BCH_T);
     bind("FRAME_BIT", &FRAME_BIT);
+    Interference_Model = "MEANPOWER";
+}
+
+UwHermesPhy::~UwHermesPhy(){
 }
 
 void UwHermesPhy::endRx(Packet* p) {
@@ -62,9 +71,7 @@ void UwHermesPhy::endRx(Packet* p) {
     hdr_MPhy* ph = HDR_MPHY(p);
     hdr_mac* mach = HDR_MAC(p);
     counter interferent_pkts;
-
     static int mac_addr = -1;
-
     ClMsgPhy2MacAddr msg;
     sendSyncClMsg(&msg);
     mac_addr = msg.getAddr();
@@ -72,7 +79,6 @@ void UwHermesPhy::endRx(Packet* p) {
         if (PktRx == p) {
             double per_ni; // packet error rate due to noise and/or interference
             double per_n; // packet error rate due to noise only
-
             int nbits = ch->size()*8;
             double x = RNG::defaultrng()->uniform_double();
             per_n = getPER(ph->Pr / ph->Pn, nbits, p);
@@ -80,9 +86,9 @@ void UwHermesPhy::endRx(Packet* p) {
             bool error_ni = 0;
             if (!error_n) {
                 if (interference_) {
-                    if (Interference_Model == "MEANPOWER") {
+                    if (Interference_Model == "MEANPOWER") { // only meanpower is allow in Hermesphy
                         double interference = interference_->getInterferencePower(p);
-                        per_ni = interference>0;
+                        per_ni = interference>0; // the Hermes interference model is unknown, thus it is taken as always destructive
                         if (per_ni and debug_)
                             std::cout <<"INTERF" << interference << std::endl;
                     } else {
@@ -92,11 +98,10 @@ void UwHermesPhy::endRx(Packet* p) {
                     interferent_pkts = interference_->getCounters(p);
 
                 } else {
-                    per_ni = getPER(ph->Pr / (ph->Pn + ph->Pi), nbits, p);
+                    per_ni = getPER(ph->Pr / (ph->Pn + ph->Pi), nbits, p); // PER of Hermes acoustic modem
                     error_ni = x <= per_ni;
                 }
             }
-
             if (time_ready_to_end_rx_ > Scheduler::instance().clock()) {
                 Rx_Time_ = Rx_Time_ + ph->duration - time_ready_to_end_rx_ + Scheduler::instance().clock();
             } else {
@@ -113,7 +118,6 @@ void UwHermesPhy::endRx(Packet* p) {
                     std::cout << NOW << "  UnderwaterPhysical(" << mac_addr << ")::endRx() packet " << ch->uid() << " contains errors due to noise." << std::endl;
                 }
             }
-
             if (error_n) {
                 incrErrorPktsNoise();
                 if (mach->ftype() != MF_CONTROL) {
@@ -150,12 +154,12 @@ void UwHermesPhy::endRx(Packet* p) {
     } else {
         dropPacket(p);
     }
-} /* UnderwaterPhysical::endRx */
+}
 
 double UwHermesPhy::getPER(double _snr, int _nbits, Packet* _p) {
     double distance = getDistance(_p);
     return 1-matchPS(distance,_nbits);
-}/* UnderwaterPhysical::getPER */
+}
 
 double UwHermesPhy::getDistance(Packet* _p){
     hdr_MPhy* ph = HDR_MPHY(_p);
@@ -166,17 +170,11 @@ double UwHermesPhy::getDistance(Packet* _p){
     double y_dst = (ph->dstPosition)->getY();
     double z_dst = (ph->dstPosition)->getZ();
     return sqrt(pow(x_src-x_dst,2.0)+pow(y_src-y_dst,2.0)+pow(z_src-z_dst,2.0));
-} /* */
+} 
 
-/*int UwHermesPhy::getSize(Packet* _p){
-    hdr_cmn* ch = HDR_CMN(_p);
-    return ch->size()*8;
-}*/
-
-double UwHermesPhy::matchPS(double distance, int size){
+double UwHermesPhy::matchPS(double distance, int size){ // success probability of Hermes
     if (debug_)
         std::cout << "distance = " << distance <<  " packet size = " << size << std::endl;
-	//TODO: match PER with linear interpolation
     int n = sizeof(L)/sizeof(double);
     if ( distance <= L[0] )
         return chunckInterpolator(P_SUCC[ 0 ], size );
@@ -188,12 +186,10 @@ double UwHermesPhy::matchPS(double distance, int size){
     double p_inf = P_SUCC[first_geq-1];
     int l_sup = L[ first_geq ];
     double p_sup = P_SUCC[first_geq];
-
     if (debug_){
         std::cout << "Distance between " << l_inf << " and " << l_sup << std::endl;
         std::cout << "Succ Prob between " << p_inf << " and " << p_sup << std::endl;
     }
-    
     double p_succ_frame= linearInterpolator( distance, l_inf, p_inf, l_sup, p_sup );
     if (debug_)
         std::cout << "Psucc_frame = " << p_succ_frame << std::endl;
@@ -205,8 +201,7 @@ double UwHermesPhy::matchPS(double distance, int size){
 
 
 double UwHermesPhy::linearInterpolator( double x, double x1, double y1, 
-    double x2, double y2 ){
-    
+    double x2, double y2 ){   
     double m = (y1-y2)/(x1-x2);
     double q = y1 - m * x1;
     if (debug_)

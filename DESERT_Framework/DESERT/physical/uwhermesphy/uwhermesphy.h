@@ -40,28 +40,14 @@
 
 #include "uwphysical.h"
 #include <math.h> 
-
 #include <iostream>
-//#include <vector>
-
-//#define FRAME_BIT 9152 // 9120 info bit +32 CRC bit
-
-/**
- *
- * BCH(n,k,t) : correction of t errors via BCH code
- * new frame length= 9152/11*15
- *
-**/
-//#define BCH_N 15 // BCH(n,k,t)
-//#define BCH_K 11
-//#define BCH_T 1
-
 
 using namespace std;
 
 class UwHermesPhy : public UnderwaterPhysical {
 
 public:
+
     /**
      * Constructor of UwHermesPhy class.
      */
@@ -75,19 +61,20 @@ public:
 	/**
 	 *
 	 * BCH(n,k,t) : correction of t errors via BCH code
-	 * new frame length= 9152/11*15
-	 *
+	 * new frame length= FRAME_BIT/k*n, example: 9152/11*15
+	 * by default BCH(15,11,1)
+	 * 
 	**/
+	static int BCH_N; // by default = 15; BCH(15,11,1)
+    static int BCH_K; // by default = 11
+    static int BCH_T; // by default = 1; unused, just for completeness
 
-    static int BCH_N;// = 15; // BCH(n,k,t)
-    static int BCH_K;// = 11;
-    static int BCH_T;// = 1;  //unused, just for completation
-
-    static int FRAME_BIT;// = 9152; // 9120 info bit +32 CRC bit
+    static int FRAME_BIT; // by default = (9120 info bit +32 CRC bit)
 
     
     
 protected:
+
     /**
      * Handles the end of a packet reception
      *
@@ -95,6 +82,7 @@ protected:
      *
      */
     virtual void endRx(Packet* p);
+
     /**
      * Returns the packet error rate by using the length of a packet and the information contained in the packet (position
      * of the source and the destiantion.
@@ -108,33 +96,22 @@ protected:
     
     
 private:
+
     /**
     *
     * Arrays containing distance in methers and relative Psuccess
     *
     **/
-    
     double const L[8];
-    //double const L[7] = {25, 50, 95, 120, 140, 160, 180};
-
     double const P_SUCC[8];
-    //double const PSUCC[7] = {98.45*90.4762, 96.83*97.2973, 97.08*97.561, };
-
-/*
-    /**    
-    * Return the packet size, in bit.
-    *
-    * @param p Packet.
-    **/
-    /*
-    virtual int getSize(Packet*);*/
-    
+   
     /**    
     * Return the distance between source and destination.
     *
     * @param p Packet by witch the module gets information about source and destination.
     **/
     virtual double getDistance(Packet*);
+
     /**    
     * Return the PER via linear interpolation.
     *
@@ -142,6 +119,7 @@ private:
     * @param size: Packet size in bit.
     **/
     virtual double matchPS(double distance, int size);
+    
     /**    
     * Return y via linear interpolation given two points.
     *
@@ -155,10 +133,9 @@ private:
 
 };
 
-int UwHermesPhy::BCH_N = 15; // BCH(n,k,t)
+int UwHermesPhy::BCH_N = 15; // BCH(15,11,1)
 int UwHermesPhy::BCH_K = 11;
-int UwHermesPhy::BCH_T = 1;  //unused, just for completation
-
+int UwHermesPhy::BCH_T = 1;  
 int UwHermesPhy::FRAME_BIT = 9152; // 9120 info bit +32 CRC bit
 
 #endif /* UWHERMESPHY_H  */

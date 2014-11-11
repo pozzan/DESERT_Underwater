@@ -164,10 +164,8 @@ void UwROVCtrModule::initPkt(Packet* p) {
 		hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
 		printf("CTR set new ROV position: X = %f, Y = %f, Z = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
 	}
-	//buffer.push(p);
 }
 void UwROVCtrModule::recv(Packet* p, Handler* h) {
-	// hdr_cmn* ch = hdr_cmn::access(p);
 	recv(p);
 }
 void UwROVCtrModule::recv(Packet* p) {
