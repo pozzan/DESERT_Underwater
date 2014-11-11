@@ -56,7 +56,7 @@ public:
     /**
      * Destructor of UwHermesPhy class.
      */
-    virtual ~UwHermesPhy() { }
+    virtual ~UwHermesPhy();
 
 	/**
 	 *
