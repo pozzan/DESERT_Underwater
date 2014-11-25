@@ -92,7 +92,7 @@ void UwHermesPhy::endRx(Packet* p) {
                         if (per_ni and debug_)
                             std::cout <<"INTERF" << interference << std::endl;
                     } else {
-                        std::cerr << "Please choose only MEANPOWER" << std::endl;
+                        std::cerr << "Please choose only MEANPOWER as Interference_Model" << std::endl;
                         exit(1);
                     }
                     interferent_pkts = interference_->getCounters(p);
