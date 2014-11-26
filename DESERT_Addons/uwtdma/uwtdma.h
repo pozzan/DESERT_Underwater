@@ -67,7 +67,7 @@ protected:
     UwTDMA* module;
 };
 
-class BufferTimer : public TimerHandler {
+/*class BufferTimer : public TimerHandler {
 public:
 
     BufferTimer(UwTDMA *m) : TimerHandler() {
@@ -76,7 +76,7 @@ public:
 protected:
     virtual void expire(Event *e);
     UwTDMA* module;
-};
+};*/
 
 class UwTDMA: public MMac {
 public:
@@ -118,7 +118,7 @@ protected:
 	double guard_time; // guard time between slots
 	double slot_duration; // slot duration
 	UwTDMATimer tdma_timer; // tdma handler
-	BufferTimer buffer_timer; // buffer handler
+	//BufferTimer buffer_timer; // buffer handler
 	std::queue<Packet*> buffer;
 
 	virtual void recvFromUpperLayers(Packet* p);
@@ -128,6 +128,8 @@ protected:
 	virtual void Phy2MacStartRx(const Packet* p);
 
 	virtual void Mac2PhyStartTx(Packet* p);
+
+    virtual void Phy2MacEndTx(const Packet* p);
 
 
 };
