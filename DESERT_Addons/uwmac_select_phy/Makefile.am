@@ -46,6 +46,6 @@ CLEANFILES = initTcl.cc
 TCL_FILES =  uwmac_select_phy-init.tcl
 
 initTcl.cc: Makefile $(TCL_FILES)
-		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ Uwmulti_modeTclCode > initTcl.cc 
+		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ Uwmac_select_phyTclCode > initTcl.cc 
 
 EXTRA_DIST = $(TCL_FILES)

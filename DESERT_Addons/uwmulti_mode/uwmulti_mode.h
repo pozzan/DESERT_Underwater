@@ -25,21 +25,65 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
 
 /**
- * @file   uwmac_select_phy/initlib.cc
+ * @file   uwmulti_mode.h
  * @author Filippo Campagnaro
  * @version 1.0.0
  * 
- * @brief Provides the initializazion of the uwmac_select_phy libraries
+ * \brief Provides the definition of the class <i>UWTDMA</i>.
+ * 
  */
 
-#include<tclcl.h>
+#ifndef UWMULTI_MODE_H
+#define UWMULTI_MODE_H
 
-extern EmbeddedTcl Uwmac_select_phyTclCode;
+#include <mmac.h>
+#include <queue>
 
-extern "C" int Uwmac_select_phy_Init() {
-	Uwmac_select_phyTclCode.load();
-	return 0;
-}
+#define UW_CHANNEL_IDLE 1 // status channel idle
+#define UW_CHANNEL_BUSY 2 // status channel busy
 
+using namespace std;
+
+class UwMultiMode;
+
+/*class BufferTimer : public TimerHandler {
+public:
+
+    BufferTimer(UwMultiMode *m) : TimerHandler() {
+        module = m;
+    }
+protected:
+    virtual void expire(Event *e);
+    UwMultiMode* module;
+};*/
+
+
+class UwMultiMode: public MMac {
+public:
+	UwMultiMode();
+
+	virtual ~UwMultiMode();
+
+    virtual int command(int argc, const char*const* argv);
+	virtual void stateTxData();
+
+
+protected:
+
+	int send_physical_id;
+	int recv_physical_id;
+	int channel_status;
+	std::queue<Packet*> buffer;
+	//BufferTimer buffer_timer; // buffer handler
+
+	virtual void Mac2PhyStartTx(Packet* p);
+	virtual void Phy2MacEndRx(Packet* p);
+	virtual void recvFromUpperLayers(Packet* p);
+	virtual void Phy2MacEndTx(const Packet* p);
+	//virtual void Phy2MacStartRx(const Packet* p);
+};
+
+#endif 

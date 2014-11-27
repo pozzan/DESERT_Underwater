@@ -47,7 +47,7 @@ AC_DEFUN([AC_ARG_WITH_DESERT],[
                     AC_MSG_ERROR([could not find ${withval}, is --with-desert=${withval} correct?])
                 fi
 
-                for dir in         
+                for dir in        
                 do
                     echo "considering dir \"$dir\""
                     DESERT_CPPFLAGS="$DESERT_CPPFLAGS -I${DESERT_PATH}/${dir}"
@@ -89,7 +89,7 @@ AC_DEFUN([AC_ARG_WITH_DESERT_BUILD],[
                         AC_MSG_ERROR([could not find ${withval}, is --with-desert-build=${withval} correct?])
                     fi
 
-                    for dir in         
+                    for dir in       
                     do
                         echo "considering dir \"$dir\""
                         DESERT_LDFLAGS_BUILD="$DESERT_LDFLAGS_BUILD -L${DESERT_PATH_BUILD}/${dir}"

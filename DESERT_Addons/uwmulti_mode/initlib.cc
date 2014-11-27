@@ -27,19 +27,19 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file   uwmac_select_phy/initlib.cc
+ * @file   uwmulti_mode/initlib.cc
  * @author Filippo Campagnaro
  * @version 1.0.0
  * 
- * @brief Provides the initializazion of the uwmac_select_phy libraries
+ * @brief Provides the initializazion of the uwmulti_mode libraries
  */
 
 #include<tclcl.h>
 
-extern EmbeddedTcl Uwmac_select_phyTclCode;
+extern EmbeddedTcl Uwmulti_modeTclCode;
 
-extern "C" int Uwmac_select_phy_Init() {
-	Uwmac_select_phyTclCode.load();
+extern "C" int Uwmulti_mode_Init() {
+	Uwmulti_modeTclCode.load();
 	return 0;
 }
 
