@@ -31,7 +31,7 @@ AM_CXXFLAGS = -Wall -ggdb3
 
 lib_LTLIBRARIES = libuwoptical.la
 
-libuwoptical_la_SOURCES = initlib.cc uwoptical.cc uwoptical.h uwoptical-mpropagation.cc uwoptical-mpropagation.h uwoptical-channel.cc uwoptical-channel.h uwoptical-interference.h uwoptical-interference.cc
+libuwoptical_la_SOURCES = initlib.cc uwoptical.cc uwoptical.h
 
 libuwoptical_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
 libuwoptical_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
