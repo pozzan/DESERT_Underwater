@@ -26,9 +26,8 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# @file   uwmultiphy-default.tcl
-# @author Filippo Campagnaro
+# @file   uwoptical-channel-default.tcl
+# @author Federico Guerra
 # @version 1.0.0
 
-Module/UW/OPTICAL/PHY set TxPower_  0.01
-Module/UW/OPTICAL/PHY set NoiseSPD_ [expr 1.28e-23 * 300]
+Module/UW/Optical/Channel set RefractiveIndex_ 1.33

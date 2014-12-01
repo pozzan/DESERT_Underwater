@@ -1,7 +1,7 @@
 /* -*- Mode: C++; -*- */
 
 /*
- * Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
+ * Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 
 /**
  * @file   uwoptical-channel.h
- * @author Federico Favaro, Federico Guerra, Filippo Campagnaro
+ * @author Federico Guerra
  * @version 1.0.0
  *
  * \brief Definition of UwOpticalChannel class.
@@ -60,6 +60,9 @@ public:
 protected:
   virtual double getPropDelay(Position *s, Position* d);
   void sendUpPhy(Packet *p,ChSAP *chsap);
+  
+  double refractive_index;
+  double speed_of_light;
 };
 
 #endif /* UW_OPTICAL_CHANNEL_H */

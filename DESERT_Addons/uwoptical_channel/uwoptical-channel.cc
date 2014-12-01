@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
+ * Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@
  */
 
 /**
- * @file   uwoptical.cc
- * @author Federico Favaro, Federico Guerra, Filippo Campagnaro
+ * @file   uwoptical-channel.cc
+ * @author Federico Guerra
  * @version 1.0.0
  *
  * \brief Implementation of UwOpticalChannel class.
@@ -39,6 +39,10 @@
 #include<iostream>
 
 #include "uwoptical-channel.h"
+
+#define SPEED_OF_LIGHT_VACUUM (3e8)
+#define REFRACTIVE_INDEX_MIN (1)
+#define REFRACTIVE_INDEX_WATER (1.33)
 
 static class UwOpticalChannelClass : public TclClass {
 public:
@@ -50,9 +54,16 @@ public:
 
 UwOpticalChannel::UwOpticalChannel() 
 :
-ChannelModule()
+  ChannelModule(),
+  refractive_index(REFRACTIVE_INDEX_WATER),
+  speed_of_light(SPEED_OF_LIGHT_VACUUM)
 {
+  bind("RefractiveIndex_", (double*)&refractive_index);
   
+  if (refractive_index < REFRACTIVE_INDEX_MIN)
+  {
+    refractive_index = REFRACTIVE_INDEX_MIN;
+  }
 }
 
 int UwOpticalChannel::command(int argc, const char*const* argv) {
@@ -62,20 +73,45 @@ int UwOpticalChannel::command(int argc, const char*const* argv) {
 
 void UwOpticalChannel::sendUpPhy(Packet *p,ChSAP *chsap)
 {
+  Scheduler &s = Scheduler::instance();
+  struct hdr_cmn *hdr = HDR_CMN(p);
+  
+  hdr->direction() = hdr_cmn::UP;
+  
+  Position *sourcePos = chsap->getPosition();
+  ChSAP *dest;
 
+  if (debug_) cout << "UwOpticalChannel::sendUpPhy() sending packet" << endl;
+  
+  for (int i=0; i < getChSAPnum(); i++) 
+  {
+    dest = (ChSAP*)getChSAP(i);
+    
+    if (chsap == dest) // it's the source node -> skip it
+      continue;
+    
+    s.schedule(dest,
+         p->copy(), 
+         getPropDelay(sourcePos, dest->getPosition()));
+  }
+
+  Packet::free(p);
 }
 
 void UwOpticalChannel::recv(Packet *p, ChSAP* chsap)
 {
 	sendUpPhy(p, chsap);
 }
-/*
- * * ideas from UnderwaterChannel
- * *
+
 double UwOpticalChannel::getPropDelay(Position *src, Position* dst)
 {
-  return 0.0;
+  double distance = src->getDist(dst);
+  
+  double delay = distance / speed_of_light;
+  
+  if (debug_) cout << "UwOpticalChannel::getPropDelay() distance = " << distance 
+                   << "; speed = " << speed_of_light << "; delay = " << delay << endl;
+  
+  return delay;
 }
 
-
-*/
