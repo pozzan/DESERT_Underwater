@@ -29,23 +29,23 @@
 
 AM_CXXFLAGS = -Wall -ggdb3
 
-lib_LTLIBRARIES = libuwoptical.la
+lib_LTLIBRARIES = libuwoptical_phy.la
 
-libuwoptical_la_SOURCES = initlib.cc uwoptical.cc uwoptical.h
+libuwoptical_phy_la_SOURCES = initlib.cc uwoptical-phy.cc uwoptical-phy.h
 
-libuwoptical_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
-libuwoptical_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
-libuwoptical_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@
+libuwoptical_phy_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
+libuwoptical_phy_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
+libuwoptical_phy_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@
 
-nodist_libuwoptical_la_SOURCES = InitTcl.cc
+nodist_libuwoptical_phy_la_SOURCES = InitTcl.cc
 
 BUILT_SOURCES = InitTcl.cc
 
 CLEANFILES = InitTcl.cc
 
-TCL_FILES =  uwoptical-default.tcl
+TCL_FILES =  uwoptical-phy-default.tcl
 
 InitTcl.cc: Makefile $(TCL_FILES)
-		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwOpticalInitTclCode > InitTcl.cc
+		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwOpticalPhyInitTclCode > InitTcl.cc
 
 EXTRA_DIST = $(TCL_FILES)

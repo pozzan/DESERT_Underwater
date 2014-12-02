@@ -36,15 +36,15 @@
 
 #include <tclcl.h>
 
-extern EmbeddedTcl UwOpticalInitTclCode;
+extern EmbeddedTcl UwOpticalPhyInitTclCode;
 
-extern "C" int Uwoptical_Init() {
-	UwOpticalInitTclCode.load();
+extern "C" int Uwoptical_phy_Init() {
+	UwOpticalPhyInitTclCode.load();
 	return 0;
 }
 
 extern "C" int Cygoptical_Init() {
-    Uwoptical_Init();
+    Uwoptical_phy_Init();
     return 0;
 }
 

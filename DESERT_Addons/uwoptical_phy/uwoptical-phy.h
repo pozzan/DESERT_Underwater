@@ -27,7 +27,7 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file   uwoptical.h
+ * @file   uwoptical-phy.h
  * @author Federico Favaro, Federico Guerra, Filippo Campagnaro
  * @version 1.0.0
  *
@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef UWOPTICAL_H
-#define UWOPTICAL_H
+#ifndef UWOPTICAL_PHY_H
+#define UWOPTICAL_PHY_H
 
 #include <bpsk.h>
 
@@ -51,18 +51,19 @@
 #include <limits>
 #include <climits>
 
-class UwOptical : public MPhy_Bpsk {
+class UwOpticalPhy : public MPhy_Bpsk {
+
 
 public:
     /**
      * Constructor of UwMultiPhy class.
      */
-    UwOptical();
+    UwOpticalPhy();
     
     /**
      * Destructor of UwMultiPhy class.
      */
-    virtual ~UwOptical() { }
+    virtual ~UwOpticalPhy() { }
     
     /**
      * TCL command interpreter. It implements the following OTcl methods:
@@ -86,4 +87,4 @@ private:
     //Variables
 };
 
-#endif /* UWMULTIPHY_H  */
+#endif /* UWOPTICAL_H  */

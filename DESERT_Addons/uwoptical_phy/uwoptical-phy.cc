@@ -35,23 +35,23 @@
  *
  */
 
-#include "uwoptical.h"
+#include "uwoptical-phy.h"
 
-static class UwOpticalClass : public TclClass {
+static class UwOpticalPhyClass : public TclClass {
 public:
-    UwOpticalClass() : TclClass("Module/UW/OPTICAL/PHY") {}
+    UwOpticalPhyClass() : TclClass("Module/UW/OPTICAL/PHY") {}
     TclObject* create(int, const char*const*) {
-        return (new UwOptical);
+        return (new UwOpticalPhy);
     }
 } class_module_optical;
 
-UwOptical::UwOptical() 
+UwOpticalPhy::UwOpticalPhy() 
 : 
 MPhy_Bpsk()
 {
 }
 
-int UwOptical::command(int argc, const char*const* argv) {
+int UwOpticalPhy::command(int argc, const char*const* argv) {
     //Tcl& tcl = Tcl::instance();
     return MPhy_Bpsk::command(argc, argv);     
 } /* UwOptical::command */

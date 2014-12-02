@@ -1,6 +1,5 @@
-#!/bin/sh
 #
-# Copyright (c) 2013 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,8 +25,6 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-#
 
+EXTRA_DIST = nsallinone.m4 nsmiracle.m4 underwatermiracle.m4 woss.m4 desert.m4
 
-aclocal -I m4 --force && libtoolize --force && automake --foreign --add-missing && autoconf

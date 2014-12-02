@@ -1,20 +1,20 @@
 #
-# Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted ptdmaided that the following conditions
+# modification, are permitted provided that the following conditions
 # are met:
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials ptdmaided with the distribution.
+#    documentation and/or other materials provided with the distribution.
 # 3. Neither the name of the University of Padova (SIGNET lab) nor the 
 #    names of its contributors may be used to endorse or promote products 
 #    derived from this software without specific prior written permission.
 #
-# THIS SOFTWARE IS PtdmaIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
 # TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
 # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
@@ -27,25 +27,45 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-AM_CXXFLAGS = -Wall -ggdb3
+AC_INIT(uwoptical_phy, 1.0.0)
+AM_INIT_AUTOMAKE
+AM_PROG_AR
 
-lib_LTLIBRARIES = libuwoptical.la
+AC_CONFIG_MACRO_DIR([m4])
 
-libuwoptical_la_SOURCES = initlib.cc uwoptical.cc uwoptical.h
+AC_PROG_CXX
+AC_PROG_MAKE_SET
 
-libuwoptical_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
-libuwoptical_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
-libuwoptical_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@
+AC_DISABLE_STATIC
+ 
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
 
-nodist_libuwoptical_la_SOURCES = InitTcl.cc
+AC_PATH_NS_ALLINONE
 
-BUILT_SOURCES = InitTcl.cc
+AC_ARG_WITH_NSMIRACLE
 
-CLEANFILES = InitTcl.cc
+AC_CHECK_NSMIRACLE([have_nsmiracle=yes],[have_nsmiracle=no])
+if test x$have_nsmiracle != xyes ; then
+  AC_MSG_ERROR([Could not find nsmiracle, is --with-nsmiracle set correctly?])
+fi  
 
-TCL_FILES =  uwoptical-default.tcl
+AC_ARG_WITH_DESERT
+AC_ARG_WITH_DESERT_BUILD
 
-InitTcl.cc: Makefile $(TCL_FILES)
-		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwOpticalInitTclCode > InitTcl.cc
+AC_CHECK_DESERT([have_desert=yes],[have_desert=no])
+if test x$have_desert != xyes ; then
+  AC_MSG_ERROR([Could not find desert, is --with-desert set correctly?])
+fi  
 
-EXTRA_DIST = $(TCL_FILES)
+AC_ARG_WITH_DESERT_ADDON
+AC_ARG_WITH_DESERT_ADDON_BUILD
+
+AC_DEFINE(CPP_NAMESPACE,std)
+
+AC_CONFIG_FILES([
+		m4/Makefile
+		Makefile
+      ])
+
+AC_OUTPUT
