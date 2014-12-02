@@ -27,7 +27,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-AC_INIT(uwoptical-propagation, 1.0.0)
+AC_INIT(uwoptical_propagation, 1.0.0)
 AM_INIT_AUTOMAKE
 AM_PROG_AR
 
