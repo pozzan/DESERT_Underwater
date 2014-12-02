@@ -202,7 +202,7 @@ proc createNode { id } {
     set ipr($id)  [new Module/UW/StaticRouting]
     set ipif($id) [new Module/UW/IP]
     set mll($id)  [new Module/UW/MLL] 
-    set mac($id)  [new Module/UW/MAC/SELECT/PHY] 
+    set mac($id)  [new Module/UW/MAC/SELECT_PHY] 
     #set mac($id)  [new Module/UW/CSMA_ALOHA] 
 
     Module/MPhy/BPSK/Underwater  set BitRate_    $opt(bitrate)

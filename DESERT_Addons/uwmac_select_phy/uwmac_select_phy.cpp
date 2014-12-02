@@ -11,7 +11,7 @@ public:
 	/**
 	 * Constructor of the class
 	*/
-	UwMacSelectPhyClass() : TclClass("Module/UW/MAC/SELECT/PHY") {}
+	UwMacSelectPhyClass() : TclClass("Module/UW/MAC/SELECT_PHY") {}
 
 	/**
 	* Creates the TCL object needed for the tcl language interpretation
@@ -91,7 +91,11 @@ void UwMacSelectPhy::recvFromUpperLayers(Packet* p)
 }
 
 void UwMacSelectPhy::Phy2MacEndRx(Packet* p){
-	sendUp(p);
+	hdr_cmn* ch = HDR_CMN(p);
+	if (ch->error())
+    	drop(p, 1, "ERR");
+  	else
+		sendUp(p);
 }
 
 void UwMacSelectPhy::Phy2MacEndTx(const Packet* p){

@@ -38,13 +38,13 @@
 
 extern EmbeddedTcl UwOpticalMPropagationInitTclCode;
 
-extern "C" int Uwoptical_mpropagation_Init() {
+extern "C" int Uwoptical_propagation_Init() {
 	UwOpticalMPropagationInitTclCode.load();
 	return 0;
 }
 
 extern "C" int Cygoptical_Init() {
-    Uwoptical_mpropagation_Init();
+    Uwoptical_propagation_Init();
     return 0;
 }
 

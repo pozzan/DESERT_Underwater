@@ -41,7 +41,7 @@
 #include<iostream>
 
 #include"uwoptical-mpropagation.h"
-#include"uwlib.h"
+//#include"uwlib.h"
 
 static class UwOpticalMPropagationClass : public TclClass {
 public:

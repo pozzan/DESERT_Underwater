@@ -29,15 +29,15 @@
 
 AM_CXXFLAGS = -Wall -ggdb3
 
-lib_LTLIBRARIES = libuwoptical_mpropagation.la
+lib_LTLIBRARIES = libuwoptical_propagation.la
 
-libuwoptical_mpropagation_la_SOURCES = initlib.cc uwoptical-mpropagation.cc uwoptical-mpropagation.h
+libuwoptical_propagation_la_SOURCES = initlib.cc uwoptical-mpropagation.cc uwoptical-mpropagation.h
 
-libuwoptical_mpropagation_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
-libuwoptical_mpropagation_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
-libuwoptical_mpropagation_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@
+libuwoptical_propagation_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
+libuwoptical_propagation_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
+libuwoptical_propagation_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@
 
-nodist_libuwoptical_mpropagation_la_SOURCES = InitTcl.cc
+nodist_libuwoptical_propagation_la_SOURCES = InitTcl.cc
 
 BUILT_SOURCES = InitTcl.cc
 

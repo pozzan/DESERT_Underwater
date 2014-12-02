@@ -28,6 +28,6 @@
 #
 # Author: Filippo Campagnaro
 
-Module/UW/MAC/SELECT/PHY set send_physical_id 		0
-Module/UW/MAC/SELECT/PHY set recv_physical_id 		0
-Module/UW/MAC/SELECT/PHY set debug_ 		0
+Module/UW/MAC/SELECT_PHY set send_physical_id 		0
+Module/UW/MAC/SELECT_PHY set recv_physical_id 		0
+Module/UW/MAC/SELECT_PHY set debug_ 		0
