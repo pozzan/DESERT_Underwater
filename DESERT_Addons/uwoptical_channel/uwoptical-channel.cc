@@ -36,7 +36,8 @@
  *
  */
 
-#include<iostream>
+#include <iostream>
+//#include <coordinates-definitions.h>
 
 #include "uwoptical-channel.h"
 
@@ -56,9 +57,11 @@ UwOpticalChannel::UwOpticalChannel()
 :
   ChannelModule(),
   refractive_index(REFRACTIVE_INDEX_WATER),
-  speed_of_light(SPEED_OF_LIGHT_VACUUM)
+  speed_of_light(SPEED_OF_LIGHT_VACUUM),
+  use_cartesian_coords(1.0)
 {
   bind("RefractiveIndex_", (double*)&refractive_index);
+  bind("UseCartesianCoords_", (double*)&use_cartesian_coords);
   
   if (refractive_index < REFRACTIVE_INDEX_MIN)
   {
@@ -105,7 +108,17 @@ void UwOpticalChannel::recv(Packet *p, ChSAP* chsap)
 
 double UwOpticalChannel::getPropDelay(Position *src, Position* dst)
 {
-  double distance = src->getDist(dst);
+  double distance = -1;
+  
+  if (use_cartesian_coords > 0) 
+  {
+    distance = src->getDist(dst);
+  }
+  else
+  {
+    cout << "UwOpticalChannel::getPropDelay() use_cartesian_coords not supported!" << endl;
+    exit(1);
+  }
   
   double delay = distance / speed_of_light;
   
