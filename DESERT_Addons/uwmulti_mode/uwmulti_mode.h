@@ -32,7 +32,7 @@
  * @author Filippo Campagnaro
  * @version 1.0.0
  * 
- * \brief Provides the definition of the class <i>UWTDMA</i>.
+ * \brief Provides the definition of the class <i>UwMultiMode</i>.
  * 
  */
 
@@ -41,49 +41,54 @@
 
 #include <mmac.h>
 #include <queue>
+#include <map>
+#include <string>
 
-#define UW_CHANNEL_IDLE 1 // status channel idle
-#define UW_CHANNEL_BUSY 2 // status channel busy
+#define UW_MANUAL_SWITCH 0 // status to switch_mode manually
+#define UW_AUTOMATIC_SWITCH 1 // status to switch_mode automatically
 
 using namespace std;
 
 class UwMultiMode;
-
-/*class BufferTimer : public TimerHandler {
-public:
-
-    BufferTimer(UwMultiMode *m) : TimerHandler() {
-        module = m;
-    }
-protected:
-    virtual void expire(Event *e);
-    UwMultiMode* module;
-};*/
-
 
 class UwMultiMode: public MMac {
 public:
 	UwMultiMode();
 
 	virtual ~UwMultiMode();
+	virtual void initInfo();
 
     virtual int command(int argc, const char*const* argv);
 	virtual void stateTxData();
-
+	virtual void stateRxTx();
 
 protected:
 
+  	enum UWMULTI_MODE_STATUS {
+    	UWMULTI_MODE_STATE_IDLE = 1, UWMULTI_MODE_STATE_TX, UWMULTI_MODE_STATE_RX, 
+    	UWMULTI_MODE_STATE_RX_TX
+  	};
+
 	int send_physical_id;
 	int recv_physical_id;
-	int channel_status;
+	UWMULTI_MODE_STATUS current_state;
+	bool initialized;
+	//bool sending_channel_idle;
+	int switch_mode;
 	std::queue<Packet*> buffer;
-	//BufferTimer buffer_timer; // buffer handler
+	map< double, int > physical_map;
+	static map< UWMULTI_MODE_STATUS , string > status_info;
 
 	virtual void Mac2PhyStartTx(Packet* p);
-	virtual void Phy2MacEndRx(Packet* p);
-	virtual void recvFromUpperLayers(Packet* p);
+	virtual void Phy2MacEndRx(Packet* p, int idSrc);
 	virtual void Phy2MacEndTx(const Packet* p);
-	//virtual void Phy2MacStartRx(const Packet* p);
+	virtual void Phy2MacStartRx(const Packet* p, int idSrc);
+	virtual void recvFromUpperLayers(Packet* p);
+	virtual void recv(Packet *p, int idSrc);
+	virtual int recvSyncClMsg(ClMessage* m);
+
+	virtual void addPhysical(double distance, int phyId);
+  
 };
 
 #endif 
