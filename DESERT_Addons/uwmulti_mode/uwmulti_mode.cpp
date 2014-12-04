@@ -63,14 +63,36 @@ public:
 
 } class_uwmulti_mode;
 
-map< UwMultiMode::UWMULTI_MODE_STATUS, string> UwMultiMode::status_info;
+void PhyMultiRecvSet::add(int id){
+	if (! contains(id))
+		recv_physical_.insert(std::pair<int,int>(id,1));
+	else{
+		int new_value = find(id)+1;
+		recv_physical_.erase(id);
+		recv_physical_.insert(std::pair<int,int>(id,new_value));
+	}
+}
+void PhyMultiRecvSet::remove(int id){
+	if (! contains(id))
+		return;
+	if (find(id)>1){
+		int new_value = find(id)-1;
+		recv_physical_.erase(id);
+		recv_physical_.insert(std::pair<int,int>(id,new_value));
+	}
+	else
+		recv_physical_.erase(id);
+}
+
+map< UwMultiMode::UWMULTI_MODE_STATE, string> UwMultiMode::state_info;
 
 UwMultiMode::UwMultiMode() 
 :
 MMac(),
+recv_physical_ids(),
+/*gioco(),*/
 initialized(false),
-current_state(UWMULTI_MODE_STATE_IDLE),
-recv_physical_id(0)
+current_state(UWMULTI_MODE_STATE_IDLE)
 {
     bind("send_physical_id", &send_physical_id);
     bind("debug_", &debug_);
@@ -85,10 +107,31 @@ void UwMultiMode::initInfo() {
 
     initialized = true;
 
-    status_info[UWMULTI_MODE_STATE_IDLE] = "STATE_IDLE";
-    status_info[UWMULTI_MODE_STATE_TX] = "STATE_TX";
-    status_info[UWMULTI_MODE_STATE_RX] = "STATE_RX";
-    status_info[UWMULTI_MODE_STATE_RX_TX] = "STATE_RX_TX";
+    state_info[UWMULTI_MODE_STATE_IDLE] = "STATE_IDLE";
+    state_info[UWMULTI_MODE_STATE_TX] = "STATE_TX";
+    state_info[UWMULTI_MODE_STATE_RX] = "STATE_RX";
+    state_info[UWMULTI_MODE_STATE_RX_TX] = "STATE_RX_TX";
+
+   /* gioco.add(1);
+    if (gioco.contains(1))
+    	std::cout << "game1 works" << std::endl;
+    else
+    	std::cout << "game1 doesn't work" << std::endl;
+    if (! gioco.contains(2))
+    	std::cout << "game2 works" << std::endl;
+    else
+    	std::cout << "game2 doesn't work" << std::endl;
+    gioco.add(1);
+    gioco.remove(1);
+    if (gioco.contains(1))
+    	std::cout << "game3 works" << std::endl;
+    else
+    	std::cout << "game3 doesn't work" << std::endl;
+    gioco.remove(1);
+    if (! gioco.contains(1))
+    	std::cout << "game4 works" << std::endl;
+    else
+    	std::cout << "game4 doesn't work" << std::endl;*/
     
 }
 
@@ -101,7 +144,7 @@ int UwMultiMode::command(int argc, const char*const* argv)
 			return TCL_OK;
 		}
 		else if(strcasecmp(argv[1], "setManualSwitch") == 0) {
-     		recv_physical_id = UW_MANUAL_SWITCH;
+     		switch_mode = UW_MANUAL_SWITCH;
 			return TCL_OK;
 		}
 		else if (strcasecmp(argv[1], "initialize") == 0) {
@@ -151,13 +194,13 @@ void UwMultiMode::stateTxData()
 		buffer.pop();
 		if (debug_)
 			std::cout << NOW << " MultiMode(" << addr << ") stateTxData, sending, state: " 
-				<< status_info[current_state] <<  std::endl;
+				<< state_info[current_state] <<  std::endl;
 	}
 	else{
 		current_state = UWMULTI_MODE_STATE_IDLE;
 		if (debug_)
 			std::cout << NOW << " MultiMode(" << addr << ") stateTxData, nothing to send, state: " 
-				<< status_info[current_state] <<  std::endl;
+				<< state_info[current_state] <<  std::endl;
 	}
 
 }
@@ -169,13 +212,13 @@ void UwMultiMode::stateRxTx() // only stateRx --> stateRxTx
 		buffer.pop();
 		if (debug_)
 			std::cout << NOW << " MultiMode(" << addr << ") stateRxTx, sending, state: " 
-				<< status_info[current_state] <<  std::endl;
+				<< state_info[current_state] <<  std::endl;
 	}
 	else {
 		current_state = UWMULTI_MODE_STATE_RX;
 		if (debug_)
 			std::cout << NOW << " MultiMode(" << addr << ") stateRxTx, nothing to send, state: " 
-				<< status_info[current_state] <<  std::endl;
+				<< state_info[current_state] <<  std::endl;
 	}
 }
 
@@ -190,14 +233,14 @@ void UwMultiMode::recvFromUpperLayers(Packet* p)
 		}
 			break;
 		case UWMULTI_MODE_STATE_RX :{
-			if(recv_physical_id != send_physical_id)
+			if( ! recv_physical_ids.contains(send_physical_id) )
 				stateRxTx();
 		}
 			break;
 		default :{
 			if (debug_)
 	    		std::cout << NOW << " MultiMode(" << addr << ") recvFromUpperLayers and waiting to transmit, state: " 
-	    			<< status_info[current_state] <<  std::endl;
+	    			<< state_info[current_state] <<  std::endl;
 		}
 	}
 }
@@ -205,56 +248,55 @@ void UwMultiMode::recvFromUpperLayers(Packet* p)
 void UwMultiMode::Phy2MacEndTx(const Packet* p){
 	if (debug_)
 		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndTx correctly, state: " 
-			<< status_info[current_state] <<  std::endl;
+			<< state_info[current_state] <<  std::endl;
 	switch (current_state) {
 		case UWMULTI_MODE_STATE_TX :{
 			stateTxData();
 		}
 			break;
 		case UWMULTI_MODE_STATE_RX_TX :{
-			if ( recv_physical_id != send_physical_id)
+			if ( ! recv_physical_ids.contains(send_physical_id) )
 				stateRxTx();
 		}
 			break;
 		default :{
 			if (debug_)
 	    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndTx in an unexpected state, state: " 
-	    			<< status_info[current_state] <<  std::endl;
+	    			<< state_info[current_state] <<  std::endl;
 		}
 	}
 }
 
 void UwMultiMode::Phy2MacStartRx(const Packet* p, int idSrc)
 {
-	recv_physical_id = idSrc;
+	recv_physical_ids.add(idSrc);
 	switch (current_state) {
 		case UWMULTI_MODE_STATE_IDLE :{
 			current_state = UWMULTI_MODE_STATE_RX;
 			if (debug_)
 	    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacStartRx correctly, state: " 
-	    			<< status_info[current_state] <<  std::endl;			
+	    			<< state_info[current_state] <<  std::endl;			
 		}
 			break;
 		case UWMULTI_MODE_STATE_TX :{
-			if (recv_physical_id != send_physical_id){
+			if (! recv_physical_ids.contains(send_physical_id)){
 				current_state = UWMULTI_MODE_STATE_RX_TX;
 				if (debug_)
 		    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacStartRx correctly, state: " 
-		    			<< status_info[current_state] <<  std::endl;
+		    			<< state_info[current_state] <<  std::endl;
 			}
 			else {
 				current_state = UWMULTI_MODE_STATE_IDLE;
-				error_pkts_rx ++;
 				if (debug_)
 		    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacStartRx error, state: " 
-		    			<< status_info[current_state] <<  std::endl;
+		    			<< state_info[current_state] <<  std::endl;
 			}
 		}
 			break;
 		default :{
-			if (debug_)
+			if (debug_ && recv_physical_ids.find(idSrc)>1)
 	    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacStartRx in an unexpected state, state: " 
-	    			<< status_info[current_state] <<  std::endl;
+	    			<< state_info[current_state] <<  std::endl;
 		}
 	}
 }
@@ -264,46 +306,88 @@ void UwMultiMode::Phy2MacEndRx(Packet* p, int idSrc){
 	hdr_mac* mach = HDR_MAC(p);
 	int source_mac = mach->macSA();
 	int dest_mac = mach->macDA();
-	if (ch->error() || idSrc != recv_physical_id || (dest_mac != addr && dest_mac == MAC_BROADCAST)){
+	if (ch->error()){
+		recv_physical_ids.remove(idSrc);
 		if (debug_)
-	    	std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx packet error: " 
-	    		<< ch->error() << ", idSrc: " << idSrc << ", recv_physical_id: " 
-	    		<< recv_physical_id << ", send_physical_id: " << send_physical_id  
-	    		<< ", dest_mac: " << dest_mac << "my addr" << addr << ", source_mac: " 
-	    		<< source_mac << std::endl;
+	    	std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx packet error: channel error= " 
+	    		<< ch->error() << std::endl;
     	drop(p, 1, "ERR");
-    /*	switch (current_state) {
+    	error_pkts_rx ++;
+    	switch (current_state) {
     		case UWMULTI_MODE_STATE_RX : {
-    			stateTxData();
+    			if( recv_physical_ids.isEmpty() )
+					stateTxData();
+				else if( ! recv_physical_ids.contains(send_physical_id) )
+					stateRxTx();
     		}
     			break;
     		case UWMULTI_MODE_STATE_RX_TX :{
-    			current_state = UWMULTI_MODE_STATE_TX;
+    			if( recv_physical_ids.isEmpty() )
+					current_state = UWMULTI_MODE_STATE_TX;
     		}
-    			break;*/
+    			break;
+    	}
 	}
-	else
-	switch (current_state) {
-		case UWMULTI_MODE_STATE_RX :{
-			if (debug_)
-	    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx correctly, state: " 
-	    			<< status_info[current_state] <<  std::endl;
-			sendUp(p);
-			stateTxData();
-		}
-			break;
-		case UWMULTI_MODE_STATE_RX_TX :{
-			if (debug_)
-	    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx correctly, state: " 
-	    			<< status_info[current_state] <<  std::endl;
-			sendUp(p);
-			current_state = UWMULTI_MODE_STATE_TX;
-		}
-			break;
-		default :{
-			if (debug_)
-	    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx in an unexpected state, state: " 
-	    			<< status_info[current_state] <<  std::endl;
+	else if ((dest_mac != addr && dest_mac != MAC_BROADCAST)){
+		if (debug_)
+	    	std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx packet error: " 
+	    		<< "packet not for me, dest_mac: " << dest_mac << ", my addr: " << addr 
+	    		<< ", source_mac: " << source_mac << std::endl;
+    	drop(p, 1, "ERR");
+		recv_physical_ids.remove(idSrc);
+    	switch (current_state) {
+    		case UWMULTI_MODE_STATE_RX : {
+    			if( recv_physical_ids.isEmpty() )
+					stateTxData();
+				else if( ! recv_physical_ids.contains(send_physical_id) )
+					stateRxTx();
+    		}
+    			break;
+    		case UWMULTI_MODE_STATE_RX_TX :{
+    			if( recv_physical_ids.isEmpty() )
+					current_state = UWMULTI_MODE_STATE_TX;
+    		}
+    			break;
+    		default :{
+    			if (debug_)
+	    			std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx in an unexpected state, state: " 
+	    				<< state_info[current_state] <<  std::endl;
+    		}
+    			break;
+    	}
+	}
+	else if(! recv_physical_ids.contains(idSrc)){
+		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx in an unexpected state, state due to idSrc: " 
+	    	<< state_info[current_state] <<  std::endl;
+	}
+	else{
+		recv_physical_ids.remove(idSrc);
+		switch (current_state) { // the packet is mine and it's correctely received
+			case UWMULTI_MODE_STATE_RX :{
+				if (debug_)
+		    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx correctly, state: " 
+		    			<< state_info[current_state] <<  std::endl;
+				sendUp(p);
+				if( recv_physical_ids.isEmpty() )
+					stateTxData();
+				else if( ! recv_physical_ids.contains(send_physical_id) )
+					stateRxTx();
+			}
+				break;
+			case UWMULTI_MODE_STATE_RX_TX :{
+				if (debug_)
+		    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx correctly, state: " 
+		    			<< state_info[current_state] <<  std::endl;
+				sendUp(p);
+				if( recv_physical_ids.isEmpty() )
+					current_state = UWMULTI_MODE_STATE_TX;
+			}
+				break;
+			default :{
+				//if (debug_)
+		    		std::cout << NOW << " MultiMode(" << addr << ") Phy2MacEndRx goes in default in an unexpected state, state: " 
+		    			<< state_info[current_state] <<  std::endl;
+			}
 		}
 	}
 }
@@ -340,5 +424,5 @@ int UwMultiMode::recvSyncClMsg(ClMessage* m)
 */
 
 void UwMultiMode::addPhysical(double distance, int phyId){
-	physical_map.insert(std::pair<char,int>(distance,phyId));
+	send_physical_map.insert(std::pair<double,int>(distance,phyId));
 }

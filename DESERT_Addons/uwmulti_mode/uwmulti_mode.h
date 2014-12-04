@@ -44,12 +44,23 @@
 #include <map>
 #include <string>
 
-#define UW_MANUAL_SWITCH 0 // status to switch_mode manually
-#define UW_AUTOMATIC_SWITCH 1 // status to switch_mode automatically
+#define UW_MANUAL_SWITCH 0 // state to switch_mode manually
+#define UW_AUTOMATIC_SWITCH 1 // state to switch_mode automatically
 
 using namespace std;
 
 class UwMultiMode;
+
+class PhyMultiRecvSet{
+public:
+	inline bool contains(int id){ return (recv_physical_.find(id) != recv_physical_.end()); }
+	inline bool isEmpty(){ return recv_physical_.empty(); }
+	inline int find(int id){ return recv_physical_.find(id)->second; }
+	virtual void add(int id);
+	virtual void remove(int id);
+private:
+	map<int,int> recv_physical_;//id, num
+};
 
 class UwMultiMode: public MMac {
 public:
@@ -64,20 +75,21 @@ public:
 
 protected:
 
-  	enum UWMULTI_MODE_STATUS {
+  	enum UWMULTI_MODE_STATE {
     	UWMULTI_MODE_STATE_IDLE = 1, UWMULTI_MODE_STATE_TX, UWMULTI_MODE_STATE_RX, 
     	UWMULTI_MODE_STATE_RX_TX
   	};
 
 	int send_physical_id;
-	int recv_physical_id;
-	UWMULTI_MODE_STATUS current_state;
+	PhyMultiRecvSet recv_physical_ids;
+	/*PhyMultiRecvSet gioco;*/
+	UWMULTI_MODE_STATE current_state;
 	bool initialized;
 	//bool sending_channel_idle;
 	int switch_mode;
 	std::queue<Packet*> buffer;
-	map< double, int > physical_map;
-	static map< UWMULTI_MODE_STATUS , string > status_info;
+	map< double, int > send_physical_map;
+	static map< UWMULTI_MODE_STATE , string > state_info;
 
 	virtual void Mac2PhyStartTx(Packet* p);
 	virtual void Phy2MacEndRx(Packet* p, int idSrc);
