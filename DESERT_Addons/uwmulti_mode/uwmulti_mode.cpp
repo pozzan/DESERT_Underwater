@@ -64,6 +64,17 @@ public:
 } class_uwmulti_mode;
 
 void PhyMultiRecvSet::add(int id){
+/* la funzione così com'è è abbastanza ingarbugliata.
+ * la riscriverei così
+ * 
+ * ::std::pair<map::<int,int>::iterator, bool> ins_res = recv_physical_.insert(std::pair<int,int>(id,1));
+ *  
+ * if (ins_res->second == false)
+ * {
+ *   (ins_res->first.second)++;
+ * }
+ *
+ **/  
 	if (! contains(id))
 		recv_physical_.insert(std::pair<int,int>(id,1));
 	else{
@@ -73,9 +84,27 @@ void PhyMultiRecvSet::add(int id){
 	}
 }
 void PhyMultiRecvSet::remove(int id){
+/* la funzione così com'è è abbastanza ingarbugliata.
+ * la riscriverei così
+ * 
+ * ::std::map::<int,int>::iterator it = recv_physical_.find(id);
+ *  
+ * if (it != recv_physical_.end())
+ * {
+      if (it->second > 1)
+      {
+        it->second--;
+      }
+      else
+      {
+        recv_physical_.erase(it);
+      }
+ * }
+ *
+ **/ 
 	if (! contains(id))
 		return;
-	if (find(id)>1){
+	if (find(id)>1){ /// @fgue se non trova id fa seg fault
 		int new_value = find(id)-1;
 		recv_physical_.erase(id);
 		recv_physical_.insert(std::pair<int,int>(id,new_value));
@@ -86,7 +115,9 @@ void PhyMultiRecvSet::remove(int id){
 
 map< UwMultiMode::UWMULTI_MODE_STATE, string> UwMultiMode::state_info;
 
-UwMultiMode::UwMultiMode() 
+UwMultiMode::UwMultiMode() ///@fgue abituati ad inizializzare TUTTE le variabili di classe nell'ordine in cui
+                           /// le hai definite. aggiungi anche quello per standard containers usando il costrutture 
+                           /// di default ()
 :
 MMac(),
 recv_physical_ids(),
@@ -190,8 +221,9 @@ void UwMultiMode::stateTxData()
 {
 	if(buffer.size() > 0) {
 		current_state = UWMULTI_MODE_STATE_TX;
-		Mac2PhyStartTx(buffer.front());
-		buffer.pop();
+		Mac2PhyStartTx(buffer.front()); ///@fgue attenzione che se ci sarà versione con ACK devi spedire COPIA del 
+                                    /// pacchetto @ffava ti può dare qualche dritta in caso
+		buffer.pop(); ///@fgue vedi sopra, se ti tieni se usiamo ACK ricordati di fare packet::free alla ricezione ACK
 		if (debug_)
 			std::cout << NOW << " MultiMode(" << addr << ") stateTxData, sending, state: " 
 				<< state_info[current_state] <<  std::endl;
@@ -209,7 +241,7 @@ void UwMultiMode::stateRxTx() // only stateRx --> stateRxTx
 	if(buffer.size() > 0) {
 		current_state = UWMULTI_MODE_STATE_RX_TX;
 		Mac2PhyStartTx(buffer.front());
-		buffer.pop();
+		buffer.pop(); ///@fgue vedi commento sopra
 		if (debug_)
 			std::cout << NOW << " MultiMode(" << addr << ") stateRxTx, sending, state: " 
 				<< state_info[current_state] <<  std::endl;

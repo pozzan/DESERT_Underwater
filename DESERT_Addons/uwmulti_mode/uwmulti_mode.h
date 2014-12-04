@@ -51,12 +51,14 @@ using namespace std;
 
 class UwMultiMode;
 
-class PhyMultiRecvSet{
+class PhyMultiRecvSet {
 public:
-	inline bool contains(int id){ return (recv_physical_.find(id) != recv_physical_.end()); }
-	inline bool isEmpty(){ return recv_physical_.empty(); }
-	inline int find(int id){ return recv_physical_.find(id)->second; }
-	virtual void add(int id);
+	inline bool contains(int id) { return (recv_physical_.find(id) != recv_physical_.end()); }
+	inline bool isEmpty() { return recv_physical_.empty(); }
+	inline int find(int id) { return recv_physical_.find(id)->second; } ///@fgue così nn va bene. 
+                                                                      // se find ritorna end() 
+                                                                      // ->second fa seg fault aggiungi check
+  virtual void add(int id);
 	virtual void remove(int id);
 private:
 	map<int,int> recv_physical_;//id, num
