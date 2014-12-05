@@ -64,27 +64,37 @@ public:
 } class_uwmulti_mode;
 
 void PhyMultiRecvSet::add(int id){
-/* la funzione così com'è è abbastanza ingarbugliata.
+ /* codice fgue
+ * la funzione così com'è è abbastanza ingarbugliata.
  * la riscriverei così
  * 
  * ::std::pair<map::<int,int>::iterator, bool> ins_res = recv_physical_.insert(std::pair<int,int>(id,1));
- *  
+ * 
  * if (ins_res->second == false)
  * {
  *   (ins_res->first.second)++;
+ * }*/
+ 
+ //new Filippo code after fgue suggestion
+  std::pair<std::map<int,int>::iterator,bool> ins_res = recv_physical_.insert(std::pair<int,int>(id,1));
+   
+  if (ins_res.second == false)
+  {
+    (ins_res.first->second)++;
+  }  
+/* Old code
+ * if (! contains(id))
+ *	recv_physical_.insert(std::pair<int,int>(id,1));
+ * else{
+ *	int new_value = find(id)+1;
+ *	recv_physical_.erase(id);
+ *	recv_physical_.insert(std::pair<int,int>(id,new_value));
  * }
- *
- **/  
-	if (! contains(id))
-		recv_physical_.insert(std::pair<int,int>(id,1));
-	else{
-		int new_value = find(id)+1;
-		recv_physical_.erase(id);
-		recv_physical_.insert(std::pair<int,int>(id,new_value));
-	}
+*/
 }
 void PhyMultiRecvSet::remove(int id){
-/* la funzione così com'è è abbastanza ingarbugliata.
+/* @fgue suggestion:
+ * la funzione così com'è è abbastanza ingarbugliata.
  * la riscriverei così
  * 
  * ::std::map::<int,int>::iterator it = recv_physical_.find(id);
@@ -102,6 +112,21 @@ void PhyMultiRecvSet::remove(int id){
  * }
  *
  **/ 
+ // Filippo code after fgue suggestion:
+std::map<int,int>::iterator it = recv_physical_.find(id);
+  
+if (it != recv_physical_.end())
+{
+    if (it->second > 1)
+    {
+	    it->second--;
+    }
+    else
+    {
+    	recv_physical_.erase(it);
+    }
+}
+/* Old Filippo code
 	if (! contains(id))
 		return;
 	if (find(id)>1){ /// @fgue se non trova id fa seg fault
@@ -110,7 +135,7 @@ void PhyMultiRecvSet::remove(int id){
 		recv_physical_.insert(std::pair<int,int>(id,new_value));
 	}
 	else
-		recv_physical_.erase(id);
+		recv_physical_.erase(id);*/
 }
 
 map< UwMultiMode::UWMULTI_MODE_STATE, string> UwMultiMode::state_info;
@@ -120,10 +145,14 @@ UwMultiMode::UwMultiMode() ///@fgue abituati ad inizializzare TUTTE le variabili
                            /// di default ()
 :
 MMac(),
+send_physical_id(0),
 recv_physical_ids(),
-/*gioco(),*/
+current_state(UWMULTI_MODE_STATE_IDLE),
 initialized(false),
-current_state(UWMULTI_MODE_STATE_IDLE)
+switch_mode(UW_MANUAL_SWITCH),
+buffer(),
+send_physical_map()
+
 {
     bind("send_physical_id", &send_physical_id);
     bind("debug_", &debug_);

@@ -55,9 +55,10 @@ class PhyMultiRecvSet {
 public:
 	inline bool contains(int id) { return (recv_physical_.find(id) != recv_physical_.end()); }
 	inline bool isEmpty() { return recv_physical_.empty(); }
-	inline int find(int id) { return recv_physical_.find(id)->second; } ///@fgue così nn va bene. 
+	//inline int find(int id) { return recv_physical_.find(id)->second; } ///@fgue così nn va bene. 
                                                                       // se find ritorna end() 
                                                                       // ->second fa seg fault aggiungi check
+  inline int find(int id) { return (contains(id))?recv_physical_.find(id)->second:0; }
   virtual void add(int id);
 	virtual void remove(int id);
 private:
@@ -84,10 +85,8 @@ protected:
 
 	int send_physical_id;
 	PhyMultiRecvSet recv_physical_ids;
-	/*PhyMultiRecvSet gioco;*/
 	UWMULTI_MODE_STATE current_state;
 	bool initialized;
-	//bool sending_channel_idle;
 	int switch_mode;
 	std::queue<Packet*> buffer;
 	map< double, int > send_physical_map;
