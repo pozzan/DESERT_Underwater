@@ -49,6 +49,9 @@
 #include <limits>
 #include <climits>
 
+#define UW_MANUAL_SWITCH 0 // state to switch_mode manually
+#define UW_AUTOMATIC_SWITCH 1 // state to switch_mode automatically
+
 class UwMultiStackController : public Module {
 
 
@@ -73,15 +76,56 @@ public:
      */
     virtual int command(int, const char*const*);
     /**
-     * recv method. It is called when a packet is received from the channel
+     * recv method. It is called when a packet is received from the other layers
      *
      * @param Packet* Pointer to the packet that are going to be received
      *
      */
+    virtual void recv(Packet *p);
+    
+
     
 protected:
     // Variables
 	int debug_;
+    int min_delay_;
+    int switch_mode;// AUTOMATIC or MANUAL MODE
+    int manual_lower_id_; // used just in MANUAL MODE
+
+    int optical_id_;
+    int acoustic_id_;
+
+    double optical_minimal_target_;
+    double acoustic_minimal_target_;
+
+    /** 
+     * Handle a packet coming from upper layers
+     * 
+     * @param p pointer to the packet
+     */
+    virtual void recvFromUpperLayers(Packet *p);
+
+     /** 
+     * return the best layer to forward the packet when the system works in AUTOMATIC_MODE
+     * 
+     * @param p pointer to the packet
+     */
+    virtual int bestLowerLayer(Packet *p);
+
+    virtual bool opticalAvailable(Packet *p);
+
+    /**
+     * Set optical id and target
+     */
+    virtual void setOptical(int id, double target);
+
+    /**
+     * Set acoustic id and target
+     */
+    virtual void setAcoustic(int id, double target);
+
+
+
 private:
     //Variables
 };

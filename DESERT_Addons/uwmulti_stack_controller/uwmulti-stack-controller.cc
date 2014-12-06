@@ -48,13 +48,104 @@ public:
 UwMultiStackController::UwMultiStackController() 
 : 
 Module(),
-debug_(0)
+debug_(0),
+min_delay_(0),
+switch_mode(UW_MANUAL_SWITCH),
+manual_lower_id_(0),
+optical_id_(0),
+acoustic_id_(0),
+optical_minimal_target_(0),
+acoustic_minimal_target_(0)
 {
 	bind("debug_", &debug_);
+	bind("min_delay_", &min_delay_);
+    bind("switch_mode", &switch_mode);
+	bind("manual_lower_id_", &manual_lower_id_);
+	bind("optical_id_", &optical_id_);
+	bind("acoustic_id_", &acoustic_id_);
+	bind("optical_minimal_target_", &optical_minimal_target_);
+	bind("acoustic_minimal_target_", &acoustic_minimal_target_);
 }
 
 int UwMultiStackController::command(int argc, const char*const* argv) {
-    //Tcl& tcl = Tcl::instance();
+    Tcl& tcl = Tcl::instance();
+	if (argc == 2) {
+		if(strcasecmp(argv[1], "setAutomaticSwitch") == 0) {
+     		switch_mode = UW_AUTOMATIC_SWITCH;
+			return TCL_OK;
+		}
+		else if(strcasecmp(argv[1], "setManualSwitch") == 0) {
+     		switch_mode = UW_MANUAL_SWITCH;
+			return TCL_OK;
+		}
+	}
+	else if (argc == 3) {
+		if(strcasecmp(argv[1], "setManualLowewlId") == 0){
+     		manual_lower_id_ = atoi(argv[2]);
+			return TCL_OK;
+		}
+		else if(strcasecmp(argv[1], "setSwitchMode") == 0) {
+     		switch_mode = atoi(argv[2]);
+			return TCL_OK;
+		}
+	}
+	else if (argc == 4) {
+		if(strcasecmp(argv[1], "setOptical") == 0){
+     		setOptical(atoi(argv[2]),(atof(argv[3])));
+			return TCL_OK;
+		}
+		else if(strcasecmp(argv[1], "setAcoustic") == 0){
+     		setAcoustic(atoi(argv[2]),(atof(argv[3])));
+			return TCL_OK;
+		}
+	}
     return Module::command(argc, argv);     
-} /* UwOptical::command */
+} /* UwMultiStackController::command */
 
+void UwMultiStackController::recv(Packet* p)
+{
+ 	hdr_cmn *ch = HDR_CMN(p);
+  	if(ch->direction() == hdr_cmn::UP)
+    {
+      	sendUp(p, min_delay_);
+    }
+  	else
+    {
+      	//direction DOWN: packet is coming from upper layers
+      	recvFromUpperLayers(p);
+    }
+}
+
+void UwMultiStackController::recvFromUpperLayers(Packet *p)
+{
+	hdr_cmn *ch = HDR_CMN(p);
+
+	if(switch_mode == UW_AUTOMATIC_SWITCH )//&& ch->stack_control_mode == AUTOMATIC_MODE)
+		sendDown(bestLowerLayer(p), p, min_delay_);
+	else 
+		sendDown(manual_lower_id_, p, min_delay_);
+}
+
+int UwMultiStackController::bestLowerLayer(Packet *p){
+	if (opticalAvailable(p))
+		return optical_id_;
+	else
+		return acoustic_id_;//at least send in acoustic
+	
+}
+
+bool UwMultiStackController::opticalAvailable(Packet *p){
+	if(!optical_id_)
+		return false;
+	//TODO: check via ClMessage the status of lower layers and choose the best one.
+}
+
+void UwMultiStackController::setOptical(int id, double minimalTarget){
+	optical_id_ = id;
+    optical_minimal_target_ = minimalTarget;
+}
+
+void UwMultiStackController::setAcoustic(int id, double minimalTarget){
+    acoustic_id_ = id;
+    acoustic_minimal_target_ = minimalTarget;
+}
