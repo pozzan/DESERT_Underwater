@@ -59,7 +59,7 @@ acoustic_minimal_target_(0)
 {
 	bind("debug_", &debug_);
 	bind("min_delay_", &min_delay_);
-    bind("switch_mode", &switch_mode);
+	bind("switch_mode", &switch_mode);
 	bind("manual_lower_id_", &manual_lower_id_);
 	bind("optical_id_", &optical_id_);
 	bind("acoustic_id_", &acoustic_id_);
@@ -142,10 +142,10 @@ bool UwMultiStackController::opticalAvailable(Packet *p){
 
 void UwMultiStackController::setOptical(int id, double minimalTarget){
 	optical_id_ = id;
-    optical_minimal_target_ = minimalTarget;
+	optical_minimal_target_ = minimalTarget;
 }
 
 void UwMultiStackController::setAcoustic(int id, double minimalTarget){
-    acoustic_id_ = id;
-    acoustic_minimal_target_ = minimalTarget;
+	acoustic_id_ = id;
+	acoustic_minimal_target_ = minimalTarget;
 }
