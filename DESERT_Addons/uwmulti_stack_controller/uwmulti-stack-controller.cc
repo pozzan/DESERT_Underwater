@@ -137,6 +137,9 @@ int UwMultiStackController::bestLowerLayer(Packet *p){
 bool UwMultiStackController::opticalAvailable(Packet *p){
 	if(!optical_id_)
 		return false;
+  	ClMsgController m(optical_id_, p);
+ 	sendSyncClMsgDown(&m);
+  	return(m.getMetrics()>optical_minimal_target_);
 	//TODO: check via ClMessage the status of lower layers and choose the best one.
 }
 
