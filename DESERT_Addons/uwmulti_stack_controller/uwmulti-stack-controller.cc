@@ -39,7 +39,7 @@
 
 static class UwMultiStackControllerClass : public TclClass {
 public:
-    UwMultiStackControllerClass() : TclClass("Module/UW/MULTI/STACK/CONTROLLER") {}
+    UwMultiStackControllerClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER") {}
     TclObject* create(int, const char*const*) {
         return (new UwMultiStackController);
     }
