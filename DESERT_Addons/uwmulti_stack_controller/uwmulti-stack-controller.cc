@@ -59,7 +59,7 @@ optical_id_(0),
 acoustic_id_(0),
 optical_minimal_target_(0),
 optical_hysteresis_size_(0),
-acoustic_minimal_target_(0),
+acoustic_maximum_target_(0),
 acoustic_hysteresis_size_(0),
 optical_on_(false)
 {
@@ -71,7 +71,7 @@ optical_on_(false)
 	bind("acoustic_id_", &acoustic_id_);
 	bind("optical_minimal_target_", &optical_minimal_target_);
 	bind("optical_hysteresis_size_", &optical_hysteresis_size_);
-	bind("acoustic_minimal_target_", &acoustic_minimal_target_);
+	bind("acoustic_maximum_target_", &acoustic_maximum_target_);
 	bind("acoustic_hysteresis_size_", &acoustic_hysteresis_size_);
 }
 
@@ -154,7 +154,7 @@ bool UwMultiStackController::opticalAvailable(Packet *p){
  	if(optical_on_)
  		return(m.getMetrics()>optical_minimal_target_ - optical_hysteresis_size_/2);
  	else
- 		return(m.getMetrics()>optical_minimal_target_ + optical_hysteresis_size_/2);
+ 		return(m.getMetrics()>acoustic_maximum_target_ + acoustic_hysteresis_size_/2);
 	//TODO: check via ClMessage the status of lower layers and choose the best one.
 }
 
@@ -165,5 +165,5 @@ void UwMultiStackController::setOpticalId(int id, double minimalTarget){
 
 void UwMultiStackController::setAcousticId(int id, double minimalTarget){
 	acoustic_id_ = id;
-	acoustic_minimal_target_ = minimalTarget;
+	acoustic_maximum_target_ = minimalTarget;
 }

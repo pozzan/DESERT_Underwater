@@ -98,7 +98,7 @@ protected:
 
     double optical_minimal_target_;
     double optical_hysteresis_size_;
-    double acoustic_minimal_target_;
+    double acoustic_maximum_target_;
     double acoustic_hysteresis_size_;
     bool optical_on_;
 
