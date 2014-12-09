@@ -65,7 +65,7 @@ public:
      * @return Pointer to an TclObject
      */
     TclObject* create(int, const char*const*) {
-        return (new UwTriggerModuleClass());
+        return (new UwTrigger_AUV());
     }
 } class_module_uw_trigger_auv;
 

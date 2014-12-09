@@ -148,7 +148,7 @@ protected:
             left_duration -= (NOW - start_time);
             if (left_duration <= 0.0) left_duration = module->mac2phy_delay_;
             force_cancel();
-            timer_status = UW_CS_ALOHA_TRIG_AUV_FROZEN;
+            timer_status = UW_TRIGGER_AUV_FROZEN;
         }
 
         /**
@@ -159,7 +159,7 @@ protected:
             start_time = NOW;
             assert(left_duration > 0);
             sched(left_duration);
-            timer_status = UW_CS_ALOHA_TRIG_AUV_RUNNING;
+            timer_status = UW_TRIGGER_AUV_RUNNING;
         }
 
         /**
