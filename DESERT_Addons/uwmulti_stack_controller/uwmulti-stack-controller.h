@@ -48,6 +48,7 @@
 #include <cmath>
 #include <limits>
 #include <climits>
+#include "controller-clmsg.h"
 
 #define UW_MANUAL_SWITCH 0 // state to switch_mode manually
 #define UW_AUTOMATIC_SWITCH 1 // state to switch_mode automatically
