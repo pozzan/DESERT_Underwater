@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,10 @@ protected:
     int acoustic_id_;
 
     double optical_minimal_target_;
+    double optical_hysteresis_size_;
     double acoustic_minimal_target_;
+    double acoustic_hysteresis_size_;
+    bool optical_on_;
 
     /** 
      * Handle a packet coming from upper layers
@@ -118,12 +121,12 @@ protected:
     /**
      * Set optical id and target
      */
-    virtual void setOptical(int id, double target);
+    virtual void setOpticalId(int id, double target);
 
     /**
      * Set acoustic id and target
      */
-    virtual void setAcoustic(int id, double target);
+    virtual void setAcousticId(int id, double target);
 
 
 

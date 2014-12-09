@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,10 @@ manual_lower_id_(0),
 optical_id_(0),
 acoustic_id_(0),
 optical_minimal_target_(0),
-acoustic_minimal_target_(0)
+optical_hysteresis_size_(0),
+acoustic_minimal_target_(0),
+acoustic_hysteresis_size_(0),
+optical_on_(false)
 {
 	bind("debug_", &debug_);
 	bind("min_delay_", &min_delay_);
@@ -67,7 +70,9 @@ acoustic_minimal_target_(0)
 	bind("optical_id_", &optical_id_);
 	bind("acoustic_id_", &acoustic_id_);
 	bind("optical_minimal_target_", &optical_minimal_target_);
+	bind("optical_hysteresis_size_", &optical_hysteresis_size_);
 	bind("acoustic_minimal_target_", &acoustic_minimal_target_);
+	bind("acoustic_hysteresis_size_", &acoustic_hysteresis_size_);
 }
 
 int UwMultiStackController::command(int argc, const char*const* argv) {
@@ -93,12 +98,12 @@ int UwMultiStackController::command(int argc, const char*const* argv) {
 		}
 	}
 	else if (argc == 4) {
-		if(strcasecmp(argv[1], "setOptical") == 0){
-     		setOptical(atoi(argv[2]),(atof(argv[3])));
+		if(strcasecmp(argv[1], "setOpticalId") == 0){
+     		setOpticalId(atoi(argv[2]),(atof(argv[3])));
 			return TCL_OK;
 		}
-		else if(strcasecmp(argv[1], "setAcoustic") == 0){
-     		setAcoustic(atoi(argv[2]),(atof(argv[3])));
+		else if(strcasecmp(argv[1], "setAcousticId") == 0){
+     		setAcousticId(atoi(argv[2]),(atof(argv[3])));
 			return TCL_OK;
 		}
 	}
@@ -130,10 +135,14 @@ void UwMultiStackController::recvFromUpperLayers(Packet *p)
 }
 
 int UwMultiStackController::bestLowerLayer(Packet *p){
-	if (opticalAvailable(p))
+	if (opticalAvailable(p)){
+		optical_on_=true;
 		return optical_id_;
-	else
+	}
+	else{
+		optical_on_=false;
 		return acoustic_id_;//at least send in acoustic
+	}
 	
 }
 
@@ -142,16 +151,19 @@ bool UwMultiStackController::opticalAvailable(Packet *p){
 		return false;
   	ClMsgController m(optical_id_, p);
  	sendSyncClMsgDown(&m);
-  	return(m.getMetrics()>optical_minimal_target_);
+ 	if(optical_on_)
+ 		return(m.getMetrics()>optical_minimal_target_ - optical_hysteresis_size_/2);
+ 	else
+ 		return(m.getMetrics()>optical_minimal_target_ + optical_hysteresis_size_/2);
 	//TODO: check via ClMessage the status of lower layers and choose the best one.
 }
 
-void UwMultiStackController::setOptical(int id, double minimalTarget){
+void UwMultiStackController::setOpticalId(int id, double minimalTarget){
 	optical_id_ = id;
 	optical_minimal_target_ = minimalTarget;
 }
 
-void UwMultiStackController::setAcoustic(int id, double minimalTarget){
+void UwMultiStackController::setAcousticId(int id, double minimalTarget){
 	acoustic_id_ = id;
 	acoustic_minimal_target_ = minimalTarget;
 }

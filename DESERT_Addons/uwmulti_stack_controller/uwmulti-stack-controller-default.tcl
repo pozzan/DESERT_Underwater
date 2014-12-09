@@ -37,4 +37,6 @@ Module/UW/MULTI_STACK_CONTROLLER set manual_lower_id_  0
 Module/UW/MULTI_STACK_CONTROLLER set optical_id_  0
 Module/UW/MULTI_STACK_CONTROLLER set acoustic_id_  0
 Module/UW/MULTI_STACK_CONTROLLER set optical_minimal_target_  0
+Module/UW/MULTI_STACK_CONTROLLER set optical_hysteresis_size_ 0
 Module/UW/MULTI_STACK_CONTROLLER set acoustic_minimal_target_  0
+Module/UW/MULTI_STACK_CONTROLLER set acoustic_hysteresis_size_ 0
