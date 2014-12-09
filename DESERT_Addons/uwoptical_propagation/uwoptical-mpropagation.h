@@ -42,6 +42,7 @@
 #define UWOPTICAL_MPROPAGATION_H
 
 #include<mpropagation.h>
+#include<mphy.h>
 
 
 class UwOpticalMPropagation : public MPropagation
@@ -54,8 +55,12 @@ public:
   //virtual int command(int argc, const char*const* argv);  
 
   int debug_;
+
+protected:
+  virtual double lookUpGain(double d, double angle);
   
 };
+
 
 
 #endif /* OPTICAL_MPROPAGATION_H */

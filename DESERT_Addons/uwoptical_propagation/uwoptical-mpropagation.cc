@@ -38,8 +38,8 @@
  *
  */
 
+#include<node-core.h>
 #include<iostream>
-
 #include"uwoptical-mpropagation.h"
 //#include"uwlib.h"
 
@@ -59,7 +59,33 @@ MPropagation()
 }
 
 double UwOpticalMPropagation::getGain(Packet* p)
-{
-   return 1.0;
+{//TODO: lookup table
 
+   hdr_MPhy *ph = HDR_MPHY(p);
+
+   Position* sp = ph->srcPosition;
+   Position* rp = ph->dstPosition;
+   assert(sp);
+   assert(rp);
+   double dist = sp->getDist(rp);
+   double angle = sp->getRelAzimuth(rp);
+
+   /*MSpectralMask* sm = ph->srcSpectralMask;
+   assert(sm);
+   double freq = ph->srcSpectralMask->getFreq();*/
+   double PCgain=lookUpGain(dist,angle);
+   if (debug_)
+     std::cout << NOW 
+	  << " UwOpticalMPropagation::getGain()" 
+	  << " dist=" << dist
+	  //<< " freq=" << freq
+	  << " gain=" << PCgain 
+	  << std::endl;
+
+   return PCgain;
+}
+
+double UwOpticalMPropagation::lookUpGain(double d, double angle){
+	//TODO: search gain in the lookup table
+	return 1.0;
 }
