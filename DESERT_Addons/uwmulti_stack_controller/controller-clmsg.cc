@@ -28,12 +28,11 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
- * thanks to: Roberto Petroccia for the channel sense extension
  */
 
 
 /**
- * @file   controller-clmsg.h
+ * @file   controller-clmsg.cc
  * @author Filippo Campagnaro
  * @date   Mon Dec 8 11:54 2014
  * 
@@ -47,16 +46,16 @@ ClMessage_t CLMSG_CONTROLLER;
 
 ClMsgController::ClMsgController(Packet* p)
   : 
-  pkt(p),
-  metrics_(0),
+  pkt(p),///@fgue why do we need to store a packet?
+  metrics(0),
   ClMessage(CLMSG_CONTROLLER_VERBOSITY, CLMSG_CONTROLLER)
 {
 }
 
 ClMsgController::ClMsgController(int moduleId, Packet*p)
   : 
-  pkt(p),
-  metrics_(0), 
+  pkt(p),///@fgue why do we need to store a packet?
+  metrics(0), 
   ClMessage(CLMSG_CONTROLLER_VERBOSITY, CLMSG_CONTROLLER, UNICAST, moduleId)
 {
 }

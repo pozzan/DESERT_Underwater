@@ -88,9 +88,9 @@ public:
     
 protected:
     // Variables
-	int debug_;
+    int debug_;
     int min_delay_;
-    int switch_mode;// AUTOMATIC or MANUAL MODE
+    int switch_mode_;// AUTOMATIC or MANUAL MODE
     int manual_lower_id_; // used just in MANUAL MODE
 
     int optical_id_;
