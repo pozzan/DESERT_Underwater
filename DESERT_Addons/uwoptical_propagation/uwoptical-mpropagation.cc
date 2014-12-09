@@ -68,7 +68,7 @@ double UwOpticalMPropagation::getGain(Packet* p)
    assert(sp);
    assert(rp);
    double dist = sp->getDist(rp);
-   double angle = sp->getRelAzimuth(rp);
+   double angle = sp->getRelZenith(rp);//mmm is it the elevation?? 
 
    /*MSpectralMask* sm = ph->srcSpectralMask;
    assert(sm);
