@@ -53,7 +53,7 @@ UwMultiStackController::UwMultiStackController()
 Module(),
 debug_(0),
 min_delay_(0),
-switch_mode(UW_MANUAL_SWITCH),
+switch_mode_(UW_MANUAL_SWITCH),
 manual_lower_id_(0),
 optical_id_(0),
 acoustic_id_(0),
@@ -65,7 +65,7 @@ optical_on_(false)
 {
 	bind("debug_", &debug_);
 	bind("min_delay_", &min_delay_);
-	bind("switch_mode", &switch_mode);
+	bind("switch_mode_", &switch_mode_);
 	bind("manual_lower_id_", &manual_lower_id_);
 	bind("optical_id_", &optical_id_);
 	bind("acoustic_id_", &acoustic_id_);
@@ -79,21 +79,21 @@ int UwMultiStackController::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
 	if (argc == 2) {
 		if(strcasecmp(argv[1], "setAutomaticSwitch") == 0) {
-     		switch_mode = UW_AUTOMATIC_SWITCH;
+     		switch_mode_ = UW_AUTOMATIC_SWITCH;
 			return TCL_OK;
 		}
 		else if(strcasecmp(argv[1], "setManualSwitch") == 0) {
-     		switch_mode = UW_MANUAL_SWITCH;
+     		switch_mode_ = UW_MANUAL_SWITCH;
 			return TCL_OK;
 		}
 	}
 	else if (argc == 3) {
-		if(strcasecmp(argv[1], "setManualLowewlId") == 0){
+		if(strcasecmp(argv[1], "setManualLowerlId") == 0){
      		manual_lower_id_ = atoi(argv[2]);
 			return TCL_OK;
 		}
 		else if(strcasecmp(argv[1], "setSwitchMode") == 0) {
-     		switch_mode = atoi(argv[2]);
+     		switch_mode_ = atoi(argv[2]);
 			return TCL_OK;
 		}
 	}
@@ -128,7 +128,7 @@ void UwMultiStackController::recvFromUpperLayers(Packet *p)
 {
 	hdr_cmn *ch = HDR_CMN(p);
 
-	if(switch_mode == UW_AUTOMATIC_SWITCH && ch->ptype() == CONTROLLED)
+	if(switch_mode_ == UW_AUTOMATIC_SWITCH && ch->ptype() == CONTROLLED)
 		sendDown(bestLowerLayer(p), p, min_delay_);
 	else 
 		sendDown(manual_lower_id_, p, min_delay_);

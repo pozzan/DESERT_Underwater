@@ -28,7 +28,6 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
- * thanks to: Roberto Petroccia for the channel sense extension
  */
 
 
@@ -46,8 +45,8 @@
 #ifndef CONTROLLER_CLMSG_H
 #define CONTROLLER_CLMSG_H
 
-#include<packet.h>
-#include<clmessage.h>
+#include <packet.h>
+#include <clmessage.h>
 
 #define CLMSG_CONTROLLER_VERBOSITY 3
 
@@ -64,16 +63,19 @@ public:
   ClMsgController(Packet* p);
   ClMsgController(int moduleId, Packet* p);
 
-  void inline setMetrics(double value){ metrics_=value; }
-  double inline getMetrics() { return metrics_; }
-
-  ClMessage* copy();	// copy the message
+  void setMetrics(double value) { metrics = value; }
+  double getMetrics() { return metrics; }
   
-  Packet* pkt;
-	
+  void setPacket(Packet* p) { pkt = p; }
+  Packet* getPacket() {return pkt; } 
+  
+  ClMessage* copy();	// copy the message
+  	
 private:
 
-  double metrics_;
+  Packet* pkt;
+  
+  double metrics;
 };
 
 
