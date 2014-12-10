@@ -34,9 +34,4 @@ Module/UW/MULTI_STACK_CONTROLLER set debug_  0
 Module/UW/MULTI_STACK_CONTROLLER set min_delay_  0
 Module/UW/MULTI_STACK_CONTROLLER set switch_mode_  0
 Module/UW/MULTI_STACK_CONTROLLER set manual_lower_id_  0
-Module/UW/MULTI_STACK_CONTROLLER set optical_id_  0
-Module/UW/MULTI_STACK_CONTROLLER set acoustic_id_  0
-Module/UW/MULTI_STACK_CONTROLLER set optical_minimal_target_  0
-Module/UW/MULTI_STACK_CONTROLLER set optical_hysteresis_size_ 0
-Module/UW/MULTI_STACK_CONTROLLER set acoustic_maximum_target_  0
-Module/UW/MULTI_STACK_CONTROLLER set acoustic_hysteresis_size_ 0
+

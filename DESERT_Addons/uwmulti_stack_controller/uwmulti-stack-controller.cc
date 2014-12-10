@@ -31,7 +31,7 @@
  * @author Federico Favaro, Federico Guerra, Filippo Campagnaro
  * @version 1.0.0
  *
- * \brief Implementation of UwOptical class.
+ * \brief Implementation of UwMultiStackController class.
  *
  */
 
@@ -46,7 +46,7 @@ public:
     TclObject* create(int, const char*const*) {
         return (new UwMultiStackController);
     }
-} class_module_optical;
+} class_stack_controller;
 
 UwMultiStackController::UwMultiStackController() 
 : 
@@ -54,25 +54,12 @@ Module(),
 debug_(0),
 min_delay_(0),
 switch_mode_(UW_MANUAL_SWITCH),
-manual_lower_id_(0),
-optical_id_(0),
-acoustic_id_(0),
-optical_minimal_target_(0),
-optical_hysteresis_size_(0),
-acoustic_maximum_target_(0),
-acoustic_hysteresis_size_(0),
-optical_on_(false)
+manual_lower_id_(0)
 {
 	bind("debug_", &debug_);
 	bind("min_delay_", &min_delay_);
-	bind("switch_mode_", &switch_mode_);
+	bind("switch_mode_", (int*) &switch_mode_);
 	bind("manual_lower_id_", &manual_lower_id_);
-	bind("optical_id_", &optical_id_);
-	bind("acoustic_id_", &acoustic_id_);
-	bind("optical_minimal_target_", &optical_minimal_target_);
-	bind("optical_hysteresis_size_", &optical_hysteresis_size_);
-	bind("acoustic_maximum_target_", &acoustic_maximum_target_);
-	bind("acoustic_hysteresis_size_", &acoustic_hysteresis_size_);
 }
 
 int UwMultiStackController::command(int argc, const char*const* argv) {
@@ -92,23 +79,28 @@ int UwMultiStackController::command(int argc, const char*const* argv) {
      		manual_lower_id_ = atoi(argv[2]);
 			return TCL_OK;
 		}
-		else if(strcasecmp(argv[1], "setSwitchMode") == 0) {
-     		switch_mode_ = atoi(argv[2]);
-			return TCL_OK;
-		}
 	}
-	else if (argc == 4) {
-		if(strcasecmp(argv[1], "setOpticalId") == 0){
-     		setOpticalId(atoi(argv[2]),(atof(argv[3])));
-			return TCL_OK;
-		}
-		else if(strcasecmp(argv[1], "setAcousticId") == 0){
-     		setAcousticId(atoi(argv[2]),(atof(argv[3])));
+	else if (argc == 6) {
+		if(strcasecmp(argv[1], "addLayer") == 0){
+     		addLayer(atoi(argv[2]),(string)(argv[3]),atof(argv[4]),atof(argv[5]));
 			return TCL_OK;
 		}
 	}
     return Module::command(argc, argv);     
 } /* UwMultiStackController::command */
+
+void UwMultiStackController::addLayer(int id, string layer_name , double target, double hysteresis){
+	/* 
+	 * TODO: decide the policy of insert or replace layer with same id
+	 * TODO: decide the use of layer_name, if it's unique or not
+	 * if (layer_name:unique){ decide the policy of insert or replace layer with same layer_name }
+	*/
+	Stats a;
+	a.layer_tag_ = layer_name;
+	a.metrics_target_ = target;
+	a.hysteresis_size_ = hysteresis;
+	layer_map.insert((std::pair<int,Stats>(id,a)));
+}
 
 void UwMultiStackController::recv(Packet* p)
 {
@@ -129,41 +121,21 @@ void UwMultiStackController::recvFromUpperLayers(Packet *p)
 	hdr_cmn *ch = HDR_CMN(p);
 
 	if(switch_mode_ == UW_AUTOMATIC_SWITCH && ch->ptype() == CONTROLLED)
-		sendDown(bestLowerLayer(p), p, min_delay_);
+		sendDown( getBestLayer(p), p, min_delay_);
 	else 
 		sendDown(manual_lower_id_, p, min_delay_);
 }
 
-int UwMultiStackController::bestLowerLayer(Packet *p){
-	if (opticalAvailable(p)){
-		optical_on_=true;
-		return optical_id_;
-	}
-	else{
-		optical_on_=false;
-		return acoustic_id_;//at least send in acoustic
-	}
-	
+int UwMultiStackController::getBestLayer(Packet *p){ 
+	/* Now it is not used, it just returns manual_lower_id_
+	 * TODO: decide the policy or just let the extended class doing it
+	 *
+	 */
+	return 	manual_lower_id_;
 }
 
-bool UwMultiStackController::opticalAvailable(Packet *p){
-	if(!optical_id_)
-		return false;
-  	ClMsgController m(optical_id_, p);
- 	sendSyncClMsgDown(&m);
- 	if(optical_on_)
- 		return(m.getMetrics()>optical_minimal_target_ - optical_hysteresis_size_/2);
- 	else
- 		return(m.getMetrics()>acoustic_maximum_target_ + acoustic_hysteresis_size_/2);
-	//TODO: check via ClMessage the status of lower layers and choose the best one.
-}
-
-void UwMultiStackController::setOpticalId(int id, double minimalTarget){
-	optical_id_ = id;
-	optical_minimal_target_ = minimalTarget;
-}
-
-void UwMultiStackController::setAcousticId(int id, double minimalTarget){
-	acoustic_id_ = id;
-	acoustic_maximum_target_ = minimalTarget;
+bool UwMultiStackController::isLayerAvailable(const string& layer_name){
+	for (std::map<int,Stats>::iterator it=layer_map.begin(); it!=layer_map.end(); ++it)
+		if((it->second).layer_tag_.compare(layer_name) == 0) { return true; }
+	return false;
 }

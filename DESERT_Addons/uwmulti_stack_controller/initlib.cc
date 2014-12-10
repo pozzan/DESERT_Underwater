@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -36,15 +36,15 @@
 
 #include <tclcl.h>
 
-extern EmbeddedTcl UwOpticalPhyInitTclCode;
+extern EmbeddedTcl UwMultiStackControllerInitTclCode;
 
-extern "C" int Uwoptical_phy_Init() {
-	UwOpticalPhyInitTclCode.load();
+extern "C" int Uwmulti_stack_controller_Init() {
+	UwMultiStackControllerInitTclCode.load();
 	return 0;
 }
 
-extern "C" int Cygoptical_Init() {
-    Uwoptical_phy_Init();
+extern "C" int Cygmulti_stack_controller_Init() {
+    Uwmulti_stack_controller_Init();
     return 0;
 }
 

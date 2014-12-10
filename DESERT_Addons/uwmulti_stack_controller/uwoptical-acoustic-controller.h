@@ -27,43 +27,32 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file   uwmulti-stack-controller.h
+ * @file   uwoptical-acoustic-controller.h
  * @author Federico Favaro, Federico Guerra, Filippo Campagnaro
  * @version 1.0.0
  *
- * \brief Definition of UwMultiStackController class.
+ * \brief Definition of UwOpticalAcousticController class.
  *
  */
 
-#ifndef UWMULTI_STACK_CONTROLLER_H
-#define UWMULTI_STACK_CONTROLLER_H
+#ifndef UWOPTICAL_ACOUSTIC_CONTROLLER_H
+#define UWOPTICAL_ACOUSTIC_CONTROLLER_H
 
-#include <rng.h>
-#include <packet.h>
-#include <module.h>
-#include <tclcl.h>
-#include <map>
+#include "uwmulti-stack-controller.h"
 
-#include <iostream>
-#include <string.h>
-#include <cmath>
-#include <limits>
-#include <climits>
-#include "controller-clmsg.h"
-
-class UwMultiStackController : public Module {
+class UwOpticalAcousticController : public UwMultiStackController {
 
 
 public:
     /**
      * Constructor of UwMultiPhy class.
      */
-    UwMultiStackController();
+    UwOpticalAcousticController();
     
     /**
      * Destructor of UwMultiPhy class.
      */
-    virtual ~UwMultiStackController() { }
+    virtual ~UwOpticalAcousticController() { }
     
     /**
      * TCL command interpreter. It implements the following OTcl methods:
@@ -76,7 +65,7 @@ public:
     virtual int command(int, const char*const*);
 
     /**
-     * Add layer
+     * Add layer: avoid this function
      * 
      * @param id unique identifier of the module
      * @param layer_name name of the module. The name should be unique
@@ -84,8 +73,8 @@ public:
      * @param hysteresis hysteresis of the module metrics
      */
     
-    virtual void addLayer(int id, string layer_name , double target, double hysteresis);
-    
+    inline void addLayer(int id, string layer_name , double target, double hysteresis){}
+
     /**
      * recv method. It is called when a packet is received from the other layers
      *
@@ -97,28 +86,14 @@ public:
     
 protected:
     // Variables
-    enum Mode
-    {
-      UW_MANUAL_SWITCH = 0, // state to switch_mode manually
-      UW_AUTOMATIC_SWITCH // state to switch_mode automatically
-    };
-
-    int debug_;
-    int min_delay_;
-    Mode switch_mode_;// AUTOMATIC or MANUAL MODE
-    int manual_lower_id_; // used just in MANUAL MODE
-
-    class Stats
-    {
-       public:
-
-        string layer_tag_;
-        double metrics_target_;
-        double hysteresis_size_;
-
-    };
-
-    std::map<int, Stats> layer_map; // layerid, stats
+    
+    bool optical_on_;
+    const string acoustic_name_;
+    const string optical_name_;
+    /** TODO: decide if it's better to work with ids than names
+     *   int optical_id_;
+     *   int acoustic_id_;
+    **/
 
     /** 
      * Handle a packet coming from upper layers
@@ -137,16 +112,36 @@ protected:
     virtual int  getBestLayer(Packet *p);
 
     /** 
-     * return if the specified layer identified by name is available
+     * return if the optical layer is available and able to transmit
      * 
-     * @param layer_name 
+     * @param p pointer to the packet
      *
      * @return if the specified layer is available
      */
-    virtual bool isLayerAvailable(const string& layer_name); //@ TOCHECK: isn't it more convenient to use layer_id than layer_name??
+    virtual bool isOpticalAvailable(Packet *p);
+
+    /**
+     * Set optical id and target
+     * 
+     * @param id unique identifier of the optical module
+     * @param target target of the optical metrics
+     * @param hysteresis hysteresis of the optical metrics
+     */
+    virtual void setOpticalLayer(int id, double target, double hysteresis);
+
+    /**
+     * Set acoustic id and target
+     * 
+     * @param id unique identifier of the acoustic module
+     * @param target target of the acoustic metrics
+     * @param hysteresis hysteresis of the acoustic metrics
+     */
+    virtual void setAcousticLayer(int id, double target, double hysteresis);
+
+
 
 private:
     //Variables
 };
 
-#endif /* UWMULTI_STACK_CONTROLLER_H  */
+#endif /* UWOPTICAL_ACOUSTIC_CONTROLLER_H  */
