@@ -31,7 +31,7 @@ AM_CXXFLAGS = -Wall -ggdb3
 
 lib_LTLIBRARIES = libuwmulti_stack_controller.la
 
-libuwmulti_stack_controller_la_SOURCES = initlib.cc uwmulti-stack-controller.cc uwmulti-stack-controller.h controller-clmsg.h controller-clmsg.cc uwoptical-acoustic-controller.h uwoptical-acoustic-controller.cc
+libuwmulti_stack_controller_la_SOURCES = initlib.cc uwmulti-stack-controller.cc uwmulti-stack-controller.h controller-clmsg.h controller-clmsg.cc 
 
 libuwmulti_stack_controller_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
 libuwmulti_stack_controller_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
