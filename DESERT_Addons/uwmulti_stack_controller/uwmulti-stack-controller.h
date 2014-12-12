@@ -143,7 +143,18 @@ protected:
      *
      * @return if the specified layer is available
      */
-    virtual bool isLayerAvailable(const string& layer_name); //@ TOCHECK: isn't it more convenient to use layer_id than layer_name??
+    virtual bool isLayerAvailable(int id); //@ TOCHECK: isn't it more convenient to use layer_id than layer_name??
+
+    /** 
+     * return the new metrics value obtained from the selected lower layer,
+     * in proactive way via ClMessage
+     * 
+     * @param id to select the lower layer 
+     * @param p pointer to the packet 
+     *
+     * @return the value of the new value of the metrics obtained in proactive way
+     */
+    virtual double getMetricFromSelectedLowerLayer(int id, Packet* p);
 
 private:
     //Variables

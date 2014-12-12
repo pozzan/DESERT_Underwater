@@ -90,11 +90,7 @@ int UwMultiStackController::command(int argc, const char*const* argv) {
 } /* UwMultiStackController::command */
 
 void UwMultiStackController::addLayer(int id, string layer_name , double target, double hysteresis){
-	/* 
-	 * TODO: decide the policy of insert or replace layer with same id
-	 * TODO: decide the use of layer_name, if it's unique or not
-	 * if (layer_name:unique){ decide the policy of insert or replace layer with same layer_name }
-	*/
+	layer_map.erase(id);
 	Stats a;
 	a.layer_tag_ = layer_name;
 	a.metrics_target_ = target;
@@ -128,14 +124,18 @@ void UwMultiStackController::recvFromUpperLayers(Packet *p)
 
 int UwMultiStackController::getBestLayer(Packet *p){ 
 	/* Now it is not used, it just returns manual_lower_id_
-	 * TODO: decide the policy or just let the extended class doing it
+	 * TODO in the extended classes: decide the policy of the layer choice
 	 *
 	 */
 	return 	manual_lower_id_;
 }
 
-bool UwMultiStackController::isLayerAvailable(const string& layer_name){
-	for (std::map<int,Stats>::iterator it=layer_map.begin(); it!=layer_map.end(); ++it)
-		if((it->second).layer_tag_.compare(layer_name) == 0) { return true; }
-	return false;
+bool UwMultiStackController::isLayerAvailable(int id){
+	return layer_map.find(id) != layer_map.end();
+}
+
+double UwMultiStackController::getMetricFromSelectedLowerLayer(int id, Packet* p){
+	ClMsgController m(id, p);
+ 	sendSyncClMsgDown(&m);
+ 	return m.getMetrics();
 }
