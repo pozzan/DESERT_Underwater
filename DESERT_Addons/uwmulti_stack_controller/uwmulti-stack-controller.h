@@ -106,7 +106,7 @@ protected:
     int debug_;
     int min_delay_;
     Mode switch_mode_;// AUTOMATIC or MANUAL MODE
-    int manual_lower_id_; // used just in MANUAL MODE
+    int lower_id_active_; // used just in MANUAL MODE
 
     class Stats
     {

@@ -54,12 +54,12 @@ Module(),
 debug_(0),
 min_delay_(0),
 switch_mode_(UW_MANUAL_SWITCH),
-manual_lower_id_(0)
+lower_id_active_(0)
 {
 	bind("debug_", &debug_);
 	bind("min_delay_", &min_delay_);
 	bind("switch_mode_", (int*) &switch_mode_);
-	bind("manual_lower_id_", &manual_lower_id_);
+	bind("set_lower_id_active_", &lower_id_active_);
 }
 
 int UwMultiStackController::command(int argc, const char*const* argv) {
@@ -76,7 +76,7 @@ int UwMultiStackController::command(int argc, const char*const* argv) {
 	}
 	else if (argc == 3) {
 		if(strcasecmp(argv[1], "setManualLowerlId") == 0){
-     		manual_lower_id_ = atoi(argv[2]);
+     		lower_id_active_ = atoi(argv[2]);
 			return TCL_OK;
 		}
 	}
@@ -119,15 +119,15 @@ void UwMultiStackController::recvFromUpperLayers(Packet *p)
 	if(switch_mode_ == UW_AUTOMATIC_SWITCH && ch->ptype() == CONTROLLED)
 		sendDown( getBestLayer(p), p, min_delay_);
 	else 
-		sendDown(manual_lower_id_, p, min_delay_);
+		sendDown(lower_id_active_, p, min_delay_);
 }
 
 int UwMultiStackController::getBestLayer(Packet *p){ 
-	/* Now it is not used, it just returns manual_lower_id_
+	/* Now it is not used, it just returns lower_id_active_
 	 * TODO in the extended classes: decide the policy of the layer choice
 	 *
 	 */
-	return 	manual_lower_id_;
+	return 	lower_id_active_;
 }
 
 bool UwMultiStackController::isLayerAvailable(int id){

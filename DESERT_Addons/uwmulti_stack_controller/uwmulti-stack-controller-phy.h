@@ -39,6 +39,8 @@
 #define UWOPTICAL_ACOUSTIC_CONTROLLER_PHY_H
 
 #include "uwmulti-stack-controller.h"
+#include <map>
+#include <string>
 
 class UwMultiStackControllerPhy : public UwMultiStackController {
 
@@ -53,7 +55,7 @@ public:
      * Destructor of UwMultiPhy class.
      */
     virtual ~UwMultiStackControllerPhy() { }
-    
+
     /**
      * TCL command interpreter. It implements the following OTcl methods:
      *
@@ -64,10 +66,54 @@ public:
      */
     virtual int command(int, const char*const*);
 
-//TODO: state machine
+    /**
+    * Cross-Layer messages synchronous interpreter. It has to be properly extended in order to 
+    * interpret custom cross-layer messages used by this particular plug-in.
+    * This type of communication need to be directly answered in the message exchanged in 
+    * order to be synchronous with the source.
+    * 
+    * @param m an instance of <i>ClMessage</i> that represent the message received and used for the answer
+    *
+    * @return zero if successful
+    * 
+    * @see NodeCore, ClMessage, ClSAP, ClTracer
+    **/
+    virtual int recvSyncClMsg(ClMessage* m);
+
+    /**
+    * Node is in Idle state. It changes its state only when it is receiving a packet.
+    */
+    virtual void stateIdle();
+  
+    /**
+    * Called when a node is receiving a packet to set the state busy.
+    * @param id the identifier of the lower layer
+    */
+    virtual void stateBusy(int id);
+
+    /**
+    * It manages a packet reception
+    * 
+    * @param p pointer to the packet will be received
+    * @param idSrc unique id of the module that has sent the packet
+    * 
+    * @see SAP, ChSAP
+    **/
+    virtual void recv(Packet *p, int idSrc);
 
     
 protected:
+    int receiving_id;
+    enum UWPHY_CONTROLLER_STATE {
+        UWPHY_CONTROLLER_STATE_IDLE = 1, UWPHY_CONTROLLER_STATE_BUSY
+    };
+    UWPHY_CONTROLLER_STATE current_state;
+    static map< UWPHY_CONTROLLER_STATE , string > state_info;
+
+    /**
+     * This function is used to initialize the UwMultiStackControllerPhy protocol.
+    */
+    virtual void initInfo();
 
 private:
     //Variables
