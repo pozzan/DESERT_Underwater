@@ -30,5 +30,6 @@
 # @author Filippo Campagnaro
 # @version 1.0.0
 
-Module/UW/OPTICAL/PHY set TxPower_  0.01
-Module/UW/OPTICAL/PHY set NoiseSPD_ [expr 1.28e-23 * 300]
+Module/UW/OPTICAL/PHY set TxPower_  		0.01
+Module/UW/OPTICAL/PHY set NoiseSPD_ 		[expr 1.28e-23 * 300]
+Module/UW/OPTICAL/PHY set Prx_threshold_	1

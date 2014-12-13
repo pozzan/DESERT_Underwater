@@ -75,16 +75,32 @@ public:
      */
     virtual int command(int, const char*const*);
     /**
-     * recv method. It is called when a packet is received from the channel
+     * getModulationType. Return the modulation type of the current packet.
      *
-     * @param Packet* Pointer to the packet that are going to be received
+     * @param Packet* Pointer to the packet analyzed
+     * @return an integer number which describe the modulation
      *
      */
+    virtual int getModulationType(Packet*);
+    /**
+     * getModulationType. Return the modulation type of the current packet.
+     *
+     * @param Packet* Pointer to the packet analyzed
+     * @return an integer number which describe the modulation
+     *
+     */
+    virtual double getTxDuration(Packet* p);
+
+
+    virtual void startRx(Packet* p);
+
+    virtual void endRx(Packet* p);
     
 protected:
     // Variables
 private:
     //Variables
+    double Prx_threshold;
 };
 
 #endif /* UWOPTICAL_H  */

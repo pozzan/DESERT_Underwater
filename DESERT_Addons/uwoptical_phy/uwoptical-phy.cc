@@ -49,6 +49,7 @@ UwOpticalPhy::UwOpticalPhy()
 : 
 MPhy_Bpsk()
 {
+	bind("Prx_threshold_",&Prx_threshold)
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv) {
@@ -56,3 +57,64 @@ int UwOpticalPhy::command(int argc, const char*const* argv) {
     return MPhy_Bpsk::command(argc, argv);     
 } /* UwOptical::command */
 
+virtual int getModulationType(Packet* p)
+{
+	//TODO
+}
+
+virtual double getTxDuration(Packet* p)
+{
+	//TODO
+}
+
+
+virtual void startRx(Packet* p)
+{
+	static int mac_addr = -1;
+	hdr_MPhy* ph = HDR_MPHY(p);
+  	double rx_time = ph->rxtime;
+  	double tx_time = ph->txtime;
+  	if ( (PktRx == 0) && (txPending == false) )
+    {
+    	double snr_dB = 10*log10(ph->Pr / ph->Pn); //calculate SNR for future statistics
+    	if (ph->Pr >= Prx_threshold)
+    	{
+    		if (ph->modulationType == modid) //TODO: check if useful and how it works
+    		{
+    			PktRx = p;
+    			Phy2MacStartRx(p);
+    			return;
+    		}
+    		else
+    		{
+    			//TODO: not allowed modulation type.
+    		}
+    	} else {
+    		//TODO: Pr below threshold
+    	}
+    }
+    else
+    {
+    	//TODO: we are sync onto another packet
+    }
+}
+    
+virtual void endRx(Packet* p)
+{
+	static int mac_addr = -1;
+  
+  	hdr_cmn* ch = HDR_CMN(p);
+  	hdr_MPhy* ph = HDR_MPHY(p);
+  	if (PktRx != 0)
+    {
+    	if (PktRx == p)
+		{  
+	  		sendUp(p);
+	  		PktRx = 0; // We can now sync onto another packet
+	  	}
+	} else {
+		MPhy_Bpsk::dropPacket(p);
+	}
+}
+
+//CHECK INTERFERENCE AND PROPAGATION AND HOW IT WORKS WITH PHY AND INTEGRATE THEM.
