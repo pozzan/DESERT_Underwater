@@ -46,8 +46,6 @@ public:
 } class_module_optical;
 
 UwOpticalPhy::UwOpticalPhy() 
-: 
-//MPhy_Bpsk()
 {
 	if (!MPhy_Bpsk::initialized)
 	{
@@ -55,7 +53,7 @@ UwOpticalPhy::UwOpticalPhy()
 		MPhy_Bpsk::initialized = true;
 	}
 	MPhy_Bpsk();
-	bind("Prx_threshold_",&Prx_threshold)
+	bind("Prx_threshold_",&Prx_threshold);
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv) {
@@ -64,13 +62,13 @@ int UwOpticalPhy::command(int argc, const char*const* argv) {
 }
 
 
-virtual double getTxDuration(Packet* p)
+double UwOpticalPhy::getTxDuration(Packet* p)
 {
 	//TODO: is it Bpsk method workin also for this case?
 }
 
 
-virtual void startRx(Packet* p)
+void UwOpticalPhy::startRx(Packet* p)
 {
 	hdr_MPhy* ph = HDR_MPHY(p);
   	double rx_time = ph->rxtime;
@@ -102,13 +100,13 @@ virtual void startRx(Packet* p)
     }
 }
     
-virtual void endRx(Packet* p)
+void UwOpticalPhy::endRx(Packet* p)
 { 
   	hdr_cmn* ch = HDR_CMN(p);
   	hdr_MPhy* ph = HDR_MPHY(p);
-  	if (PktRx != 0)
+  	if (MPhy_Bpsk::PktRx != 0)
     {
-    	if (PktRx == p)
+    	if (MPhy_Bpsk::PktRx == p)
 		{ 
 			ch->error() = 0; 
 	  		sendUp(p);
@@ -116,11 +114,11 @@ virtual void endRx(Packet* p)
 	  	} 
 	  	else 
 	  	{
-			MPhy_Bpsk::dropPacket(p);
+			dropPacket(p);
 		}
 	} 
 	else 
 	{
-		MPhy_Bpsk::dropPacket(p);
+		dropPacket(p);
 	}
 }

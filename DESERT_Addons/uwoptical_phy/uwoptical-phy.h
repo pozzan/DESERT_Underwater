@@ -95,7 +95,6 @@ protected:
 private:
     //Variables
     double Prx_threshold;
-    int mod_id;
 };
 
 #endif /* UWOPTICAL_H  */
