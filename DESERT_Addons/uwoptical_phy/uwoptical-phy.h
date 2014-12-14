@@ -51,6 +51,8 @@
 #include <limits>
 #include <climits>
 
+#define OPTICAL_MODULATION_TYPE "OPTIC_BPSK"
+
 class UwOpticalPhy : public MPhy_Bpsk {
 
 
@@ -81,14 +83,6 @@ public:
      * @return an integer number which describe the modulation
      *
      */
-    virtual int getModulationType(Packet*);
-    /**
-     * getModulationType. Return the modulation type of the current packet.
-     *
-     * @param Packet* Pointer to the packet analyzed
-     * @return an integer number which describe the modulation
-     *
-     */
     virtual double getTxDuration(Packet* p);
 
 
@@ -101,6 +95,7 @@ protected:
 private:
     //Variables
     double Prx_threshold;
+    int mod_id;
 };
 
 #endif /* UWOPTICAL_H  */

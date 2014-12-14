@@ -47,39 +47,40 @@ public:
 
 UwOpticalPhy::UwOpticalPhy() 
 : 
-MPhy_Bpsk()
+//MPhy_Bpsk()
 {
+	if (!MPhy_Bpsk::initialized)
+	{
+		MPhy_Bpsk::modid = MPhy::registerModulationType(OPTICAL_MODULATION_TYPE);
+		MPhy_Bpsk::initialized = true;
+	}
+	MPhy_Bpsk();
 	bind("Prx_threshold_",&Prx_threshold)
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv) {
     //Tcl& tcl = Tcl::instance();
     return MPhy_Bpsk::command(argc, argv);     
-} /* UwOptical::command */
-
-virtual int getModulationType(Packet* p)
-{
-	//TODO
 }
+
 
 virtual double getTxDuration(Packet* p)
 {
-	//TODO
+	//TODO: is it Bpsk method workin also for this case?
 }
 
 
 virtual void startRx(Packet* p)
 {
-	static int mac_addr = -1;
 	hdr_MPhy* ph = HDR_MPHY(p);
   	double rx_time = ph->rxtime;
   	double tx_time = ph->txtime;
   	if ( (PktRx == 0) && (txPending == false) )
     {
-    	double snr_dB = 10*log10(ph->Pr / ph->Pn); //calculate SNR for future statistics
-    	if (ph->Pr >= Prx_threshold)
+    	double snr_dB = 10*log10(ph->Pr / ph->Pn);
+    	if (snr_dB > MPhy_Bpsk::getAcquisitionThreshold())
     	{
-    		if (ph->modulationType == modid) //TODO: check if useful and how it works
+    		if (ph->modulationType == MPhy_Bpsk::modid)
     		{
     			PktRx = p;
     			Phy2MacStartRx(p);
@@ -87,34 +88,39 @@ virtual void startRx(Packet* p)
     		}
     		else
     		{
-    			//TODO: not allowed modulation type.
+    			if (debug_) cout << "UwOpticalPhy::Drop Packet::Wrong modulation" << endl;
     		}
-    	} else {
-    		//TODO: Pr below threshold
+    	} 
+    	else 
+    	{
+    		if (debug_) cout << "UwOpticalPhy::Drop Packet::Below Threshold" << endl;
     	}
     }
     else
     {
-    	//TODO: we are sync onto another packet
+    	if (debug_) cout << "UwOpticalPhy::Drop Packet::Synced onto another packet" << endl;
     }
 }
     
 virtual void endRx(Packet* p)
-{
-	static int mac_addr = -1;
-  
+{ 
   	hdr_cmn* ch = HDR_CMN(p);
   	hdr_MPhy* ph = HDR_MPHY(p);
   	if (PktRx != 0)
     {
     	if (PktRx == p)
-		{  
+		{ 
+			ch->error() = 0; 
 	  		sendUp(p);
-	  		PktRx = 0; // We can now sync onto another packet
-	  	}
-	} else {
+	  		PktRx = 0;
+	  	} 
+	  	else 
+	  	{
+			MPhy_Bpsk::dropPacket(p);
+		}
+	} 
+	else 
+	{
 		MPhy_Bpsk::dropPacket(p);
 	}
 }
-
-//CHECK INTERFERENCE AND PROPAGATION AND HOW IT WORKS WITH PHY AND INTEGRATE THEM.
