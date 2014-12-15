@@ -60,7 +60,8 @@ current_state(UWPHY_CONTROLLER_STATE_IDLE)
 void UwMultiStackControllerPhy::initInfo() {
 
     state_info[UWPHY_CONTROLLER_STATE_IDLE] = "STATE_IDLE";
-    state_info[UWPHY_CONTROLLER_STATE_BUSY] = "STATE_BUSY";
+    state_info[UWPHY_CONTROLLER_STATE_BUSY_2_TX] = "STATE_BUSY_2_TX";
+    state_info[UWPHY_CONTROLLER_STATE_BUSY_2_TX] = "STATE_BUSY_2_RX";
 }
 
 int UwMultiStackControllerPhy::command(int argc, const char*const* argv) {
@@ -76,43 +77,67 @@ int UwMultiStackControllerPhy::command(int argc, const char*const* argv) {
 
 int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m)
 {
-    if (m->direction() == DOWN)//mac2phy
+    if (debug_)
+        std::cout << NOW << " ControllerPhy::recvSyncClMsg(ClMessage* m), state_info: " 
+            << state_info[current_state] << std::endl;
+    if (m->direction() == DOWN)//mac2phy something
     {
         m->setDest(lower_id_active_);
         sendSyncClMsgDown(m);
         return 0;
     }
-    else if (m->type() == CLMSG_PHY2MAC_STARTRX && current_state == UWPHY_CONTROLLER_STATE_IDLE)
-    {
-        stateBusy(m->getSource());
-        return 0;
+    else if (m->type() == CLMSG_PHY2MAC_STARTRX){
+        if (current_state == UWPHY_CONTROLLER_STATE_IDLE)
+        {
+            stateBusy2Rx(m->getSource());
+            sendSyncClMsgUp(m);
+            return 0;
+        }
+        else{
+            if(m->getSource() == receiving_id && current_state == UWPHY_CONTROLLER_STATE_BUSY_2_RX)
+                std::cout << NOW <<" ControllerPhy::error " << std::endl;
+            return 0;
+        }
     }
-    else{
+    else {
+        if (m->type() == CLMSG_PHY2MAC_ENDTX && current_state == UWPHY_CONTROLLER_STATE_BUSY_2_TX)
+            stateIdle();
         sendSyncClMsgUp(m);
         return 0;
     }
 }
 
 void UwMultiStackControllerPhy::stateIdle(){
+     if (debug_)
+        std::cout << NOW << " ControllerPhy::stateIdle(), state_info: " << state_info[current_state] 
+            << std::endl;
     current_state = UWPHY_CONTROLLER_STATE_IDLE;
+    receiving_id = 0;
 }
 
-void UwMultiStackControllerPhy::stateBusy(int id){
-    current_state = UWPHY_CONTROLLER_STATE_BUSY;
-    receiving_id=id;
+void UwMultiStackControllerPhy::stateBusy2Rx(int id){
+     if (debug_)
+        std::cout << NOW << " ControllerPhy::stateBusy2Rx(id), state_info: " 
+            << state_info[current_state] << "id = " << id << std::endl;
+    current_state = UWPHY_CONTROLLER_STATE_BUSY_2_RX;
+    receiving_id = id;
 }
-
+void UwMultiStackControllerPhy::stateBusy2Tx(Packet *p){
+     if (debug_)
+        std::cout << NOW << " ControllerPhy::stateBusy2Tx(), state_info: " 
+            << state_info[current_state] << std::endl;
+    current_state = UWPHY_CONTROLLER_STATE_BUSY_2_TX;
+    recvFromUpperLayers(p);
+}
 void UwMultiStackControllerPhy::recv(Packet *p, int idSrc){
     hdr_cmn *ch = HDR_CMN(p);
-    if(ch->direction() == hdr_cmn::UP && current_state == UWPHY_CONTROLLER_STATE_BUSY && 
-        idSrc == receiving_id)
+    if (ch->direction() == hdr_cmn::DOWN){
+        //direction DOWN: packet is coming from upper layers
+        stateBusy2Tx(p);
+    }
+    else if (current_state == UWPHY_CONTROLLER_STATE_BUSY_2_RX && idSrc == receiving_id)
     {
         sendUp(p, min_delay_);
         stateIdle();
-    }
-    else
-    {
-        //direction DOWN: packet is coming from upper layers
-        recvFromUpperLayers(p);
     }
 }

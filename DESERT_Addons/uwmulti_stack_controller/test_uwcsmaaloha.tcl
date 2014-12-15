@@ -79,6 +79,7 @@ load libuwmll.so
 load libuwudp.so
 load libuwcbr.so
 load libuwcsmaaloha.so
+load libuwaloha.so
 load libuwmulti_stack_controller.so
 
 #############################
@@ -93,7 +94,7 @@ $ns use-Miracle
 ##################
 set opt(start_clock) [clock seconds]
 
-set opt(nn)                 4.0 ;# Number of Nodes
+set opt(nn)                 6.0 ;# Number of Nodes
 set opt(pktsize)            125  ;# Pkt sike in byte
 set opt(starttime)          1	
 set opt(stoptime)           100000 
@@ -105,6 +106,10 @@ set opt(txpower)            180.0  ;#Power transmitted in dB re uPa
 set opt(maxinterval_)       20.0
 set opt(freq)               25000.0 ;#Frequency used in Hz
 set opt(bw)                 5000.0	;#Bandwidth used in Hz
+set opt(freq2)               50000.0 ;#Frequency used in Hz
+set opt(bw2)                 5000.0  ;#Bandwidth used in Hz
+set opt(freq3)               15000.0 ;#Frequency used in Hz
+set opt(bw3)                 5000.0  ;#Bandwidth used in Hz
 set opt(bitrate)            4800.0	;#bitrate in bps
 set opt(ack_mode)           "setNoAckMode"
 
@@ -153,6 +158,12 @@ set propagation [new MPropagation/Underwater]
 set data_mask [new MSpectralMask/Rect]
 $data_mask setFreq       $opt(freq)
 $data_mask setBandwidth  $opt(bw)
+set data_mask2 [new MSpectralMask/Rect]
+$data_mask2 setFreq       $opt(freq2)
+$data_mask2 setBandwidth  $opt(bw2)
+set data_mask3 [new MSpectralMask/Rect]
+$data_mask3 setFreq       $opt(freq3)
+$data_mask3 setBandwidth  $opt(bw3)
 
 #########################
 # Module Configuration  #
@@ -169,7 +180,7 @@ Module/MPhy/BPSK  set TxPower_               $opt(txpower)
 ################################
 proc createNode { id } {
 
-    global channel propagation data_mask ns cbr position node udp portnum ipr ipif channel_estimator
+    global channel propagation data_mask data_mask2 data_mask3 ns cbr position node udp portnum ipr ipif channel_estimator
     global phy posdb opt rvposx rvposy rvposz mhrouting mll mac woss_utilities woss_creator db_manager
     global node_coordinates
     
@@ -182,19 +193,24 @@ proc createNode { id } {
     set ipif($id) [new Module/UW/IP]
     set mll($id)  [new Module/UW/MLL] 
     set mac($id)  [new Module/UW/CSMA_ALOHA] 
+    set mac($id)  [new Module/UW/ALOHA] 
     set ctr($id)  [new Module/UW/MULTI_STACK_CONTROLLER_PHY]
     set phy($id)  [new Module/MPhy/BPSK]  
+    set phy2($id)  [new Module/MPhy/BPSK]  
+    set phy3($id)  [new Module/MPhy/BPSK]  
 	
 	for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-		$node($id) addModule 7 $cbr($id,$cnt)   1  "CBR"
-		$node($id) addModule 6 $udp($id,$cnt)   1  "UDP"
+		$node($id) addModule 10 $cbr($id,$cnt)   1  "CBR"
+		$node($id) addModule 9 $udp($id,$cnt)   1  "UDP"
 	}
-    $node($id) addModule 6 $ipr($id)   1  "IPR"
-    $node($id) addModule 5 $ipif($id)  1  "IPF"   
-    $node($id) addModule 4 $mll($id)   1  "MLL"
-    $node($id) addModule 3 $mac($id)   1  "MAC"
-    $node($id) addModule 2 $ctr($id)   1  "CTR"
-    $node($id) addModule 1 $phy($id)   1  "PHY"
+    $node($id) addModule 8 $ipr($id)   1  "IPR"
+    $node($id) addModule 7 $ipif($id)  1  "IPF"   
+    $node($id) addModule 6 $mll($id)   1  "MLL"
+    $node($id) addModule 5 $mac($id)   1  "MAC"
+    $node($id) addModule 4 $ctr($id)   1  "CTR"
+    $node($id) addModule 3 $phy($id)   1  "PHY"
+    $node($id) addModule 2 $phy2($id)   1  "PHY"
+    $node($id) addModule 1 $phy3($id)   1  "PHY"
 
 	for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
 		$node($id) setConnection $cbr($id,$cnt)   $udp($id,$cnt)   0
@@ -206,7 +222,11 @@ proc createNode { id } {
     $node($id) setConnection $mll($id)   $mac($id)   1
     $node($id) setConnection $mac($id)   $ctr($id)   1
     $node($id) setConnection $ctr($id)   $phy($id)   1
+    $node($id) setConnection $ctr($id)   $phy2($id)  1
+    $node($id) setConnection $ctr($id)   $phy3($id)  1
     $node($id) addToChannel  $channel    $phy($id)   1
+    $node($id) addToChannel  $channel    $phy2($id)   1
+    $node($id) addToChannel  $channel    $phy3($id)   1
 
     if {$id > 254} {
 		puts "hostnum > 254!!! exiting"
@@ -237,9 +257,19 @@ proc createNode { id } {
     
     $phy($id) setSpectralMask $data_mask
     $phy($id) setInterference $interf_data($id)
+    $phy2($id) setSpectralMask $data_mask2
+    $phy2($id) setInterference $interf_data($id)
+    $phy3($id) setSpectralMask $data_mask3
+    $phy3($id) setInterference $interf_data($id)
     $mac($id) $opt(ack_mode)
     $mac($id) initialize
-    $ctr($id) setManualLowerlId [$phy($id) Id_]
+    if {![expr $id %3]} {
+        $ctr($id) setManualLowerlId [$phy($id) Id_]
+    } elseif {[expr $id %3] ==1} {
+        $ctr($id) setManualLowerlId [$phy2($id) Id_]
+    } else {
+        $ctr($id) setManualLowerlId [$phy3($id) Id_]
+    }
 }
 
 #################

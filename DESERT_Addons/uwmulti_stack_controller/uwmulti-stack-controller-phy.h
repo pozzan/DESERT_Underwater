@@ -89,7 +89,13 @@ public:
     * Called when a node is receiving a packet to set the state busy.
     * @param id the identifier of the lower layer
     */
-    virtual void stateBusy(int id);
+    virtual void stateBusy2Rx(int id);
+
+    /**
+    * Called when a node is transmitting a packet to set the state busy.
+    * @param p pointer to the packet will be received
+    */
+    virtual void stateBusy2Tx(Packet *p);
 
     /**
     * It manages a packet reception
@@ -105,7 +111,7 @@ public:
 protected:
     int receiving_id;
     enum UWPHY_CONTROLLER_STATE {
-        UWPHY_CONTROLLER_STATE_IDLE = 1, UWPHY_CONTROLLER_STATE_BUSY
+        UWPHY_CONTROLLER_STATE_IDLE = 1, UWPHY_CONTROLLER_STATE_BUSY_2_TX, UWPHY_CONTROLLER_STATE_BUSY_2_RX
     };
     UWPHY_CONTROLLER_STATE current_state;
     static map< UWPHY_CONTROLLER_STATE , string > state_info;
