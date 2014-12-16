@@ -80,6 +80,38 @@ public:
     **/
     virtual int recvSyncClMsg(ClMessage* m);
 
+
+    /**
+    * It manages each packet reception, either from the upper and the lower layer
+    * 
+    * @param p pointer to the packet will be received
+    * @param idSrc unique id of the module that has sent the packet
+    * 
+    * @see SAP, ChSAP
+    **/
+    virtual void recv(Packet *p, int idSrc);
+
+    
+protected:
+  
+    int receiving_id;
+    
+    enum UWPHY_CONTROLLER_STATE 
+    {
+      UWPHY_CONTROLLER_STATE_IDLE = 1, 
+      UWPHY_CONTROLLER_STATE_BUSY_2_TX, 
+      UWPHY_CONTROLLER_STATE_BUSY_2_RX
+    };
+    
+    UWPHY_CONTROLLER_STATE current_state;
+    
+    static map< UWPHY_CONTROLLER_STATE , string > state_info;
+
+    /**
+     * This function is used to initialize the UwMultiStackControllerPhy debugging info.
+    */
+    virtual void initInfo();
+
     /**
     * Node is in Idle state. It changes its state only when it has to manage 
     * a packet reception.
@@ -101,30 +133,6 @@ public:
     * @param p pointer to the packet will be received
     */
     virtual void stateBusy2Tx(Packet *p);
-
-    /**
-    * It manages each packet reception, either from the upper and the lower layer
-    * 
-    * @param p pointer to the packet will be received
-    * @param idSrc unique id of the module that has sent the packet
-    * 
-    * @see SAP, ChSAP
-    **/
-    virtual void recv(Packet *p, int idSrc);
-
-    
-protected:
-    int receiving_id;
-    enum UWPHY_CONTROLLER_STATE {
-        UWPHY_CONTROLLER_STATE_IDLE = 1, UWPHY_CONTROLLER_STATE_BUSY_2_TX, UWPHY_CONTROLLER_STATE_BUSY_2_RX
-    };
-    UWPHY_CONTROLLER_STATE current_state;
-    static map< UWPHY_CONTROLLER_STATE , string > state_info;
-
-    /**
-     * This function is used to initialize the UwMultiStackControllerPhy debugging info.
-    */
-    virtual void initInfo();
 
 private:
     //Variables

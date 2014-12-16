@@ -89,13 +89,23 @@ int UwMultiStackController::command(int argc, const char*const* argv) {
     return Module::command(argc, argv);     
 } /* UwMultiStackController::command */
 
-void UwMultiStackController::addLayer(int id, string layer_name , double target, double hysteresis){
-	layer_map.erase(id);
+void UwMultiStackController::addLayer(int id, const string& layer_name, double target, double hysteresis)
+{
+#if 1 ///@fgue better Implementation
+  Stats details(layer_name, target, hysteresis);
+  layer_map.erase(id); 
+
+  // there is no need to check for id since we deleted it before.
+  layer_map.insert((std::pair<int,Stats>(id,details)));
+#else
+	layer_map.erase(id); ///@fgue why are you deleting the id and then searching for it???
+	
 	Stats details(layer_name, target, hysteresis);
 	if (layer_map.find(id) == layer_map.end())
 		layer_map.insert((std::pair<int,Stats>(id,details)));
 	else
 		(layer_map.find(id))->second = details;
+#endif 
 }
 
 void UwMultiStackController::recv(Packet* p)
@@ -116,18 +126,23 @@ void UwMultiStackController::recvFromUpperLayers(Packet *p)
 {
 	/*hdr_cmn *ch = HDR_CMN(p);*/
 
-	if(switch_mode_ == UW_AUTOMATIC_SWITCH) /*&& ch->ptype() == CONTROLLED)*/{
+	if(switch_mode_ == UW_AUTOMATIC_SWITCH) /*&& ch->ptype() == CONTROLLED)*/
+  {
 		sendDown( getBestLayer(p), p, min_delay_);
 	}
 	else 
+  {
 		sendDown(lower_id_active_, p, min_delay_);
+  }
 }
 
-bool UwMultiStackController::isLayerAvailable(int id){
+bool UwMultiStackController::isLayerAvailable(int id)
+{
 	return layer_map.find(id) != layer_map.end();
 }
 
-double UwMultiStackController::getMetricFromSelectedLowerLayer(int id, Packet* p){
+double UwMultiStackController::getMetricFromSelectedLowerLayer(int id, Packet* p)
+{
 	ClMsgController m(id, p);
  	sendSyncClMsgDown(&m);
  	return m.getMetrics();

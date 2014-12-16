@@ -50,31 +50,39 @@ public:
 
 UwMultiStackControllerPhySlave::UwMultiStackControllerPhySlave() 
 : 
-UwMultiStackControllerPhy()
-{ }
-
-int UwMultiStackControllerPhySlave::command(int argc, const char*const* argv) {
-    Tcl& tcl = Tcl::instance();
-    if (argc == 3) {
-		if(strcasecmp(argv[1], "setManualLowerlId") == 0){
-            lower_id_active_ = atoi(argv[2]);
-            slave_lower_layer_ = lower_id_active_; // first initialization of the automatic slave_lower_layer
-			return TCL_OK;
-		}
-	}
-    return UwMultiStackControllerPhy::command(argc, argv);     
-} /* UwMultiStackControllerPhySlave::command */
-
-void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc){
-    updateSlave(p,idSrc);
-    UwMultiStackControllerPhy::recv(p, idSrc);
+  UwMultiStackControllerPhy()
+{ 
+  
 }
 
-void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc){
-    hdr_mac* mach = HDR_MAC(p);
-    ClMsgPhy2MacAddr msg;
-    sendSyncClMsg(&msg);
-    if (mach->macDA() == msg.getAddr()){
-        slave_lower_layer_ = idSrc;
+int UwMultiStackControllerPhySlave::command(int argc, const char*const* argv) 
+{
+  Tcl& tcl = Tcl::instance();
+  if (argc == 3) 
+  {
+    if(strcasecmp(argv[1], "setManualLowerlId") == 0)
+    {
+      lower_id_active_ = atoi(argv[2]);
+      slave_lower_layer_ = lower_id_active_; // first initialization of the automatic slave_lower_layer
+      return TCL_OK;
     }
+  }
+  return UwMultiStackControllerPhy::command(argc, argv);     
+} /* UwMultiStackControllerPhySlave::command */
+
+void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc)
+{
+  updateSlave(p,idSrc);
+  UwMultiStackControllerPhy::recv(p, idSrc);
+}
+
+void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc)
+{
+  hdr_mac* mach = HDR_MAC(p);
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  if (mach->macDA() == msg.getAddr())
+  {
+    slave_lower_layer_ = idSrc;
+  }
 }

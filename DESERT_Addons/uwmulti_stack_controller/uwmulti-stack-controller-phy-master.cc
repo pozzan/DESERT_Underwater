@@ -48,8 +48,11 @@ public:
 UwMultiStackControllerPhyMaster::UwMultiStackControllerPhyMaster() 
 : 
 UwMultiStackControllerPhy()
-{ }
+{ 
+  
+}
 
-int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv) {
-    return UwMultiStackControllerPhy::command(argc, argv);     
+int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv) 
+{
+  return UwMultiStackControllerPhy::command(argc, argv);     
 } /* UwMultiStackControllerPhyMaster::command */

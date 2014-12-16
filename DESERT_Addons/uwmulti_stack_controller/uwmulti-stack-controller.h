@@ -84,7 +84,7 @@ public:
      * @param hysteresis hysteresis of the module metrics
      */
     
-    virtual void addLayer(int id, string layer_name , double target, double hysteresis);
+    virtual void addLayer(int id, const string& layer_name, double target, double hysteresis);
     
     /**
      * recv method. It is called when a packet is received from the other layers
@@ -111,16 +111,25 @@ protected:
     class Stats
     {
         public:
-            Stats() { };
-            Stats (string name, double metrics, double hysteresis) { 
-                layer_tag_ = name;
-                metrics_target_ = metrics;
-                hysteresis_size_ = hysteresis;
-            }
-            virtual ~Stats() { }
-            string layer_tag_;
-            double metrics_target_;
-            double hysteresis_size_;
+          Stats()
+          : layer_tag_(), ///@fgue provide default value via define
+            metrics_target_(), ///@fgue provide default value via define
+            hysteresis_size_() ///@fgue provide default value via define
+          { }
+          
+          Stats (const string& name, double metrics, double hysteresis) 
+          : layer_tag_(name),
+            metrics_target_(metrics),
+            hysteresis_size_(hysteresis)
+          { 
+
+          }
+          
+          virtual ~Stats() { }
+          
+          string layer_tag_;
+          double metrics_target_;
+          double hysteresis_size_;
 
     };
 
@@ -137,9 +146,10 @@ protected:
      * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.
      * It has to be overload in the extended classes to implement the choice rule.
      * 
+     * 
      * @param p pointer to the packet
      *
-     * @return id of the module representing the best layer
+     * @return id of the module representing the best layer ///@fgue what if there is no layer id active?
     */
     inline int  getBestLayer(Packet *p) {return  lower_id_active_;}
 
@@ -159,7 +169,7 @@ protected:
      * @param id to select the lower layer 
      * @param p pointer to the packet 
      *
-     * @return the value of the new value of the metrics obtained in proactive way
+     * @return the value of the new value of the metrics obtained in proactive way ///@fgue what happens if the requested id is not present?
      */
     virtual double getMetricFromSelectedLowerLayer(int id, Packet* p);
 
