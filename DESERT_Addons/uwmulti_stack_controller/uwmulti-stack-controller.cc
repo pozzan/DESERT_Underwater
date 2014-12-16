@@ -122,14 +122,6 @@ void UwMultiStackController::recvFromUpperLayers(Packet *p)
 		sendDown(lower_id_active_, p, min_delay_);
 }
 
-int UwMultiStackController::getBestLayer(Packet *p){ 
-	/* Now it is not used, it just returns lower_id_active_
-	 * TODO in the extended classes: decide the policy of the layer choice
-	 *
-	 */
-	return 	lower_id_active_;
-}
-
 bool UwMultiStackController::isLayerAvailable(int id){
 	return layer_map.find(id) != layer_map.end();
 }

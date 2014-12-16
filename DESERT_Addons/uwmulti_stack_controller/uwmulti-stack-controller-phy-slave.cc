@@ -37,6 +37,9 @@
 
 #include "uwmulti-stack-controller-phy-slave.h"
 
+#include <mac.h>
+#include <phymac-clmsg.h>
+
 static class UwMultiStackControllerPhySlaveClass : public TclClass {
 public:
     UwMultiStackControllerPhySlaveClass() : TclClass("Module/UW/OPTICAL_ACOUSTIC_CONTROLLER") {}
@@ -52,10 +55,25 @@ UwMultiStackControllerPhy()
 
 int UwMultiStackControllerPhySlave::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
-    if (argc == 5) {
-		if(strcasecmp(argv[1], "setOpticalLayer") == 0){
+    if (argc == 3) {
+		if(strcasecmp(argv[1], "setManualLowerlId") == 0){
+            lower_id_active_ = atoi(argv[2]);
+            slave_lower_layer_ = lower_id_active_; // first initialization of the slave automatic_lower_layer
 			return TCL_OK;
 		}
 	}
     return UwMultiStackControllerPhy::command(argc, argv);     
 } /* UwMultiStackControllerPhySlave::command */
+
+void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc){
+    updateSlave(p,idSrc);
+    UwMultiStackControllerPhy::recv(p, idSrc);
+}
+
+void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc){
+    hdr_mac* mach = HDR_MAC(p);
+    ClMsgPhy2MacAddr msg;
+    sendSyncClMsg(&msg);
+    if (mach->macDA() == msg.getAddr())
+        slave_lower_layer_ = idSrc;
+}

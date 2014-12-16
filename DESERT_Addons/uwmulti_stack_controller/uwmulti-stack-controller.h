@@ -135,22 +135,22 @@ protected:
 
     /** 
      * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.
-     * It has to be overload in the extended classes to implement the choose policy.
+     * It has to be overload in the extended classes to implement the choice rule.
      * 
      * @param p pointer to the packet
      *
      * @return id of the module representing the best layer
     */
-    virtual int  getBestLayer(Packet *p);
+    inline int  getBestLayer(Packet *p) {return  lower_id_active_;}
 
     /** 
      * return if the specified layer, identified by id, is available
      * 
-     * @param layer_name 
+     * @param id unique identifier of the module 
      *
      * @return if the specified layer is available
      */
-    virtual bool isLayerAvailable(int id); //@ TOCHECK: isn't it more convenient to use layer_id than layer_name??
+    virtual bool isLayerAvailable(int id); 
 
     /** 
      * return the new metrics value obtained from the selected lower layer,

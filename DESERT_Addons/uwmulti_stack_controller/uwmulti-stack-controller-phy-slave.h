@@ -64,9 +64,39 @@ public:
      */
     virtual int command(int, const char*const*);
 
+    /**
+    * It manages each packet reception, either from the upper and the lower layer
+    * 
+    * @param p pointer to the packet will be received
+    * @param idSrc unique id of the module that has sent the packet
+    * 
+    * @see SAP, ChSAP
+    **/
+    virtual void recv(Packet *p, int idSrc);
+
     
 protected:
     // Variables
+    int slave_lower_layer_;
+
+    /** 
+     * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.
+     * It has to be overload in the extended classes to implement the choice rule.
+     * 
+     * @param p pointer to the packet
+     *
+     * @return id of the module representing the best layer
+    */
+    inline int  getBestLayer(Packet *p) { return  slave_lower_layer_; }
+
+    /** 
+     * It implements the slave choice rule to choose the lower layer when the system works 
+     * in AUTOMATIC_MODE. 
+     * 
+     * @param p pointer to the packet
+     * @param idSrc unique id of the module that has sent the packet
+    */
+    virtual void updateSlave(Packet *p, int idSrc);
 
 private:
     //Variables
