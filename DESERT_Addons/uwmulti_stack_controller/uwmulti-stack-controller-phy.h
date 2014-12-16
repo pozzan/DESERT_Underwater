@@ -39,11 +39,11 @@
 #define UWOPTICAL_ACOUSTIC_CONTROLLER_PHY_H
 
 #include "uwmulti-stack-controller.h"
+
 #include <map>
 #include <string>
 
 class UwMultiStackControllerPhy : public UwMultiStackController {
-
 
 public:
     /**
@@ -81,24 +81,29 @@ public:
     virtual int recvSyncClMsg(ClMessage* m);
 
     /**
-    * Node is in Idle state. It changes its state only when it is receiving a packet.
+    * Node is in Idle state. It changes its state only when it has to manage 
+    * a packet reception.
     */
     virtual void stateIdle();
   
     /**
-    * Called when a node is receiving a packet to set the state busy.
+    * Called when a node is receiving correctely a packet from the lower
+    * layer. It sets the state busy due to the reception.
+    *
     * @param id the identifier of the lower layer
     */
     virtual void stateBusy2Rx(int id);
 
     /**
-    * Called when a node is transmitting a packet to set the state busy.
+    * Called when a node is transmitting a packet. The state is set 
+    * busy due to the transmitting operation.
+    *
     * @param p pointer to the packet will be received
     */
     virtual void stateBusy2Tx(Packet *p);
 
     /**
-    * It manages a packet reception
+    * It manages each packet reception, either from the upper and the lower layer
     * 
     * @param p pointer to the packet will be received
     * @param idSrc unique id of the module that has sent the packet
@@ -117,7 +122,7 @@ protected:
     static map< UWPHY_CONTROLLER_STATE , string > state_info;
 
     /**
-     * This function is used to initialize the UwMultiStackControllerPhy protocol.
+     * This function is used to initialize the UwMultiStackControllerPhy debugging info.
     */
     virtual void initInfo();
 

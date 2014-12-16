@@ -76,7 +76,7 @@ public:
     virtual int command(int, const char*const*);
 
     /**
-     * Add layer
+     * Add a layer in the layer_map
      * 
      * @param id unique identifier of the module
      * @param layer_name name of the module. The name should be unique
@@ -110,11 +110,17 @@ protected:
 
     class Stats
     {
-       public:
-
-        string layer_tag_;
-        double metrics_target_;
-        double hysteresis_size_;
+        public:
+            Stats() { };
+            Stats (string name, double metrics, double hysteresis) { 
+                layer_tag_ = name;
+                metrics_target_ = metrics;
+                hysteresis_size_ = hysteresis;
+            }
+            virtual ~Stats() { }
+            string layer_tag_;
+            double metrics_target_;
+            double hysteresis_size_;
 
     };
 
@@ -128,7 +134,8 @@ protected:
     virtual void recvFromUpperLayers(Packet *p);
 
     /** 
-     * return the best layer to forward the packet when the system works in AUTOMATIC_MODE
+     * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.
+     * It has to be overload in the extended classes to implement the choose policy.
      * 
      * @param p pointer to the packet
      *
@@ -137,7 +144,7 @@ protected:
     virtual int  getBestLayer(Packet *p);
 
     /** 
-     * return if the specified layer identified by name is available
+     * return if the specified layer, identified by id, is available
      * 
      * @param layer_name 
      *

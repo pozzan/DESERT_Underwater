@@ -91,11 +91,11 @@ int UwMultiStackController::command(int argc, const char*const* argv) {
 
 void UwMultiStackController::addLayer(int id, string layer_name , double target, double hysteresis){
 	layer_map.erase(id);
-	Stats a;
-	a.layer_tag_ = layer_name;
-	a.metrics_target_ = target;
-	a.hysteresis_size_ = hysteresis;
-	layer_map.insert((std::pair<int,Stats>(id,a)));
+	Stats details(layer_name, target, hysteresis);
+	if (layer_map.find(id) == layer_map.end())
+		layer_map.insert((std::pair<int,Stats>(id,details)));
+	else
+		(layer_map.find(id))->second = details;
 }
 
 void UwMultiStackController::recv(Packet* p)
