@@ -58,7 +58,7 @@ int UwMultiStackControllerPhySlave::command(int argc, const char*const* argv) {
     if (argc == 3) {
 		if(strcasecmp(argv[1], "setManualLowerlId") == 0){
             lower_id_active_ = atoi(argv[2]);
-            slave_lower_layer_ = lower_id_active_; // first initialization of the slave automatic_lower_layer
+            slave_lower_layer_ = lower_id_active_; // first initialization of the automatic slave_lower_layer
 			return TCL_OK;
 		}
 	}

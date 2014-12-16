@@ -39,7 +39,7 @@
 
 static class UwMultiStackControllerPhyMasterClass : public TclClass {
 public:
-    UwMultiStackControllerPhyMasterClass() : TclClass("Module/UW/OPTICAL_ACOUSTIC_CONTROLLER") {}
+    UwMultiStackControllerPhyMasterClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER") {}
     TclObject* create(int, const char*const*) {
         return (new UwMultiStackControllerPhyMaster);
     }
@@ -51,11 +51,5 @@ UwMultiStackControllerPhy()
 { }
 
 int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv) {
-    Tcl& tcl = Tcl::instance();
-    if (argc == 5) {
-		if(strcasecmp(argv[1], "setOpticalLayer") == 0){
-			return TCL_OK;
-		}
-	}
     return UwMultiStackControllerPhy::command(argc, argv);     
 } /* UwMultiStackControllerPhyMaster::command */
