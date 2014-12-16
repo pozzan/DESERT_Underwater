@@ -52,8 +52,8 @@
 
 extern ClMessage_t CLMSG_CONTROLLER;
 
-extern packet_t NOT_CONTROLLED;
-extern packet_t CONTROLLED;
+//extern packet_t NOT_CONTROLLED;
+//extern packet_t CONTROLLED;
 
 class ClMsgController : public ClMessage
 {

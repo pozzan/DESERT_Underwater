@@ -37,8 +37,8 @@
 
 #include "uwmulti-stack-controller.h"
 
-packet_t NOT_CONTROLLED;
-packet_t CONTROLLED;
+/*packet_t NOT_CONTROLLED;
+packet_t CONTROLLED;*/
 
 static class UwMultiStackControllerClass : public TclClass {
 public:
@@ -114,10 +114,11 @@ void UwMultiStackController::recv(Packet* p)
 
 void UwMultiStackController::recvFromUpperLayers(Packet *p)
 {
-	hdr_cmn *ch = HDR_CMN(p);
+	/*hdr_cmn *ch = HDR_CMN(p);*/
 
-	if(switch_mode_ == UW_AUTOMATIC_SWITCH && ch->ptype() == CONTROLLED)
+	if(switch_mode_ == UW_AUTOMATIC_SWITCH) /*&& ch->ptype() == CONTROLLED)*/{
 		sendDown( getBestLayer(p), p, min_delay_);
+	}
 	else 
 		sendDown(lower_id_active_, p, min_delay_);
 }

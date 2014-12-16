@@ -42,7 +42,7 @@
 
 static class UwMultiStackControllerPhySlaveClass : public TclClass {
 public:
-    UwMultiStackControllerPhySlaveClass() : TclClass("Module/UW/OPTICAL_ACOUSTIC_CONTROLLER") {}
+    UwMultiStackControllerPhySlaveClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE") {}
     TclObject* create(int, const char*const*) {
         return (new UwMultiStackControllerPhySlave);
     }
@@ -74,6 +74,7 @@ void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc){
     hdr_mac* mach = HDR_MAC(p);
     ClMsgPhy2MacAddr msg;
     sendSyncClMsg(&msg);
-    if (mach->macDA() == msg.getAddr())
+    if (mach->macDA() == msg.getAddr()){
         slave_lower_layer_ = idSrc;
+    }
 }
