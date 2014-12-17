@@ -34,4 +34,5 @@ Module/UW/MULTI_STACK_CONTROLLER set debug_  0
 Module/UW/MULTI_STACK_CONTROLLER set min_delay_  0
 Module/UW/MULTI_STACK_CONTROLLER set switch_mode_  0
 Module/UW/MULTI_STACK_CONTROLLER set lower_id_active_  0
+Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set alpha_ 0.5
 

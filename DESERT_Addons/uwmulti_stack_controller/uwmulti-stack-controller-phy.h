@@ -27,13 +27,13 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file   uwmulti-stack-controller-phy.h
- * @author Federico Favaro, Federico Guerra, Filippo Campagnaro
- * @version 1.0.0
- *
- * \brief Definition of UwMultiStackControllerPhy class.
- *
- */
+* @file   uwmulti-stack-controller-phy.h
+* @author Federico Favaro, Federico Guerra, Filippo Campagnaro
+* @version 1.0.0
+*
+* \brief Definition of UwMultiStackControllerPhy class.
+*
+*/
 
 #ifndef UWOPTICAL_ACOUSTIC_CONTROLLER_PHY_H
 #define UWOPTICAL_ACOUSTIC_CONTROLLER_PHY_H
@@ -46,96 +46,96 @@
 class UwMultiStackControllerPhy : public UwMultiStackController {
 
 public:
-    /**
-     * Constructor of UwMultiPhy class.
-     */
-    UwMultiStackControllerPhy();
-    
-    /**
-     * Destructor of UwMultiPhy class.
-     */
-    virtual ~UwMultiStackControllerPhy() { }
+  /**
+   * Constructor of UwMultiPhy class.
+   */
+  UwMultiStackControllerPhy();
+  
+  /**
+   * Destructor of UwMultiPhy class.
+   */
+  virtual ~UwMultiStackControllerPhy() { }
 
-    /**
-     * TCL command interpreter. It implements the following OTcl methods:
-     *
-     * @param argc Number of arguments in <i>argv</i>.
-     * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
-     *
-     * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
-     */
-    virtual int command(int, const char*const*);
+  /**
+   * TCL command interpreter. It implements the following OTcl methods:
+   *
+   * @param argc Number of arguments in <i>argv</i>.
+   * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
+   *
+   * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
+   */
+  virtual int command(int, const char*const*);
 
-    /**
-    * Cross-Layer messages synchronous interpreter. It has to be properly extended in order to 
-    * interpret custom cross-layer messages used by this particular plug-in.
-    * This type of communication need to be directly answered in the message exchanged in 
-    * order to be synchronous with the source.
-    * 
-    * @param m an instance of <i>ClMessage</i> that represent the message received and used for the answer
-    *
-    * @return zero if successful
-    * 
-    * @see NodeCore, ClMessage, ClSAP, ClTracer
-    **/
-    virtual int recvSyncClMsg(ClMessage* m);
+  /**
+  * Cross-Layer messages synchronous interpreter. It has to be properly extended in order to 
+  * interpret custom cross-layer messages used by this particular plug-in.
+  * This type of communication need to be directly answered in the message exchanged in 
+  * order to be synchronous with the source.
+  * 
+  * @param m an instance of <i>ClMessage</i> that represent the message received and used for the answer
+  *
+  * @return zero if successful
+  * 
+  * @see NodeCore, ClMessage, ClSAP, ClTracer
+  **/
+  virtual int recvSyncClMsg(ClMessage* m);
 
 
-    /**
-    * It manages each packet reception, either from the upper and the lower layer
-    * 
-    * @param p pointer to the packet will be received
-    * @param idSrc unique id of the module that has sent the packet
-    * 
-    * @see SAP, ChSAP
-    **/
-    virtual void recv(Packet *p, int idSrc);
+  /**
+  * It manages each packet reception, either from the upper and the lower layer
+  * 
+  * @param p pointer to the packet will be received
+  * @param idSrc unique id of the module that has sent the packet
+  * 
+  * @see SAP, ChSAP
+  **/
+  virtual void recv(Packet *p, int idSrc);
 
-    
+  
 protected:
+
+  int receiving_id;
   
-    int receiving_id;
-    
-    enum UWPHY_CONTROLLER_STATE 
-    {
-      UWPHY_CONTROLLER_STATE_IDLE = 1, 
-      UWPHY_CONTROLLER_STATE_BUSY_2_TX, 
-      UWPHY_CONTROLLER_STATE_BUSY_2_RX
-    };
-    
-    UWPHY_CONTROLLER_STATE current_state;
-    
-    static map< UWPHY_CONTROLLER_STATE , string > state_info;
-
-    /**
-     * This function is used to initialize the UwMultiStackControllerPhy debugging info.
-    */
-    virtual void initInfo();
-
-    /**
-    * Node is in Idle state. It changes its state only when it has to manage 
-    * a packet reception.
-    */
-    virtual void stateIdle();
+  enum UWPHY_CONTROLLER_STATE 
+  {
+    UWPHY_CONTROLLER_STATE_IDLE = 1, 
+    UWPHY_CONTROLLER_STATE_BUSY_2_TX, 
+    UWPHY_CONTROLLER_STATE_BUSY_2_RX
+  };
   
-    /**
-    * Called when a node is receiving correctely a packet from the lower
-    * layer. It sets the state busy due to the reception.
-    *
-    * @param id the identifier of the lower layer
-    */
-    virtual void stateBusy2Rx(int id);
+  UWPHY_CONTROLLER_STATE current_state;
+  
+  static map< UWPHY_CONTROLLER_STATE , string > state_info;
 
-    /**
-    * Called when a node is transmitting a packet. The state is set 
-    * busy due to the transmitting operation.
-    *
-    * @param p pointer to the packet will be received
-    */
-    virtual void stateBusy2Tx(Packet *p);
+  /**
+   * This function is used to initialize the UwMultiStackControllerPhy debugging info.
+  */
+  virtual void initInfo();
+
+  /**
+  * Node is in Idle state. It changes its state only when it has to manage 
+  * a packet reception.
+  */
+  virtual void stateIdle();
+
+  /**
+  * Called when a node is receiving correctely a packet from the lower
+  * layer. It sets the state busy due to the reception.
+  *
+  * @param id the identifier of the lower layer
+  */
+  virtual void stateBusy2Rx(int id);
+
+  /**
+  * Called when a node is transmitting a packet. The state is set 
+  * busy due to the transmitting operation.
+  *
+  * @param p pointer to the packet will be received
+  */
+  virtual void stateBusy2Tx(Packet *p);
 
 private:
-    //Variables
+  //Variables
 };
 
 #endif /* UWOPTICAL_ACOUSTIC_CONTROLLER_PHY_H  */

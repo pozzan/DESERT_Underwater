@@ -44,29 +44,63 @@ class UwMultiStackControllerPhyMaster : public UwMultiStackControllerPhy {
 
 
 public:
-    /**
-     * Constructor of UwMultiPhy class.
-     */
-    UwMultiStackControllerPhyMaster();
-    
-    /**
-     * Destructor of UwMultiPhy class.
-     */
-    virtual ~UwMultiStackControllerPhyMaster() { }
-    
-    /**
-     * TCL command interpreter. It implements the following OTcl methods:
-     *
-     * @param argc Number of arguments in <i>argv</i>.
-     * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
-     *
-     * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
-     */
-    virtual int command(int, const char*const*);
+  /**
+   * Constructor of UwMultiPhy class.
+   */
+  UwMultiStackControllerPhyMaster();
+  
+  /**
+   * Destructor of UwMultiPhy class.
+   */
+  virtual ~UwMultiStackControllerPhyMaster() { }
+  
+  /**
+   * TCL command interpreter. It implements the following OTcl methods:
+   *
+   * @param argc Number of arguments in <i>argv</i>.
+   * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
+   *
+   * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
+   */
+  virtual int command(int, const char*const*);
+
+  /**
+   * It manages each packet reception, either from the upper and the lower layer
+   * 
+   * @param p pointer to the packet will be received
+   * @param idSrc unique id of the module that has sent the packet
+   * 
+   * @see SAP, ChSAP
+  **/
+  virtual void recv(Packet *p, int idSrc);
 
     
 protected:
     // Variables
+	int last_layer_used_;
+  int powerful_layer_;
+  int default_layer_;
+	double power_statistics_;
+	double alpha_; //FIR parameter
+
+  /** 
+   * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.
+   * It overloads in the extended classes to implement the choice rule.
+   * 
+   * @param p pointer to the packet
+   *
+   * @return id of the module representing the best layer
+  */
+  virtual int  getBestLayer(Packet *p);
+
+  /** 
+   * It implements the slave choice rule to choose the lower layer when the system works 
+   * in AUTOMATIC_MODE. 
+   * 
+   * @param p pointer to the packet
+   * @param idSrc unique id of the module that has sent the packet
+  */
+  virtual void updateMasterStatistics(Packet *p, int idSrc);
 
 private:
     //Variables

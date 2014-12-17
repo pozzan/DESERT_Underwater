@@ -40,10 +40,10 @@
 
 static class UwMultiStackControllerPhyClass : public TclClass {
 public:
-    UwMultiStackControllerPhyClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY") {}
-    TclObject* create(int, const char*const*) {
-        return (new UwMultiStackControllerPhy);
-    }
+  UwMultiStackControllerPhyClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY") {}
+  TclObject* create(int, const char*const*) {
+      return (new UwMultiStackControllerPhy);
+  }
 } class_uwmulti_stack_controller_phy;
 
 map< UwMultiStackControllerPhy::UWPHY_CONTROLLER_STATE, string> UwMultiStackControllerPhy::state_info;
