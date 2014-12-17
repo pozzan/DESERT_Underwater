@@ -103,10 +103,6 @@ int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m)
     }
     else
     {
-      if(m->getSource() == lower_id_active_ && current_state == UWPHY_CONTROLLER_STATE_BUSY_2_TX)
-      {
-        std::cout << NOW <<" ControllerPhy::error, unexpected event." << std::endl;
-      }
       return 0;
     }
   }

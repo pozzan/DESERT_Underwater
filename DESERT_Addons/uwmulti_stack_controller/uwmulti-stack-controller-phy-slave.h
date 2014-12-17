@@ -85,7 +85,7 @@ protected:
    *
    * @return id of the module representing the best layer
   **/
-  inline int  getBestLayer(Packet *p) { return  slave_lower_layer_; }
+  virtual inline int  getBestLayer(Packet *p) { return  slave_lower_layer_; }
 
   /** 
    * It implements the slave choice rule to choose the lower layer when the system works 

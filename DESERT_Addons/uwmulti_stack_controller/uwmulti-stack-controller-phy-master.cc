@@ -71,6 +71,7 @@ int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv)
     }
     else if(strcasecmp(argv[1], "setDefaultId") == 0){
       default_layer_ = atoi(argv[2]);
+      last_layer_used_ = default_layer_;
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "setShortRangeId") == 0){
@@ -88,8 +89,11 @@ void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
 }
 
 int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p) {
-  //TODO: define if doing it directly for doubble physical or in a more general way..
-
+  //TODO: define if doing it directly for doubble physical or in a more general way.
+  if (debug_)
+  {
+    std::cout << NOW << " ControllerPhyMaster::getBestLayer(Packet *p)" << std::endl;
+  }
   Stats info = layer_map.find(last_layer_used_)->second;
   if(last_layer_used_ == default_layer_)
     last_layer_used_ = (power_statistics_ > info.metrics_target_+info.hysteresis_size_/2) ? 
@@ -97,9 +101,8 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p) {
   else
     last_layer_used_ = (power_statistics_ < info.metrics_target_+info.hysteresis_size_/2) ? 
                         default_layer_ : last_layer_used_;
-  last_layer_used_;
   power_statistics_ = 0;
-  return 0;
+  return last_layer_used_;
 }
 
 void UwMultiStackControllerPhyMaster::updateMasterStatistics(Packet *p, int idSrc)

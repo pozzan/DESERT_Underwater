@@ -151,7 +151,7 @@ protected:
    *
    * @return id of the module representing the best layer ///@fgue what if there is no layer id active?
   */
-  inline int  getBestLayer(Packet *p) {return  lower_id_active_;}
+  virtual inline int  getBestLayer(Packet *p) { return  lower_id_active_;}
 
   /** 
    * return if the specified layer, identified by id, is available
