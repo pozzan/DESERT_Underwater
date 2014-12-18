@@ -55,43 +55,43 @@ class UwMultiStackController : public Module {
 
 
 public:
-/**
- * Constructor of UwMultiPhy class.
- */
-UwMultiStackController();
 
-/**
- * Destructor of UwMultiPhy class.
- */
-virtual ~UwMultiStackController() { }
+  /**
+   * Constructor of UwMultiPhy class.
+   */
+  UwMultiStackController();
 
-/**
- * TCL command interpreter. It implements the following OTcl methods:
- *
- * @param argc Number of arguments in <i>argv</i>.
- * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
- *
- * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
- */
-virtual int command(int, const char*const*);
+  /**
+   * Destructor of UwMultiPhy class.
+   */
+  virtual ~UwMultiStackController() { }
 
-/**
- * Add a layer in the layer_map
- * 
- * @param id unique identifier of the module
- * @param layer_name name of the module. The name should be unique
- * @param target target of the module metrics
- * @param hysteresis hysteresis of the module metrics
- */
+  /**
+   * TCL command interpreter. It implements the following OTcl methods:
+   *
+   * @param argc Number of arguments in <i>argv</i>.
+   * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
+   *
+   * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
+   */
+  virtual int command(int, const char*const*);
 
-virtual void addLayer(int id, const string& layer_name, double target, double hysteresis);
+  /**
+   * Add a layer in the layer_map
+   * 
+   * @param id unique identifier of the module
+   * @param layer_name name of the module. The name should be unique
+   * @param target target of the module metrics
+   * @param hysteresis hysteresis of the module metrics
+   */
+  virtual void addLayer(int id, const string& layer_name, double target, double hysteresis);
 
-/**
- * recv method. It is called when a packet is received from the other layers
- *
- * @param Packet* Pointer to the packet that are going to be received
- */
-virtual void recv(Packet *p);
+  /**
+   * recv method. It is called when a packet is received from the other layers
+   *
+   * @param Packet* Pointer to the packet that are going to be received
+   */
+  virtual void recv(Packet *p);
 
 
   

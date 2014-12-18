@@ -82,6 +82,12 @@ int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv)
   return UwMultiStackControllerPhy::command(argc, argv);     
 } /* UwMultiStackControllerPhyMaster::command */
 
+void UwMultiStackControllerPhyMaster::addLayer(int id, const string& layer_name, double target, double hysteresis){
+  layer_map.erase(id);
+  if (layer_map.size() < 2)
+    UwMultiStackController::addLayer(id, layer_name, target, hysteresis);
+}
+
 void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
 {
   updateMasterStatistics(p,idSrc);
@@ -92,7 +98,8 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p) {
   //TODO: define if doing it directly for doubble physical or in a more general way.
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhyMaster::getBestLayer(Packet *p)" << std::endl;
+    std::cout << NOW << " ControllerPhyMaster::getBestLayer(Packet *p), power_statistics_=" 
+              << power_statistics_ << std::endl;
   }
   Stats info = layer_map.find(last_layer_used_)->second;
   if(last_layer_used_ == default_layer_)
@@ -111,6 +118,9 @@ void UwMultiStackControllerPhyMaster::updateMasterStatistics(Packet *p, int idSr
   hdr_MPhy* ph = HDR_MPHY(p);
   ClMsgPhy2MacAddr msg;
   sendSyncClMsg(&msg);
+  if (debug_)
+    std::cout << NOW << " ControllerPhyMaster::updateMasterStatistics(Packet *p, int idSrc), Pr = " 
+              << ph->Pr << std::endl;
   if (mach->macDA() == msg.getAddr() && idSrc == last_layer_used_)
     power_statistics_ = power_statistics_ ? (1-alpha_)*power_statistics_ + alpha_*ph->Pr : ph->Pr;
 }

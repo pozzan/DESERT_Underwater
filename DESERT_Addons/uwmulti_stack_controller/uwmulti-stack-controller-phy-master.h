@@ -32,6 +32,7 @@
  * @version 1.0.0
  *
  * \brief Definition of UwMultiStackControllerPhyMaster class.
+ * This controller can switch from TWO layers thanks to the statistics collected.
  *
  */
 
@@ -64,6 +65,16 @@ public:
    */
   virtual int command(int, const char*const*);
 
+  /**
+   * Add a layer in the layer_map only if the map size < 2.
+   * 
+   * @param id unique identifier of the module
+   * @param layer_name name of the module. The name should be unique
+   * @param target target of the module metrics
+   * @param hysteresis hysteresis of the module metrics
+  */
+  virtual void addLayer(int id, const string& layer_name, double target, double hysteresis);
+  
   /**
    * It manages each packet reception, either from the upper and the lower layer
    * 

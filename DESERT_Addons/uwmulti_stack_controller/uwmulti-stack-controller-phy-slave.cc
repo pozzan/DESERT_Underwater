@@ -83,6 +83,7 @@ void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc)
   sendSyncClMsg(&msg);
   if (mach->macDA() == msg.getAddr())
   {
+    //std::cout << NOW << " " << msg.getAddr() << ": " << slave_lower_layer_ << "-->" << idSrc << std::endl;
     slave_lower_layer_ = idSrc;
   }
 }
