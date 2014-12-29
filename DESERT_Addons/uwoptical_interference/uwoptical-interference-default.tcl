@@ -26,9 +26,9 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# @file   uwmultiphy-default.tcl
+# @file   uwoptical-interference-default.tcl
 # @author Filippo Campagnaro
 # @version 1.0.0
 
-Module/UW/OPTICAL/PHY set TxPower_  0.01
-Module/UW/OPTICAL/PHY set NoiseSPD_ [expr 1.28e-23 * 300]
+Module/UW/OPTICAL/INTERFERENCE set maxinterval_ 50 
+Module/UW/OPTICAL/INTERFERENCE set debug_ 0
