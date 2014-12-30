@@ -38,15 +38,6 @@
 
 
 #include "uw-csma-aloha-triggered-auv.h"
-#include <mac.h>
-
-using namespace std;
-
-const double UwCsmaAloha_Triggered_AUV::prop_speed = 1500.0;
-bool UwCsmaAloha_Triggered_AUV::initialized = false;
-
-map< UwCsmaAloha_Triggered_AUV::UW_CS_ALOHA_TRIG_AUV_STATUS, string> UwCsmaAloha_Triggered_AUV::status_info;
-map< UwCsmaAloha_Triggered_AUV::UW_CS_ALOHA_TRIG_AUV_REASON_STATUS, string> UwCsmaAloha_Triggered_AUV::reason_info;
 
 /**
  * Class that represents the binding with the tcl configuration script 
@@ -57,7 +48,7 @@ public:
     /**
      * Constructor of the class
      */
-    UwCsmaAloha_Triggered_AUVModuleClass() : TclClass("Module/UW/CSMA_ALOHA/TRIGGERED/AUV") {
+    UwCsmaAloha_Triggered_AUVModuleClass() : TclClass("Module/UW/CSMA_ALOHA/TRIGGER/SINK") {
     }
 
     /**
@@ -72,16 +63,12 @@ public:
 void UwCsmaAloha_Triggered_AUV::ReceiveTimer::expire(Event* e) {
     timer_status = UW_CS_ALOHA_TRIG_AUV_EXPIRED;
     if (module->curr_state != UW_CS_ALOHA_TRIG_AUV_STATE_TX_TRIGGER) {
-        if (module->debug_) cout << NOW << " UwCsmaAloha_Triggered_AUV(" << module->addr << ") timer Receiving expire() current state ="
-                << module->status_info[module->curr_state] << "; next state " << module->status_info[UW_CS_ALOHA_TRIG_AUV_STATE_DISABLE_RX] << endl;
         module->stateDisableRx();
-
     }
 }
 
 UwCsmaAloha_Triggered_AUV::UwCsmaAloha_Triggered_AUV()
-: print_transitions(false),
-curr_state(UW_CS_ALOHA_TRIG_AUV_STATE_IDLE),
+: curr_state(UW_CS_ALOHA_TRIG_AUV_STATE_IDLE),
 prev_state(UW_CS_ALOHA_TRIG_AUV_STATE_IDLE),
 last_reason(UW_CS_ALOHA_TRIG_AUV_REASON_NOT_SET),
 receive_timer(this),
@@ -98,17 +85,10 @@ UwCsmaAloha_Triggered_AUV::~UwCsmaAloha_Triggered_AUV() {
 int UwCsmaAloha_Triggered_AUV::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
     if (argc == 2) {
-        if (strcasecmp(argv[1], "initialize") == 0) {
-            if (initialized == false) initInfo();
-            if (print_transitions) fout.open("/tmp/UW_CSMA_ALOHA_TRIGGERED_AUV_state_transitione.txt", ios_base::app);
-            return TCL_OK;
-        } else if (strcasecmp(argv[1], "printTransitions") == 0) {
-            print_transitions = true;
-            return TCL_OK;
-        } else if (strcasecmp(argv[1], "sinkRun") == 0) {
+        if (strcasecmp(argv[1], "sinkRun") == 0) {
             stateIdle();
             return TCL_OK;
-        } else if (strcasecmp(argv[1], "getTriggerMessagesSent") == 0) {
+        } else if (strcasecmp(argv[1], "getNTriggerSent") == 0) {
             tcl.resultf("%d", getTriggerMsgSent());
         }
 
@@ -123,35 +103,6 @@ int UwCsmaAloha_Triggered_AUV::crLayCommand(ClMessage* m) {
     }
 }
 
-void UwCsmaAloha_Triggered_AUV::initInfo() {
-
-    initialized = true;
-
-    if ((print_transitions) && (system(NULL))) {
-        if (!system("rm -f /tmp/UW_CSMA_ALOHA_TRIGGERED_AUV_debug_state_transition.txt")) {
-            std::cerr << "Cannot rm /tmp/UW_CSMA_ALOHA_TRIGGERED_AUV_debug_state_transition.txt";
-        }
-        if (!system("touch /tmp/UW_CSMA_ALOHA_TRIGGERED_AUV_debug_state_transition.txt")) {
-            std::cerr << "Cannot create /tmp/UW_CSMA_ALOHA_TRIGGERED_AUV_debug_state_transition.txt";
-        }
-
-
-    }
-    status_info[UW_CS_ALOHA_TRIG_AUV_STATE_IDLE] = "Idle state";
-    status_info[UW_CS_ALOHA_TRIG_AUV_STATE_NOT_SET] = "State not set";
-    status_info[UW_CS_ALOHA_TRIG_AUV_STATE_TX_TRIGGER] = "Transmitting TRIGGER to sensors";
-    status_info[UW_CS_ALOHA_TRIG_AUV_STATE_ENABLE_RX] = "Enabling reception of DATA";
-    status_info[UW_CS_ALOHA_TRIG_AUV_STATE_DISABLE_RX] = "Disabling reception of DATA";
-    status_info[UW_CS_ALOHA_TRIG_AUV_STATE_DATA_RX] = "Reception of DATA packet";
-
-
-    reason_info[UW_CS_ALOHA_TRIG_AUV_REASON_DATA_RX] = "DATA received";
-    reason_info[UW_CS_ALOHA_TRIG_AUV_REASON_START_RX] = "Start rx pkt";
-    reason_info[UW_CS_ALOHA_TRIG_AUV_REASON_PKT_NOT_FOR_ME] = "Received an erroneous pkt";
-    reason_info[UW_CS_ALOHA_TRIG_AUV_REASON_PKT_ERROR] = "Erroneous pkt";
-    reason_info[UW_CS_ALOHA_TRIG_AUV_REASON_NOT_SET] = "Reason NOT SET";
-    reason_info[UW_CS_ALOHA_TRIG_AUV_REASON_TX_TRIGGER] = "TRIGGER message has been transmitted";
-}
 
 void UwCsmaAloha_Triggered_AUV::recvFromUpperLayers(Packet* p) {
     //no receive data pkt from upper layers in AUV mode
@@ -192,11 +143,9 @@ void UwCsmaAloha_Triggered_AUV::Phy2MacEndTx(const Packet* p) {
 
 void UwCsmaAloha_Triggered_AUV::Phy2MacStartRx(const Packet* p) {
     if (receiving_state_active) {
-        //RxActive = true;
         refreshReason(UW_CS_ALOHA_TRIG_AUV_REASON_START_RX);
         if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_AUV(" << addr << ")::Phy2MacStartRx() rx Packet " << endl;
     } else {
-        //RxActive = false;
         if (debug_) cout << NOW << " UwCsmaAloha_Triggered_AUV(" << addr << ")::Phy2MacStartRx() Receiving disabled" << endl;
     }
 
@@ -210,19 +159,6 @@ void UwCsmaAloha_Triggered_AUV::Phy2MacEndRx(Packet* p) {
         hdr_MPhy* ph = HDR_MPHY(p);
 
         int dest_mac = mach->macDA();
-        /*********************/
-        double gen_time = ph->txtime;
-        double received_time = ph->rxtime;
-        double diff_time = received_time - gen_time;
-        double distance = diff_time * prop_speed;
-        /********************/
-
-
-        if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_AUV(" << addr << ")::Phy2MacEndRx() "
-                << status_info[curr_state] << ", received a pkt type = "
-                << ch->ptype() << ", src addr = " << mach->macSA()
-            << " dest addr = " << mach->macDA()
-            << ", estimated distance between nodes = " << distance << " m " << endl;
 
         if (ch->error()) {
 
@@ -273,8 +209,6 @@ void UwCsmaAloha_Triggered_AUV::stateIdle() {
 
     refreshState(UW_CS_ALOHA_TRIG_AUV_STATE_IDLE);
 
-    if (print_transitions) printStateInfo();
-
     if (debug_) std::cout << NOW << "  UwCsmaAloha_Triggered_AUV(" << addr << ")::stateIdle() --> TRANSMITTING TRIGGER" << endl;
     stateTxTRIGGER();
 }
@@ -299,10 +233,6 @@ void UwCsmaAloha_Triggered_AUV::txTRIGGER(Packet* p) {
     }
 }
 
-void UwCsmaAloha_Triggered_AUV::printStateInfo(double delay) {
-    if (debug_) cout << NOW << " UwCsmaAloha_Triggered_AUV(" << addr << ")::printStateInfo() " << "from " << status_info[prev_state]
-            << " to " << status_info[curr_state] << ". Reason: " << reason_info[last_reason] << endl;
-}
 
 void UwCsmaAloha_Triggered_AUV::waitForUser() {
     std::string response;

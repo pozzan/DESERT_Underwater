@@ -27,16 +27,16 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-Module/UW/CSMA_ALOHA/TRIGGERED/NODE set HDR_size_ 		10
-Module/UW/CSMA_ALOHA/TRIGGERED/NODE set debug_			0
-Module/UW/CSMA_ALOHA/TRIGGERED/NODE set max_payload_		125
-Module/UW/CSMA_ALOHA/TRIGGERED/NODE set buffer_pkts_		1
-Module/UW/CSMA_ALOHA/TRIGGERED/NODE set listen_time_ 		0.5
-Module/UW/CSMA_ALOHA/TRIGGERED/NODE set tx_timer_duration_      40
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set HDR_size_ 				10
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set debug_					0
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set max_payload_				125
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set buffer_pkts_				1
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set listen_time_ 				0.5
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set tx_timer_duration_      	40
 
 
-Module/UW/CSMA_ALOHA/TRIGGERED/AUV set HDR_size_               0
-Module/UW/CSMA_ALOHA/TRIGGERED/AUV set debug_                  0
-Module/UW/CSMA_ALOHA/TRIGGERED/AUV set max_payload_            125
-Module/UW/CSMA_ALOHA/TRIGGERED/AUV set TRIGGER_size_           10
-Module/UW/CSMA_ALOHA/TRIGGERED/AUV set tx_timer_duration_      45
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set HDR_size_               	0
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set debug_                  	0
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set max_payload_            	125
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set TRIGGER_size_           	10
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set tx_timer_duration_      	45

@@ -44,6 +44,7 @@
 
 
 #include <iostream>
+#include <mac.h>
 #include <string>
 #include <map>
 #include <set>
@@ -93,8 +94,6 @@ public:
 protected:
 
 
-    static const double prop_speed; /**< Typical sound propagation speed in underwater enviroment */
-
     /**< Variable that rapresent the status of the protocol machine state */
     enum UW_CS_ALOHA_TRIG_AUV_STATUS {
         UW_CS_ALOHA_TRIG_AUV_STATE_IDLE = 1,
@@ -107,7 +106,7 @@ protected:
 
     /**< Reason for the changing of the state */
     enum UW_CS_ALOHA_TRIG_AUV_REASON_STATUS {
-        UW_CS_ALOHA_TRIG_AUV_REASON_DATA_RX,
+        UW_CS_ALOHA_TRIG_AUV_REASON_DATA_RX = 1,
         UW_CS_ALOHA_TRIG_AUV_REASON_NOT_SET,
         UW_CS_ALOHA_TRIG_AUV_REASON_START_RX,
         UW_CS_ALOHA_TRIG_AUV_REASON_PKT_NOT_FOR_ME,
@@ -359,17 +358,6 @@ protected:
      */
     virtual void stateRxPacketNotForMe(Packet* p);
     /**
-     * Used for debug purporses. Prints the state transisions of the protocol
-     */
-    virtual void printStateInfo(double delay = 0);
-    /**
-     * Initializes the protocol at the beginning of the simulation.
-     * @param double delay
-     * @see command method
-     */
-    virtual void initInfo();
-
-    /**
      * Refresh the state of the protocol 
      * @param UW_CS_ALOHA_TRIG_AUV_STATUS next state of the protocol
      */
@@ -417,12 +405,7 @@ protected:
 
     double tx_timer_duration; /**< Duration of the timer in which one node is allowed to transmit */
 
-    static bool initialized; /**< True if the protocol is initialized */
 
-
-    Packet* curr_data_pkt; /**< Pointer to the current data packet */
-
-    bool print_transitions; /**< True if the transition of the protocol are printed out on a file */
     bool receiving_state_active; /**< True if the sink is allowed to receive data packet */
 
 
@@ -434,11 +417,6 @@ protected:
     ReceiveTimer receive_timer; /**< timer of receive state */
 
     int trigger_pkts_tx; /**< Number of TRIGGER packet received */
-
-    static map< UW_CS_ALOHA_TRIG_AUV_STATUS, string > status_info; /**< Textual infos of the status of the protocol */
-    static map< UW_CS_ALOHA_TRIG_AUV_REASON_STATUS, string> reason_info; /**< Textual infos of the reason for status change */
-
-    std::ofstream fout; /**< Ouput file where the state transitions are written */
 };
 
 #endif 
