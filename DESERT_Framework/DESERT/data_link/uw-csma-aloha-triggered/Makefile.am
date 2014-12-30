@@ -29,25 +29,25 @@
 
 AM_CXXFLAGS = -Wall -ggdb3
 
-lib_LTLIBRARIES = libuwcsmaalohatriggered.la
+lib_LTLIBRARIES = libuwcsmaalohatrigger.la
 
-libuwcsmaalohatriggered_la_SOURCES = initlib.cc \
-				     uw-csma-aloha-triggered-auv.cc \
-				     uw-csma-aloha-triggered-auv.h \
+libuwcsmaalohatrigger_la_SOURCES = initlib.cc \
+				     uw-csma-aloha-trigger-sink.cc \
+				     uw-csma-aloha-trigger-sink.h \
 		                     uw-csma-aloha-triggered-node.cc \
                                      uw-csma-aloha-triggered-node.h
 
-libuwcsmaalohatriggered_la_CPPFLAGS = 	@NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
-libuwcsmaalohatriggered_la_LDFLAGS = 	@NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
-libuwcsmaalohatriggered_la_LIBADD = 	@NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
+libuwcsmaalohatrigger_la_CPPFLAGS = 	@NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+libuwcsmaalohatrigger_la_LDFLAGS = 	@NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
+libuwcsmaalohatrigger_la_LIBADD = 	@NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
 
-nodist_libuwcsmaalohatriggered_la_SOURCES = initTcl.cc
+nodist_libuwcsmaalohatrigger_la_SOURCES = initTcl.cc
 BUILT_SOURCES = initTcl.cc
 CLEANFILES = initTcl.cc
 
 TCL_FILES = uw-csma-aloha-triggered-init.tcl
 
 initTcl.cc : Makefile $(TCL_FILES)
-			cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwCsmaAlohaTriggeredTclCode > initTcl.cc
+			cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwCsmaAlohaTriggerTclCode > initTcl.cc
 
 EXTRA_DIST = $(TCL_FILES) 

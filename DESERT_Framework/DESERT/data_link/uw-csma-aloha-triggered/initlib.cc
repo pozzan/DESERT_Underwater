@@ -33,12 +33,12 @@
 
 #include<sap.h>
 
-extern EmbeddedTcl UwCsmaAlohaTriggeredTclCode;
+extern EmbeddedTcl UwCsmaAlohaTriggerTclCode;
 
 packet_t PT_MMAC_TRIGGER;
 
-extern "C" int Uwcsmaalohatriggered_Init() {
-	UwCsmaAlohaTriggeredTclCode.load();
+extern "C" int Uwcsmaalohatrigger_Init() {
+	UwCsmaAlohaTriggerTclCode.load();
 	return 0;
 }
 

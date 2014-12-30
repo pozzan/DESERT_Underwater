@@ -50,7 +50,7 @@ enum {
 static class UwCsmaAloha_Triggered_NODEModuleClass : public TclClass {
 public:
 
-    UwCsmaAloha_Triggered_NODEModuleClass() : TclClass("Module/UW/CSMA_ALOHA/TRIGGERED/NODE") {
+    UwCsmaAloha_Triggered_NODEModuleClass() : TclClass("Module/UW/CSMA_ALOHA/TRIGGER/NODE") {
     }
 
     TclObject* create(int, const char*const*) {
