@@ -41,22 +41,24 @@
 #include <phymac-clmsg.h>
 #include <mphy_pktheader.h>
 
-static class UwMultiStackControllerPhyMasterClass : public TclClass {
-public:
-    UwMultiStackControllerPhyMasterClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER") {}
-    TclObject* create(int, const char*const*) {
-        return (new UwMultiStackControllerPhyMaster);
-    }
+static class UwMultiStackControllerPhyMasterClass : public TclClass 
+{
+  public:
+  UwMultiStackControllerPhyMasterClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER") {}
+  TclObject* create(int, const char*const*) 
+  {
+    return (new UwMultiStackControllerPhyMaster);
+  }
 } class_uwmulti_stack_controller_phy_master;
 
 UwMultiStackControllerPhyMaster::UwMultiStackControllerPhyMaster() 
 : 
-UwMultiStackControllerPhy(),
-last_layer_used_(0),
-powerful_layer_(0),
-default_layer_(0),
-power_statistics_(0),
-alpha_(0.5)
+  UwMultiStackControllerPhy(),
+  last_layer_used_(0),
+  powerful_layer_(0),
+  default_layer_(0),
+  power_statistics_(0),
+  alpha_(0.5)
 { 
   bind("alpha_", &alpha_);
 }
@@ -64,17 +66,21 @@ alpha_(0.5)
 int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv) 
 {
   Tcl& tcl = Tcl::instance();
-  if (argc == 3) {
-    if(strcasecmp(argv[1], "setAlpha") == 0){
+  if (argc == 3) 
+  {
+    if(strcasecmp(argv[1], "setAlpha") == 0)
+    {
       alpha_ = atof(argv[2]);
       return TCL_OK;
     }
-    else if(strcasecmp(argv[1], "setDefaultId") == 0){
+    else if(strcasecmp(argv[1], "setDefaultId") == 0)
+    {
       default_layer_ = atoi(argv[2]);
       last_layer_used_ = default_layer_;
       return TCL_OK;
     }
-    else if(strcasecmp(argv[1], "setShortRangeId") == 0){
+    else if(strcasecmp(argv[1], "setShortRangeId") == 0)
+    {
       powerful_layer_ = atoi(argv[2]);
       return TCL_OK;
     }
@@ -82,10 +88,14 @@ int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv)
   return UwMultiStackControllerPhy::command(argc, argv);     
 } /* UwMultiStackControllerPhyMaster::command */
 
-void UwMultiStackControllerPhyMaster::addLayer(int id, const string& layer_name, double target, double hysteresis){
+void UwMultiStackControllerPhyMaster::addLayer(int id, const string& layer_name, double target, double hysteresis)
+{
   layer_map.erase(id);
+  
   if (layer_map.size() < 2)
+  {
     UwMultiStackController::addLayer(id, layer_name, target, hysteresis);
+  }
 }
 
 void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
@@ -94,20 +104,28 @@ void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
   UwMultiStackControllerPhy::recv(p, idSrc);
 }
 
-int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p) {
+int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p) 
+{
   //TODO: define if doing it directly for doubble physical or in a more general way.
   if (debug_)
   {
     std::cout << NOW << " ControllerPhyMaster::getBestLayer(Packet *p), power_statistics_=" 
               << power_statistics_ << std::endl;
   }
+  
   Stats info = layer_map.find(last_layer_used_)->second;
+  
   if(last_layer_used_ == default_layer_)
+  {
     last_layer_used_ = (power_statistics_ > info.metrics_target_+info.hysteresis_size_/2) ? 
                         powerful_layer_ : last_layer_used_;
+  }
   else
+  {
     last_layer_used_ = (power_statistics_ < info.metrics_target_+info.hysteresis_size_/2) ? 
                         default_layer_ : last_layer_used_;
+  }
+  
   power_statistics_ = 0;
   return last_layer_used_;
 }
@@ -118,10 +136,16 @@ void UwMultiStackControllerPhyMaster::updateMasterStatistics(Packet *p, int idSr
   hdr_MPhy* ph = HDR_MPHY(p);
   ClMsgPhy2MacAddr msg;
   sendSyncClMsg(&msg);
+  
   if (debug_)
+  {
     std::cout << NOW << " ControllerPhyMaster::updateMasterStatistics(Packet *p, int idSrc), Pr = " 
               << ph->Pr << std::endl;
+  }
+  
   if (mach->macDA() == msg.getAddr() && idSrc == last_layer_used_)
+  {
     power_statistics_ = power_statistics_ ? (1-alpha_)*power_statistics_ + alpha_*ph->Pr : ph->Pr;
+  }
 }
 
