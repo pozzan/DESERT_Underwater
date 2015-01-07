@@ -102,20 +102,9 @@ int UwMultiStackController::command(int argc, const char*const* argv)
 
 void UwMultiStackController::addLayer(int id, const string& layer_name, double target, double hysteresis)
 {
- ///@fgue better Implementation
   Stats details(layer_name, target, hysteresis);
   layer_map.erase(id); 
-
-  // there is no need to check for id since we deleted it before.
   layer_map.insert((std::pair<int,Stats>(id,details)));
-  // Filippo old code
-	/*layer_map.erase(id); ///@fgue why are you deleting the id and then searching for it???
-	
-	Stats details(layer_name, target, hysteresis);
-	if (layer_map.find(id) == layer_map.end())
-		layer_map.insert((std::pair<int,Stats>(id,details)));
-	else
-		(layer_map.find(id))->second = details;*/
 }
 
 void UwMultiStackController::recv(Packet* p)

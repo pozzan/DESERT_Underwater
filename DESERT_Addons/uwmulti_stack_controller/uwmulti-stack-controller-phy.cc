@@ -103,6 +103,10 @@ int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m)
     }
     else
     {
+      if (debug_)
+      {
+        std::cout <<"ControllerPhy::recvSyncClMsg(ClMessage* m), nothing done."<<std::endl;
+      }
       return 0;
     }
   }
