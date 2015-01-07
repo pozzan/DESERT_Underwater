@@ -147,7 +147,7 @@ void UwMultiStackControllerPhy::stateBusy2Tx(Packet *p)
     std::cout << NOW << " ControllerPhy::stateBusy2Tx(), state_info: " 
               << state_info[current_state] << std::endl;
   }
-  
+  assert(current_state == UWPHY_CONTROLLER_STATE_IDLE);
   current_state = UWPHY_CONTROLLER_STATE_BUSY_2_TX;
   recvFromUpperLayers(p);
 }

@@ -107,6 +107,7 @@ void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
 int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p) 
 {
   //TODO: define if doing it directly for doubble physical or in a more general way.
+  assert(switch_mode_ == UW_AUTOMATIC_SWITCH);
   if (debug_)
   {
     std::cout << NOW << " ControllerPhyMaster::getBestLayer(Packet *p), power_statistics_=" 
@@ -127,6 +128,7 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
   }
   
   power_statistics_ = 0;
+  lower_id_active_ = last_layer_used_;
   return last_layer_used_;
 }
 
