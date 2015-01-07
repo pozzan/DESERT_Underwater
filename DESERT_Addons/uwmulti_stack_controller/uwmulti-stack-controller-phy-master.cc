@@ -55,7 +55,7 @@ UwMultiStackControllerPhyMaster::UwMultiStackControllerPhyMaster()
 : 
   UwMultiStackControllerPhy(),
   last_layer_used_(0),
-  powerful_layer_(0),
+  short_range_layer_(0),
   default_layer_(0),
   power_statistics_(0),
   alpha_(0.5)
@@ -81,7 +81,7 @@ int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv)
     }
     else if(strcasecmp(argv[1], "setShortRangeId") == 0)
     {
-      powerful_layer_ = atoi(argv[2]);
+      short_range_layer_ = atoi(argv[2]);
       return TCL_OK;
     }
   }
@@ -118,11 +118,11 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
   if(last_layer_used_ == default_layer_)
   {
     last_layer_used_ = (power_statistics_ > info.metrics_target_+info.hysteresis_size_/2) ? 
-                        powerful_layer_ : last_layer_used_;
+                        short_range_layer_ : last_layer_used_;
   }
   else
   {
-    last_layer_used_ = (power_statistics_ < info.metrics_target_+info.hysteresis_size_/2) ? 
+    last_layer_used_ = (power_statistics_ < info.metrics_target_-info.hysteresis_size_/2) ? 
                         default_layer_ : last_layer_used_;
   }
   

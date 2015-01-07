@@ -89,8 +89,8 @@ public:
 protected:
     // Variables
 	int last_layer_used_;
-  int powerful_layer_;
-  int default_layer_;
+  int short_range_layer_;// This layer privides high bitrate at short range
+  int default_layer_;// This layer provides long range communication despite the limited bitrate
 	double power_statistics_;
 	double alpha_; //FIR parameter
 
