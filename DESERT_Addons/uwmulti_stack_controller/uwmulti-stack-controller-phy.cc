@@ -134,7 +134,7 @@ void UwMultiStackControllerPhy::stateBusy2Rx(int id)
   if (debug_)
   {
     std::cout << NOW << " ControllerPhy::stateBusy2Rx(id), state_info: " 
-              << state_info[current_state] << "id = " << id << std::endl;
+              << state_info[current_state] << " id = " << id << std::endl;
   }
   current_state = UWPHY_CONTROLLER_STATE_BUSY_2_RX;
   receiving_id = id;
