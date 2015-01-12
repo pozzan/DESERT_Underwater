@@ -40,21 +40,23 @@
 /*packet_t NOT_CONTROLLED;
 packet_t CONTROLLED;*/
 
-static class UwMultiStackControllerClass : public TclClass {
+static class UwMultiStackControllerClass : public TclClass 
+{
 public:
     UwMultiStackControllerClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER") {}
-    TclObject* create(int, const char*const*) {
-        return (new UwMultiStackController);
+    TclObject* create(int, const char*const*) 
+    {
+      return (new UwMultiStackController);
     }
 } class_stack_controller;
 
 UwMultiStackController::UwMultiStackController() 
 : 
-Module(),
-debug_(0),
-min_delay_(0),
-switch_mode_(UW_MANUAL_SWITCH),
-lower_id_active_(0)
+  Module(),
+  debug_(0),
+  min_delay_(0),
+  switch_mode_(UW_MANUAL_SWITCH),
+  lower_id_active_(0)
 {
 	bind("debug_", &debug_);
 	bind("min_delay_", &min_delay_);
@@ -62,49 +64,47 @@ lower_id_active_(0)
 	bind("set_lower_id_active_", &lower_id_active_);
 }
 
-int UwMultiStackController::command(int argc, const char*const* argv) {
+int UwMultiStackController::command(int argc, const char*const* argv) 
+{
   Tcl& tcl = Tcl::instance();
-	if (argc == 2) {
-		if(strcasecmp(argv[1], "setAutomaticSwitch") == 0) {
-     		switch_mode_ = UW_AUTOMATIC_SWITCH;
+	if (argc == 2) 
+  {
+		if(strcasecmp(argv[1], "setAutomaticSwitch") == 0) 
+    {
+      switch_mode_ = UW_AUTOMATIC_SWITCH;
 			return TCL_OK;
 		}
-		else if(strcasecmp(argv[1], "setManualSwitch") == 0) {
-     		switch_mode_ = UW_MANUAL_SWITCH;
-			return TCL_OK;
-		}
-	}
-	else if (argc == 3) {
-		if(strcasecmp(argv[1], "setManualLowerlId") == 0){
-     		lower_id_active_ = atoi(argv[2]);
+		else if(strcasecmp(argv[1], "setManualSwitch") == 0) 
+    {
+      switch_mode_ = UW_MANUAL_SWITCH;
 			return TCL_OK;
 		}
 	}
-	else if (argc == 6) {
-		if(strcasecmp(argv[1], "addLayer") == 0){
-     		addLayer(atoi(argv[2]),(string)(argv[3]),atof(argv[4]),atof(argv[5]));
+	else if (argc == 3) 
+  {
+		if(strcasecmp(argv[1], "setManualLowerlId") == 0)
+    {
+      lower_id_active_ = atoi(argv[2]);
 			return TCL_OK;
 		}
 	}
-    return Module::command(argc, argv);     
+	else if (argc == 6) 
+  {
+		if(strcasecmp(argv[1], "addLayer") == 0)
+    {
+      addLayer(atoi(argv[2]),(string)(argv[3]),atof(argv[4]),atof(argv[5]));
+			return TCL_OK;
+		}
+	}
+	
+  return Module::command(argc, argv);     
 } /* UwMultiStackController::command */
 
 void UwMultiStackController::addLayer(int id, const string& layer_name, double target, double hysteresis)
 {
- ///@fgue better Implementation
   Stats details(layer_name, target, hysteresis);
   layer_map.erase(id); 
-
-  // there is no need to check for id since we deleted it before.
   layer_map.insert((std::pair<int,Stats>(id,details)));
-  // Filippo old code
-	/*layer_map.erase(id); ///@fgue why are you deleting the id and then searching for it???
-	
-	Stats details(layer_name, target, hysteresis);
-	if (layer_map.find(id) == layer_map.end())
-		layer_map.insert((std::pair<int,Stats>(id,details)));
-	else
-		(layer_map.find(id))->second = details;*/
 }
 
 void UwMultiStackController::recv(Packet* p)
@@ -112,12 +112,12 @@ void UwMultiStackController::recv(Packet* p)
  	hdr_cmn *ch = HDR_CMN(p);
   	if(ch->direction() == hdr_cmn::UP)
     {
-      	sendUp(p, min_delay_);
+      sendUp(p, min_delay_);
     }
   	else
     {
-      	//direction DOWN: packet is coming from upper layers
-      	recvFromUpperLayers(p);
+      //direction DOWN: packet is coming from upper layers
+      recvFromUpperLayers(p);
     }
 }
 

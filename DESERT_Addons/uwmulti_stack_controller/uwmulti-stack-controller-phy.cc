@@ -103,6 +103,10 @@ int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m)
     }
     else
     {
+      if (debug_)
+      {
+        std::cout <<"ControllerPhy::recvSyncClMsg(ClMessage* m), nothing done."<<std::endl;
+      }
       return 0;
     }
   }
@@ -134,7 +138,7 @@ void UwMultiStackControllerPhy::stateBusy2Rx(int id)
   if (debug_)
   {
     std::cout << NOW << " ControllerPhy::stateBusy2Rx(id), state_info: " 
-              << state_info[current_state] << "id = " << id << std::endl;
+              << state_info[current_state] << " id = " << id << std::endl;
   }
   current_state = UWPHY_CONTROLLER_STATE_BUSY_2_RX;
   receiving_id = id;
@@ -147,7 +151,7 @@ void UwMultiStackControllerPhy::stateBusy2Tx(Packet *p)
     std::cout << NOW << " ControllerPhy::stateBusy2Tx(), state_info: " 
               << state_info[current_state] << std::endl;
   }
-  
+  assert(current_state == UWPHY_CONTROLLER_STATE_IDLE);
   current_state = UWPHY_CONTROLLER_STATE_BUSY_2_TX;
   recvFromUpperLayers(p);
 }

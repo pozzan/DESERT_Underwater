@@ -77,6 +77,7 @@ public:
 protected:
   // Variables
   int slave_lower_layer_;
+  
   /** 
    * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.
    * It has to be overload in the extended classes to implement the choice rule.
@@ -85,7 +86,7 @@ protected:
    *
    * @return id of the module representing the best layer
   **/
-  virtual inline int  getBestLayer(Packet *p) { return  slave_lower_layer_; }
+  virtual int getBestLayer(Packet *p);
 
   /** 
    * It implements the slave choice rule to choose the lower layer when the system works 

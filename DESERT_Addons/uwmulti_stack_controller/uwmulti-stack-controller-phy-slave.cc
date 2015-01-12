@@ -76,6 +76,12 @@ void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc)
   UwMultiStackControllerPhy::recv(p, idSrc);
 }
 
+int UwMultiStackControllerPhySlave::getBestLayer(Packet *p) { 
+    assert(switch_mode_ == UW_AUTOMATIC_SWITCH);
+    lower_id_active_ = slave_lower_layer_; 
+    return  slave_lower_layer_; 
+  }
+
 void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc)
 {
   hdr_mac* mach = HDR_MAC(p);
@@ -83,7 +89,10 @@ void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc)
   sendSyncClMsg(&msg);
   if (mach->macDA() == msg.getAddr())
   {
-    //std::cout << NOW << " " << msg.getAddr() << ": " << slave_lower_layer_ << "-->" << idSrc << std::endl;
+    if (debug_)
+    {
+      std::cout << NOW << " " << msg.getAddr() << ": " << slave_lower_layer_ << " --> " << idSrc << std::endl;
+    }
     slave_lower_layer_ = idSrc;
   }
 }

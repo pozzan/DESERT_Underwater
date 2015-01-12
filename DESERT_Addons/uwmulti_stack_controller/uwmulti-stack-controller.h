@@ -149,9 +149,9 @@ protected:
    * 
    * @param p pointer to the packet
    *
-   * @return id of the module representing the best layer ///@fgue what if there is no layer id active?
+   * @return id of the module representing the best layer. ///@fgue what if there is no layer id active?
   */
-  virtual inline int  getBestLayer(Packet *p) { return  lower_id_active_;}
+  virtual inline int  getBestLayer(Packet *p) { assert(switch_mode_ == UW_AUTOMATIC_SWITCH); return  lower_id_active_;}
 
   /** 
    * return if the specified layer, identified by id, is available
