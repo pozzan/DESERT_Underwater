@@ -45,7 +45,7 @@
 
 static class UwOpticalMPropagationClass : public TclClass {
 public:
-  UwOpticalMPropagationClass() : TclClass("MPropagation/UW/Optical") {}
+  UwOpticalMPropagationClass() : TclClass("Module/UW/OPTICAL/Propagation") {}
   TclObject* create(int, const char*const*) {
     return (new UwOpticalMPropagation);
   }
