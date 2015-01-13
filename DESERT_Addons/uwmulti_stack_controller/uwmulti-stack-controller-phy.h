@@ -39,6 +39,7 @@
 #define UWOPTICAL_ACOUSTIC_CONTROLLER_PHY_H
 
 #include "uwmulti-stack-controller.h"
+#include "phymac-clmsg.h"
 
 #include <map>
 #include <string>

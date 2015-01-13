@@ -36,7 +36,6 @@
  */
 
 #include "uwmulti-stack-controller-phy.h"
-#include "phymac-clmsg.h"
 
 static class UwMultiStackControllerPhyClass : public TclClass {
 public:
@@ -81,9 +80,13 @@ int UwMultiStackControllerPhy::command(int argc, const char*const* argv)
 
 int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m) 
 {
+  int mac_addr = -1;
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  mac_addr = msg.getAddr();
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhy::recvSyncClMsg(ClMessage* m), state_info: " 
+    std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recvSyncClMsg(ClMessage* m), state_info: " 
               << state_info[current_state] << std::endl;
   }
   
@@ -105,7 +108,7 @@ int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m)
     {
       if (debug_)
       {
-        std::cout <<"ControllerPhy::recvSyncClMsg(ClMessage* m), nothing done."<<std::endl;
+        std::cout <<"ControllerPhy("<< mac_addr <<")::recvSyncClMsg(ClMessage* m), nothing done."<<std::endl;
       }
       return 0;
     }
@@ -124,9 +127,13 @@ int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m)
 
 void UwMultiStackControllerPhy::stateIdle() 
 {
+  int mac_addr = -1;
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  mac_addr = msg.getAddr();
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhy::stateIdle(), state_info: " << state_info[current_state] 
+    std::cout << NOW << " ControllerPhy("<< mac_addr <<")::stateIdle(), state_info: " << state_info[current_state] 
               << std::endl;
   }
   current_state = UWPHY_CONTROLLER_STATE_IDLE;
@@ -135,10 +142,14 @@ void UwMultiStackControllerPhy::stateIdle()
 
 void UwMultiStackControllerPhy::stateBusy2Rx(int id) 
 {
+  int mac_addr = -1;
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  mac_addr = msg.getAddr();
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhy::stateBusy2Rx(id), state_info: " 
-              << state_info[current_state] << " id = " << id << std::endl;
+    std::cout << NOW << " ControllerPhy("<< mac_addr <<")::stateBusy2Rx(id), state_info: " 
+              << state_info[current_state] << " phy_id = " << id << std::endl;
   }
   current_state = UWPHY_CONTROLLER_STATE_BUSY_2_RX;
   receiving_id = id;
@@ -146,9 +157,13 @@ void UwMultiStackControllerPhy::stateBusy2Rx(int id)
 
 void UwMultiStackControllerPhy::stateBusy2Tx(Packet *p) 
 {
+  int mac_addr = -1;
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  mac_addr = msg.getAddr();
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhy::stateBusy2Tx(), state_info: " 
+    std::cout << NOW << " ControllerPhy("<< mac_addr <<")::stateBusy2Tx(), state_info: " 
               << state_info[current_state] << std::endl;
   }
   assert(current_state == UWPHY_CONTROLLER_STATE_IDLE);

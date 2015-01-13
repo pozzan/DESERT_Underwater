@@ -40,7 +40,8 @@
 #define UWOPTICAL_ACOUSTIC_CONTROLLER_MASTER_H
 
 #include "uwmulti-stack-controller-phy.h"
-
+#include <mac.h>
+ 
 class UwMultiStackControllerPhyMaster : public UwMultiStackControllerPhy {
 
 

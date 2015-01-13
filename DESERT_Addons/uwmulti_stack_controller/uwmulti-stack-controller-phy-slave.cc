@@ -37,9 +37,6 @@
 
 #include "uwmulti-stack-controller-phy-slave.h"
 
-#include <mac.h>
-#include <phymac-clmsg.h>
-
 static class UwMultiStackControllerPhySlaveClass : public TclClass {
 public:
     UwMultiStackControllerPhySlaveClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE") {}
@@ -77,21 +74,36 @@ void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc)
 }
 
 int UwMultiStackControllerPhySlave::getBestLayer(Packet *p) { 
-    assert(switch_mode_ == UW_AUTOMATIC_SWITCH);
-    lower_id_active_ = slave_lower_layer_; 
-    return  slave_lower_layer_; 
+  assert(switch_mode_ == UW_AUTOMATIC_SWITCH);
+
+  int mac_addr = -1;
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  mac_addr = msg.getAddr();
+
+  if (debug_)
+  {
+    std::cout << NOW << " ControllerPhySlave("<< mac_addr <<")::getBestLayer(Packet *p) "<< std::endl;
+  }
+  lower_id_active_ = slave_lower_layer_; 
+
+  return  slave_lower_layer_; 
   }
 
 void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc)
 {
+  int mac_addr = -1;
   hdr_mac* mach = HDR_MAC(p);
   ClMsgPhy2MacAddr msg;
   sendSyncClMsg(&msg);
-  if (mach->macDA() == msg.getAddr())
+  mac_addr = msg.getAddr();
+
+  if (mach->macDA() == mac_addr)
   {
     if (debug_)
     {
-      std::cout << NOW << " " << msg.getAddr() << ": " << slave_lower_layer_ << " --> " << idSrc << std::endl;
+      std::cout << NOW << "ControllerPhySlave("<< mac_addr <<")::updateSlave " 
+                << msg.getAddr() << ": " << slave_lower_layer_ << " --> " << idSrc << std::endl;
     }
     slave_lower_layer_ = idSrc;
   }
