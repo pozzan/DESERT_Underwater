@@ -34,8 +34,8 @@ lib_LTLIBRARIES = libuwcsmaalohatrigger.la
 libuwcsmaalohatrigger_la_SOURCES = initlib.cc \
 				     uw-csma-aloha-trigger-sink.cc \
 				     uw-csma-aloha-trigger-sink.h \
-		                     uw-csma-aloha-triggered-node.cc \
-                                     uw-csma-aloha-triggered-node.h
+		                     uw-csma-aloha-trigger-node.cc \
+                                     uw-csma-aloha-trigger-node.h
 
 libuwcsmaalohatrigger_la_CPPFLAGS = 	@NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
 libuwcsmaalohatrigger_la_LDFLAGS = 	@NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@

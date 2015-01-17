@@ -31,53 +31,49 @@
  * @author Federico Favaro
  * @version 1.0.0
  *
- * \brief Provides the implementation of UwCsmaAloha_Triggered_NODE class
+ * \brief Provides the implementation of UwCsmaAloha_Trigger_NODE class
  *
  */
 
 
-#include "uw-csma-aloha-triggered-node.h"
-#include <mac.h>
-#include <cmath>
-#include <climits>
-#include <iomanip>
-#include <rng.h>
+#include "uw-csma-aloha-trigger-node.h"
+
 
 enum {
     NOT_SET = -1, SESSION_DISTANCE_NOT_SET = 0
 };
 
-static class UwCsmaAloha_Triggered_NODEModuleClass : public TclClass {
+static class UwCsmaAloha_Trigger_NODEModuleClass : public TclClass {
 public:
 
-    UwCsmaAloha_Triggered_NODEModuleClass() : TclClass("Module/UW/CSMA_ALOHA/TRIGGER/NODE") {
+    UwCsmaAloha_Trigger_NODEModuleClass() : TclClass("Module/UW/CSMA_ALOHA/TRIGGER/NODE") {
     }
 
     TclObject* create(int, const char*const*) {
-        return (new UwCsmaAloha_Triggered_NODE());
+        return (new UwCsmaAloha_Trigger_NODE());
     }
 } class_module_uw_csma_aloha_triggered_node;
 
-void UwCsmaAloha_Triggered_NODE::ListenTimer::expire(Event *e) {
+void UwCsmaAloha_Trigger_NODE::ListenTimer::expire(Event *e) {
     timer_status = UW_CS_ALOHA_TRIG_NODE_EXPIRED;
 
     if (module->curr_state == UW_CS_ALOHA_TRIG_NODE_STATE_LISTEN) {
 
-        if (module->debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << module->addr << ") timer expire() current state = "
+        if (module->debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << module->addr << ") timer expire() current state = "
                 << module->status_info[module->curr_state] << "; listening period expired, next state = "
                 << module->status_info[UW_CS_ALOHA_TRIG_NODE_STATE_TX_DATA] << endl;
 
         module->refreshReason(UW_CS_ALOHA_TRIG_NODE_REASON_LISTEN_TIMEOUT);
         module->stateTxData();
     } else {
-        if (module->debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << module->addr << ")::ListenTimer::expired() " << endl;
+        if (module->debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << module->addr << ")::ListenTimer::expired() " << endl;
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::TransmissionTimer::expire(Event *e) {
+void UwCsmaAloha_Trigger_NODE::TransmissionTimer::expire(Event *e) {
     timer_status = UW_CS_ALOHA_TRIG_NODE_EXPIRED;
     if (module->can_transmit == true) {
-        if (module->debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << module->addr << ") Transmission timer expire() current state = "
+        if (module->debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << module->addr << ") Transmission timer expire() current state = "
                 << module->status_info[module->curr_state] << endl;
         module->can_transmit = false;
     } else {
@@ -86,22 +82,21 @@ void UwCsmaAloha_Triggered_NODE::TransmissionTimer::expire(Event *e) {
 }
 
 
-const double UwCsmaAloha_Triggered_NODE::prop_speed = 1500.0;
-int UwCsmaAloha_Triggered_NODE::u_pkt_id;
-bool UwCsmaAloha_Triggered_NODE::initialized = false;
+const double UwCsmaAloha_Trigger_NODE::prop_speed = 1500.0;
+int UwCsmaAloha_Trigger_NODE::u_pkt_id;
+bool UwCsmaAloha_Trigger_NODE::initialized = false;
 
 
-map< UwCsmaAloha_Triggered_NODE::UW_CS_ALOHA_TRIG_NODE_STATUS, string> UwCsmaAloha_Triggered_NODE::status_info;
-map< UwCsmaAloha_Triggered_NODE::UW_CS_ALOHA_TRIG_NODE_REASON_STATUS, string> UwCsmaAloha_Triggered_NODE::reason_info;
+map< UwCsmaAloha_Trigger_NODE::UW_CS_ALOHA_TRIG_NODE_STATUS, string> UwCsmaAloha_Trigger_NODE::status_info;
+map< UwCsmaAloha_Trigger_NODE::UW_CS_ALOHA_TRIG_NODE_REASON_STATUS, string> UwCsmaAloha_Trigger_NODE::reason_info;
 
-UwCsmaAloha_Triggered_NODE::UwCsmaAloha_Triggered_NODE()
+UwCsmaAloha_Trigger_NODE::UwCsmaAloha_Trigger_NODE()
 : listen_timer(this),
 tx_timer(this),
 u_data_id(0),
 last_sent_data_id(-1),
 curr_data_pkt(0),
 last_data_id_rx(NOT_SET),
-print_transitions(false),
 has_buffer_queue(false),
 curr_state(UW_CS_ALOHA_TRIG_NODE_STATE_IDLE),
 prev_state(UW_CS_ALOHA_TRIG_NODE_STATE_IDLE),
@@ -122,21 +117,17 @@ last_reason(UW_CS_ALOHA_TRIG_NODE_REASON_NOT_SET)
     if (listen_time <= 0.0) listen_time = 1e-19;
 }
 
-UwCsmaAloha_Triggered_NODE::~UwCsmaAloha_Triggered_NODE() {
+UwCsmaAloha_Trigger_NODE::~UwCsmaAloha_Trigger_NODE() {
 
 }
 
 // TCL command interpreter
 
-int UwCsmaAloha_Triggered_NODE::command(int argc, const char*const* argv) {
+int UwCsmaAloha_Trigger_NODE::command(int argc, const char*const* argv) {
     Tcl& tcl = Tcl::instance();
     if (argc == 2) {
         if (strcasecmp(argv[1], "initialize") == 0) {
-            if (initialized == false) initInfo();
-            if (print_transitions) fout.open("/tmp/ALOHAstateTransitions.txt", ios_base::app);
-            return TCL_OK;
-        } else if (strcasecmp(argv[1], "printTransitions") == 0) {
-            print_transitions = true;
+            initInfo();
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getQueueSize") == 0) {
             tcl.resultf("%d", Q.size());
@@ -146,7 +137,7 @@ int UwCsmaAloha_Triggered_NODE::command(int argc, const char*const* argv) {
     return MMac::command(argc, argv);
 }
 
-int UwCsmaAloha_Triggered_NODE::crLayCommand(ClMessage* m) {
+int UwCsmaAloha_Trigger_NODE::crLayCommand(ClMessage* m) {
     switch (m->type()) {
 
         default:
@@ -154,21 +145,9 @@ int UwCsmaAloha_Triggered_NODE::crLayCommand(ClMessage* m) {
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::initInfo() {
+void UwCsmaAloha_Trigger_NODE::initInfo() {
 
     initialized = true;
-
-    if ((print_transitions) && (system(NULL))) 
-    {
-        if (! system("rm -f /tmp/UW_CSMA_ALOHA_TRIGGERED_NODE.txt"))
-        {
-            std::cerr << "Cannot rm -f /tmp/UW_CSMA_ALOHA_TRIGGERED_NODE.txt";
-        }
-        if (! system("touch /tmp/UW_CSMA_ALOHA_TRIGGERED_NODE.txt") )
-        {
-            std::cerr << "Cannot touch /tmp/UW_CSMA_ALOHA_TRIGGERED_NODE.txt";
-        }
-    }
 
     status_info[UW_CS_ALOHA_TRIG_NODE_STATE_IDLE] = "Idle state";
     status_info[UW_CS_ALOHA_TRIG_NODE_STATE_TX_DATA] = "Transmit DATA state";
@@ -197,7 +176,7 @@ void UwCsmaAloha_Triggered_NODE::initInfo() {
 
 
 
-void UwCsmaAloha_Triggered_NODE::recvFromUpperLayers(Packet* p) {
+void UwCsmaAloha_Trigger_NODE::recvFromUpperLayers(Packet* p) {
     if ((has_buffer_queue == true) && ((Q.size()) < (buffer_pkts)) || (has_buffer_queue == false)) {
         initPkt(p);
         Q.push(p);
@@ -218,7 +197,7 @@ void UwCsmaAloha_Triggered_NODE::recvFromUpperLayers(Packet* p) {
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::initPkt(Packet* p) {
+void UwCsmaAloha_Trigger_NODE::initPkt(Packet* p) {
     hdr_cmn* ch = hdr_cmn::access(p);
     int curr_size = ch->size();
 
@@ -227,16 +206,16 @@ void UwCsmaAloha_Triggered_NODE::initPkt(Packet* p) {
     u_data_id++;
 }
 
-void UwCsmaAloha_Triggered_NODE::Mac2PhyStartTx(Packet* p) {
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::Mac2PhyStartTx() start tx packet" << endl;
+void UwCsmaAloha_Trigger_NODE::Mac2PhyStartTx(Packet* p) {
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::Mac2PhyStartTx() start tx packet" << endl;
 
     MMac::Mac2PhyStartTx(p);
 }
 
-void UwCsmaAloha_Triggered_NODE::Phy2MacEndTx(const Packet* p) {
+void UwCsmaAloha_Trigger_NODE::Phy2MacEndTx(const Packet* p) {
 
 
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::Phy2MacEndTx() end tx packet" << endl;
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::Phy2MacEndTx() end tx packet" << endl;
 
     switch (curr_state) {
 
@@ -244,7 +223,7 @@ void UwCsmaAloha_Triggered_NODE::Phy2MacEndTx(const Packet* p) {
         {
             refreshReason(UW_CS_ALOHA_TRIG_NODE_REASON_DATA_TX);
 
-            if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::Phy2MacEndTx() DATA sent, from "
+            if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::Phy2MacEndTx() DATA sent, from "
                     << status_info[curr_state] << " to " << status_info[UW_CS_ALOHA_TRIG_NODE_STATE_IDLE] << endl;
 
             stateIdle();
@@ -253,7 +232,7 @@ void UwCsmaAloha_Triggered_NODE::Phy2MacEndTx(const Packet* p) {
 
         default:
         {
-            cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::Phy2MacEndTx() logical error, current state = "
+            cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::Phy2MacEndTx() logical error, current state = "
                     << status_info[curr_state] << endl;
         }
             break;
@@ -262,8 +241,8 @@ void UwCsmaAloha_Triggered_NODE::Phy2MacEndTx(const Packet* p) {
 
 }
 
-void UwCsmaAloha_Triggered_NODE::Phy2MacStartRx(const Packet* p) {
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::Phy2MacStartRx() rx Packet " << endl;
+void UwCsmaAloha_Trigger_NODE::Phy2MacStartRx(const Packet* p) {
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::Phy2MacStartRx() rx Packet " << endl;
 
     refreshReason(UW_CS_ALOHA_TRIG_NODE_REASON_START_RX);
 
@@ -278,14 +257,14 @@ void UwCsmaAloha_Triggered_NODE::Phy2MacStartRx(const Packet* p) {
             break;
         default:
         {
-            if (debug_) std::cerr << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::Phy2MacStartRx() logical warning, current state = "
+            if (debug_) std::cerr << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::Phy2MacStartRx() logical warning, current state = "
                     << status_info[curr_state] << std::endl;
         }
 
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::Phy2MacEndRx(Packet* p) {
+void UwCsmaAloha_Trigger_NODE::Phy2MacEndRx(Packet* p) {
     hdr_cmn* ch = HDR_CMN(p);
     packet_t rx_pkt_type = ch->ptype();
     hdr_mac* mach = HDR_MAC(p);
@@ -299,7 +278,7 @@ void UwCsmaAloha_Triggered_NODE::Phy2MacEndRx(Packet* p) {
 
     double distance = diff_time * prop_speed;
 
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::Phy2MacEndRx() "
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::Phy2MacEndRx() "
             << status_info[curr_state] << ", received a pkt type = "
             << ch->ptype() << ", src addr = " << mach->macSA()
         << " dest addr = " << mach->macDA()
@@ -307,7 +286,7 @@ void UwCsmaAloha_Triggered_NODE::Phy2MacEndRx(Packet* p) {
 
     if (ch->error()) {
 
-        if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::Phy2MacEndRx() dropping corrupted pkt " << endl;
+        if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::Phy2MacEndRx() dropping corrupted pkt " << endl;
         incrErrorPktsRx();
 
         refreshReason(UW_CS_ALOHA_TRIG_NODE_REASON_PKT_ERROR);
@@ -329,7 +308,7 @@ void UwCsmaAloha_Triggered_NODE::Phy2MacEndRx(Packet* p) {
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::stateRxTrigger(Packet* p) {
+void UwCsmaAloha_Trigger_NODE::stateRxTrigger(Packet* p) {
     if (debug_) cout << NOW << "Csma_Aloha_NODE(" << addr << ")::stateRxTrigger---> can_transmit" << can_transmit << endl;
     if (can_transmit == false) {
         refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_RX_TRIGGER);
@@ -344,7 +323,7 @@ void UwCsmaAloha_Triggered_NODE::stateRxTrigger(Packet* p) {
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::txData() {
+void UwCsmaAloha_Trigger_NODE::txData() {
     Packet* data_pkt = curr_data_pkt->copy();
     queuePop();
 
@@ -352,8 +331,8 @@ void UwCsmaAloha_Triggered_NODE::txData() {
     Mac2PhyStartTx(data_pkt);
 }
 
-void UwCsmaAloha_Triggered_NODE::stateRxPacketNotForMe(Packet* p) {
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateRxPacketNotForMe() pkt for another address. Dropping pkt" << endl;
+void UwCsmaAloha_Trigger_NODE::stateRxPacketNotForMe(Packet* p) {
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateRxPacketNotForMe() pkt for another address. Dropping pkt" << endl;
     if (p != NULL) Packet::free(p);
 
     refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_WRONG_PKT_RX);
@@ -369,18 +348,17 @@ void UwCsmaAloha_Triggered_NODE::stateRxPacketNotForMe(Packet* p) {
             break;
 
         default:
-            if (debug_) cerr << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateRxPacketNotForMe() logical error, prev state = "
+            if (debug_) cerr << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateRxPacketNotForMe() logical error, prev state = "
                     << status_info[prev_state] << endl;
             //exit(1);
 
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::stateCheckListenExpired() {
+void UwCsmaAloha_Trigger_NODE::stateCheckListenExpired() {
     refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_CHK_LISTEN_TIMEOUT);
 
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateCheckListenExpired()" << endl;
-    if (print_transitions) printStateInfo();
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateCheckListenExpired()" << endl;
     if (listen_timer.isActive()) {
         refreshReason(UW_CS_ALOHA_TRIG_NODE_REASON_LISTEN_PENDING);
         refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_LISTEN);
@@ -389,22 +367,21 @@ void UwCsmaAloha_Triggered_NODE::stateCheckListenExpired() {
         if (!(prev_state == UW_CS_ALOHA_TRIG_NODE_STATE_WRONG_PKT_RX || prev_state == UW_CS_ALOHA_TRIG_NODE_STATE_DATA_RX)) stateTxData();
         else stateListen();
     } else {
-        if (debug_) cerr << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateCheckListenExpired() listen_timer logical error, current timer state = "
+        if (debug_) cerr << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateCheckListenExpired() listen_timer logical error, current timer state = "
                 << status_info[curr_state] << endl;
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::stateCheckTxTimerExpired() {
+void UwCsmaAloha_Trigger_NODE::stateCheckTxTimerExpired() {
 }
 
-void UwCsmaAloha_Triggered_NODE::stateIdle() {
+void UwCsmaAloha_Trigger_NODE::stateIdle() {
     listen_timer.stop();
 
     refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_IDLE);
 
-    if (print_transitions) printStateInfo();
 
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateIdle() queue size = " << Q.size() << endl;
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateIdle() queue size = " << Q.size() << endl;
     ////////////////
     if (can_transmit) {
         if (!Q.empty()) {
@@ -415,13 +392,12 @@ void UwCsmaAloha_Triggered_NODE::stateIdle() {
     ///////////////////
 }
 
-void UwCsmaAloha_Triggered_NODE::stateRxIdle() {
+void UwCsmaAloha_Trigger_NODE::stateRxIdle() {
     refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_RX_IDLE);
 
-    if (print_transitions) printStateInfo();
 }
 
-void UwCsmaAloha_Triggered_NODE::stateListen() {
+void UwCsmaAloha_Trigger_NODE::stateListen() {
     listen_timer.stop();
     refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_LISTEN);
 
@@ -429,26 +405,23 @@ void UwCsmaAloha_Triggered_NODE::stateListen() {
 
     double time = listen_time * RNG::defaultrng()->uniform_double() + wait_costant;
 
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateListen() listen time = " << time << endl;
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateListen() listen time = " << time << endl;
 
-    if (print_transitions) printStateInfo();
 
     listen_timer.schedule(time);
 }
 
-void UwCsmaAloha_Triggered_NODE::stateRxListen() {
+void UwCsmaAloha_Trigger_NODE::stateRxListen() {
     refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_RX_LISTEN);
 
-    if (print_transitions) printStateInfo();
 }
 
-void UwCsmaAloha_Triggered_NODE::stateTxData() {
+void UwCsmaAloha_Trigger_NODE::stateTxData() {
     if (can_transmit) {
         refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_TX_DATA);
 
 
-        if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateTxData() " << endl;
-        if (print_transitions) printStateInfo();
+        if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateTxData() " << endl;
 
         curr_data_pkt = Q.front();
 
@@ -458,14 +431,14 @@ void UwCsmaAloha_Triggered_NODE::stateTxData() {
         last_sent_data_id = data_sn_queue.front();
         txData();
     } else {
-        if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateTxData() ---> Not Allowed To Transmit " << endl;
+        if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateTxData() ---> Not Allowed To Transmit " << endl;
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::stateRxData(Packet* data_pkt) {
+void UwCsmaAloha_Trigger_NODE::stateRxData(Packet* data_pkt) {
     refreshState(UW_CS_ALOHA_TRIG_NODE_STATE_DATA_RX);
 
-    if (debug_) cout << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::stateRxData() " << endl;
+    if (debug_) cout << NOW << "  UwCsmaAloha_Trigger_NODE(" << addr << ")::stateRxData() " << endl;
     refreshReason(UW_CS_ALOHA_TRIG_NODE_REASON_DATA_RX);
 
 
@@ -495,23 +468,14 @@ void UwCsmaAloha_Triggered_NODE::stateRxData(Packet* data_pkt) {
 
         default:
 
-            if (debug_) cerr << NOW << " UwCsmaAloha_Triggered_NODE(" << addr << ")::stateRxData() logical error, prev state = " << status_info[prev_state]
+            if (debug_) cerr << NOW << " UwCsmaAloha_Trigger_NODE(" << addr << ")::stateRxData() logical error, prev state = " << status_info[prev_state]
                     << endl;
 
     }
 }
 
-void UwCsmaAloha_Triggered_NODE::printStateInfo(double delay) {
-    if (debug_) cout << NOW << " UwCsmaAloha_Triggered_NODE(" << addr << ")::printStateInfo() " << "from " << status_info[prev_state]
-            << " to " << status_info[curr_state] << ". Reason: " << reason_info[last_reason] << endl;
 
-
-    fout << left << setw(10) << NOW << "  UwCsmaAloha_Triggered_NODE(" << addr << ")::printStateInfo() "
-            << "from " << status_info[prev_state]
-            << " to " << status_info[curr_state] << ". Reason: " << reason_info[last_reason] << endl;
-}
-
-void UwCsmaAloha_Triggered_NODE::waitForUser() {
+void UwCsmaAloha_Trigger_NODE::waitForUser() {
     std::string response;
     std::cout << "Press Enter to continue";
     std::getline(std::cin, response);
