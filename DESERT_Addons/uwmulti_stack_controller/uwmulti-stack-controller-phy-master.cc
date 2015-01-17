@@ -37,8 +37,6 @@
 
 #include "uwmulti-stack-controller-phy-master.h"
 
-#include <mac.h>
-#include <phymac-clmsg.h>
 #include <mphy_pktheader.h>
 
 static class UwMultiStackControllerPhyMasterClass : public TclClass 
@@ -108,9 +106,15 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
 {
   //TODO: define if doing it directly for doubble physical or in a more general way.
   assert(switch_mode_ == UW_AUTOMATIC_SWITCH);
+
+  int mac_addr = -1;
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  mac_addr = msg.getAddr();
+
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhyMaster::getBestLayer(Packet *p), power_statistics_=" 
+    std::cout << NOW << " ControllerPhyMaster("<< mac_addr <<")::getBestLayer(Packet *p), power_statistics_=" 
               << power_statistics_ << std::endl;
   }
   
@@ -134,18 +138,23 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
 
 void UwMultiStackControllerPhyMaster::updateMasterStatistics(Packet *p, int idSrc)
 {
-  hdr_mac* mach = HDR_MAC(p);
-  hdr_MPhy* ph = HDR_MPHY(p);
+  int mac_addr = -1;
   ClMsgPhy2MacAddr msg;
   sendSyncClMsg(&msg);
+  mac_addr = msg.getAddr();
+
+  hdr_mac* mach = HDR_MAC(p);
+  hdr_MPhy* ph = HDR_MPHY(p);
+
+
   
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhyMaster::updateMasterStatistics(Packet *p, int idSrc), Pr = " 
+    std::cout << NOW << " ControllerPhyMaster("<< mac_addr <<")::updateMasterStatistics(Packet *p, int idSrc), Pr = " 
               << ph->Pr << std::endl;
   }
   
-  if (mach->macDA() == msg.getAddr() && idSrc == last_layer_used_)
+  if (mach->macDA() == mac_addr && idSrc == last_layer_used_)
   {
     power_statistics_ = power_statistics_ ? (1-alpha_)*power_statistics_ + alpha_*ph->Pr : ph->Pr;
   }
