@@ -127,7 +127,7 @@ AC_CONFIG_FILES([
     data_link/uwsr/Makefile
     data_link/uw-t-lohi/Makefile
     data_link/uwUFetch/Makefile
-    data_link/uw-csma-aloha-triggered/Makefile
+    data_link/uw-csma-aloha-trigger/Makefile
     physical/uwmphy_modem/Makefile
     physical/ms2c_evologics/Makefile
     physical/uwmphypatch/Makefile
