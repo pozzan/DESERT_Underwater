@@ -51,7 +51,7 @@ SUBDIRS = m4 \
     data_link/uwsr \
     data_link/uw-t-lohi \
     data_link/uwUFetch \
-    data_link/uw-csma-aloha-triggered \
+    data_link/uw-csma-aloha-trigger \
     physical/uwphysical \
     physical/uwgainfromdb \
     physical/uwphysicaldb\
