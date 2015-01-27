@@ -44,8 +44,7 @@
 
 // constants initialization
 
-const string UwOpticalMPropagation::file_name_ = "optical_LUT.txt";
-const char UwOpticalMPropagation::token_separator_ = ',';
+//const string UwOpticalMPropagation::file_name_ = "optical_LUT.txt";
 
 static class UwOpticalMPropagationClass : public TclClass {
 public:
@@ -58,8 +57,35 @@ public:
 
 UwOpticalMPropagation::UwOpticalMPropagation()
 :
-MPropagation()
+MPropagation(),
+file_name_("optical_LUT.txt"),
+token_separator_('\t')
 {
+  bind_error("token_separator_", &token_separator_);
+}
+
+int UwOpticalMPropagation::command(int argc, const char*const* argv){
+  if (argc == 3) {
+    if (strcasecmp(argv[1], "setFileName") == 0) {
+      string tmp_ = ((char *) argv[2]);
+      if (tmp_.size() == 0) {
+          fprintf(stderr, "Empty string for the file name");
+          return TCL_ERROR;
+      }
+      file_name_ = tmp_;
+      return TCL_OK;
+    } 
+    else if (strcasecmp(argv[1], "setSeparator") == 0) {
+      string tmp_ = ((char *) argv[2]);
+      if (tmp_.size() == 0) {
+          fprintf(stderr, "Empty char for the file name");
+          return TCL_ERROR;
+      }
+      token_separator_ = tmp_.at(0);
+      return TCL_OK;
+    }
+  }
+  return MPropagation::command(argc, argv);
 }
 
 double UwOpticalMPropagation::getGain(Packet* p)
