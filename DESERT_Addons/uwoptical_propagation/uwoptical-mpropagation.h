@@ -41,8 +41,10 @@
 #ifndef UWOPTICAL_MPROPAGATION_H 
 #define UWOPTICAL_MPROPAGATION_H
 
-#include<mpropagation.h>
-#include<mphy.h>
+#include <mpropagation.h>
+#include <mphy.h>
+#include <fstream>
+#include <sstream>
 
 
 class UwOpticalMPropagation : public MPropagation
@@ -58,6 +60,9 @@ public:
 
 protected:
   virtual double lookUpGain(double d, double angle);
+
+  static const string file_name_;
+  static const char token_separator_;
   
 };
 

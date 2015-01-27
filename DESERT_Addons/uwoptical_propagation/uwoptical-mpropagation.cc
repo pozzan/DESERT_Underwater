@@ -41,7 +41,11 @@
 #include<node-core.h>
 #include<iostream>
 #include"uwoptical-mpropagation.h"
-//#include"uwlib.h"
+
+// constants initialization
+
+const string UwOpticalMPropagation::file_name_ = "optical_LUT.txt";
+const char UwOpticalMPropagation::token_separator_ = ',';
 
 static class UwOpticalMPropagationClass : public TclClass {
 public:
@@ -87,5 +91,28 @@ double UwOpticalMPropagation::getGain(Packet* p)
 
 double UwOpticalMPropagation::lookUpGain(double d, double angle){
 	//TODO: search gain in the lookup table
+  ifstream input_file_;
+  istringstream stm;
+  string line_;
+  string token_;
+  double return_value_;
+
+  char* tmp_ = new char[file_name_.length() + 1];
+  strcpy(tmp_, file_name_.c_str());
+  input_file_.open(tmp_);
+  if (input_file_.is_open()) {
+    while (std::getline(input_file_, line_)) {
+      //TODO: retrive the right row and break the loop
+    }
+  } else {
+    cerr << "Impossible to open file " << file_name_ << endl;
+  }
+  istringstream iss(line_);
+  while (getline(iss, token_, token_separator_)) {
+    //TODO: find the right column
+  }
+  stm.str(token_);
+  stm >> return_value_;
+  //return return_value_;
 	return 1.0;
 }
