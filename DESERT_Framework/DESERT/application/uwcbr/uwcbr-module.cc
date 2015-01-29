@@ -72,7 +72,6 @@ public:
     TclObject* create(int, const char*const*) {
         return (new UwCbrModule());
     }
-    const char* TclClass;
 } class_module_uwcbr;
 
 void UwSendTimer::expire(Event *e) {
