@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2013 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,44 +25,34 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @file   Makefile.am
+# @author Federico Favaro
+# @version 1.0.0
 
+AM_CXXFLAGS = -Wall -ggdb3
 
-DISTCHECK_CONFIGURE_FLAGS = @NS_ALLINONE_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NSMIRACLE_DISTCHECK_CONFIGURE_FLAGS@ 
+lib_LTLIBRARIES = libuwapplication.la
 
-ACLOCAL_AMFLAGS = -I m4 
+libuwapplication_la_SOURCES = initlib.cc \
+			      uwApplication_module.cc \
+			      uwApplication_TCP_socket.cc\
+			      uwApplication_UDP_socket.cc\
+			      uwApplication_module.h\
+			      uwApplication_cmn_header.h
+			 
+libuwapplication_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+libuwapplication_la_LDFLAGS = @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
+libuwapplication_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
 
-EXTRA_DIST = autogen.sh 
+nodist_libuwapplication_la_SOURCES = InitTcl.cc
+BUILT_SOURCES = InitTcl.cc
 
-SUBDIRS = m4 \
-    application/uwcbr \
-    application/uwvbr \
-    application/uwApplication \
-    transport/uwudp \
-    network/uwstaticrouting \
-    network/uwsun \
-    network/uwicrp \
-    network/uwip \
-    network/uwflooding \
-    data_link/uwmll \
-    data_link/uw-csma-aloha \
-    data_link/uwdacap \
-    data_link/uwpolling \
-    data_link/uwaloha \
-    data_link/uwsr \
-    data_link/uw-t-lohi \
-    data_link/uwUFetch \
-    data_link/uw-csma-aloha-triggered \
-    physical/uwphysical \
-    physical/uwgainfromdb \
-    physical/uwphysicaldb\
-    physical/uwmphy_modem \
-    physical/ms2c_evologics \
-    physical/uwmphypatch \
-    physical/uw-al \
-    physical/uw-al/packer_common \
-    physical/uw-al/packer_mac \
-    mobility/uwdriftposition \
-    mobility/uwgmposition \
-    interference/uwinterference
+CLEANFILES = InitTcl.cc
 
+TCL_FILES = uwApplication-defaults.tcl
+
+InitTcl.cc : Makefile $(TCL_FILES)
+	cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ uwApplicationInitTclCode > InitTcl.cc
+
+EXTRA_DIST = $(TCL_FILES)
