@@ -47,14 +47,20 @@
 #include <iostream>
 #include <string.h>
 #include <cmath>
-#include <limits>
 #include <climits>
 #include "controller-clmsg.h"
+
+typedef std::map <int, double> ThresMap;
+typedef std::map <int, ThresMap> ThresMatrix;
 
 class UwMultiStackController : public Module {
 
 
 public:
+
+  // constant definitions
+  static double const threshold_not_exist; // this constant is returned when a searched threshold does not exist
+  static int const layer_not_exist; // this constant is returned when a searched layer does not exist
 
   /**
    * Constructor of UwMultiPhy class.
@@ -70,21 +76,30 @@ public:
    * TCL command interpreter. It implements the following OTcl methods:
    *
    * @param argc Number of arguments in <i>argv</i>.
-   * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
+   * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> 
+   *             is the name of the object).
    *
    * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
    */
   virtual int command(int, const char*const*);
 
   /**
-   * Add a layer in the layer_map
+   * Add a layer in the layer map
    * 
    * @param id unique identifier of the module
-   * @param layer_name name of the module. The name should be unique
-   * @param target target of the module metrics
-   * @param hysteresis hysteresis of the module metrics
+   * @param order of the id in the controller logic
    */
-  virtual void addLayer(int id, const string& layer_name, double target, double hysteresis);
+  virtual void addLayer(int id, int order);
+
+  /** 
+   * set the threshold value for the transition from layer i to layer j, checking first whether
+   * the layers exists 
+   *
+   * @param i id of the layer i
+   * @param j id of the layer j
+   * @param thres_ij threshold to pass from i to j
+   */
+  virtual void addThreshold(int i, int j, double thres_ij);
 
   /**
    * recv method. It is called when a packet is received from the other layers
@@ -92,9 +107,28 @@ public:
    * @param Packet* Pointer to the packet that are going to be received
    */
   virtual void recv(Packet *p);
-
-
   
+  /** 
+   * return the order of the id for the controller logic
+   * 
+   * @param id to select the layer 
+   *
+   * @return the order of the id
+   */
+  int inline getOrder(int layer_id) { return id2order.find(layer_id)==id2order.end() ? 
+                                              UwMultiStackController::layer_not_exist :
+                                              id2order.find(layer_id)->second; }
+  
+  /** 
+   * return the id of the controlled layer given its order in the controller logic
+   * 
+   * @param order of the mapped layer
+   *
+   * @return the layer id
+   */
+  int inline getId(int layer_order) { return order2id.find(layer_order)==order2id.end() ? 
+                                              UwMultiStackController::layer_not_exist :
+                                              order2id.find(layer_order)->second; }
 protected:
   // Variables
   enum Mode
@@ -105,53 +139,30 @@ protected:
 
   int debug_;
   int min_delay_;
-  Mode switch_mode_;// AUTOMATIC or MANUAL MODE
+  Mode switch_mode_; // AUTOMATIC or MANUAL MODE
   int lower_id_active_; // used just in MANUAL MODE
 
-  class Stats
-  {
-    public:
-      Stats()
-      : layer_tag_(), ///@fgue provide default value via define
-        metrics_target_(), ///@fgue provide default value via define
-        hysteresis_size_() ///@fgue provide default value via define
-      { }
-      
-      Stats (const string& name, double metrics, double hysteresis) 
-      : layer_tag_(name),
-        metrics_target_(metrics),
-        hysteresis_size_(hysteresis)
-      { 
-
-      }
-      
-      virtual ~Stats() { }
-      
-      string layer_tag_;
-      double metrics_target_;
-      double hysteresis_size_;
-
-  };
-
-  std::map<int, Stats> layer_map; // layerid, stats
+  std::map<int, int> id2order; // layer_id, order
+	ThresMatrix threshold_map; // layer_order, thresholds
+  std::map<int, int> order2id; // layer_order, layer_id
 
   /** 
    * Handle a packet coming from upper layers
    * 
    * @param p pointer to the packet
-   */
+  */
   virtual void recvFromUpperLayers(Packet *p);
 
   /** 
    * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.
    * It has to be overloaded in the extended classes to implement the choice rule.
-   * 
-   * 
+   *  
    * @param p pointer to the packet
    *
    * @return id of the module representing the best layer. ///@fgue what if there is no layer id active?
   */
-  virtual inline int  getBestLayer(Packet *p) { assert(switch_mode_ == UW_AUTOMATIC_SWITCH); return  lower_id_active_;}
+  virtual inline int  getBestLayer(Packet *p) { assert(switch_mode_ == UW_AUTOMATIC_SWITCH); 
+                                                return  lower_id_active_; }
 
   /** 
    * return if the specified layer, identified by id, is available
@@ -172,6 +183,36 @@ protected:
    * @return the value of the new value of the metrics obtained in proactive way ///@fgue what happens if the requested id is not present?
    */
   virtual double getMetricFromSelectedLowerLayer(int id, Packet* p);
+  
+  /** 
+   * get the threshold value for the transition from layer i to layer j, checking first whether
+   * the layers exists 
+   *
+   * @param i id of the layer i
+   * @param j id of the layer j
+   *
+   * @return the threshold
+   */
+  virtual double getThreshold(int i, int j);
+  
+  /** 
+   * remove the threshold value for the transition from layer i to layer j, checking first whether
+   * the layers exists 
+   *
+   * @param i id of the layer i
+   * @param j id of the layer j
+   *
+   */
+  virtual void eraseThreshold(int i, int j);
+  
+  /** 
+   * set the threshold value for the transition from layer i to layer j
+   * 
+   * @param i id of the layer i
+   * @param j id of the layer j
+   * @param thres_ij threshold to pass from i to j
+   */
+  void inline setThreshold(int i, int j, double thres_ij) { threshold_map[i][j] = thres_ij; }
 
 private:
   //Variables

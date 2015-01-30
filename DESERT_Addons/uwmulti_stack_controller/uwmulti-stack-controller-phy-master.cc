@@ -49,12 +49,13 @@ static class UwMultiStackControllerPhyMasterClass : public TclClass
   }
 } class_uwmulti_stack_controller_phy_master;
 
+/*const double UwMultiStackControllerPhyMaster::min_value = -numeric_limits<double>::max();//-10*pow(10.0,100);
+const double UwMultiStackControllerPhyMaster::max_value = numeric_limits<double>::max();//10*pow(10.0,100);*/
+
 UwMultiStackControllerPhyMaster::UwMultiStackControllerPhyMaster() 
 : 
   UwMultiStackControllerPhy(),
   last_layer_used_(0),
-  short_range_layer_(0),
-  default_layer_(0),
   power_statistics_(0),
   alpha_(0.5)
 { 
@@ -63,7 +64,6 @@ UwMultiStackControllerPhyMaster::UwMultiStackControllerPhyMaster()
 
 int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv) 
 {
-  Tcl& tcl = Tcl::instance();
   if (argc == 3) 
   {
     if(strcasecmp(argv[1], "setAlpha") == 0)
@@ -71,30 +71,15 @@ int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv)
       alpha_ = atof(argv[2]);
       return TCL_OK;
     }
-    else if(strcasecmp(argv[1], "setDefaultId") == 0)
+		else if(strcasecmp(argv[1], "setManualLowerlId") == 0)
     {
-      default_layer_ = atoi(argv[2]);
-      last_layer_used_ = default_layer_;
-      return TCL_OK;
-    }
-    else if(strcasecmp(argv[1], "setShortRangeId") == 0)
-    {
-      short_range_layer_ = atoi(argv[2]);
-      return TCL_OK;
-    }
+      lower_id_active_ = atoi(argv[2]);
+      last_layer_used_ = lower_id_active_;
+			return TCL_OK;
+		}
   }
   return UwMultiStackControllerPhy::command(argc, argv);     
 } /* UwMultiStackControllerPhyMaster::command */
-
-void UwMultiStackControllerPhyMaster::addLayer(int id, const string& layer_name, double target, double hysteresis)
-{
-  layer_map.erase(id);
-  
-  if (layer_map.size() < 2)
-  {
-    UwMultiStackController::addLayer(id, layer_name, target, hysteresis);
-  }
-}
 
 void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
 {
@@ -111,28 +96,29 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
   ClMsgPhy2MacAddr msg;
   sendSyncClMsg(&msg);
   mac_addr = msg.getAddr();
-
+  
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhyMaster("<< mac_addr <<")::getBestLayer(Packet *p), power_statistics_=" 
+    std::cout << NOW << " ControllerPhyMaster("<< mac_addr 
+              <<")::getBestLayer(Packet *p), power_statistics_=" 
               << power_statistics_ << std::endl;
   }
-  
-  Stats info = layer_map.find(last_layer_used_)->second;
-  
-  if(last_layer_used_ == default_layer_)
-  {
-    last_layer_used_ = (power_statistics_ > info.metrics_target_+info.hysteresis_size_/2) ? 
-                        short_range_layer_ : last_layer_used_;
-  }
-  else
-  {
-    last_layer_used_ = (power_statistics_ < info.metrics_target_-info.hysteresis_size_/2) ? 
-                        default_layer_ : last_layer_used_;
-  }
-  
+
+  int id_short_range = getShorterRangeLayer(last_layer_used_);
+  int id_long_range = getLongerRangeLayer(last_layer_used_);
+  double upper_threshold= getThreshold(last_layer_used_,id_short_range);
+  double lower_threshold = getThreshold(last_layer_used_,id_long_range);
+
+  last_layer_used_ = (upper_threshold != UwMultiStackController::threshold_not_exist 
+                      && power_statistics_ > upper_threshold) ?
+                      id_short_range : last_layer_used_;
+
+  last_layer_used_ = (lower_threshold != UwMultiStackController::threshold_not_exist 
+                      && power_statistics_ < lower_threshold) ?
+                      id_long_range : last_layer_used_;
   power_statistics_ = 0;
   lower_id_active_ = last_layer_used_;
+  std::cout << last_layer_used_<<std::endl;
   return last_layer_used_;
 }
 
@@ -145,18 +131,18 @@ void UwMultiStackControllerPhyMaster::updateMasterStatistics(Packet *p, int idSr
 
   hdr_mac* mach = HDR_MAC(p);
   hdr_MPhy* ph = HDR_MPHY(p);
-
-
   
   if (debug_)
   {
-    std::cout << NOW << " ControllerPhyMaster("<< mac_addr <<")::updateMasterStatistics(Packet *p, int idSrc), Pr = " 
+    std::cout << NOW << " ControllerPhyMaster("<< mac_addr <<
+              ")::updateMasterStatistics(Packet *p, int idSrc), Pr = " 
               << ph->Pr << std::endl;
   }
   
   if (mach->macDA() == mac_addr && idSrc == last_layer_used_)
   {
-    power_statistics_ = power_statistics_ ? (1-alpha_)*power_statistics_ + alpha_*ph->Pr : ph->Pr;
+    power_statistics_ = power_statistics_ ? (1-alpha_)*power_statistics_ + alpha_*ph->Pr 
+                        : ph->Pr;
   }
 }
 

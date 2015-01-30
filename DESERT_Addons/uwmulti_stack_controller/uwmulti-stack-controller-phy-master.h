@@ -42,10 +42,17 @@
 #include "uwmulti-stack-controller-phy.h"
 #include <mac.h>
  
+#include <limits>
+
 class UwMultiStackControllerPhyMaster : public UwMultiStackControllerPhy {
 
 
 public:
+
+/*  // constants defition
+  static double const min_value; // min value t
+  static double const max_value;*/
+
   /**
    * Constructor of UwMultiPhy class.
    */
@@ -65,16 +72,6 @@ public:
    * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
    */
   virtual int command(int, const char*const*);
-
-  /**
-   * Add a layer in the layer_map only if the map size < 2.
-   * 
-   * @param id unique identifier of the module
-   * @param layer_name name of the module. The name should be unique
-   * @param target target of the module metrics
-   * @param hysteresis hysteresis of the module metrics
-  */
-  virtual void addLayer(int id, const string& layer_name, double target, double hysteresis);
   
   /**
    * It manages each packet reception, either from the upper and the lower layer
@@ -85,13 +82,10 @@ public:
    * @see SAP, ChSAP
   **/
   virtual void recv(Packet *p, int idSrc);
-
     
 protected:
     // Variables
 	int last_layer_used_;
-  int short_range_layer_;// This layer privides high bitrate at short range
-  int default_layer_;// This layer provides long range communication despite the limited bitrate
 	double power_statistics_;
 	double alpha_; //FIR parameter
 
@@ -113,6 +107,28 @@ protected:
    * @param idSrc unique id of the module that has sent the packet
   */
   virtual void updateMasterStatistics(Packet *p, int idSrc);
+  
+  /** 
+   * Return the next layer in order which can achieve shorter range with higer bitrete.
+   * 
+   * @param layer_id id of the current layer
+   *
+   * @return id of the next layer in order
+  */
+  inline int getShorterRangeLayer(int layer_id){ return (getId(getOrder(layer_id) + 1) == UwMultiStackController::layer_not_exist)?
+																												 layer_id : getId(getOrder(layer_id) + 1);
+	}
+  
+  /** 
+   * Return the previous layer in order which can achieve longer range with lower bitrete.
+   * 
+   * @param layer_id id of the current layer
+   *
+   * @return id of the previous layer in order
+  */
+  inline int getLongerRangeLayer(int layer_id){ return (getId(getOrder(layer_id) - 1) == UwMultiStackController::layer_not_exist)?
+																												layer_id : getId(getOrder(layer_id) - 1);
+	}
 
 private:
     //Variables

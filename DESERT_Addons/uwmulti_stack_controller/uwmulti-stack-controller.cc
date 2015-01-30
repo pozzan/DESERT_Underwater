@@ -50,6 +50,9 @@ public:
     }
 } class_stack_controller;
 
+const double UwMultiStackController::threshold_not_exist = nan("");;
+const int UwMultiStackController::layer_not_exist = -1;
+
 UwMultiStackController::UwMultiStackController() 
 : 
   Module(),
@@ -66,7 +69,6 @@ UwMultiStackController::UwMultiStackController()
 
 int UwMultiStackController::command(int argc, const char*const* argv) 
 {
-  Tcl& tcl = Tcl::instance();
 	if (argc == 2) 
   {
 		if(strcasecmp(argv[1], "setAutomaticSwitch") == 0) 
@@ -88,23 +90,45 @@ int UwMultiStackController::command(int argc, const char*const* argv)
 			return TCL_OK;
 		}
 	}
-	else if (argc == 6) 
+	else if (argc == 4) 
   {
+    /**
+     * parameters: layer_id, layer_order, a positive and
+     * unique integer to order the set if physical ids
+    */
 		if(strcasecmp(argv[1], "addLayer") == 0)
     {
-      addLayer(atoi(argv[2]),(string)(argv[3]),atof(argv[4]),atof(argv[5]));
+      addLayer(atoi(argv[2]),atoi(argv[3]));
 			return TCL_OK;
 		}
 	}
+  else if (argc == 5) 
+  {
+    /**
+     * parameters: layer_id1, layer_id2, transition threshold
+    */
+    if(strcasecmp(argv[1], "addThreshold") == 0)
+    {
+      addThreshold(atoi(argv[2]),atoi(argv[3]),atof(argv[3]));
+      return TCL_OK;
+    }
+  }
 	
   return Module::command(argc, argv);     
 } /* UwMultiStackController::command */
 
-void UwMultiStackController::addLayer(int id, const string& layer_name, double target, double hysteresis)
+void UwMultiStackController::addLayer(int id, int order)
 {
-  Stats details(layer_name, target, hysteresis);
-  layer_map.erase(id); 
-  layer_map.insert((std::pair<int,Stats>(id,details)));
+	assert(order > 0);
+  id2order.erase(id);
+  id2order.insert((std::pair<int,int>(id,order)));
+  order2id.erase(order);
+  order2id.insert((std::pair<int,int>(order,id)));
+}
+
+void UwMultiStackController::addThreshold(int i, int j, double thres_ij){
+  assert (id2order.find(i) != id2order.end() && id2order.find(j) != id2order.end() && i!=j);
+  setThreshold(i,j,thres_ij);
 }
 
 void UwMultiStackController::recv(Packet* p)
@@ -137,7 +161,7 @@ void UwMultiStackController::recvFromUpperLayers(Packet *p)
 
 bool UwMultiStackController::isLayerAvailable(int id)
 {
-	return layer_map.find(id) != layer_map.end();
+	return id2order.find(id) != id2order.end();
 }
 
 double UwMultiStackController::getMetricFromSelectedLowerLayer(int id, Packet* p)
@@ -145,4 +169,29 @@ double UwMultiStackController::getMetricFromSelectedLowerLayer(int id, Packet* p
 	ClMsgController m(id, p);
  	sendSyncClMsgDown(&m);
  	return m.getMetrics();
+}
+
+double UwMultiStackController::getThreshold(int i, int j) { 
+  ThresMatrix::iterator it = threshold_map.find(i); 
+  if (it != threshold_map.end()) {
+    ThresMap thres_i = it->second;
+    ThresMap::iterator it_thres_ij = thres_i.find(j);
+    if(it_thres_ij != thres_i.end())
+      return it_thres_ij->second;
+    else
+      return UwMultiStackController::threshold_not_exist;
+  }
+  return threshold_not_exist;
+}
+
+void UwMultiStackController::eraseThreshold(int i, int j) { 
+  ThresMatrix::iterator it = threshold_map.find(i); 
+  if (it != threshold_map.end()) {
+    ThresMap thres_i = it->second;
+    ThresMap::iterator it_thres_ij = thres_i.find(j);
+    if(it_thres_ij != thres_i.end())
+      thres_i.erase(j);
+    if(thres_i.size() == 0)
+      threshold_map.erase(i);
+  }
 }
