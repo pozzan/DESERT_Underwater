@@ -96,7 +96,7 @@ $ns use-Miracle
 ##################
 set opt(start_clock) [clock seconds]
 
-set opt(nn)                 3.0 ;# Number of Nodes
+set opt(nn)                 2.0 ;# Number of Nodes
 set opt(pktsize)            125  ;# Pkt sike in byte
 set opt(starttime)          1	
 set opt(stoptime)           100000 
