@@ -269,8 +269,8 @@ proc createNode { id } {
   $node($id) addToChannel  $channel    $phy3($id)   1
 
   if {$id > 254} {
-	puts "hostnum > 254!!! exiting"
-	exit
+  	puts "hostnum > 254!!! exiting"
+  	exit
   }
   #Set the IP address of the node
   set ip_value [expr $id + 1]
