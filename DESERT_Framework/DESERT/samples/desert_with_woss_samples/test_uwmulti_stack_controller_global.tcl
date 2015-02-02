@@ -109,7 +109,7 @@ set opt(start_long)    		13.5  ;# Starting Longitude
 set opt(nn) 			        8.0    ;# Number of nodes
 set opt(pktsize)	 	      125    ;# Packet size in bytes
 set opt(stoptime)        	126000  ;# Stoptime
-set opt(dist_nodes) 		  100.0    ;# Distance between nodes in m
+set opt(dist_nodes) 		  7.0    ;# Distance between nodes in m
 set opt(nn_in_row) 		    4          ;# Number of nodes in a row
 set opt(knots)        		4      ;# Speed of the SINK in knots
 set opt(speed)            [expr $opt(knots) * 0.51444444444] ;#Speed of the SINK in m/s
@@ -131,7 +131,7 @@ if {$opt(bash_parameters)} {
 } else {
   set opt(rep_num)    1
   $rng seed [lindex $argv 0]
-  set opt(cbr_period) 1000
+  set opt(cbr_period) 100
 }
 
 set opt(cbrpr) [expr int($opt(cbr_period))]
@@ -151,19 +151,23 @@ set opt(sink_max_angle) 	  90.0
 set opt(node_bathy_offset) -2.0
 
 set opt(maxinterval_)     	10.0
-set opt(freq)               25000.0 ;#Frequency used in Hz
-set opt(bw)                 5000.0  ;#Bandwidth used in Hz
-set opt(freq2)              50000.0 ;#Frequency used in Hz
-set opt(bw2)                9000.0  ;#Bandwidth used in Hz
-set opt(bitrate)            4800.0  ;#bitrate in bps
-set opt(bitrate2)           8800.0  ;#bitrate in bps
+set opt(freq)               26000.0 ;#Frequency used in Hz
+set opt(bw)                 16000.0  ;#Bandwidth used in Hz
+set opt(freq2)              63000.0 ;#Frequency used in Hz
+set opt(bw2)                30000.0  ;#Bandwidth used in Hz
+set opt(bitrate)            10000.0  ;#bitrate in bps
+set opt(bitrate2)           30000.0  ;#bitrate in bps
 
+
+set opt(freq)             25000.0
+set opt(bw)               5000.0
+set opt(bitrate)          4800.0
 
 ### TRACE FILE
 if {$opt(trace_files)} {
-  set opt(tracefilename) "./test_uwpolling.tr"
+  set opt(tracefilename) "./test_uwcsma_trigger.tr"
   set opt(tracefile) [open $opt(tracefilename) w]
-  set opt(cltracefilename) "./test_uwpolling.cltr"
+  set opt(cltracefilename) "./test_uwcsma_trigger.cltr"
   set opt(cltracefile) [open $opt(cltracefilename) w]
 } else {
   set opt(tracefilename) "/dev/null/"
@@ -235,12 +239,12 @@ Module/UW/PHYSICAL  set BandwidthOptimization_     0
 Module/UW/PHYSICAL  set SPLOptimization_           0
 
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set TRIGGER_size_         1
-Module/UW/CSMA_ALOHA/TRIGGER/SINK set tx_timer_duration_    10
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set tx_timer_duration_    85
 
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set HDR_size_             1
-Module/UW/CSMA_ALOHA/TRIGGER/NODE set buffer_pkts_          10
-Module/UW/CSMA_ALOHA/TRIGGER/NODE set listen_time_          0.5
-Module/UW/CSMA_ALOHA/TRIGGER/NODE set tx_timer_duration_    10
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set buffer_pkts_          100
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set listen_time_          0.8
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set tx_timer_duration_    80
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set max_payload_          125
 
 WOSS/Position/WayPoint set time_threshold_            [expr 1.0 / $opt(speed)]
@@ -273,8 +277,10 @@ proc createNode { id } {
   set ctr($id)        [new Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE]
   Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate)
   set phy_data($id)   [new Module/UW/PHYSICAL]
-  Module/UW/OPTICAL/PHY  set BitRate_                    $opt(bitrate2)
-  set phy_data2($id)   [new Module/UW/OPTICAL/PHY]
+  # Module/UW/OPTICAL/PHY  set BitRate_                    $opt(bitrate2)
+  # set phy_data2($id)   [new Module/UW/OPTICAL/PHY]
+  Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate2)
+  set phy_data2($id)   [new Module/UW/PHYSICAL]
 
   $node($id)  addModule 9 $cbr($id)   1  "CBR"
   $node($id)  addModule 8 $port($id)  1  "PRT"
@@ -295,7 +301,8 @@ proc createNode { id } {
   $node($id) setConnection $ctr($id)   $phy_data($id) 
   $node($id) setConnection $ctr($id)   $phy_data2($id)  1
   $node($id) addToChannel  $channel    $phy_data($id)   1
-  $node($id) addToChannel  $channel2    $phy_data2($id)   1
+  # $node($id) addToChannel  $channel2    $phy_data2($id)   1
+  $node($id) addToChannel  $channel    $phy_data2($id)   1
 
 
   set portnum($id) [$port($id) assignPort $cbr($id) ]
@@ -339,15 +346,23 @@ proc createNode { id } {
   set interf_data($id) [new "Module/UW/INTERFERENCE"]
   $interf_data($id) set maxinterval_ $opt(maxinterval_)
   $interf_data($id) set debug_       0
-  
+
+  set interf_data2($id) [new "Module/UW/INTERFERENCE"]
+  $interf_data2($id) set maxinterval_ $opt(maxinterval_)
+  $interf_data2($id) set debug_       0
+
   $phy_data($id) setSpectralMask $data_mask
-  $phy_data($id) setInterference $interf_data($id)
   $phy_data($id) setPropagation $propagation
   $phy_data($id) set debug_ 0
+  $phy_data($id) setInterference $interf_data($id)
+  $phy_data($id) setInterferenceModel "MEANPOWER"
 
   $phy_data2($id) setSpectralMask $data_mask2
-  $phy_data2($id) setPropagation $propagation2
+  # $phy_data2($id) setPropagation $propagation2
+  $phy_data2($id) setPropagation $propagation
   $phy_data2($id) set debug_ 0
+  $phy_data2($id) setInterference $interf_data2($id)
+  $phy_data2($id) setInterferenceModel "MEANPOWER"
 
   $ctr($id) setManualLowerlId [$phy_data($id) Id_]
   $ctr($id) setAutomaticSwitch
@@ -375,8 +390,11 @@ proc createSink { } {
   set ctr            [new Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER]
   Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate)
   set phy_data_sink   [new Module/UW/PHYSICAL]
-  Module/UW/OPTICAL/PHY  set BitRate_                    $opt(bitrate2)
-  set phy_data_sink2  [new Module/UW/OPTICAL/PHY]
+  # Module/UW/OPTICAL/PHY  set BitRate_                    $opt(bitrate2)
+  # set phy_data_sink2  [new Module/UW/OPTICAL/PHY]
+
+  Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate2)
+  set phy_data_sink2   [new Module/UW/PHYSICAL]
 
   for { set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
     $node_sink addModule 9 $cbr_sink($cnt) 0 "CBR"
@@ -401,7 +419,8 @@ proc createSink { } {
   $node_sink setConnection $ctr       $phy_data_sink    	1
   $node_sink setConnection $ctr       $phy_data_sink2    1
   $node_sink addToChannel $channel    $phy_data_sink   	1
-  $node_sink addToChannel $channel2    $phy_data_sink2    1
+  # $node_sink addToChannel $channel2    $phy_data_sink2    1
+  $node_sink addToChannel $channel    $phy_data_sink2    1
 
   for { set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
    set portnum_sink($cnt) [$port_sink assignPort $cbr_sink($cnt)]
@@ -416,23 +435,18 @@ proc createSink { } {
   set curr_lat    [ $woss_utilities getLatfromDistBearing  $opt(start_lat) $opt(start_long) 180.0 0 ]
   set curr_lon    [ $woss_utilities getLongfromDistBearing $opt(start_lat) $opt(start_long) 90.0  0 ]
 
-
   set position_sink [new "WOSS/Position/WayPoint"]
   $position_sink addStartWayPoint $curr_lat $curr_lon [expr -1.0 * $curr_depth] $opt(speed) 0.0
   $node_sink addPosition $position_sink
 
-  $ctr setManualLowerlId [$phy_data_sink Id_]
   $ctr setAutomaticSwitch
-  $ctr setManualLowerlId [$phy_data_sink Id_]
+  $ctr setManualLowerlId [$phy_data_sink2 Id_]
   $ctr addLayer [$phy_data_sink Id_]  1 
   $ctr addLayer [$phy_data_sink2 Id_] 2
-  $ctr addThreshold [$phy_data_sink Id_] [$phy_data_sink2 Id_] 20
-  $ctr addThreshold [$phy_data_sink2 Id_] [$phy_data_sink Id_] 18
+  $ctr addThreshold [$phy_data_sink Id_] [$phy_data_sink2 Id_] 25025600000000
+  $ctr addThreshold [$phy_data_sink2 Id_] [$phy_data_sink Id_] 21025600000000
 
   $ipif_sink addr 253
-
-
-
 
   puts "node sink at ([$position_sink getLatitude_], [$position_sink getLongitude_], [$position_sink getAltitude_]) , ([$position_sink getX_], [$position_sink getY_], [$position_sink getZ_])"
 
@@ -440,11 +454,20 @@ proc createSink { } {
   $interf_data_sink set maxinterval_ $opt(maxinterval_)
   $interf_data_sink set debug_       0
 
+  set interf_data_sink2 [new Module/UW/INTERFERENCE]
+  $interf_data_sink2 set maxinterval_ $opt(maxinterval_)
+  $interf_data_sink2 set debug_       0
+
   $phy_data_sink setSpectralMask     $data_mask
   $phy_data_sink setPropagation      $propagation
   $phy_data_sink setInterference     $interf_data_sink
+  $phy_data_sink setInterferenceModel "MEANPOWER"
+
   $phy_data_sink2 setSpectralMask    $data_mask2
-  $phy_data_sink2 setPropagation     $propagation2
+  # $phy_data_sink2 setPropagation     $propagation2
+  $phy_data_sink2 setPropagation     $propagation
+  $phy_data_sink2 setInterference    $interf_data_sink2
+  $phy_data_sink2 setInterferenceModel "MEANPOWER"
 
 }
 
