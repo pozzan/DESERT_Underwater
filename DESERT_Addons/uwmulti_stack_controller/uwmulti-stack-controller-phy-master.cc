@@ -96,13 +96,6 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
   ClMsgPhy2MacAddr msg;
   sendSyncClMsg(&msg);
   mac_addr = msg.getAddr();
-  
-  if (debug_)
-  {
-    std::cout << NOW << " ControllerPhyMaster("<< mac_addr 
-              <<")::getBestLayer(Packet *p), power_statistics_=" 
-              << power_statistics_ << std::endl;
-  }
 
   int id_short_range = getShorterRangeLayer(last_layer_used_);
   int id_long_range = getLongerRangeLayer(last_layer_used_);
@@ -118,7 +111,12 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
                       id_long_range : last_layer_used_;
   power_statistics_ = 0;
   lower_id_active_ = last_layer_used_;
-  std::cout << last_layer_used_<<std::endl;
+  if (debug_)
+  {
+    std::cout << NOW << " ControllerPhyMaster("<< mac_addr 
+              <<")::getBestLayer(Packet *p), power_statistics_=" << power_statistics_
+              << " best layer id = " << last_layer_used_ << std::endl;
+  }
   return last_layer_used_;
 }
 
