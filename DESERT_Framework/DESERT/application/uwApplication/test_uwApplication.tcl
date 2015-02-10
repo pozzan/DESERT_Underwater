@@ -26,7 +26,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Loris Brolo <brololor@dei.unipd.it>
+# Author: Federico Favaro
 # Version: 1.0.0
 # NOTE: tcl sample tested on Ubuntu 12.04, 64 bits OS
 #
@@ -75,7 +75,7 @@
 # Flags to enable or disable options #
 ######################################
 set opt(trace_files)        1
-set opt(bash_parameters)    1
+set opt(bash_parameters)    0
 
 #####################
 # Library Loading   #
@@ -154,7 +154,7 @@ if {$opt(bash_parameters)} {
 } else {
     set opt(pktsize)    125
     set opt(cbr_period) 60
-#	 set opt(socket_comm) 0
+	set opt(socket_comm) 0
 }
 
 
@@ -190,7 +190,6 @@ Module/UW/APPLICATION set period_ $opt(cbr_period)
 Module/UW/APPLICATION set PoissonTraffic_ 0		   ;# 1= use a Poisson process for generate packets
 Module/UW/APPLICATION set Payload_size_ $opt(pktsize)
 Module/UW/APPLICATION set drop_out_of_order_ 1 		;# 1= drop out of order activate 
-Module/UW/APPLICATION set pattern_sequence_ 0			;# 1= use pattern sequence for data payload message
 Module/UW/APPLICATION set Socket_Port_ 4000
 Module/UW/APPLICATION set EXP_ID_ 1
 
@@ -253,7 +252,7 @@ proc createNode { id } {
     $interf_data($id) set debug_       0
 
     $phy($id) setPropagation $propagation
-    $cbr($id) setSocketProtocol "TCP"
+    #$cbr($id) setSocketProtocol "TCP"
     $cbr($id) set node_ID_  $tmp_
     $cbr($id) print_log
     $phy($id) setSpectralMask $data_mask
@@ -323,7 +322,7 @@ proc createSink { } {
     $phy_data_sink setInterference $interf_data_sink
     $phy_data_sink setPropagation $propagation
     for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-        $cbr_sink($cnt) setSocketProtocol "TCP"
+        #$cbr_sink($cnt) setSocketProtocol "TCP"
         $cbr_sink($cnt) set node_ID_ 254
         $cbr_sink($cnt) print_log
     }

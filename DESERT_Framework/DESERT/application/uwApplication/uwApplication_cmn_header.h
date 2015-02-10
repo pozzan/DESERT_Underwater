@@ -1,8 +1,7 @@
 /** 
  * File:   uwAPPLICATION_cmh_header.h
- * Author: pc_loris87
+ * Author: Federico Favaro
  *
- * Created on 15 dicembre 2013, 15.48
  */
 
 #ifndef UWAPPLICATION_CMH_HEADER_H
