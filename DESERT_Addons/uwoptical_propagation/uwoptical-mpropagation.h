@@ -30,11 +30,11 @@
  */
 
 /**
- * @file   uwoptical-propagation.h
+ * @file   uwoptical-mpropagation.h
  * @author Filippo Campagnaro, Federico Favaro, Federico Guerra
  * @version 1.0.0
  *
- * \brief Definition of UwOpticas class.
+ * \brief Definition of UwOptical_propagation class.
  *
  */
 
@@ -91,4 +91,4 @@ protected:
 
 
 
-#endif /* OPTICAL_MPROPAGATION_H */
+#endif /* UWOPTICAL_MPROPAGATION_H */

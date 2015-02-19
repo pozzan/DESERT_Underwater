@@ -58,20 +58,20 @@ public:
 
 UwOpticalMPropagation::UwOpticalMPropagation()
 :
-MPropagation(),
-/*file_name_("optical_LUT.txt"),
-token_separator_('\t')*/
 Ar_(1),
 At_(1),
 c_(0),
 theta_(0),
 omnidirectional_(false)
+/*file_name_("optical_LUT.txt"),
+token_separator_('\t')*/
 {
   /*bind_error("token_separator_", &token_separator_);*/
   bind("Ar_", &Ar_);
   bind("At_", &At_);
   bind("c_", &c_);
   bind("theta_", &theta_);
+  bind("debug_", &debug_);
 }
 
 /*int UwOpticalMPropagation::command(int argc, const char*const* argv){
@@ -130,22 +130,20 @@ int UwOpticalMPropagation::command(int argc, const char*const* argv){
 }
 
 double UwOpticalMPropagation::getGain(Packet* p)
-{//TODO: lookup table
-
-   hdr_MPhy *ph = HDR_MPHY(p);
-
-   Position* sp = ph->srcPosition;
-   Position* rp = ph->dstPosition;
-   assert(sp);
-   assert(rp);
-   double dist = sp->getDist(rp);
-   double beta = sp->getRelZenith(rp);//mmm is it the elevation?? 
-   double PCgain=getLambertBeerGain(dist,beta);
-   if (debug_)
+{
+  hdr_MPhy *ph = HDR_MPHY(p);
+  Position* sp = ph->srcPosition;
+  Position* rp = ph->dstPosition;
+  assert(sp);
+  assert(rp);
+  double dist = sp->getDist(rp);
+  double beta = sp->getRelAzimuth(rp);// mmm is it Beta (the elevation) ?? 
+  double PCgain=getLambertBeerGain(dist,beta);
+  if (debug_)
     std::cout << NOW << " UwOpticalMPropagation::getGain()" << " dist="
               << dist << " gain=" << PCgain << std::endl;
 
-   return PCgain;
+  return PCgain;
 }
 
 double UwOpticalMPropagation::getLambertBeerGain(double d, double beta){

@@ -30,8 +30,8 @@
 # @author Filippo Campagnaro
 # @version 1.0.0
 
-Module/UW/OPTICAL/Propagation set TxPower_  0.01
 Module/UW/OPTICAL/Propagation set Ar_       0.0000011
 Module/UW/OPTICAL/Propagation set At_       0.000010
 Module/UW/OPTICAL/Propagation set c_        2.0
 Module/UW/OPTICAL/Propagation set theta_    1.0
+Module/UW/OPTICAL/Propagation set debug_    0
