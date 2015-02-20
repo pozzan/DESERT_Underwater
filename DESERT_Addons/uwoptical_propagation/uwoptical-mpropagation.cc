@@ -137,7 +137,8 @@ double UwOpticalMPropagation::getGain(Packet* p)
   assert(sp);
   assert(rp);
   double dist = sp->getDist(rp);
-  double beta = sp->getRelAzimuth(rp);// mmm is it Beta (the elevation) ?? 
+  double beta = sp->getZ() == rp->getZ() ? 0 : M_PI/2 - abs(sp->getRelZenith(rp));
+  /*double beta = sp->getRelAzimuth(rp);// mmm is it Beta (the elevation) ?? */
   double PCgain=getLambertBeerGain(dist,beta);
   if (debug_)
     std::cout << NOW << " UwOpticalMPropagation::getGain()" << " dist="
