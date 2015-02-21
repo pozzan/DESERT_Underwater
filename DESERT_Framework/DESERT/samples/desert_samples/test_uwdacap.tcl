@@ -133,7 +133,7 @@ if {$opt(bash_parameters)} {
 		$rng seed         $opt(seedcbr)
 	}
 } else {
-	set opt(cbr_period) 60
+	set opt(cbr_period)     100
 	set opt(pktsize)	125
 	set opt(seedcbr)	1
 }
