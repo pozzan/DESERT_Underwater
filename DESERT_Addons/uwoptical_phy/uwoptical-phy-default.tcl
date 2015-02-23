@@ -31,6 +31,10 @@
 # @version 1.0.0
 
 Module/UW/OPTICAL/PHY set TxPower_  				0.01
-Module/UW/OPTICAL/PHY set NoiseSPD_ 				[expr 1.28e-23 * 300]
-Module/UW/OPTICAL/PHY set Prx_threshold_			1
-Module/UW/OPTICAL/PHY set AcquisitionThreshold_dB_	1
+Module/UW/OPTICAL/PHY set AcquisitionThreshold_dB_              1
+Module/UW/OPTICAL/PHY set Id_                                   1
+Module/UW/OPTICAL/PHY set Il_                                   1
+Module/UW/OPTICAL/PHY set R_                                    1
+Module/UW/OPTICAL/PHY set S_                                    1
+Module/UW/OPTICAL/PHY set T_                                    1
+

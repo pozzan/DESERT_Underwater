@@ -37,6 +37,9 @@
 
 #include "uwoptical-phy.h"
 
+const double K = 1.38*1.E-23; //Boltzmann constant
+const double q = 1.6*1.E-19; //electronic charge
+
 static class UwOpticalPhyClass : public TclClass {
 public:
     UwOpticalPhyClass() : TclClass("Module/UW/OPTICAL/PHY") {}
@@ -53,7 +56,11 @@ UwOpticalPhy::UwOpticalPhy()
 		MPhy_Bpsk::initialized = true;
 	}
 	MPhy_Bpsk();
-	bind("Prx_threshold_",&Prx_threshold);
+        bind("Id_",&Id);
+        bind("Il_",&Il);
+        bind("R_",&R);
+        bind("S_",&S);
+        bind("T_",&T);
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv) {
@@ -61,21 +68,12 @@ int UwOpticalPhy::command(int argc, const char*const* argv) {
     return MPhy_Bpsk::command(argc, argv);     
 }
 
-
-double UwOpticalPhy::getTxDuration(Packet* p)
-{
-	//TODO: is it Bpsk method workin also for this case?
-}
-
-
 void UwOpticalPhy::startRx(Packet* p)
 {
-	hdr_MPhy* ph = HDR_MPHY(p);
-  	double rx_time = ph->rxtime;
-  	double tx_time = ph->txtime;
-  	if ( (PktRx == 0) && (txPending == false) )
+    hdr_MPhy* ph = HDR_MPHY(p);
+    if ( (PktRx == 0) && (txPending == false) )
     {
-    	double snr_dB = 10*log10(ph->Pr / ph->Pn);
+        double snr_dB = getSNRdB(p);
     	if (snr_dB > MPhy_Bpsk::getAcquisitionThreshold())
     	{
     		if (ph->modulationType == MPhy_Bpsk::modid)
@@ -99,26 +97,53 @@ void UwOpticalPhy::startRx(Packet* p)
     	if (debug_) cout << "UwOpticalPhy::Drop Packet::Synced onto another packet" << endl;
     }
 }
+
+double UwOpticalPhy::getSNRdB(Packet* p)
+{
+    hdr_MPhy* ph = HDR_MPHY(p);
+    double snr_linear = pow((S*ph->Pr),2)/((2*q*(Id+Il)*ph->srcSpectralMask->getBandwidth() + ((4*K*T*ph->srcSpectralMask->getBandwidth())/R)) + ph->Pn);
+    return 10*log10(snr_linear);
+}
+
+double UwOpticalPhy::getNoisePower(Packet* p)
+{
+    //LUT
+}
     
 void UwOpticalPhy::endRx(Packet* p)
 { 
-  	hdr_cmn* ch = HDR_CMN(p);
-  	hdr_MPhy* ph = HDR_MPHY(p);
-  	if (MPhy_Bpsk::PktRx != 0)
+    hdr_cmn* ch = HDR_CMN(p);
+    hdr_MPhy* ph = HDR_MPHY(p);
+    if (MPhy_Bpsk::PktRx != 0)
     {
     	if (MPhy_Bpsk::PktRx == p)
-		{ 
-			ch->error() = 0; 
-	  		sendUp(p);
-	  		PktRx = 0;
-	  	} 
-	  	else 
-	  	{
-			dropPacket(p);
-		}
+	{
+            if(interference_)
+            {
+                const PowerChunkList& power_chunk_list = interference_->getInterferencePowerChunkList(p);
+                if(power_chunk_list.empty())
+                {
+                    //no interference
+                    ch->error() = 0; 
+                    sendUp(p);
+                    PktRx = 0;
+                }
+                else
+                {
+                    dropPacket(p);
+                }
+            }
+            else
+            {
+                //no interference model set
+                ch->error() = 0; 
+                sendUp(p);
+                PktRx = 0;
+            }
 	} 
 	else 
 	{
-		dropPacket(p);
+            dropPacket(p);
 	}
+    }
 }

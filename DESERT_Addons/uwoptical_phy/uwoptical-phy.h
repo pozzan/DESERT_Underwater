@@ -50,6 +50,7 @@
 #include <cmath>
 #include <limits>
 #include <climits>
+#include <math.h>
 
 #define OPTICAL_MODULATION_TYPE "OPTIC_BPSK"
 
@@ -76,25 +77,24 @@ public:
      *
      */
     virtual int command(int, const char*const*);
-    /**
-     * getModulationType. Return the modulation type of the current packet.
-     *
-     * @param Packet* Pointer to the packet analyzed
-     * @return an integer number which describe the modulation
-     *
-     */
-    virtual double getTxDuration(Packet* p);
-
 
     virtual void startRx(Packet* p);
+    
+    virtual double getSNRdB(Packet* p);
 
     virtual void endRx(Packet* p);
+    
+    virtual double getNoisePower(Packet* p);
     
 protected:
     // Variables
 private:
     //Variables
-    double Prx_threshold;
+    double Id;
+    double Il; //
+    double R; //shunt resistance
+    double S; //sensitivity
+    double T; //temperature (K)
 };
 
 #endif /* UWOPTICAL_H  */
