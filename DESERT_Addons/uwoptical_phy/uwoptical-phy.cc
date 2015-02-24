@@ -50,17 +50,17 @@ public:
 
 UwOpticalPhy::UwOpticalPhy() 
 {
-	if (!MPhy_Bpsk::initialized)
-	{
-		MPhy_Bpsk::modid = MPhy::registerModulationType(OPTICAL_MODULATION_TYPE);
-		MPhy_Bpsk::initialized = true;
-	}
-	MPhy_Bpsk();
-        bind("Id_",&Id);
-        bind("Il_",&Il);
-        bind("R_",&R);
-        bind("S_",&S);
-        bind("T_",&T);
+    if (!MPhy_Bpsk::initialized)
+    {
+        MPhy_Bpsk::modid = MPhy::registerModulationType(OPTICAL_MODULATION_TYPE);
+        MPhy_Bpsk::initialized = true;
+    }
+    MPhy_Bpsk();
+    bind("Id_",&Id);
+    bind("Il_",&Il);
+    bind("R_",&R);
+    bind("S_",&S);
+    bind("T_",&T);
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv) {
@@ -130,6 +130,7 @@ void UwOpticalPhy::endRx(Packet* p)
                 }
                 else
                 {
+                    //at least one interferent packet
                     dropPacket(p);
                 }
             }
