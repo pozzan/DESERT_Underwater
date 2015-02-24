@@ -87,17 +87,21 @@ int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m)
   if (debug_)
   {
     std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recvSyncClMsg(ClMessage* m), state_info: " 
-              << state_info[current_state] << std::endl;
+              << state_info[current_state];
   }
   
   if (m->direction() == DOWN)//mac2phy something
   {
+    if (debug_)
+      std::cout << " direction = DOWN "<< std::endl;
     m->setDest(lower_id_active_);
     sendSyncClMsgDown(m);
     return 0;
   }
   else if (m->type() == CLMSG_PHY2MAC_STARTRX)
   {
+    if (debug_)
+      std::cout << " type = CLMSG_PHY2MAC_STARTRX "<< std::endl;
     if (current_state == UWPHY_CONTROLLER_STATE_IDLE)
     {
       stateBusy2Rx(m->getSource());
@@ -117,7 +121,13 @@ int UwMultiStackControllerPhy::recvSyncClMsg(ClMessage* m)
   {
     if (m->type() == CLMSG_PHY2MAC_ENDTX && current_state == UWPHY_CONTROLLER_STATE_BUSY_2_TX)
     {
+      if (debug_)
+        std::cout << " endTx "<< std::endl;
       stateIdle();
+    }
+    else {
+      if (debug_)
+        std::cout << " altro "<< std::endl;
     }
     
     sendSyncClMsgUp(m);
@@ -173,15 +183,28 @@ void UwMultiStackControllerPhy::stateBusy2Tx(Packet *p)
 
 void UwMultiStackControllerPhy::recv(Packet *p, int idSrc) 
 {
+  int mac_addr = -1;
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  mac_addr = msg.getAddr();
   hdr_cmn *ch = HDR_CMN(p);
   if (ch->direction() == hdr_cmn::DOWN && current_state == UWPHY_CONTROLLER_STATE_IDLE) 
   {
     //direction DOWN: packet is coming from upper layers
+    if(debug_)
+      std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recv(Packet *p, int idSrc) FromUpperLayers" 
+                << std::endl;
     stateBusy2Tx(p);
   }
   else if (current_state == UWPHY_CONTROLLER_STATE_BUSY_2_RX && idSrc == receiving_id) 
   {
+    if(debug_)
+      std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recv(Packet *p, int idSrc) sendUp" 
+                << std::endl;
     sendUp(p, min_delay_);
     stateIdle();
   }
+  else if (debug_)
+    std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recv(Packet *p, int idSrc) block direction = " 
+              << ch->direction() << std::endl;
 }

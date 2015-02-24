@@ -1,7 +1,7 @@
 /* -*-	Mode:C++ -*- */
 
 /*
- * Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
+ * Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,11 +30,11 @@
  */
 
 /**
- * @file   uwoptical-propagation.h
+ * @file   uwoptical-mpropagation.h
  * @author Filippo Campagnaro, Federico Favaro, Federico Guerra
  * @version 1.0.0
  *
- * \brief Definition of UwOpticas class.
+ * \brief Definition of UwOptical_propagation class.
  *
  */
 
@@ -43,8 +43,8 @@
 
 #include <mpropagation.h>
 #include <mphy.h>
-#include <fstream>
-#include <sstream>
+/*#include <fstream>
+#include <sstream>*/
 
 
 class UwOpticalMPropagation : public MPropagation
@@ -65,18 +65,30 @@ public:
    */
   virtual int command(int, const char*const*);
   
+  /**
+   * calculate the gain following the Lambert and Beer's law
+   *
+   * @param Packet* Pointer to the packet that has to be received.
+   * @return the gain due to the optical propagation.
+   * 
+   */
   virtual double getGain(Packet* p);
 
   int debug_;
 
 protected:
-  virtual double lookUpGain(double d, double angle);
-
+/*  virtual double lookUpGain(double d, double angle);
   string file_name_;
-  char token_separator_;
-  
+  char token_separator_;*/
+
+  virtual double getLambertBeerGain(double d, double angle);
+  double Ar_; // receiver area [m^2]
+  double At_; // transmitter size [m^2]
+  double c_; // beam light attenuation coefficient c = a + b [m^-1]
+  double theta_; // transmitting beam diverge angle [rad]
+  bool omnidirectional_; // flag to set whether the system is omnidirectional or not. By default it is false.
 };
 
 
 
-#endif /* OPTICAL_MPROPAGATION_H */
+#endif /* UWOPTICAL_MPROPAGATION_H */

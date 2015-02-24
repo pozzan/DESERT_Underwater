@@ -97,12 +97,11 @@ void UwMultiStackControllerPhySlave::updateSlave(Packet *p, int idSrc)
   ClMsgPhy2MacAddr msg;
   sendSyncClMsg(&msg);
   mac_addr = msg.getAddr();
-
-  if (mach->macDA() == mac_addr)
+  if (mach->macDA() == mac_addr || mach->macDA() == MAC_BROADCAST)
   {
     if (debug_)
     {
-      std::cout << NOW << "ControllerPhySlave("<< mac_addr <<")::updateSlave " 
+      std::cout << NOW << " ControllerPhySlave("<< mac_addr <<")::updateSlave " 
                 << msg.getAddr() << ": " << slave_lower_layer_ << " --> " << idSrc << std::endl;
     }
     slave_lower_layer_ = idSrc;

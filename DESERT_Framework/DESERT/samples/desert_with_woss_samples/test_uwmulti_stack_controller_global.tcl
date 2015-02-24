@@ -26,7 +26,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Federico Favaro <favarofe@dei.unipd.it>
+# Author: Filippo Campagnaro <campagn1@dei.unipd.it>
 # Version: 1.0.0
 
 
@@ -109,7 +109,7 @@ set opt(start_long)    		13.5  ;# Starting Longitude
 set opt(nn) 			        8.0    ;# Number of nodes
 set opt(pktsize)	 	      125    ;# Packet size in bytes
 set opt(stoptime)        	126000  ;# Stoptime
-set opt(dist_nodes) 		  7.0    ;# Distance between nodes in m
+set opt(dist_nodes) 		  70.0    ;# Distance between nodes in m
 set opt(nn_in_row) 		    4          ;# Number of nodes in a row
 set opt(knots)        		4      ;# Speed of the SINK in knots
 set opt(speed)            [expr $opt(knots) * 0.51444444444] ;#Speed of the SINK in m/s
@@ -153,15 +153,11 @@ set opt(node_bathy_offset) -2.0
 set opt(maxinterval_)     	10.0
 set opt(freq)               26000.0 ;#Frequency used in Hz
 set opt(bw)                 16000.0  ;#Bandwidth used in Hz
-set opt(freq2)              63000.0 ;#Frequency used in Hz
-set opt(bw2)                30000.0  ;#Bandwidth used in Hz
+set opt(freq2)              1000000.0 ;#Frequency used in Hz
+set opt(bw2)                100000.0  ;#Bandwidth used in Hz
 set opt(bitrate)            10000.0  ;#bitrate in bps
-set opt(bitrate2)           30000.0  ;#bitrate in bps
+set opt(bitrate2)           1000000.0  ;#bitrate in bps
 
-
-set opt(freq)             25000.0
-set opt(bw)               5000.0
-set opt(bitrate)          4800.0
 
 ### TRACE FILE
 if {$opt(trace_files)} {
@@ -238,8 +234,11 @@ Module/UW/PHYSICAL  set CentralFreqOptimization_   0
 Module/UW/PHYSICAL  set BandwidthOptimization_     0
 Module/UW/PHYSICAL  set SPLOptimization_           0
 
+Module/MPhy/BPSK  set BitRate_                    $opt(bitrate2)
+
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set TRIGGER_size_         1
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set tx_timer_duration_    85
+# Module/UW/CSMA_ALOHA/TRIGGER/SINK set debug_     1
 
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set HDR_size_             1
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set buffer_pkts_          100
@@ -253,8 +252,8 @@ WOSS/Position/WayPoint set verticalOrientation_       0.0
 WOSS/Position/WayPoint set minVerticalOrientation_    -40.0
 WOSS/Position/WayPoint set maxVerticalOrientation_    40.0
 
-Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE  set debug_     0
-Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set debug_     0
+# Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE  set debug_     1
+# Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set debug_     1
 
 ################################
 # Procedure(s) to create nodes #
@@ -275,12 +274,11 @@ proc createNode { id } {
   set mll($id)        [new Module/UW/MLL] 
   set mac($id)        [new Module/UW/CSMA_ALOHA/TRIGGER/NODE]
   set ctr($id)        [new Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE]
-  Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate)
+  
   set phy_data($id)   [new Module/UW/PHYSICAL]
   # Module/UW/OPTICAL/PHY  set BitRate_                    $opt(bitrate2)
   # set phy_data2($id)   [new Module/UW/OPTICAL/PHY]
-  Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate2)
-  set phy_data2($id)   [new Module/UW/PHYSICAL]
+  set phy_data2($id)   [new Module/MPhy/BPSK]
 
   $node($id)  addModule 9 $cbr($id)   1  "CBR"
   $node($id)  addModule 8 $port($id)  1  "PRT"
@@ -301,8 +299,8 @@ proc createNode { id } {
   $node($id) setConnection $ctr($id)   $phy_data($id) 
   $node($id) setConnection $ctr($id)   $phy_data2($id)  1
   $node($id) addToChannel  $channel    $phy_data($id)   1
-  # $node($id) addToChannel  $channel2    $phy_data2($id)   1
-  $node($id) addToChannel  $channel    $phy_data2($id)   1
+  $node($id) addToChannel  $channel2    $phy_data2($id)   1
+  # $node($id) addToChannel  $channel    $phy_data2($id)   1
 
 
   set portnum($id) [$port($id) assignPort $cbr($id) ]
@@ -347,7 +345,7 @@ proc createNode { id } {
   $interf_data($id) set maxinterval_ $opt(maxinterval_)
   $interf_data($id) set debug_       0
 
-  set interf_data2($id) [new "Module/UW/INTERFERENCE"]
+  set interf_data2($id) [new "MInterference/MIV"]
   $interf_data2($id) set maxinterval_ $opt(maxinterval_)
   $interf_data2($id) set debug_       0
 
@@ -358,11 +356,8 @@ proc createNode { id } {
   $phy_data($id) setInterferenceModel "MEANPOWER"
 
   $phy_data2($id) setSpectralMask $data_mask2
-  # $phy_data2($id) setPropagation $propagation2
-  $phy_data2($id) setPropagation $propagation
-  $phy_data2($id) set debug_ 0
+  $phy_data2($id) setPropagation $propagation2
   $phy_data2($id) setInterference $interf_data2($id)
-  $phy_data2($id) setInterferenceModel "MEANPOWER"
 
   $ctr($id) setManualLowerlId [$phy_data($id) Id_]
   $ctr($id) setAutomaticSwitch
@@ -388,13 +383,11 @@ proc createSink { } {
   set mll_sink       [new Module/UW/MLL] 
   set mac_sink       [new Module/UW/CSMA_ALOHA/TRIGGER/SINK]
   set ctr            [new Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER]
-  Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate)
   set phy_data_sink   [new Module/UW/PHYSICAL]
   # Module/UW/OPTICAL/PHY  set BitRate_                    $opt(bitrate2)
   # set phy_data_sink2  [new Module/UW/OPTICAL/PHY]
 
-  Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate2)
-  set phy_data_sink2   [new Module/UW/PHYSICAL]
+  set phy_data_sink2   [new Module/MPhy/BPSK]  
 
   for { set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
     $node_sink addModule 9 $cbr_sink($cnt) 0 "CBR"
@@ -419,8 +412,8 @@ proc createSink { } {
   $node_sink setConnection $ctr       $phy_data_sink    	1
   $node_sink setConnection $ctr       $phy_data_sink2    1
   $node_sink addToChannel $channel    $phy_data_sink   	1
-  # $node_sink addToChannel $channel2    $phy_data_sink2    1
-  $node_sink addToChannel $channel    $phy_data_sink2    1
+  $node_sink addToChannel $channel2    $phy_data_sink2    1
+  # $node_sink addToChannel $channel    $phy_data_sink2    1
 
   for { set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
    set portnum_sink($cnt) [$port_sink assignPort $cbr_sink($cnt)]
@@ -439,13 +432,6 @@ proc createSink { } {
   $position_sink addStartWayPoint $curr_lat $curr_lon [expr -1.0 * $curr_depth] $opt(speed) 0.0
   $node_sink addPosition $position_sink
 
-  $ctr setAutomaticSwitch
-  $ctr setManualLowerlId [$phy_data_sink2 Id_]
-  $ctr addLayer [$phy_data_sink Id_]  1 
-  $ctr addLayer [$phy_data_sink2 Id_] 2
-  $ctr addThreshold [$phy_data_sink Id_] [$phy_data_sink2 Id_] 25025600000000
-  $ctr addThreshold [$phy_data_sink2 Id_] [$phy_data_sink Id_] 21025600000000
-
   $ipif_sink addr 253
 
   puts "node sink at ([$position_sink getLatitude_], [$position_sink getLongitude_], [$position_sink getAltitude_]) , ([$position_sink getX_], [$position_sink getY_], [$position_sink getZ_])"
@@ -454,7 +440,7 @@ proc createSink { } {
   $interf_data_sink set maxinterval_ $opt(maxinterval_)
   $interf_data_sink set debug_       0
 
-  set interf_data_sink2 [new Module/UW/INTERFERENCE]
+  set interf_data_sink2 [new "MInterference/MIV"]
   $interf_data_sink2 set maxinterval_ $opt(maxinterval_)
   $interf_data_sink2 set debug_       0
 
@@ -464,11 +450,17 @@ proc createSink { } {
   $phy_data_sink setInterferenceModel "MEANPOWER"
 
   $phy_data_sink2 setSpectralMask    $data_mask2
-  # $phy_data_sink2 setPropagation     $propagation2
-  $phy_data_sink2 setPropagation     $propagation
-  $phy_data_sink2 setInterference    $interf_data_sink2
-  $phy_data_sink2 setInterferenceModel "MEANPOWER"
+  $phy_data_sink2 setPropagation     $propagation2
+  $phy_data_sink2 setInterference     $interf_data_sink2
+  
+  $ctr setAutomaticSwitch
+  $ctr setManualLowerlId [$phy_data_sink Id_]
+  $ctr addLayer [$phy_data_sink Id_]  1 
+  $ctr addLayer [$phy_data_sink2 Id_] 2
+  $ctr addThreshold [$phy_data_sink Id_] [$phy_data_sink2 Id_] 2000
+  $ctr addThreshold [$phy_data_sink2 Id_] [$phy_data_sink Id_] 0.1
 
+  # puts 
 }
 
 ##################
@@ -542,15 +534,15 @@ proc createSinkWaypoints { } {
 ###############################
 
 proc connectNodes {id1} {
-    global ipif ipr portnum cbr cbr_sink ipif_sink portnum_sink ipr_sink
+  global ipif ipr portnum cbr cbr_sink ipif_sink portnum_sink ipr_sink
 
-    $cbr($id1) set destAddr_ [$ipif_sink addr]
-    $cbr($id1) set destPort_ $portnum_sink($id1)
-    $cbr_sink($id1) set destAddr_ [$ipif($id1) addr]
-    $cbr_sink($id1) set destPort_ $portnum($id1)  
-    #$ipr($id1) addRoute "1.0.0.253"    "255.255.255.255" "1.0.0.253"
-    $ipr($id1) addRoute [$ipif_sink addr] [$ipif_sink addr]
-    $ipr_sink  addRoute [$ipif($id1) addr] [$ipif($id1) addr]
+  $cbr($id1) set destAddr_ [$ipif_sink addr]
+  $cbr($id1) set destPort_ $portnum_sink($id1)
+  $cbr_sink($id1) set destAddr_ [$ipif($id1) addr]
+  $cbr_sink($id1) set destPort_ $portnum($id1)  
+  #$ipr($id1) addRoute "1.0.0.253"    "255.255.255.255" "1.0.0.253"
+  $ipr($id1) addRoute [$ipif_sink addr] [$ipif_sink addr]
+  $ipr_sink  addRoute [$ipif($id1) addr] [$ipif($id1) addr]
 }
 
 ###############################
@@ -558,7 +550,7 @@ proc connectNodes {id1} {
 ###############################
 
 for {set id 0} {$id < $opt(nn)} {incr id}  {
-    createNode $id
+  createNode $id
 }
 
 ###############################
@@ -573,7 +565,7 @@ createSinkWaypoints
 ################################
 
 for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-    connectNodes $id1
+  connectNodes $id1
 }
 
 ################################
@@ -581,11 +573,11 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 ################################
 
 for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-    for {set id2 0} {$id2 < $opt(nn)} {incr id2}  {
-	$mll($id1) addentry [$ipif($id2) addr] [$mac($id2) addr]
-    }   
-    $mll($id1) addentry [$ipif_sink addr] [ $mac_sink addr]
-    $mll_sink addentry [$ipif($id1) addr] [ $mac($id1) addr]
+  for {set id2 0} {$id2 < $opt(nn)} {incr id2}  {
+  	$mll($id1) addentry [$ipif($id2) addr] [$mac($id2) addr]
+  }   
+  $mll($id1) addentry [$ipif_sink addr] [ $mac_sink addr]
+  $mll_sink addentry [$ipif($id1) addr] [ $mac($id1) addr]
 }
 
 
@@ -603,26 +595,26 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 $ns at 20 "$mac_sink sinkRun"
 
 proc finish { } {
-      global ns opt cbr outfile
-      global mac propagation cbr_sink mac_sink phy_data phy_data_sink channel db_manager propagation
-      if {$opt(verbose)} {
-        puts "CBR_PERIOD : $opt(cbr_period)"
-        puts "SEED: $opt(rep_num)"
-        puts "NUMBER OF NODES: $opt(nn)"
-      } else {
-        puts "End of simulation"
-      }
+  global ns opt cbr outfile
+  global mac propagation cbr_sink mac_sink phy_data phy_data_sink channel db_manager propagation
+  if {$opt(verbose)} {
+    puts "CBR_PERIOD : $opt(cbr_period)"
+    puts "SEED: $opt(rep_num)"
+    puts "NUMBER OF NODES: $opt(nn)"
+  } else {
+    puts "End of simulation"
+  }
 
 
-      set sum_cbr_throughput 	0
-      set sum_per		0
-      set sum_cbr_sent_pkts	0.0
-      set sum_cbr_rcv_pkts	0.0
-      set sum_mac_sent_pkts     0.0
-      set cbr_rcv_pkts		0.0
-      set mac_pkts		0.0
-	
-      for {set id3 0} {$id3 < $opt(nn)} {incr id3}  {
+  set sum_cbr_throughput 	0
+  set sum_per		0
+  set sum_cbr_sent_pkts	0.0
+  set sum_cbr_rcv_pkts	0.0
+  set sum_mac_sent_pkts     0.0
+  set cbr_rcv_pkts		0.0
+  set mac_pkts		0.0
+
+  for {set id3 0} {$id3 < $opt(nn)} {incr id3}  {
 		set cbr_throughput	   [$cbr_sink($id3) getthr]
 		set cbr_per	           [$cbr_sink($id3) getper]
 		set cbr_pkts         	   [$cbr($id3) getsentpkts]
@@ -641,28 +633,28 @@ proc finish { } {
 		set sum_cbr_sent_pkts [expr $sum_cbr_sent_pkts + $cbr_pkts]
 		set sum_cbr_rcv_pkts  [expr $sum_cbr_rcv_pkts + $cbr_rcv_pkts]
 		set sum_mac_sent_pkts [expr $sum_mac_sent_pkts + $mac_pkts]
-      }	
-    set mac_auv_rcv_pkts   [$mac_sink getDataPktsRx] 
-    #set tot_time  	     [$mac_sink GetTotalReceivingTime]
-    
-    if {$opt(verbose)} {  
-      puts "---------------------------------------------------------------------"
-      puts "Number of packets transmitted by CBR: [expr ($sum_cbr_sent_pkts)]"
-      puts "Number of packets received by CBR: [expr ($sum_cbr_rcv_pkts)]"
-      puts "------------------------------------------------------------------"
-      puts "Number of packets received by MAC:	$mac_auv_rcv_pkts"
-      puts "Number of packets transmitted by MAC:    $sum_mac_sent_pkts"
-      puts "------------------------------------------------------------------"
-      puts "Mean PER at CBR layer: [expr (1 - ($sum_cbr_rcv_pkts/($sum_cbr_sent_pkts)))]"
-      puts "Mean PER at MAC layer: [expr (1- ($sum_cbr_rcv_pkts/($sum_mac_sent_pkts)))]"
+  }	
+  set mac_auv_rcv_pkts   [$mac_sink getDataPktsRx] 
+  #set tot_time  	     [$mac_sink GetTotalReceivingTime]
+  
+  if {$opt(verbose)} {  
+    puts "---------------------------------------------------------------------"
+    puts "Number of packets transmitted by CBR: [expr ($sum_cbr_sent_pkts)]"
+    puts "Number of packets received by CBR: [expr ($sum_cbr_rcv_pkts)]"
+    puts "------------------------------------------------------------------"
+    puts "Number of packets received by MAC:	$mac_auv_rcv_pkts"
+    puts "Number of packets transmitted by MAC:    $sum_mac_sent_pkts"
+    puts "------------------------------------------------------------------"
+    puts "Mean PER at CBR layer: [expr (1 - ($sum_cbr_rcv_pkts/($sum_cbr_sent_pkts)))]"
+    puts "Mean PER at MAC layer: [expr (1- ($sum_cbr_rcv_pkts/($sum_mac_sent_pkts)))]"
 
-      #puts "Total receiving time: $tot_time"
-      #puts "Mean throughput at MAC layer: [expr (($mac_auv_rcv_pkts*125*8)/($tot_time))]"
-      puts "Mean throughput at CBR layer: $sum_cbr_throughput"
-      puts "done!"
-    }
-    $ns flush-trace
-    close $opt(tracefile)
+    #puts "Total receiving time: $tot_time"
+    #puts "Mean throughput at MAC layer: [expr (($mac_auv_rcv_pkts*125*8)/($tot_time))]"
+    puts "Mean throughput at CBR layer: $sum_cbr_throughput"
+    puts "done!"
+  }
+  $ns flush-trace
+  close $opt(tracefile)
 }
 
 

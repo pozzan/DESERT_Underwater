@@ -1,7 +1,7 @@
 /* -*-	Mode:C++ -*- */
 
 /*
- * Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
+ * Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 #include<node-core.h>
 #include<iostream>
 #include"uwoptical-mpropagation.h"
+#include <math.h>
 
 // constants initialization
 
@@ -57,14 +58,23 @@ public:
 
 UwOpticalMPropagation::UwOpticalMPropagation()
 :
-MPropagation(),
-file_name_("optical_LUT.txt"),
-token_separator_('\t')
+Ar_(1),
+At_(1),
+c_(0),
+theta_(0),
+omnidirectional_(false)
+/*file_name_("optical_LUT.txt"),
+token_separator_('\t')*/
 {
-  bind_error("token_separator_", &token_separator_);
+  /*bind_error("token_separator_", &token_separator_);*/
+  bind("Ar_", &Ar_);
+  bind("At_", &At_);
+  bind("c_", &c_);
+  bind("theta_", &theta_);
+  bind("debug_", &debug_);
 }
 
-int UwOpticalMPropagation::command(int argc, const char*const* argv){
+/*int UwOpticalMPropagation::command(int argc, const char*const* argv){
   if (argc == 3) {
     if (strcasecmp(argv[1], "setFileName") == 0) {
       string tmp_ = ((char *) argv[2]);
@@ -86,36 +96,65 @@ int UwOpticalMPropagation::command(int argc, const char*const* argv){
     }
   }
   return MPropagation::command(argc, argv);
+}*/
+int UwOpticalMPropagation::command(int argc, const char*const* argv){
+  if (argc == 2) {
+    if (strcasecmp(argv[1], "setOmnidirectional") == 0) {
+      omnidirectional_ = true;
+      return TCL_OK;
+    } 
+    else if (strcasecmp(argv[1], "setDirectional") == 0) {
+      omnidirectional_ = false;
+      return TCL_OK;
+    } 
+  }
+  else if (argc == 3) {
+    if (strcasecmp(argv[1], "setAr") == 0) {
+      Ar_ = strtod(argv[2], NULL);
+      return TCL_OK;
+    } 
+    else if (strcasecmp(argv[1], "setAt") == 0) {
+      At_ = strtod(argv[2], NULL);
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "setC") == 0) {
+      c_ = strtod(argv[2], NULL);
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "setTheta") == 0) {
+      theta_ = strtod(argv[2], NULL);
+      return TCL_OK;
+    }
+  }
+  return MPropagation::command(argc, argv);
 }
 
 double UwOpticalMPropagation::getGain(Packet* p)
-{//TODO: lookup table
+{
+  hdr_MPhy *ph = HDR_MPHY(p);
+  Position* sp = ph->srcPosition;
+  Position* rp = ph->dstPosition;
+  assert(sp);
+  assert(rp);
+  double dist = sp->getDist(rp);
+  double beta = sp->getZ() == rp->getZ() ? 0 : M_PI/2 - abs(sp->getRelZenith(rp));
+  /*double beta = sp->getRelAzimuth(rp);// mmm is it Beta (the elevation) ?? */
+  double PCgain=getLambertBeerGain(dist,beta);
+  if (debug_)
+    std::cout << NOW << " UwOpticalMPropagation::getGain()" << " dist="
+              << dist << " gain=" << PCgain << std::endl;
 
-   hdr_MPhy *ph = HDR_MPHY(p);
-
-   Position* sp = ph->srcPosition;
-   Position* rp = ph->dstPosition;
-   assert(sp);
-   assert(rp);
-   double dist = sp->getDist(rp);
-   double angle = sp->getRelZenith(rp);//mmm is it the elevation?? 
-
-   /*MSpectralMask* sm = ph->srcSpectralMask;
-   assert(sm);
-   double freq = ph->srcSpectralMask->getFreq();*/
-   double PCgain=lookUpGain(dist,angle);
-   if (debug_)
-     std::cout << NOW 
-	  << " UwOpticalMPropagation::getGain()" 
-	  << " dist=" << dist
-	  //<< " freq=" << freq
-	  << " gain=" << PCgain 
-	  << std::endl;
-
-   return PCgain;
+  return PCgain;
 }
 
-double UwOpticalMPropagation::lookUpGain(double d, double angle){
+double UwOpticalMPropagation::getLambertBeerGain(double d, double beta){
+  double cosBeta = omnidirectional_ ? 1 : cos(beta);
+  double L = d / cosBeta; // TODO: verify this 
+  return 2 * Ar_ * cosBeta / (M_PI * pow(L, 2.0) * (1 - cos(theta_)) + 2 * At_) 
+         * exp(-c_*d);
+}
+
+/*double UwOpticalMPropagation::lookUpGain(double d, double angle){
 	//TODO: search gain in the lookup table
   ifstream input_file_;
   istringstream stm;
@@ -141,4 +180,4 @@ double UwOpticalMPropagation::lookUpGain(double d, double angle){
   stm >> return_value_;
   //return return_value_;
 	return 1.0;
-}
+}*/
