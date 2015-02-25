@@ -95,6 +95,7 @@ private:
     double R; //shunt resistance
     double S; //sensitivity
     double T; //temperature (K)
+    double Ar_; //receiver area [m^2]
 };
 
 #endif /* UWOPTICAL_H  */

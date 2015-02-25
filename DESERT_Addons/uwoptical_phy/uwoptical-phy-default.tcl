@@ -32,9 +32,10 @@
 
 Module/UW/OPTICAL/PHY set TxPower_  				0.01
 Module/UW/OPTICAL/PHY set AcquisitionThreshold_dB_              1
-Module/UW/OPTICAL/PHY set Id_                                   1
-Module/UW/OPTICAL/PHY set Il_                                   1
-Module/UW/OPTICAL/PHY set R_                                    1
-Module/UW/OPTICAL/PHY set S_                                    1
-Module/UW/OPTICAL/PHY set T_                                    1
+Module/UW/OPTICAL/PHY set Id_                                   [expr 1.0e-9]
+Module/UW/OPTICAL/PHY set Il_                                   [expr 1.0e-6]
+Module/UW/OPTICAL/PHY set R_                                    [expr 1.49e9]
+Module/UW/OPTICAL/PHY set S_                                    0.26
+Module/UW/OPTICAL/PHY set T_                                    293.15
+Module/UW/OPTICAL/PHY set Ar_                                   0.0000011
 

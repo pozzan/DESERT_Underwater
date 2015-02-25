@@ -61,6 +61,7 @@ UwOpticalPhy::UwOpticalPhy()
     bind("R_",&R);
     bind("S_",&S);
     bind("T_",&T);
+    bind("Ar_",&Ar_);
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv) {
@@ -89,12 +90,12 @@ void UwOpticalPhy::startRx(Packet* p)
     	} 
     	else 
     	{
-    		if (debug_) cout << "UwOpticalPhy::Drop Packet::Below Threshold" << endl;
+    		if (debug_) cout << "UwOpticalPhy::Drop Packet::Below Threshold : snrdb = " << snr_dB << ", threshold = " << MPhy_Bpsk::getAcquisitionThreshold() << endl;
     	}
     }
     else
     {
-    	if (debug_) cout << "UwOpticalPhy::Drop Packet::Synced onto another packet" << endl;
+    	if (debug_) cout << "UwOpticalPhy::Drop Packet::Synced onto another packet PktRx = " << PktRx << ", pending = " << txPending << endl;
     }
 }
 
@@ -107,7 +108,9 @@ double UwOpticalPhy::getSNRdB(Packet* p)
 
 double UwOpticalPhy::getNoisePower(Packet* p)
 {
-    //LUT
+    // TODO: search the corect value in the LUT
+    double lut_value = 0;
+    return pow(lut_value * Ar_ * S , 2);//right now returns 0, due to not bias the snr calculation with unexpected values
 }
     
 void UwOpticalPhy::endRx(Packet* p)
@@ -117,9 +120,10 @@ void UwOpticalPhy::endRx(Packet* p)
     if (MPhy_Bpsk::PktRx != 0)
     {
     	if (MPhy_Bpsk::PktRx == p)
-	{
+	    {
             if(interference_)
             {
+                /* Old code:
                 const PowerChunkList& power_chunk_list = interference_->getInterferencePowerChunkList(p);
                 if(power_chunk_list.empty())
                 {
@@ -128,23 +132,37 @@ void UwOpticalPhy::endRx(Packet* p)
                     sendUp(p);
                     PktRx = 0;
                 }
+                */
+                // new code: 
+                double interference_power = interference_->getInterferencePower(p);
+                if(interference_power == 0)
+                {
+                    //no interference
+                    ch->error() = 0; 
+                }
                 else
                 {
                     //at least one interferent packet
-                    dropPacket(p);
+                    ch->error() = 1;
+                    if (debug_) cout << "UwOpticalPhy::endRx interference power = " << interference_power << endl;
                 }
             }
             else
             {
                 //no interference model set
                 ch->error() = 0; 
-                sendUp(p);
-                PktRx = 0;
             }
-	} 
-	else 
-	{
+
+            sendUp(p);
+            PktRx = 0;
+    	} 
+    	else 
+    	{
             dropPacket(p);
-	}
+    	}
+    }
+    else 
+    {
+        dropPacket(p);
     }
 }

@@ -32,7 +32,7 @@
 #
 # DumbWirelessChannel and MPHYPATCH is used for PHY layer and channel
 #
-# Author: Federico Favaro <favarofe@dei.unipd.it>
+# Author: Filippo Campagnaro <campagn1@dei.unipd.it>
 # Version: 1.0.0
 #
 #
@@ -80,6 +80,9 @@ load libuwudp.so
 load libuwcbr.so
 load libuwmphypatch.so
 load libuwoptical_propagation.so
+load libuwoptical_channel.so
+load libuwmulti_stack_controller.so
+load libuwoptical_phy.so
 
 #############################
 # NS-Miracle initialization #
@@ -99,9 +102,23 @@ set opt(starttime)          1
 set opt(stoptime)           100000 
 set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration of the simulation
 set opt(ack_mode)           "setNoAckMode"
+set opt(maxinterval_)       10.0
 
 set opt(freq)              10000000
 set opt(bw)                100000
+set opt(bitrate)           1000000
+set opt(txpower)           0.58
+set opt(opt_acq_db)        10
+set opt(temperatura)       293.15 ; # in Kelvin
+set opt(txArea)            0.000010
+set opt(rxArea)            0.0000011 ; # receveing area, it has to be the same for optical physical and propagation
+set opt(c)                 0.043 ; # pure seawater attenation coefficient
+set opt(theta)             1
+set opt(id)                [expr 1.0e-9]
+set opt(il)                [expr 1.0e-6]
+set opt(shuntRes)          [expr 1.49e9]
+set opt(sensitivity)       0.26
+
 
 set rng [new RNG]
 
@@ -152,18 +169,37 @@ Module/UW/CBR set period_              $opt(cbr_period)
 Module/UW/CBR set PoissonTraffic_      1
 Module/UW/CBR set debug_               0
 
+# Module/MPhy/BPSK  set TxPower_                $opt(txpower)
+# Module/MPhy/BPSK  set BitRate_                    $opt(bitrate)
+# Module/MPhy/BPSK  set AcquisitionThreshold_dB_   -15.0 
+# Module/MPhy/BPSK  set NoiseSPD_ [expr 1.28e-26]
+
+Module/UW/OPTICAL/PHY   set TxPower_                    $opt(txpower)
+Module/UW/OPTICAL/PHY   set BitRate_                    $opt(bitrate)
+Module/UW/OPTICAL/PHY   set AcquisitionThreshold_dB_    $opt(opt_acq_db)
+Module/UW/OPTICAL/PHY   set Id_                         $opt(id)
+Module/UW/OPTICAL/PHY   set Il_                         $opt(il)
+Module/UW/OPTICAL/PHY   set R_                          $opt(shuntRes)
+Module/UW/OPTICAL/PHY   set S_                          $opt(sensitivity)
+Module/UW/OPTICAL/PHY   set T_                          $opt(temperatura)
+Module/UW/OPTICAL/PHY   set Ar_                         $opt(rxArea)
+# Module/UW/OPTICAL/PHY   set debug_                      1
+
 set data_mask [new MSpectralMask/Rect]
 $data_mask setFreq       $opt(freq)
 $data_mask setBandwidth  $opt(bw)
 
-#set propagation [new MPropagation/MFreeSpace]
-
-Module/UW/OPTICAL/Propagation set debug_ 1
+Module/UW/OPTICAL/Propagation set Ar_       $opt(rxArea)
+Module/UW/OPTICAL/Propagation set At_       $opt(txArea)
+Module/UW/OPTICAL/Propagation set c_        $opt(c)
+Module/UW/OPTICAL/Propagation set theta_    $opt(theta)
+Module/UW/OPTICAL/Propagation set debug_    0
+# Module/UW/OPTICAL/Propagation set debug_ 1
 set propagation [new Module/UW/OPTICAL/Propagation]
 $propagation setOmnidirectional
 
-set channel [new Module/DumbWirelessCh]
-
+# set channel [new Module/DumbWirelessCh]
+set channel [new Module/UW/Optical/Channel]
 
 ################################
 # Procedure(s) to create nodes #
@@ -183,7 +219,8 @@ proc createNode { id } {
     set ipif($id) [new Module/UW/IP]
     set mll($id)  [new Module/UW/MLL] 
     set mac($id)  [new Module/UW/CSMA_ALOHA] 
-    set phy($id)  [new Module/MPhy/BPSK]  
+    # set phy($id)  [new Module/MPhy/BPSK]  
+    set phy($id)  [new Module/UW/OPTICAL/PHY]
 	
 	for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
 		$node($id) addModule 7 $cbr($id,$cnt)   1  "CBR"
@@ -206,6 +243,11 @@ proc createNode { id } {
     $node($id) setConnection $mac($id)   $phy($id)   1
     $node($id) addToChannel  $channel    $phy($id)   1
 
+    set interf_data($id) [new "MInterference/MIV"]
+    $interf_data($id) set maxinterval_ $opt(maxinterval_)
+    $interf_data($id) set debug_       0
+
+    $phy($id) setInterference $interf_data($id)
     $phy($id) setPropagation $propagation
     $phy($id) setSpectralMask $data_mask
 
@@ -215,8 +257,8 @@ proc createNode { id } {
     $node($id) addPosition $position($id)
     
     #Setup positions
-    $position($id) setX_ [expr $id*2]
-    $position($id) setY_ [expr $id*2]
+    $position($id) setX_ [expr $id*10]
+    $position($id) setY_ [expr $id*10]
     $position($id) setZ_ -100
     
     $mac($id) $opt(ack_mode)
@@ -278,14 +320,17 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 # Start/Stop Timers #
 #####################
 # Set here the timers to start and/or stop the timers
-for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-	for {set id2 0} {$id2 < $opt(nn)} {incr id2} {
-		if {$id1 != $id2} {
-			$ns at $opt(starttime)    "$cbr($id1,$id2) start"
-			$ns at $opt(stoptime)     "$cbr($id1,$id2) stop"
-		}
-	}
-}
+# for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
+# 	for {set id2 0} {$id2 < $opt(nn)} {incr id2} {
+# 		if {$id1 != $id2} {
+# 			$ns at $opt(starttime)    "$cbr($id1,$id2) start"
+# 			$ns at $opt(stoptime)     "$cbr($id1,$id2) stop"
+# 		}
+# 	}
+# }
+
+$ns at $opt(starttime)    "$cbr(0,1) start"
+$ns at $opt(stoptime)     "$cbr(0,1) stop"
 
 ###################
 # Final Procedure #
