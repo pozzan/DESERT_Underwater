@@ -51,23 +51,35 @@
 #include <limits>
 #include <climits>
 #include <math.h>
+#include <node-core.h>
+#include <fstream>
+#include <sstream>
+#include <map>
+#include <vector>
+
 
 #define OPTICAL_MODULATION_TYPE "OPTIC_BPSK"
+#define NOT_FOUND_VALUE 0
+
+typedef ::std::map< double, double > DepthMap;
+typedef DepthMap::iterator DMIt;
 
 class UwOpticalPhy : public MPhy_Bpsk {
 
 
 public:
+
+
     /**
      * Constructor of UwMultiPhy class.
      */
     UwOpticalPhy();
-    
+
     /**
      * Destructor of UwMultiPhy class.
      */
     virtual ~UwOpticalPhy() { }
-    
+
     /**
      * TCL command interpreter. It implements the following OTcl methods:
      *
@@ -79,23 +91,32 @@ public:
     virtual int command(int, const char*const*);
 
     virtual void startRx(Packet* p);
-    
+
     virtual double getSNRdB(Packet* p);
 
     virtual void endRx(Packet* p);
-    
+
     virtual double getNoisePower(Packet* p);
     
 protected:
+
+    virtual double lookUpLightNoiseE(double depth);
+
+    virtual double linearInterpolator( double x, double x1, double y1, double x2, double y2 );  
+
+    virtual void initializeLUT();   
     // Variables
 private:
     //Variables
-    double Id;
-    double Il; //
+    double Id; //dark current
+    double Il; //light current it can be approximated to the short circuit current
     double R; //shunt resistance
     double S; //sensitivity
     double T; //temperature (K)
     double Ar_; //receiver area [m^2]
+    string lut_file_name_; //LUT file name
+    char lut_token_separator_; //
+    DepthMap lut_map;
 };
 
 #endif /* UWOPTICAL_H  */

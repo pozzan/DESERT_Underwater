@@ -40,7 +40,8 @@
 const double K = 1.38*1.E-23; //Boltzmann constant
 const double q = 1.6*1.E-19; //electronic charge
 
-static class UwOpticalPhyClass : public TclClass {
+static class UwOpticalPhyClass : public TclClass 
+{
 public:
     UwOpticalPhyClass() : TclClass("Module/UW/OPTICAL/PHY") {}
     TclObject* create(int, const char*const*) {
@@ -48,7 +49,9 @@ public:
     }
 } class_module_optical;
 
-UwOpticalPhy::UwOpticalPhy() 
+UwOpticalPhy::UwOpticalPhy() :
+    lut_file_name_(""),
+    lut_token_separator_('\t')
 {
     if (!MPhy_Bpsk::initialized)
     {
@@ -64,9 +67,41 @@ UwOpticalPhy::UwOpticalPhy()
     bind("Ar_",&Ar_);
 }
 
-int UwOpticalPhy::command(int argc, const char*const* argv) {
-    //Tcl& tcl = Tcl::instance();
-    return MPhy_Bpsk::command(argc, argv);     
+int UwOpticalPhy::command(int argc, const char*const* argv)
+{
+  if (argc == 2)
+  {
+    if (strcasecmp(argv[1], "useLUT") == 0) 
+    {
+      initializeLUT();
+      return TCL_OK;
+    }
+  }
+  else if (argc == 3) 
+  {
+    if (strcasecmp(argv[1], "setLUTFileName") == 0) 
+    {
+      string tmp_ = ((char *) argv[2]);
+      if (tmp_.size() == 0) 
+      {
+          fprintf(stderr, "Empty string for the file name");
+          return TCL_ERROR;
+      }
+      lut_file_name_ = tmp_;
+      return TCL_OK;
+    } 
+    else if (strcasecmp(argv[1], "setLUTSeparator") == 0) 
+    {
+      string tmp_ = ((char *) argv[2]);
+      if (tmp_.size() == 0) {
+          fprintf(stderr, "Empty char for the file name");
+          return TCL_ERROR;
+      }
+      lut_token_separator_ = tmp_.at(0);
+      return TCL_OK;
+    }
+  }
+  return MPhy_Bpsk::command(argc, argv);
 }
 
 void UwOpticalPhy::startRx(Packet* p)
@@ -108,32 +143,22 @@ double UwOpticalPhy::getSNRdB(Packet* p)
 
 double UwOpticalPhy::getNoisePower(Packet* p)
 {
-    // TODO: search the corect value in the LUT
-    double lut_value = 0;
+    hdr_MPhy *ph = HDR_MPHY(p);
+    Position* dest = ph->dstPosition;
+    assert(dest);
+    double lut_value = lut_map.empty() ? 0 : lookUpLightNoiseE(-dest->getZ());
     return pow(lut_value * Ar_ * S , 2);//right now returns 0, due to not bias the snr calculation with unexpected values
 }
     
 void UwOpticalPhy::endRx(Packet* p)
 { 
     hdr_cmn* ch = HDR_CMN(p);
-    hdr_MPhy* ph = HDR_MPHY(p);
     if (MPhy_Bpsk::PktRx != 0)
     {
     	if (MPhy_Bpsk::PktRx == p)
 	    {
             if(interference_)
             {
-                /* Old code:
-                const PowerChunkList& power_chunk_list = interference_->getInterferencePowerChunkList(p);
-                if(power_chunk_list.empty())
-                {
-                    //no interference
-                    ch->error() = 0; 
-                    sendUp(p);
-                    PktRx = 0;
-                }
-                */
-                // new code: 
                 double interference_power = interference_->getInterferencePower(p);
                 if(interference_power == 0)
                 {
@@ -165,4 +190,56 @@ void UwOpticalPhy::endRx(Packet* p)
     {
         dropPacket(p);
     }
+}
+
+double UwOpticalPhy::lookUpLightNoiseE(double depth)
+{
+  //TODO: search noise Energy in the lookup table
+  double return_value_ = -1;
+  DepthMap::iterator it = lut_map.upper_bound(depth);
+  if (it != lut_map.end() && it->first == depth)
+    return it->second;  
+  if (it == lut_map.end() || it == lut_map.begin())
+    return NOT_FOUND_VALUE;
+  DepthMap::iterator u_it = it;
+  it--;
+  if (debug_)
+    std::cout <<depth<< " "<<it->first << " " << it->second << " " 
+              <<u_it->first << " " << u_it->second <<std::endl;
+  return linearInterpolator(depth, it->first, it->second, u_it->first, u_it->second);
+}
+
+double UwOpticalPhy::linearInterpolator( double x, double x1, double y1, double x2, double y2 )
+{ 
+  assert (x1 != x2);  
+  double m = (y1-y2)/(x1-x2);
+  double q = y1 - m * x1;
+  return m * x + q;
+}
+
+void UwOpticalPhy::initializeLUT()
+{
+  ifstream input_file_;
+  string line_;
+  char* tmp_ = new char[lut_file_name_.length() + 1];
+  strcpy(tmp_, lut_file_name_.c_str());
+  input_file_.open(tmp_);
+  if (input_file_.is_open()) {
+    // skip first 2 lines
+    for (int i = 0; i < 2; ++i)
+    {
+      std::getline(input_file_, line_);
+    }
+    while (std::getline(input_file_, line_)) {
+      //TODO: retrive the right row and break the loop
+      ::std::stringstream line_stream(line_);
+      double d;
+      double n;
+      line_stream >> d;
+      line_stream >> n;
+      lut_map[d] = n;
+    }
+  } else {
+    cerr << "Impossible to open file " << lut_file_name_ << endl;
+  }
 }

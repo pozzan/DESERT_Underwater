@@ -255,6 +255,9 @@ proc createNode { id } {
     $phy($id) setInterference $interf_data($id)
     $phy($id) setPropagation $propagation
     $phy($id) setSpectralMask $data_mask
+    $phy($id) setLUTFileName "LUT.txt"
+    $phy($id) setLUTSeparator " "
+    $phy($id) useLUT
 
     $ipif($id) addr [expr $id +1]
     
@@ -264,7 +267,7 @@ proc createNode { id } {
     #Setup positions
     $position($id) setX_ [expr $id*10]
     $position($id) setY_ [expr $id*10]
-    $position($id) setZ_ -100
+    $position($id) setZ_ -14.5
     
     $mac($id) $opt(ack_mode)
     $mac($id) initialize

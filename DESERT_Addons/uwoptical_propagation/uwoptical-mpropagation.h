@@ -43,8 +43,7 @@
 
 #include <mpropagation.h>
 #include <mphy.h>
-/*#include <fstream>
-#include <sstream>*/
+#include <iostream>
 
 
 class UwOpticalMPropagation : public MPropagation
@@ -52,8 +51,6 @@ class UwOpticalMPropagation : public MPropagation
 public:
   UwOpticalMPropagation();
   virtual ~UwOpticalMPropagation() { }
-
-  //virtual int command(int argc, const char*const* argv);  
 
   /**
    * TCL command interpreter. It implements the following OTcl methods:
@@ -77,9 +74,6 @@ public:
   int debug_;
 
 protected:
-/*  virtual double lookUpGain(double d, double angle);
-  string file_name_;
-  char token_separator_;*/
 
   virtual double getLambertBeerGain(double d, double angle);
   double Ar_; // receiver area [m^2]

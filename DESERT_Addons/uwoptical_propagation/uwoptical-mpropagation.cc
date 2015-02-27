@@ -38,9 +38,8 @@
  *
  */
 
-#include<node-core.h>
-#include<iostream>
-#include"uwoptical-mpropagation.h"
+#include <node-core.h>
+#include "uwoptical-mpropagation.h"
 #include <math.h>
 
 // constants initialization
@@ -63,8 +62,6 @@ At_(1),
 c_(0),
 theta_(0),
 omnidirectional_(false)
-/*file_name_("optical_LUT.txt"),
-token_separator_('\t')*/
 {
   /*bind_error("token_separator_", &token_separator_);*/
   bind("Ar_", &Ar_);
@@ -74,29 +71,6 @@ token_separator_('\t')*/
   bind("debug_", &debug_);
 }
 
-/*int UwOpticalMPropagation::command(int argc, const char*const* argv){
-  if (argc == 3) {
-    if (strcasecmp(argv[1], "setFileName") == 0) {
-      string tmp_ = ((char *) argv[2]);
-      if (tmp_.size() == 0) {
-          fprintf(stderr, "Empty string for the file name");
-          return TCL_ERROR;
-      }
-      file_name_ = tmp_;
-      return TCL_OK;
-    } 
-    else if (strcasecmp(argv[1], "setSeparator") == 0) {
-      string tmp_ = ((char *) argv[2]);
-      if (tmp_.size() == 0) {
-          fprintf(stderr, "Empty char for the file name");
-          return TCL_ERROR;
-      }
-      token_separator_ = tmp_.at(0);
-      return TCL_OK;
-    }
-  }
-  return MPropagation::command(argc, argv);
-}*/
 int UwOpticalMPropagation::command(int argc, const char*const* argv){
   if (argc == 2) {
     if (strcasecmp(argv[1], "setOmnidirectional") == 0) {
@@ -138,7 +112,6 @@ double UwOpticalMPropagation::getGain(Packet* p)
   assert(rp);
   double dist = sp->getDist(rp);
   double beta = sp->getZ() == rp->getZ() ? 0 : M_PI/2 - abs(sp->getRelZenith(rp));
-  /*double beta = sp->getRelAzimuth(rp);// mmm is it Beta (the elevation) ?? */
   double PCgain=getLambertBeerGain(dist,beta);
   if (debug_)
     std::cout << NOW << " UwOpticalMPropagation::getGain()" << " dist="
@@ -153,31 +126,3 @@ double UwOpticalMPropagation::getLambertBeerGain(double d, double beta){
   return 2 * Ar_ * cosBeta / (M_PI * pow(L, 2.0) * (1 - cos(theta_)) + 2 * At_) 
          * exp(-c_*d);
 }
-
-/*double UwOpticalMPropagation::lookUpGain(double d, double angle){
-	//TODO: search gain in the lookup table
-  ifstream input_file_;
-  istringstream stm;
-  string line_;
-  string token_;
-  double return_value_;
-
-  char* tmp_ = new char[file_name_.length() + 1];
-  strcpy(tmp_, file_name_.c_str());
-  input_file_.open(tmp_);
-  if (input_file_.is_open()) {
-    while (std::getline(input_file_, line_)) {
-      //TODO: retrive the right row and break the loop
-    }
-  } else {
-    cerr << "Impossible to open file " << file_name_ << endl;
-  }
-  istringstream iss(line_);
-  while (getline(iss, token_, token_separator_)) {
-    //TODO: find the right column
-  }
-  stm.str(token_);
-  stm >> return_value_;
-  //return return_value_;
-	return 1.0;
-}*/
