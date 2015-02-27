@@ -75,6 +75,7 @@ load libuwstaticrouting.so
 load libmphy.so
 load libmmac.so
 load libuwcsmaaloha.so
+load libuwaloha.so
 load libuwmll.so
 load libuwudp.so
 load libuwcbr.so
@@ -99,7 +100,7 @@ set opt(start_clock) [clock seconds]
 set opt(nn)                 2.0 ;# Number of Nodes
 set opt(pktsize)            125  ;# Pkt sike in byte
 set opt(starttime)          1	
-set opt(stoptime)           100000 
+set opt(stoptime)           1000 
 set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration of the simulation
 set opt(ack_mode)           "setNoAckMode"
 set opt(maxinterval_)       10.0
@@ -140,7 +141,7 @@ if {$opt(bash_parameters)} {
 		$rng seed         $opt(seedcbr)
 	}
 } else {
-	set opt(cbr_period) 60
+	set opt(cbr_period) 0.1
 	set opt(pktsize)	125
 	set opt(seedcbr)	1
 }
@@ -201,6 +202,10 @@ $propagation setOmnidirectional
 # set channel [new Module/DumbWirelessCh]
 set channel [new Module/UW/Optical/Channel]
 
+Module/UW/CSMA_ALOHA set listen_time_          [expr 1.0e-12]
+Module/UW/CSMA_ALOHA set wait_costant_         [expr 1.0e-12]
+# Module/UW/ALOHA set listen_time_          [expr 1.0e-12]
+# Module/UW/ALOHA set wait_costant_         [expr 1.0e-12]
 ################################
 # Procedure(s) to create nodes #
 ################################
@@ -218,8 +223,8 @@ proc createNode { id } {
     set ipr($id)  [new Module/UW/StaticRouting]
     set ipif($id) [new Module/UW/IP]
     set mll($id)  [new Module/UW/MLL] 
+    # set mac($id)  [new Module/UW/ALOHA] 
     set mac($id)  [new Module/UW/CSMA_ALOHA] 
-    # set phy($id)  [new Module/MPhy/BPSK]  
     set phy($id)  [new Module/UW/OPTICAL/PHY]
 	
 	for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
@@ -309,7 +314,7 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 ##################
 for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 	for {set id2 0} {$id2 < $opt(nn)} {incr id2}  {
-			$ipr($id2) addRoute [$ipif($id1) addr] [$ipif($id1) addr]
+		$ipr($id2) addRoute [$ipif($id1) addr] [$ipif($id1) addr]
 	}
 }
 
@@ -320,17 +325,17 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 # Start/Stop Timers #
 #####################
 # Set here the timers to start and/or stop the timers
-# for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-# 	for {set id2 0} {$id2 < $opt(nn)} {incr id2} {
-# 		if {$id1 != $id2} {
-# 			$ns at $opt(starttime)    "$cbr($id1,$id2) start"
-# 			$ns at $opt(stoptime)     "$cbr($id1,$id2) stop"
-# 		}
-# 	}
-# }
+for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
+	for {set id2 0} {$id2 < $opt(nn)} {incr id2} {
+		if {$id1 != $id2} {
+			$ns at $opt(starttime)    "$cbr($id1,$id2) start"
+			$ns at $opt(stoptime)     "$cbr($id1,$id2) stop"
+		}
+	}
+}
 
-$ns at $opt(starttime)    "$cbr(0,1) start"
-$ns at $opt(stoptime)     "$cbr(0,1) stop"
+# $ns at $opt(starttime)    "$cbr(0,1) start"
+# $ns at $opt(stoptime)     "$cbr(0,1) stop"
 
 ###################
 # Final Procedure #
