@@ -196,11 +196,18 @@ double UwOpticalPhy::lookUpLightNoiseE(double depth)
 {
   //TODO: search noise Energy in the lookup table
   double return_value_ = -1;
-  DepthMap::iterator it = lut_map.upper_bound(depth);
+  DepthMap::iterator it = lut_map.lower_bound(depth);
   if (it != lut_map.end() && it->first == depth)
+  {
+    if (debug_) std::cout <<depth<< " "<<it->first << " " << it->second << std::endl; 
     return it->second;  
+  }
   if (it == lut_map.end() || it == lut_map.begin())
+  {
+    if (debug_) std::cout <<depth<< " Nothing returned " << std::endl; 
+    
     return NOT_FOUND_VALUE;
+  }
   DepthMap::iterator u_it = it;
   it--;
   if (debug_)
