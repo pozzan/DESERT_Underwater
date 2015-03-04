@@ -109,7 +109,7 @@ int UwMultiStackController::command(int argc, const char*const* argv)
     */
     if(strcasecmp(argv[1], "addThreshold") == 0)
     {
-      addThreshold(atoi(argv[2]),atoi(argv[3]),atof(argv[3]));
+      addThreshold(atoi(argv[2]),atoi(argv[3]),atof(argv[4]));
       return TCL_OK;
     }
   }

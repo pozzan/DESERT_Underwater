@@ -83,7 +83,9 @@ int UwMultiStackControllerPhyMaster::command(int argc, const char*const* argv)
 
 void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
 {
-  updateMasterStatistics(p,idSrc);
+  hdr_cmn *ch = HDR_CMN(p);
+  if (ch->direction() == hdr_cmn::UP)
+    updateMasterStatistics(p,idSrc);
   UwMultiStackControllerPhy::recv(p, idSrc);
 }
 
@@ -99,7 +101,7 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
 
   int id_short_range = getShorterRangeLayer(last_layer_used_);
   int id_long_range = getLongerRangeLayer(last_layer_used_);
-  double upper_threshold= getThreshold(last_layer_used_,id_short_range);
+  double upper_threshold = getThreshold(last_layer_used_,id_short_range);
   double lower_threshold = getThreshold(last_layer_used_,id_long_range);
 
   last_layer_used_ = (upper_threshold != UwMultiStackController::threshold_not_exist 
@@ -109,14 +111,17 @@ int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p)
   last_layer_used_ = (lower_threshold != UwMultiStackController::threshold_not_exist 
                       && power_statistics_ < lower_threshold) ?
                       id_long_range : last_layer_used_;
-  power_statistics_ = 0;
-  lower_id_active_ = last_layer_used_;
   if (debug_)
   {
     std::cout << NOW << " ControllerPhyMaster("<< mac_addr 
-              <<")::getBestLayer(Packet *p), power_statistics_=" << power_statistics_
-              << " best layer id = " << last_layer_used_ << std::endl;
-  }
+              <<")::getBestLayer(Packet *p), power_statistics_= " << power_statistics_
+              << " best layer id = " << last_layer_used_ << " upper_threshold = " << upper_threshold
+              << " lower_threshold = " << lower_threshold << std::endl;
+  }                    
+
+  power_statistics_ = 0;
+  lower_id_active_ = last_layer_used_;
+  
   return last_layer_used_;
 }
 
@@ -130,17 +135,16 @@ void UwMultiStackControllerPhyMaster::updateMasterStatistics(Packet *p, int idSr
   hdr_mac* mach = HDR_MAC(p);
   hdr_MPhy* ph = HDR_MPHY(p);
   
-  if (debug_)
-  {
-    std::cout << NOW << " ControllerPhyMaster("<< mac_addr <<
-              ")::updateMasterStatistics(Packet *p, int idSrc), Pr = " 
-              << ph->Pr << std::endl;
-  }
-  
   if (mach->macDA() == mac_addr && idSrc == last_layer_used_)
   {
     power_statistics_ = power_statistics_ ? (1-alpha_)*power_statistics_ + alpha_*ph->Pr 
                         : ph->Pr;
+  }
+  if (debug_)
+  {
+    std::cout << NOW << " ControllerPhyMaster("<< mac_addr <<
+              ")::updateMasterStatistics(Packet *p, int idSrc), Pr = " << ph->Pr 
+              << " power_statistics_ = " << power_statistics_ << std::endl;
   }
 }
 
