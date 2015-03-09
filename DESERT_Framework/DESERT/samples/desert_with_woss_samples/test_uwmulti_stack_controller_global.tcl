@@ -109,12 +109,14 @@ set opt(start_long)    		13.5   ;# Starting Longitude
 set opt(nn) 			        8.0    ;# Number of nodes
 set opt(pktsize)	 	      125    ;# Packet size in bytes
 set opt(stoptime)        	1000 ;# Stoptime
-set opt(dist_nodes) 		  10    ;# Distance between nodes in m
+set opt(dist_nodes) 		  500    ;# Distance between nodes in m
 set opt(nn_in_row) 		    4      ;# Number of nodes in a row
 set opt(knots)        		4      ;# Speed of the SINK in knots
 set opt(speed)            [expr $opt(knots) * 0.51444444444] ;#Speed of the SINK in m/s
-set opt(node_depth)       100
-
+set opt(node_depth)       100.0
+set opt(time_in_wp)       10.0
+set opt(trigger_time)     10.0 ;#>5
+set opt(time_interval)    10.0
 set rng [new RNG]
 
 if {$opt(bash_parameters)} {
@@ -141,16 +143,16 @@ set opt(starttime)       	0.1
 set opt(txduration)     	[expr $opt(stoptime) - $opt(starttime)]
 
 set opt(txpower)	 	        150.0 
-set opt(txpower2)           0.58
+set opt(txpower2)           10.0
 set opt(per_tgt)	 	        0.1
 set opt(rx_snr_penalty_db)  0.0
 set opt(tx_margin_db)		    0.0
 
-set opt(opt_acq_db)        10
+set opt(opt_acq_db)        20
 set opt(temperatura)       293.15 ; # in Kelvin
 set opt(txArea)            0.000010
 set opt(rxArea)            0.0000011 ; # receveing area, it has to be the same for optical physical and propagation
-set opt(c)                 0.043 ; # pure seawater attenation coefficient
+set opt(c)                 0.15 ; # pure seawater attenation coefficient
 set opt(theta)             1
 set opt(id)                [expr 1.0e-9]
 set opt(il)                [expr 1.0e-6]
@@ -172,8 +174,8 @@ set opt(freq2)              10000000 ;#Frequency used in Hz
 set opt(bw2)                100000   ;#Bandwidth used in Hz
 set opt(bitrate2)           1000000.0;#bitrate in bps
 
-set opt(ctrOptThr)          [expr 1.0e-9]
-set opt(ctrAcThr)           [expr 5.0e-11]
+set opt(ctrOptThr)          [expr 6.5e-9] ; # 6.88e^-9 - hysteresis
+set opt(ctrAcThr)           [expr 7.0e13] ; # 6.826e^13 + hysteresis
 
 
 ### TRACE FILE
@@ -247,6 +249,7 @@ Module/UW/OPTICAL/PHY   set T_                          $opt(temperatura)
 Module/UW/OPTICAL/PHY   set Ar_                         $opt(rxArea)
 
 set channel [new Module/UnderwaterChannel]
+MPropagation/Underwater set practicalSpreading_  1.5
 set propagation [new MPropagation/Underwater]
 
 set channel2 [new Module/UW/Optical/Channel]
@@ -271,7 +274,7 @@ $data_mask2 setBandwidth  $opt(bw2)
 
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set TRIGGER_size_         1
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set buffer_pkts_          1000
-Module/UW/CSMA_ALOHA/TRIGGER/SINK set tx_timer_duration_    5
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set tx_timer_duration_    $opt(trigger_time)
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set listen_time_          0.01;#[expr 1.0e-3]
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set wait_costant_         [expr 1.0e-12]
 # Module/UW/CSMA_ALOHA/TRIGGER/SINK set debug_     1
@@ -280,7 +283,7 @@ Module/UW/CSMA_ALOHA/TRIGGER/NODE set HDR_size_             1
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set buffer_pkts_          1000
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set listen_time_          0.01;#[expr 1.0e-3]
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set wait_costant_         [expr 1.0e-12]
-Module/UW/CSMA_ALOHA/TRIGGER/NODE set tx_timer_duration_    4
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set tx_timer_duration_    [expr $opt(trigger_time)-3.2]
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set max_payload_          125
 
 # Module/UW/CSMA_ALOHA set wait_costant_         [expr 1.0e-12]
@@ -295,7 +298,8 @@ set node_depth $opt(node_depth)
 set sink_depth  [expr $node_depth - 3 ]
 
 # Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE  set debug_     1
-Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set debug_     1
+# Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set debug_     1
+Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set alpha_     0.5
 
 ################################
 # Procedure(s) to create nodes #
@@ -509,54 +513,54 @@ proc createSinkWaypoints { } {
   set curr_lat [$position(1) getLatitude_]
   set curr_lon [$position(1) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) 5.0]
+  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
   puts "waypoint 1  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
 
 
   set curr_lat [$position(2) getLatitude_]
   set curr_lon [$position(2) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) 5.0]
+  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
   puts "waypoint 2  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
 
 
   set curr_lat [$position(3) getLatitude_]
   set curr_lon [$position(3) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) 5.0]
+  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
   puts "waypoint 3  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
 
 
   set curr_lat [$position(7) getLatitude_]
   set curr_lon [$position(7) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) 5.0]
+  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
   puts "waypoint 4  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
 
 
   set curr_lat [$position(6) getLatitude_]
   set curr_lon [$position(6) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) 5.0]
+  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
   puts "waypoint 5  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
 
   set curr_lat [$position(5) getLatitude_]
   set curr_lon [$position(5) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) 5.0]
+  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
   puts "waypoint 6  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
 
 
   set curr_lat [$position(4) getLatitude_]
   set curr_lon [$position(4) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) 5.0]
+  set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
   puts "waypoint 7  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
 
   set curr_lat [$position(0) getLatitude_]
   set curr_lon [$position(0) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addLoopPoint $curr_lat $curr_lon $curr_depth $opt(speed) 5.0 0 4000]
+  set toa      [$position_sink addLoopPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp) 0 4000]
   puts "waypoint 0  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
   #1 TOTAL LOOPS
   #0.0 loop_id
@@ -614,11 +618,26 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
   $mll_sink addentry [$ipif($id1) addr] [ $mac($id1) addr]
 }
 
+proc printPos {} {
+  global position_sink
+  set x_pos [$position_sink getX_]
+  set y_pos [$position_sink getY_]
+  set z_pos [$position_sink getZ_]
+  puts "Position = $x_pos $y_pos $z_pos"
+}
 
+set partial_tot_rx 0.0
+
+proc printInstantThgp { } {
+  global mac_sink partial_tot_rx opt
+  set mac_auv_rcv_pkts   [$mac_sink getDataPktsRx]
+  set thgp [expr ($mac_auv_rcv_pkts-$partial_tot_rx)*$opt(pktsize)/$opt(time_interval)]
+  set partial_tot_rx     $mac_auv_rcv_pkts
+  puts "Throughput = $thgp"
+}
 ################################
 #Start cbr(s)
 ################################
-
 
 set force_stop $opt(stoptime)
 
@@ -628,11 +647,10 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 }
 $ns at 20 "$mac_sink sinkRun"
 
-# for {set t 30} {$t <= $opt(stoptime)} {set t [expr $t + 100.0]} {
-#   $ns at $t "puts -nonewline [$position_sink getX_] "
-#   $ns at $t "puts -nonewline [$position_sink getY_] "
-#   $ns at $t "puts [$position_sink getZ_] "
-# }
+for {set t 30} {$t <= $opt(stoptime)} {set t [expr $t + $opt(time_interval)]} {
+  # $ns at $t "printPos"
+  $ns at $t "printInstantThgp"
+}
 
 proc finish { } {
   global ns opt cbr outfile
@@ -657,14 +675,16 @@ proc finish { } {
   for {set id3 0} {$id3 < $opt(nn)} {incr id3}  {
 		set cbr_throughput	   [$cbr_sink($id3) getthr]
 		set cbr_per	           [$cbr_sink($id3) getper]
-		set cbr_pkts         	   [$cbr($id3) getsentpkts]
-		set mac_pkts         	   [$mac($id3) getDataPktsTx]
+		set cbr_pkts         	 [$cbr($id3) getsentpkts]
+		set mac_pkts         	 [$mac($id3) getDataPktsTx]
+    set den_mac_pkts       $mac_pkts
+    if {$den_mac_pkts == 0} { set den_mac_pkts 1 }
 		set cbr_rcv_pkts       [$cbr_sink($id3) getrecvpkts]
     if {$opt(verbose)} {
 		  puts "cbr_sink($id3) throughput                : $cbr_throughput"
 		  puts "cbr_sink($id3) received packets          : $cbr_rcv_pkts"
 		  puts "mac($id3) sent pkts                      : $mac_pkts"
-		  puts "MAC level PDR of node		       : [expr {double($cbr_rcv_pkts)/double($mac_pkts)}]"
+		  puts "MAC level PDR of node		       : [expr {double($cbr_rcv_pkts)/double($den_mac_pkts)}]"
 		  puts "-------------------------------------------------------------------------------------------"
     }
 
