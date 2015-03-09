@@ -87,6 +87,7 @@ protected:
     // Variables
 	int last_layer_used_;
 	double power_statistics_;
+  int power_stat_node_;
 	double alpha_; //FIR parameter
 
   /** 

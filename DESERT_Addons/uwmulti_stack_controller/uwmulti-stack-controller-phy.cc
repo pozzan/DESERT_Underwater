@@ -192,8 +192,8 @@ void UwMultiStackControllerPhy::recv(Packet *p, int idSrc)
   {
     //direction DOWN: packet is coming from upper layers
     if(debug_)
-      std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recv(Packet *p, int idSrc) FromUpperLayers" 
-                << std::endl;
+      std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recv(Packet *p, int idSrc) FromUpperLayer idSrc = " 
+                << idSrc << std::endl;
     stateBusy2Tx(p);
   }
   else if (current_state == UWPHY_CONTROLLER_STATE_BUSY_2_RX && idSrc == receiving_id) 
@@ -204,7 +204,10 @@ void UwMultiStackControllerPhy::recv(Packet *p, int idSrc)
     sendUp(p, min_delay_);
     stateIdle();
   }
-  else if (debug_)
-    std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recv(Packet *p, int idSrc) block direction = " 
-              << ch->direction() << std::endl;
+  else {
+    if (debug_)
+      std::cout << NOW << " ControllerPhy("<< mac_addr <<")::recv(Packet *p, int idSrc) block direction = " 
+              << ch->direction() << " idSrc = " << idSrc << std::endl;
+    //Packet::free(p);?
+  }
 }

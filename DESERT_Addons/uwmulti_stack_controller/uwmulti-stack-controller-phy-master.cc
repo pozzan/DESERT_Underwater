@@ -57,6 +57,7 @@ UwMultiStackControllerPhyMaster::UwMultiStackControllerPhyMaster()
   UwMultiStackControllerPhy(),
   last_layer_used_(0),
   power_statistics_(0),
+  power_stat_node_(0),
   alpha_(0.5)
 { 
   bind("alpha_", &alpha_);
@@ -137,8 +138,13 @@ void UwMultiStackControllerPhyMaster::updateMasterStatistics(Packet *p, int idSr
   
   if (mach->macDA() == mac_addr && idSrc == last_layer_used_)
   {
-    power_statistics_ = power_statistics_ ? (1-alpha_)*power_statistics_ + alpha_*ph->Pr 
-                        : ph->Pr;
+    if (power_stat_node_ == mach->macSA())
+      power_statistics_ = power_statistics_ ? (1-alpha_)*power_statistics_ + alpha_*ph->Pr 
+                          : ph->Pr;
+    else if (ph->Pr > power_statistics_){
+      power_statistics_ = ph->Pr;
+      power_stat_node_ = mach->macSA();
+    }
   }
   if (debug_)
   {
