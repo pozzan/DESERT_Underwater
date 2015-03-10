@@ -108,14 +108,14 @@ set opt(start_lat)  	 	  44.51  ;# Starting Latitude
 set opt(start_long)    		13.5   ;# Starting Longitude
 set opt(nn) 			        8.0    ;# Number of nodes
 set opt(pktsize)	 	      125    ;# Packet size in bytes
-set opt(stoptime)        	1000 ;# Stoptime
-set opt(dist_nodes) 		  500    ;# Distance between nodes in m
+set opt(stoptime)        	820 ;# Stoptime
+set opt(dist_nodes) 		  100    ;# Distance between nodes in m
 set opt(nn_in_row) 		    4      ;# Number of nodes in a row
-set opt(knots)        		4      ;# Speed of the SINK in knots
+set opt(knots)        		2      ;# Speed of the SINK in knots
 set opt(speed)            [expr $opt(knots) * 0.51444444444] ;#Speed of the SINK in m/s
 set opt(node_depth)       100.0
-set opt(time_in_wp)       10.0
-set opt(trigger_time)     10.0 ;#>5
+set opt(time_in_wp)       1.0
+set opt(trigger_time)     5.0 ;#>5
 set opt(time_interval)    10.0
 set rng [new RNG]
 
@@ -134,7 +134,7 @@ if {$opt(bash_parameters)} {
 } else {
   set opt(rep_num)    1
   $rng seed [lindex $argv 0]
-  set opt(cbr_period) 0.1
+  set opt(cbr_period) 0.01
 }
 
 set opt(cbrpr) [expr int($opt(cbr_period))]
@@ -191,8 +191,6 @@ if {$opt(trace_files)} {
   set opt(cltracefile) [open $opt(cltracefilename) w]
 }
 ###
-
-
 
 ###########################
 #Random Number Generators #
@@ -273,17 +271,17 @@ $data_mask2 setFreq       $opt(freq2)
 $data_mask2 setBandwidth  $opt(bw2)
 
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set TRIGGER_size_         1
-Module/UW/CSMA_ALOHA/TRIGGER/SINK set buffer_pkts_          1000
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set buffer_pkts_          10000
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set tx_timer_duration_    $opt(trigger_time)
-Module/UW/CSMA_ALOHA/TRIGGER/SINK set listen_time_          0.01;#[expr 1.0e-3]
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set listen_time_          [expr 1.0e-8]
 Module/UW/CSMA_ALOHA/TRIGGER/SINK set wait_costant_         [expr 1.0e-12]
 # Module/UW/CSMA_ALOHA/TRIGGER/SINK set debug_     1
 
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set HDR_size_             1
-Module/UW/CSMA_ALOHA/TRIGGER/NODE set buffer_pkts_          1000
-Module/UW/CSMA_ALOHA/TRIGGER/NODE set listen_time_          0.01;#[expr 1.0e-3]
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set buffer_pkts_          10000
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set listen_time_          [expr 1.0e-8]
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set wait_costant_         [expr 1.0e-12]
-Module/UW/CSMA_ALOHA/TRIGGER/NODE set tx_timer_duration_    [expr $opt(trigger_time)-3.2]
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set tx_timer_duration_    [expr $opt(trigger_time)-1];#3.2 for 500m distance
 Module/UW/CSMA_ALOHA/TRIGGER/NODE set max_payload_          125
 
 # Module/UW/CSMA_ALOHA set wait_costant_         [expr 1.0e-12]
@@ -514,54 +512,54 @@ proc createSinkWaypoints { } {
   set curr_lon [$position(1) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
   set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
-  puts "waypoint 1  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
+  puts "waypoint 1  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; x = [$position(1) getX_]; y = [$position(1) getY_]; z = [$position(1) getZ_]; toa = $toa"
 
 
   set curr_lat [$position(2) getLatitude_]
   set curr_lon [$position(2) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
   set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
-  puts "waypoint 2  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
+  puts "waypoint 2  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; x = [$position(2) getX_]; y = [$position(2) getY_]; z = [$position(2) getZ_]; toa = $toa"
 
 
   set curr_lat [$position(3) getLatitude_]
   set curr_lon [$position(3) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
   set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
-  puts "waypoint 3  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
+  puts "waypoint 3  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; x = [$position(3) getX_]; y = [$position(3) getY_]; z = [$position(3) getZ_]; toa = $toa"
 
 
   set curr_lat [$position(7) getLatitude_]
   set curr_lon [$position(7) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
   set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
-  puts "waypoint 4  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
+  puts "waypoint 4  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; x = [$position(7) getX_]; y = [$position(7) getY_]; z = [$position(7) getZ_]; toa = $toa"
 
 
   set curr_lat [$position(6) getLatitude_]
   set curr_lon [$position(6) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
   set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
-  puts "waypoint 5  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
+  puts "waypoint 5  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; x = [$position(6) getX_]; y = [$position(6) getY_]; z = [$position(6) getZ_]; toa = $toa"
 
   set curr_lat [$position(5) getLatitude_]
   set curr_lon [$position(5) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
   set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
-  puts "waypoint 6  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
+  puts "waypoint 6  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; x = [$position(5) getX_]; y = [$position(5) getY_]; z = [$position(5) getZ_]; toa = $toa"
 
 
   set curr_lat [$position(4) getLatitude_]
   set curr_lon [$position(4) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
   set toa      [$position_sink addWayPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp)]
-  puts "waypoint 7  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
+  puts "waypoint 7  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; x = [$position(4) getX_]; y = [$position(4) getY_]; z = [$position(4) getZ_]; toa = $toa"
 
   set curr_lat [$position(0) getLatitude_]
   set curr_lon [$position(0) getLongitude_]
   set curr_depth [expr -1.0 * $sink_depth]
-  set toa      [$position_sink addLoopPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp) 0 4000]
-  puts "waypoint 0  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; toa = $toa"
+  set toa      [$position_sink addLoopPoint $curr_lat $curr_lon $curr_depth $opt(speed) $opt(time_in_wp) 0 1.0]
+  puts "waypoint 0  lat = $curr_lat; long = $curr_lon ; depth = $curr_depth ; x = [$position(0) getX_]; y = [$position(0) getY_]; z = [$position(0) getZ_]; toa = $toa"
   #1 TOTAL LOOPS
   #0.0 loop_id
 
@@ -618,12 +616,18 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
   $mll_sink addentry [$ipif($id1) addr] [ $mac($id1) addr]
 }
 
+# proc printPos {} {
+#   global position_sink
+#   set x_pos [$position_sink getX_]
+#   set y_pos [$position_sink getY_]
+#   set z_pos [$position_sink getZ_]
+#   puts -nonewline " Position = $x_pos $y_pos $z_pos"
+# }
 proc printPos {} {
   global position_sink
-  set x_pos [$position_sink getX_]
-  set y_pos [$position_sink getY_]
-  set z_pos [$position_sink getZ_]
-  puts "Position = $x_pos $y_pos $z_pos"
+  set lat [$position_sink getLatitude_]
+  set lon [$position_sink getLongitude_]
+  puts -nonewline " Position = $lat $lon "
 }
 
 set partial_tot_rx 0.0
@@ -631,9 +635,9 @@ set partial_tot_rx 0.0
 proc printInstantThgp { } {
   global mac_sink partial_tot_rx opt
   set mac_auv_rcv_pkts   [$mac_sink getDataPktsRx]
-  set thgp [expr ($mac_auv_rcv_pkts-$partial_tot_rx)*$opt(pktsize)/$opt(time_interval)]
+  set thgp [expr ($mac_auv_rcv_pkts-$partial_tot_rx)*$opt(pktsize)*8/$opt(time_interval)];#bps
   set partial_tot_rx     $mac_auv_rcv_pkts
-  puts "Throughput = $thgp"
+  puts " Throughput = $thgp"
 }
 ################################
 #Start cbr(s)
@@ -649,7 +653,7 @@ $ns at 20 "$mac_sink sinkRun"
 
 for {set t 30} {$t <= $opt(stoptime)} {set t [expr $t + $opt(time_interval)]} {
   # $ns at $t "printPos"
-  $ns at $t "printInstantThgp"
+  $ns at $t "puts -nonewline $t; printPos; printInstantThgp"
 }
 
 proc finish { } {
