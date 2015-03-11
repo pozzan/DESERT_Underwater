@@ -123,6 +123,7 @@ double UwOpticalMPropagation::getGain(Packet* p)
 double UwOpticalMPropagation::getLambertBeerGain(double d, double beta){
   double cosBeta = omnidirectional_ ? 1 : cos(beta);
   double L = d / cosBeta; // TODO: verify this 
+  if(c_*d>400) return 0; // avoid floating point exception
   return 2 * Ar_ * cosBeta / (M_PI * pow(L, 2.0) * (1 - cos(theta_)) + 2 * At_) 
          * exp(-c_*d);
 }
