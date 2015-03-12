@@ -51,7 +51,8 @@ public:
 
 UwOpticalPhy::UwOpticalPhy() :
     lut_file_name_(""),
-    lut_token_separator_('\t')
+    lut_token_separator_('\t'),
+    use_woss_(false)
 {
     if (!MPhy_Bpsk::initialized)
     {
@@ -74,6 +75,11 @@ int UwOpticalPhy::command(int argc, const char*const* argv)
     if (strcasecmp(argv[1], "useLUT") == 0) 
     {
       initializeLUT();
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "useWOSS") == 0) 
+    {
+      use_woss_ = true;
       return TCL_OK;
     }
   }
@@ -146,7 +152,8 @@ double UwOpticalPhy::getNoisePower(Packet* p)
     hdr_MPhy *ph = HDR_MPHY(p);
     Position* dest = ph->dstPosition;
     assert(dest);
-    double lut_value = lut_map.empty() ? 0 : lookUpLightNoiseE(-dest->getZ());
+    double depth = use_woss_ ? abs(dest->getAltitude()) : abs(dest->getZ());
+    double lut_value = lut_map.empty() ? 0 : lookUpLightNoiseE(depth);
     return pow(lut_value * Ar_ * S , 2);//right now returns 0, due to not bias the snr calculation with unexpected values
 }
     
@@ -204,7 +211,7 @@ double UwOpticalPhy::lookUpLightNoiseE(double depth)
   }
   if (it == lut_map.end() || it == lut_map.begin())
   {
-    if (debug_) std::cout <<depth<< " Nothing returned " << std::endl; 
+    if (debug_) std::cout <<depth<< " Nothing returned depth = " << depth << std::endl; 
     
     return NOT_FOUND_VALUE;
   }

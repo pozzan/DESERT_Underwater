@@ -117,6 +117,7 @@ private:
     string lut_file_name_; //LUT file name
     char lut_token_separator_; //
     DepthMap lut_map;
+    bool use_woss_;
 };
 
 #endif /* UWOPTICAL_H  */
