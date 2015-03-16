@@ -36,6 +36,7 @@
  */
 
 #include "uwoptical-phy.h"
+#include <float.h>
 
 const double K = 1.38*1.E-23; //Boltzmann constant
 const double q = 1.6*1.E-19; //electronic charge
@@ -144,7 +145,8 @@ double UwOpticalPhy::getSNRdB(Packet* p)
 {
     hdr_MPhy* ph = HDR_MPHY(p);
     double snr_linear = pow((S*ph->Pr),2)/((2*q*(Id+Il)*ph->srcSpectralMask->getBandwidth() + ((4*K*T*ph->srcSpectralMask->getBandwidth())/R)) + ph->Pn);
-    return 10*log10(snr_linear);
+    cout <<snr_linear<< endl;
+    return snr_linear ? 10*log10(snr_linear) : -DBL_MAX;
 }
 
 double UwOpticalPhy::getNoisePower(Packet* p)
