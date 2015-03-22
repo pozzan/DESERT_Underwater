@@ -58,7 +58,7 @@ UwOpticalChannel::UwOpticalChannel()
 :
   ChannelModule(),
   refractive_index(REFRACTIVE_INDEX_WATER),
-  speed_of_light(SPEED_OF_LIGHT_VACUUM),
+  speed_of_light(SPEED_OF_LIGHT_VACUUM)
 {
   bind("RefractiveIndex_", (double*)&refractive_index);
 
