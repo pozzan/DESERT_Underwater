@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2013 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,16 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+# @file   uwmultiphy-default.tcl
+# @author Filippo Campagnaro
+# @version 1.0.0
 
-AM_CXXFLAGS = -Wall -ggdb3
+Module/UW/OPTICAL/PHY set TxPower_  				0.01
+Module/UW/OPTICAL/PHY set AcquisitionThreshold_dB_              1
+Module/UW/OPTICAL/PHY set Id_                                   [expr 1.0e-9]
+Module/UW/OPTICAL/PHY set Il_                                   [expr 1.0e-6]
+Module/UW/OPTICAL/PHY set R_                                    [expr 1.49e9]
+Module/UW/OPTICAL/PHY set S_                                    0.26
+Module/UW/OPTICAL/PHY set T_                                    293.15
+Module/UW/OPTICAL/PHY set Ar_                                   0.0000011
 
-lib_LTLIBRARIES = libuwcsmaalohatriggered.la
-
-libuwcsmaalohatriggered_la_SOURCES = initlib.cc \
-				     uw-csma-aloha-triggered-auv.cc \
-				     uw-csma-aloha-triggered-auv.h \
-		                     uw-csma-aloha-triggered-node.cc \
-                                     uw-csma-aloha-triggered-node.h
-
-libuwcsmaalohatriggered_la_CPPFLAGS = 	@NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
-libuwcsmaalohatriggered_la_LDFLAGS = 	@NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
-libuwcsmaalohatriggered_la_LIBADD = 	@NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
-
-nodist_libuwcsmaalohatriggered_la_SOURCES = initTcl.cc
-BUILT_SOURCES = initTcl.cc
-CLEANFILES = initTcl.cc
-
-TCL_FILES = uw-csma-aloha-triggered-init.tcl
-
-initTcl.cc : Makefile $(TCL_FILES)
-			cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwCsmaAlohaTriggeredTclCode > initTcl.cc
-
-EXTRA_DIST = $(TCL_FILES) 

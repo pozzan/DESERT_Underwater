@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,14 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @file   uwmultiphy-default.tcl
+# @author Filippo Campagnaro
+# @version 1.0.0
 
-EXTRA_DIST = nsallinone.m4 nsmiracle.m4 underwatermiracle.m4 woss.m4 desert.m4
+Module/UW/MULTI_STACK_CONTROLLER set debug_  0
+Module/UW/MULTI_STACK_CONTROLLER set min_delay_  0
+Module/UW/MULTI_STACK_CONTROLLER set switch_mode_  0
+Module/UW/MULTI_STACK_CONTROLLER set lower_id_active_  0
+Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set alpha_ 0.5
 

@@ -27,11 +27,11 @@ void UwTDMATimer::expire(Event *e) {
     ((UwTDMA *)module)->change_tdma_status();
 }
 
-void BufferTimer::expire(Event *e) {
+/*void BufferTimer::expire(Event *e) {
     ((UwTDMA *)module)->stateTxData();
-}
+}*/
 
-UwTDMA::UwTDMA() : MMac(), tdma_timer(this), buffer_timer(this) {
+UwTDMA::UwTDMA() : MMac(), tdma_timer(this) {//, buffer_timer(this) {
     bind("slot_status", &slot_status);
     bind("slot_duration", &slot_duration);
     bind("frame_time", &frame_time);
@@ -114,7 +114,7 @@ void UwTDMA::Mac2PhyStartTx(Packet* p)
 {
 	channel_status=UW_CHANNEL_BUSY;
   	MMac::Mac2PhyStartTx(p);
-  	buffer_timer.resched(Mac2PhyTxDuration(p)*1.001);
+  	//buffer_timer.resched(Mac2PhyTxDuration(p)*1.001);
   	if(debug_<-5)
     	std::cout << NOW << " Send packet id " << host_id << "" << std::endl;
 }
@@ -130,6 +130,11 @@ void UwTDMA::Phy2MacEndRx(Packet* p){
 
 void UwTDMA::Phy2MacStartRx(const Packet* p){
   channel_status=UW_CHANNEL_BUSY;
+}
+
+void UwTDMA::Phy2MacEndTx(const Packet* p)
+{
+	stateTxData();
 }
 
 void UwTDMA::change_tdma_status(){

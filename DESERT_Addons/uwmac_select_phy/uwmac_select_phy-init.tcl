@@ -25,6 +25,9 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Author: Filippo Campagnaro
 
-EXTRA_DIST = nsallinone.m4 nsmiracle.m4 underwatermiracle.m4 woss.m4 desert.m4
-
+Module/UW/MAC/SELECT_PHY set send_physical_id 		0
+Module/UW/MAC/SELECT_PHY set recv_physical_id 		0
+Module/UW/MAC/SELECT_PHY set debug_ 		0

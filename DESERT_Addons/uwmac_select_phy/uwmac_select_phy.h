@@ -28,7 +28,7 @@
 //
 
 /**
- * @file   uwtdma.h
+ * @file   uwselect_phy.h
  * @author Filippo Campagnaro
  * @version 1.0.0
  * 
@@ -36,102 +36,42 @@
  * 
  */
 
-#ifndef UWTDMA_H
-#define UWTDMA_H
+#ifndef UWMAC_SElECT_PHY_H
+#define UWMAC_SElECT_PHY_H
 
 #include <mmac.h>
 #include <queue>
 
-#define UW_TDMA_STATUS_MY_SLOT 1 /**< Status slot active, whether TDMA modality is on >**/
-#define UW_TDMA_STATUS_NOT_MY_SLOT 2 /**< Status slot not active, whether TDMA modality is on >**/
-
 #define UW_CHANNEL_IDLE 1 // status channel idle
 #define UW_CHANNEL_BUSY 2 // status channel busy
 
-
 using namespace std;
 
-class UwTDMA;
+class UwMacSelectPhy;
 
-/**
- * UwTDMATimer class is used to handle the scheduling period of <i>UWTDMA</i> slots.
- */
-class UwTDMATimer : public TimerHandler {
+class UwMacSelectPhy: public MMac {
 public:
+	UwMacSelectPhy();
 
-    UwTDMATimer(UwTDMA *m) : TimerHandler() {
-        module = m;
-    }
-protected:
-    virtual void expire(Event *e);
-    UwTDMA* module;
-};
-
-/*class BufferTimer : public TimerHandler {
-public:
-
-    BufferTimer(UwTDMA *m) : TimerHandler() {
-        module = m;
-    }
-protected:
-    virtual void expire(Event *e);
-    UwTDMA* module;
-};*/
-
-class UwTDMA: public MMac {
-public:
-	UwTDMA();
-
-	virtual ~UwTDMA();
-
-	/**
-     * Change TDMA status from 
-     */
-	virtual void change_tdma_status();
- 	
- 	/**
-     * Schedule the beginning of TDMA slots
-     */
-    virtual void start();
+	virtual ~UwMacSelectPhy();
 
     virtual int command(int argc, const char*const* argv);
-
-	/**
-     * transmit a data packet whether is my slot
-     */
-    virtual void txData();
-
-    /**
-     * state status my slot and and start to txData
-     */
-    virtual void stateTxData();
+	virtual void stateTxData();
 
 
 protected:
 
-	int slot_status; //active or not
+	int send_physical_id;
+	int recv_physical_id;
 	int channel_status;
-	int debug_;
-	double num_hosts;
-	double host_id;
-	double frame_time; // frame duration
-	double guard_time; // guard time between slots
-	double slot_duration; // slot duration
-	UwTDMATimer tdma_timer; // tdma handler
-	//BufferTimer buffer_timer; // buffer handler
 	std::queue<Packet*> buffer;
-
-	virtual void recvFromUpperLayers(Packet* p);
-
-	virtual void Phy2MacEndRx(Packet* p);
-
-	virtual void Phy2MacStartRx(const Packet* p);
+	//BufferTimer buffer_timer; // buffer handler
 
 	virtual void Mac2PhyStartTx(Packet* p);
-
-    virtual void Phy2MacEndTx(const Packet* p);
-
-
+	virtual void Phy2MacEndRx(Packet* p);
+	virtual void recvFromUpperLayers(Packet* p);
+	virtual void Phy2MacEndTx(const Packet* p);
+	//virtual void Phy2MacStartRx(const Packet* p);
 };
 
 #endif 

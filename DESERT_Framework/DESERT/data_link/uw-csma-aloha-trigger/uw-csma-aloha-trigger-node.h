@@ -31,7 +31,7 @@
  * @author Federico Favaro
  * @version 1.0.0
  *
- * \brief Provides the declaration of UwCsmaAloha_Triggered_NODE class
+ * \brief Provides the declaration of UwCsmaAloha_Trigger_NODE class
  *
  */
 
@@ -40,13 +40,18 @@
 #define UW_CS_ALOHA_TRIG_NODE_H
 
 #include <mmac.h>
+#include <mac.h>
+#include <mphy.h>
 #include <iostream>
 #include <string>
 #include <map>
 #include <set>
 #include <queue>
 #include <fstream>
-#include <mphy.h>
+#include <cmath>
+#include <climits>
+#include <iomanip>
+#include <rng.h>
 
 
 #define UW_CS_ALOHA_TRIG_NODE_DROP_REASON_BUFFER_FULL "DBF"     /**< The Buffer of DATA packets is full */
@@ -57,17 +62,17 @@ extern packet_t PT_MMAC_TRIGGER;
 /**
  * Class that describes a CsmaAloha_TRIGGERED module of the node
  */
-class UwCsmaAloha_Triggered_NODE : public MMac {
+class UwCsmaAloha_Trigger_NODE : public MMac {
 public:
 
     /**
-     * Constructor of the UwCsmaAloha_Triggered_NODE class
+     * Constructor of the UwCsmaAloha_Trigger_NODE class
      */
-    UwCsmaAloha_Triggered_NODE();
+    UwCsmaAloha_Trigger_NODE();
     /**
-     * Destructor of the UwCsmaAloha_Triggered_NODE class
+     * Destructor of the UwCsmaAloha_Trigger_NODE class
      */
-    virtual ~UwCsmaAloha_Triggered_NODE();
+    virtual ~UwCsmaAloha_Trigger_NODE();
     /**
      * TCL command interpreter. It implements the following OTcl methods:
      * 
@@ -122,7 +127,7 @@ protected:
          * Constructor of the AlohaTimer class
          * @param CsmaAloha* a pointer to an object of type CsmaAloha*
          */
-        Csma_Aloha_Triggered_Timer(UwCsmaAloha_Triggered_NODE *m) : TimerHandler(), start_time(0.0), left_duration(0.0), counter(0), module(m), timer_status(UW_CS_ALOHA_TRIG_NODE_IDLE) {
+        Csma_Aloha_Triggered_Timer(UwCsmaAloha_Trigger_NODE *m) : TimerHandler(), start_time(0.0), left_duration(0.0), counter(0), module(m), timer_status(UW_CS_ALOHA_TRIG_NODE_IDLE) {
             assert(m != NULL);
         }
 
@@ -256,7 +261,7 @@ protected:
         int counter; /**< counter of the timer */
 
 
-        UwCsmaAloha_Triggered_NODE* module; /**< Pointer of an object of type UwCsmaAloha_Triggered */
+        UwCsmaAloha_Trigger_NODE* module; /**< Pointer of an object of type UwCsmaAloha_Triggered */
 
         UW_CS_ALOHA_TRIG_NODE_TIMER_STATUS timer_status; /**< Timer status */
 
@@ -271,9 +276,9 @@ protected:
 
         /**
          * Constructor of ListenTimer class 
-         * @param UwCsmaAloha_Triggered_NODE* pointer to an object of type CsmaAloha
+         * @param UwCsmaAloha_Trigger_NODE* pointer to an object of type CsmaAloha
          */
-        ListenTimer(UwCsmaAloha_Triggered_NODE* m) : Csma_Aloha_Triggered_Timer(m) {
+        ListenTimer(UwCsmaAloha_Trigger_NODE* m) : Csma_Aloha_Triggered_Timer(m) {
         }
 
         /**
@@ -302,9 +307,9 @@ protected:
 
         /**
          * Constructor of the TransmissionTimer class
-         * @param m pointer to an object of type UwCsmaAloha_Triggered_NODE
+         * @param m pointer to an object of type UwCsmaAloha_Trigger_NODE
          */
-        TransmissionTimer(UwCsmaAloha_Triggered_NODE* m) : Csma_Aloha_Triggered_Timer(m) {
+        TransmissionTimer(UwCsmaAloha_Trigger_NODE* m) : Csma_Aloha_Triggered_Timer(m) {
         }
 
         /**
@@ -406,11 +411,6 @@ protected:
      */
     virtual void stateRxPacketNotForMe(Packet* p);
     /**
-     * Prints in a file the textual information of the current state and the transitions reasons
-     * @param double time lapse from the call of the method and the effective write process in the file (setted to zero by default)
-     */
-    virtual void printStateInfo(double delay = 0);
-    /**
      * Initializes the protocol at the beginning of the simulation. This method is called by
      * a command in tcl. 
      * @param double delay
@@ -501,7 +501,6 @@ protected:
 
     int last_data_id_rx; /**< ID of the last DATA packet received */
 
-    bool print_transitions; /**< flag that indicates if the protocol is enabled to print its state transitions on a file */
     bool has_buffer_queue; /**< flag that indicates if a node has a buffer where store DATA packets */
     bool can_transmit; /**< Flag that indicates if the node can transmit data packets to the sink */
 

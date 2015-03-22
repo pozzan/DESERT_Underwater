@@ -27,51 +27,47 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file   uw-csma-aloha-triggered-auv.cc
+ * @file   uw-csma-aloha-trigger-sink.cc
  * @author Federico Favaro
  * @version 1.0.0
  *
- * \brief Provides the declaration of UwCsmaAloha_Triggered_AUV class
+ * \brief Provides the declaration of UwCsmaAloha_Trigger_SINK class
  *
  */
 
 
-#ifndef UW_CSMA_UW_CS_ALOHA_TRIG_AUV_TRIGGERED_AUV_H 
-#define UW_CSMA_UW_CS_ALOHA_TRIG_AUV_TRIGGERED_AUV_H
+#ifndef UW_CSMA_UW_CS_ALOHA_TRIG_SINK_TRIGGER_SINK_H 
+#define UW_CSMA_UW_CS_ALOHA_TRIG_SINK_TRIGGER_SINK_H
 
 #include "mmac.h"
 #include "mphy.h"
+#include "mac.h"
 
 
 #include <iostream>
-#include <string>
-#include <map>
-#include <set>
-#include <queue>
-#include <fstream>
 
-#define UW_CS_ALOHA_TRIG_AUV_DROP_REASON_WRONG_RECEIVER "WRCV" /**< The packet is for another node */
-#define UW_CS_ALOHA_TRIG_AUV_DROP_REASON_UNKNOWN_TYPE "UPT" /**< The type of the packet is unknown */
-#define UW_CS_ALOHA_TRIG_AUV_DROP_REASON_ERROR "ERR" /**< Packet corrupted */
-#define UW_CS_ALOHA_TRIG_AUV_DROP_REASON_RECEIVING_NOT_ENABLED "RNE" /**< The sink is not enabled to receive data */
+#define UW_CS_ALOHA_TRIG_SINK_DROP_REASON_WRONG_RECEIVER "WRCV" /**< The packet is for another node */
+#define UW_CS_ALOHA_TRIG_SINK_DROP_REASON_UNKNOWN_TYPE "UPT" /**< The type of the packet is unknown */
+#define UW_CS_ALOHA_TRIG_SINK_DROP_REASON_ERROR "ERR" /**< Packet corrupted */
+#define UW_CS_ALOHA_TRIG_SINK_DROP_REASON_RECEIVING_NOT_ENABLED "RNE" /**< The sink is not enabled to receive data */
 
 
 extern packet_t PT_MMAC_TRIGGER;
 
 /**
- * Class that describes a UwCsmaAloha_Triggered_AUV module 
+ * Class that describes a UwCsmaAloha_Trigger_SINK module 
  */
-class UwCsmaAloha_Triggered_AUV : public MMac {
+class UwCsmaAloha_Trigger_SINK : public MMac {
 public:
 
     /**
-     * Constructor of the UwCsmaAloha_Triggered_AUV class
+     * Constructor of the UwCsmaAloha_Trigger_SINK class
      */
-    UwCsmaAloha_Triggered_AUV();
+    UwCsmaAloha_Trigger_SINK();
     /**
-     * Destructor of the UwCsmaAloha_Triggered_AUV class
+     * Destructor of the UwCsmaAloha_Trigger_SINK class
      */
-    virtual ~UwCsmaAloha_Triggered_AUV();
+    virtual ~UwCsmaAloha_Trigger_SINK();
     /**
      * TCL command interpreter. It implements the following OTcl methods:
      * 
@@ -93,80 +89,78 @@ public:
 protected:
 
 
-    static const double prop_speed; /**< Typical sound propagation speed in underwater enviroment */
-
     /**< Variable that rapresent the status of the protocol machine state */
-    enum UW_CS_ALOHA_TRIG_AUV_STATUS {
-        UW_CS_ALOHA_TRIG_AUV_STATE_IDLE = 1,
-        UW_CS_ALOHA_TRIG_AUV_STATE_NOT_SET,
-        UW_CS_ALOHA_TRIG_AUV_STATE_TX_TRIGGER,
-        UW_CS_ALOHA_TRIG_AUV_STATE_ENABLE_RX,
-        UW_CS_ALOHA_TRIG_AUV_STATE_DISABLE_RX,
-        UW_CS_ALOHA_TRIG_AUV_STATE_DATA_RX
+    enum UW_CS_ALOHA_TRIG_SINK_STATUS {
+        UW_CS_ALOHA_TRIG_SINK_STATE_IDLE = 1,
+        UW_CS_ALOHA_TRIG_SINK_STATE_NOT_SET,
+        UW_CS_ALOHA_TRIG_SINK_STATE_TX_TRIGGER,
+        UW_CS_ALOHA_TRIG_SINK_STATE_ENABLE_RX,
+        UW_CS_ALOHA_TRIG_SINK_STATE_DISABLE_RX,
+        UW_CS_ALOHA_TRIG_SINK_STATE_DATA_RX
     };
 
     /**< Reason for the changing of the state */
-    enum UW_CS_ALOHA_TRIG_AUV_REASON_STATUS {
-        UW_CS_ALOHA_TRIG_AUV_REASON_DATA_RX,
-        UW_CS_ALOHA_TRIG_AUV_REASON_NOT_SET,
-        UW_CS_ALOHA_TRIG_AUV_REASON_START_RX,
-        UW_CS_ALOHA_TRIG_AUV_REASON_PKT_NOT_FOR_ME,
-        UW_CS_ALOHA_TRIG_AUV_REASON_PKT_ERROR,
-        UW_CS_ALOHA_TRIG_AUV_REASON_TX_TRIGGER
+    enum UW_CS_ALOHA_TRIG_SINK_REASON_STATUS {
+        UW_CS_ALOHA_TRIG_SINK_REASON_DATA_RX = 1,
+        UW_CS_ALOHA_TRIG_SINK_REASON_NOT_SET,
+        UW_CS_ALOHA_TRIG_SINK_REASON_START_RX,
+        UW_CS_ALOHA_TRIG_SINK_REASON_PKT_NOT_FOR_ME,
+        UW_CS_ALOHA_TRIG_SINK_REASON_PKT_ERROR,
+        UW_CS_ALOHA_TRIG_SINK_REASON_TX_TRIGGER
     };
 
     /**< Status of the timer */
-    enum UW_CS_ALOHA_TRIG_AUV_TIMER_STATUS {
-        UW_CS_ALOHA_TRIG_AUV_IDLE = 1, UW_CS_ALOHA_TRIG_AUV_RUNNING, UW_CS_ALOHA_TRIG_AUV_FROZEN, UW_CS_ALOHA_TRIG_AUV_EXPIRED
+    enum UW_CS_ALOHA_TRIG_SINK_TIMER_STATUS {
+        UW_CS_ALOHA_TRIG_SINK_IDLE = 1, UW_CS_ALOHA_TRIG_SINK_RUNNING, UW_CS_ALOHA_TRIG_SINK_FROZEN, UW_CS_ALOHA_TRIG_SINK_EXPIRED
     };
 
     /**
      * Class that describes the timers in the node
      */
-    class AlohaTimer : public TimerHandler {
+    class GenericTimer : public TimerHandler {
     public:
 
         /**
-         * Constructor of the AlohaTimer class
+         * Constructor of the GenericTimer class
          * @param CsmaAloha* a pointer to an object of type CsmaAloha*
          */
-        AlohaTimer(UwCsmaAloha_Triggered_AUV *m) : TimerHandler(), start_time(0.0), left_duration(0.0), counter(0), module(m), timer_status(UW_CS_ALOHA_TRIG_AUV_IDLE) {
+        GenericTimer(UwCsmaAloha_Trigger_SINK *m) : TimerHandler(), start_time(0.0), left_duration(0.0), counter(0), module(m), timer_status(UW_CS_ALOHA_TRIG_SINK_IDLE) {
             assert(m != NULL);
         }
 
         /**
-         * Destructor of the AlohaTimer class
+         * Destructor of the GenericTimer class
          */
-        virtual ~AlohaTimer() {
+        virtual ~GenericTimer() {
         }
 
         /**
          * Freezes the timer
          */
         virtual void freeze() {
-            assert(timer_status == UW_CS_ALOHA_TRIG_AUV_RUNNING);
+            assert(timer_status == UW_CS_ALOHA_TRIG_SINK_RUNNING);
             left_duration -= (NOW - start_time);
             if (left_duration <= 0.0) left_duration = module->mac2phy_delay_;
             force_cancel();
-            timer_status = UW_CS_ALOHA_TRIG_AUV_FROZEN;
+            timer_status = UW_CS_ALOHA_TRIG_SINK_FROZEN;
         }
 
         /**
          * unFreezes is used to resume the timer starting from the point where it was freezed
          */
         virtual void unFreeze() {
-            assert(timer_status == UW_CS_ALOHA_TRIG_AUV_FROZEN);
+            assert(timer_status == UW_CS_ALOHA_TRIG_SINK_FROZEN);
             start_time = NOW;
             assert(left_duration > 0);
             sched(left_duration);
-            timer_status = UW_CS_ALOHA_TRIG_AUV_RUNNING;
+            timer_status = UW_CS_ALOHA_TRIG_SINK_RUNNING;
         }
 
         /**
          * stops the timer
          */
         virtual void stop() {
-            timer_status = UW_CS_ALOHA_TRIG_AUV_IDLE;
+            timer_status = UW_CS_ALOHA_TRIG_SINK_IDLE;
             force_cancel();
         }
 
@@ -177,7 +171,7 @@ protected:
         virtual void schedule(double val) {
             start_time = NOW;
             left_duration = val;
-            timer_status = UW_CS_ALOHA_TRIG_AUV_RUNNING;
+            timer_status = UW_CS_ALOHA_TRIG_SINK_RUNNING;
             resched(val);
         }
 
@@ -186,7 +180,7 @@ protected:
          * @return bool <i>true</i> or <i>false</i>
          */
         bool isIdle() {
-            return ( timer_status == UW_CS_ALOHA_TRIG_AUV_IDLE);
+            return ( timer_status == UW_CS_ALOHA_TRIG_SINK_IDLE);
         }
 
         /**
@@ -194,7 +188,7 @@ protected:
          * @return <i>true</i> or <i>false</i>
          */
         bool isRunning() {
-            return (timer_status == UW_CS_ALOHA_TRIG_AUV_RUNNING);
+            return (timer_status == UW_CS_ALOHA_TRIG_SINK_RUNNING);
         }
 
         /**
@@ -202,7 +196,7 @@ protected:
          * @return <i>true</i> or <i>false</i>
          */
         bool isExpired() {
-            return (timer_status == UW_CS_ALOHA_TRIG_AUV_EXPIRED);
+            return (timer_status == UW_CS_ALOHA_TRIG_SINK_EXPIRED);
         }
 
         /**
@@ -210,7 +204,7 @@ protected:
          * @return <i>true</i> or <i>false</i>
          */
         bool isFrozen() {
-            return (timer_status == UW_CS_ALOHA_TRIG_AUV_FROZEN);
+            return (timer_status == UW_CS_ALOHA_TRIG_SINK_FROZEN);
         }
 
         /**
@@ -218,7 +212,7 @@ protected:
          * @return <i>true</i> or <i>false</i>
          */
         bool isActive() {
-            return (timer_status == UW_CS_ALOHA_TRIG_AUV_FROZEN || timer_status == UW_CS_ALOHA_TRIG_AUV_RUNNING);
+            return (timer_status == UW_CS_ALOHA_TRIG_SINK_FROZEN || timer_status == UW_CS_ALOHA_TRIG_SINK_RUNNING);
         }
 
         /**
@@ -262,9 +256,9 @@ protected:
         int counter; /**< counter of the timer */
 
 
-        UwCsmaAloha_Triggered_AUV* module; /**< Pointer to an object of type CsmaAloha */
+        UwCsmaAloha_Trigger_SINK* module; /**< Pointer to an object of type CsmaAloha */
 
-        UW_CS_ALOHA_TRIG_AUV_TIMER_STATUS timer_status; /**< Timer status */
+        UW_CS_ALOHA_TRIG_SINK_TIMER_STATUS timer_status; /**< Timer status */
 
 
     };
@@ -272,14 +266,14 @@ protected:
     /**
      * Class used to handle the timer of the reception period
      */
-    class ReceiveTimer : public AlohaTimer {
+    class ReceiveTimer : public GenericTimer {
     public:
 
         /**
          * Conscructor of ReceiveTimer class 
-         * @param UwCsmaAloha_Triggered_AUV* pointer to an object of type UwCsmaAloha_Triggered_AUV
+         * @param UwCsmaAloha_Trigger_SINK* pointer to an object of type UwCsmaAloha_Trigger_SINK
          */
-        ReceiveTimer(UwCsmaAloha_Triggered_AUV* m) : AlohaTimer(m) {
+        ReceiveTimer(UwCsmaAloha_Trigger_SINK* m) : GenericTimer(m) {
         }
 
         /**
@@ -359,28 +353,17 @@ protected:
      */
     virtual void stateRxPacketNotForMe(Packet* p);
     /**
-     * Used for debug purporses. Prints the state transisions of the protocol
-     */
-    virtual void printStateInfo(double delay = 0);
-    /**
-     * Initializes the protocol at the beginning of the simulation.
-     * @param double delay
-     * @see command method
-     */
-    virtual void initInfo();
-
-    /**
      * Refresh the state of the protocol 
-     * @param UW_CS_ALOHA_TRIG_AUV_STATUS next state of the protocol
+     * @param UW_CS_ALOHA_TRIG_SINK_STATUS next state of the protocol
      */
-    inline void refreshState(UW_CS_ALOHA_TRIG_AUV_STATUS state) {
+    inline void refreshState(UW_CS_ALOHA_TRIG_SINK_STATUS state) {
         curr_state = state;
     }
 
     /**
      * Refresh the reason for the change of state
      */
-    inline void refreshReason(UW_CS_ALOHA_TRIG_AUV_REASON_STATUS reason) {
+    inline void refreshReason(UW_CS_ALOHA_TRIG_SINK_REASON_STATUS reason) {
         last_reason = reason;
     }
 
@@ -401,44 +384,30 @@ protected:
     /**
      * Increment the number of Data received from upper layers
      */
-    virtual void incrUpperDataRx() {
-        up_data_pkts_rx++;
-    }
+    virtual void incrUpperDataRx() { up_data_pkts_rx++; }
 
     /**
      * Increment the number of TRIGGER packets transmitted
      */
-    inline void incrTRIGGERPacketTx() {
-        trigger_pkts_tx++;
-    }
+    inline void incrTRIGGERPacketTx() { trigger_pkts_tx++;}
 
     int TRIGGER_size; /**< Size of the TRIGGER packet */
     int buffer_pkts; /**< Length of data packet queue */
 
     double tx_timer_duration; /**< Duration of the timer in which one node is allowed to transmit */
 
-    static bool initialized; /**< True if the protocol is initialized */
 
-
-    Packet* curr_data_pkt; /**< Pointer to the current data packet */
-
-    bool print_transitions; /**< True if the transition of the protocol are printed out on a file */
     bool receiving_state_active; /**< True if the sink is allowed to receive data packet */
 
 
-    UW_CS_ALOHA_TRIG_AUV_STATUS curr_state; /**< Current state of the protocol */
-    UW_CS_ALOHA_TRIG_AUV_STATUS prev_state; /**< Previous state of the protocol */
-    UW_CS_ALOHA_TRIG_AUV_REASON_STATUS last_reason; /**< Last reason of the state change of the protocol */
+    UW_CS_ALOHA_TRIG_SINK_STATUS curr_state; /**< Current state of the protocol */
+    UW_CS_ALOHA_TRIG_SINK_STATUS prev_state; /**< Previous state of the protocol */
+    UW_CS_ALOHA_TRIG_SINK_REASON_STATUS last_reason; /**< Last reason of the state change of the protocol */
 
 
     ReceiveTimer receive_timer; /**< timer of receive state */
 
     int trigger_pkts_tx; /**< Number of TRIGGER packet received */
-
-    static map< UW_CS_ALOHA_TRIG_AUV_STATUS, string > status_info; /**< Textual infos of the status of the protocol */
-    static map< UW_CS_ALOHA_TRIG_AUV_REASON_STATUS, string> reason_info; /**< Textual infos of the reason for status change */
-
-    std::ofstream fout; /**< Ouput file where the state transitions are written */
 };
 
 #endif 

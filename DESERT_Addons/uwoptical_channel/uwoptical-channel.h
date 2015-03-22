@@ -1,7 +1,7 @@
-/* -*-	Mode:C++ -*- */
+/* -*- Mode: C++; -*- */
 
 /*
- * Copyright (c) 2010 Regents of the SIGNET lab, University of Padova.
+ * Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,16 +29,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include<tclcl.h>
+/**
+ * @file   uwoptical-channel.h
+ * @author Federico Guerra
+ * @version 1.0.0
+ *
+ * \brief Definition of UwOpticalChannel class.
+ *
+ */
 
-#include<sap.h>
+#ifndef UW_OPTICAL_CHANNEL_H
+#define UW_OPTICAL_CHANNEL_H
 
-extern EmbeddedTcl UwCsmaAlohaTriggeredTclCode;
+#include <channel-module.h>
+#include <stdlib.h>
+#include <tclcl.h>
 
-packet_t PT_MMAC_TRIGGER;
+class  UwOpticalChannel : public ChannelModule
+{
 
-extern "C" int Uwcsmaalohatriggered_Init() {
-	UwCsmaAlohaTriggeredTclCode.load();
-	return 0;
-}
+public:
+  UwOpticalChannel();
+  virtual ~ UwOpticalChannel() { }
+  
+  //virtual void recv(Packet *p);
+  virtual void recv(Packet *p, ChSAP *chsap);
+  
+  virtual int command(int argc, const char*const* argv);
 
+protected:
+  virtual double getPropDelay(Position *s, Position* d);
+  void sendUpPhy(Packet *p,ChSAP *chsap);
+  
+  double refractive_index;
+  double speed_of_light;
+  double use_cartesian_coords;
+};
+
+#endif /* UW_OPTICAL_CHANNEL_H */

@@ -228,7 +228,6 @@ double WossGMMob3D::Gaussian()
 	double x1, x2, w, y1;
 	static double y2;
 	static int use_last = 0;
-
 	if (use_last)             
 	{
 		y1 = y2;

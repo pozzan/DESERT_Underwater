@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2008 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,18 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
 
-EXTRA_DIST = nsallinone.m4 nsmiracle.m4 underwatermiracle.m4 woss.m4 desert.m4
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set HDR_size_ 				10
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set debug_					0
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set max_payload_				125
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set buffer_pkts_				1
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set listen_time_ 				0.5
+Module/UW/CSMA_ALOHA/TRIGGER/NODE set tx_timer_duration_      	40
 
+
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set HDR_size_               	0
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set debug_                  	0
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set max_payload_            	125
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set TRIGGER_size_           	10
+Module/UW/CSMA_ALOHA/TRIGGER/SINK set tx_timer_duration_      	45

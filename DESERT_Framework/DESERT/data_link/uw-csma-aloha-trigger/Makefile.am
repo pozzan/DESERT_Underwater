@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2013 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,29 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
 
-EXTRA_DIST = nsallinone.m4 nsmiracle.m4 underwatermiracle.m4 woss.m4 desert.m4
+AM_CXXFLAGS = -Wall -ggdb3
 
+lib_LTLIBRARIES = libuwcsmaalohatrigger.la
+
+libuwcsmaalohatrigger_la_SOURCES = initlib.cc \
+				     uw-csma-aloha-trigger-sink.cc \
+				     uw-csma-aloha-trigger-sink.h \
+		                     uw-csma-aloha-trigger-node.cc \
+                                     uw-csma-aloha-trigger-node.h
+
+libuwcsmaalohatrigger_la_CPPFLAGS = 	@NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+libuwcsmaalohatrigger_la_LDFLAGS = 	@NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
+libuwcsmaalohatrigger_la_LIBADD = 	@NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
+
+nodist_libuwcsmaalohatrigger_la_SOURCES = initTcl.cc
+BUILT_SOURCES = initTcl.cc
+CLEANFILES = initTcl.cc
+
+TCL_FILES = uw-csma-aloha-triggered-init.tcl
+
+initTcl.cc : Makefile $(TCL_FILES)
+			cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwCsmaAlohaTriggerTclCode > initTcl.cc
+
+EXTRA_DIST = $(TCL_FILES) 
