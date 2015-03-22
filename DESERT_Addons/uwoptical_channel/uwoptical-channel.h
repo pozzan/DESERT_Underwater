@@ -63,7 +63,6 @@ protected:
   
   double refractive_index;
   double speed_of_light;
-  double use_cartesian_coords;
 };
 
 #endif /* UW_OPTICAL_CHANNEL_H */
