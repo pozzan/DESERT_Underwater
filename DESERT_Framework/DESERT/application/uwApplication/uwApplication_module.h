@@ -345,24 +345,61 @@ protected:
      * @return generation period for DATA packets 
      */
     virtual double getTimeBeforeNextPkt();
-
-    
+    /**
+     * Returns the average Round Trip Time
+     * 
+     * @return the average Round Trip Time
+     */
     virtual double GetRTT() const;
-    
+    /**
+     * Return the standard deviation of the Round Trip Time calculated
+     * 
+     * @return the standard deviation of the Round Trip Time calculated 
+     */
     virtual double GetRTTstd() const;
-    
+    /**
+     * Update the RTT after the reception of a new packet
+     * 
+     * @param RTT of the current packet received
+     */
     virtual void updateRTT(const double& rtt);
-    
+    /**
+     * Returns the average Forward Trip Time
+     * 
+     * @return the average Forward Trip Time 
+     * 
+     */
     virtual double GetFTT() const;
-    
+    /**
+    /**
+     * Return the standard deviation of the Forward Trip Time calculated
+     * 
+     * @return the standard deviation of the Forward Trip Time calculated 
+     */
     virtual double GetFTTstd() const;
-    
+    /**
+     * Rerturn the Packet Error Rate calculated
+     * 
+     * @return the Packet Error Rate calculated
+     */
     virtual double GetPER() const;
-    
+    /**
+     * Return the Throughput calculated [bps]
+     * 
+     * @return Throughput [bps]
+     */
     virtual double GetTHR() const;
-    
+    /**
+     * Update the FTT after the reception of a new packet
+     * 
+     * @param FTT of the current packet received
+     */
     virtual void updateFTT(const double& ftt);
-    
+    /**
+     * Update the Throughput after the reception of a new packet
+     * 
+     * @param Throughput of the current packet received
+     */
     virtual void updateThroughput(const int& bytes, const double& dt);
     
     /**************************************************************************

@@ -14,9 +14,8 @@
 
 /* 
  * File:   uwApplication_module.cc
- * Author: Loris Brolo
+ * Author: Federico Favaro
  *
- * Created on 15 dicembre 2013, 14.54
  */
 
 #include <sstream>
