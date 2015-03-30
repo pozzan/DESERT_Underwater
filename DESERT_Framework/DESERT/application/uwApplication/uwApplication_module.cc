@@ -291,9 +291,8 @@ void uwApplicationModule::statistics(Packet* p) {
 }//end statistics method
 
 void uwApplicationModule::start_generation() {
-    //if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::start_generation() ---> Start the process to generate DATA packets." << std::endl;
     if(debug_ >= 1) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::START_GENERATION_DATA" << endl;
-    if(logging) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::START_GENERATION_DATA" << endl;
+    if(logging) out_log << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::START_GENERATION_DATA" << endl;
     chkTimerPeriod.resched(getTimeBeforeNextPkt());
 } //end start_generation() method
 
