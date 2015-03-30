@@ -435,23 +435,11 @@ proc finish {} {
 		  }
     }
         
-#    set ipheadersize        [$ipif(1) getipheadersize]
-#    set udpheadersize       [$udp(1) getudpheadersize]
-#    set cbrheadersize       [$cbr(1) getcbrheadersize]
-    
     puts "Mean Throughput          : [expr ($sum_cbr_throughput/($opt(nn)))]"
-#    if { $opt(socket_comm) == 1 } {
-#	 		puts "Packets stored by server : $sum_cbr_queue_pkts"
-#    }
-	 puts "Sent Packets             : $sum_cbr_sent_pkts"
-	 puts "Received Packets         : $sum_cbr_rcv_pkts"
+
+	puts "Sent Packets             : $sum_cbr_sent_pkts"
+	puts "Received Packets         : $sum_cbr_rcv_pkts"
     puts "Packet Delivery Ratio    : [expr $sum_cbr_rcv_pkts / $sum_cbr_sent_pkts * 100]"
-#	 if { $opt(socket_comm) == 1 } {
-#	     puts "Packets received by server but not yet passed to the below level: [expr ($sum_cbr_queue_pkts-$sum_cbr_rcv_pkts)]"
-#	 }
-#    puts "IP Pkt Header Size       : $ipheadersize"
-#    puts "UDP Header Size          : $udpheadersize"
-#    puts "CBR Header Size          : $cbrheadersize"
   
     $ns flush-trace
     close $opt(tracefile)
@@ -460,11 +448,6 @@ proc finish {} {
 ###################
 # start simulation
 ###################
-#if { $opt(socket_comm) == 1 } {
-#	$ns at [expr $opt(stoptime) + 30.0]  "finish; $ns halt"
-#} else {
-#	$ns at [expr $opt(stoptime) + 3600]  "finish; $ns halt" 
-#}
 for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
     $ns at $opt(starttime)    "$app($id1) start"
     $ns at $opt(stoptime)     "$app($id1) stop"
