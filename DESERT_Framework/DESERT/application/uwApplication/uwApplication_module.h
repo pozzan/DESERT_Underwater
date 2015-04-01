@@ -245,7 +245,7 @@ protected:
      * @return <i>true</i> use a Poisson process to generate data
      *          <i>false</i> use a constant period data generation 
      */
-    virtual inline bool usePoissonTraffic() {bool test;POISSON_TRAFFIC == 1 ? test = true : test = false; return test;}
+    virtual inline bool usePoissonTraffic() {bool test;poisson_traffic == 1 ? test = true : test = false; return test;}
     /**
      * If the communication take place without sockets verify if the data packets
      * received by the server is out of order or not. In the first case discard the 
@@ -254,7 +254,7 @@ protected:
      * @return <i>true</i> enable drop out of order
      *          <i>false</i> not enabled drop out of order 
      */
-    virtual inline bool useDropOutOfOrder() {bool test;DROP_OUT_OF_ORDER == 1 ? test = true : test = false; return test;}
+    virtual inline bool useDropOutOfOrder() {bool test;drop_out_of_order == 1 ? test = true : test = false; return test;}
 
     /**************************************************************************
      *                       METHODS GET and SET                              *
@@ -324,9 +324,9 @@ protected:
     /**
      * return the size of DATA packet payload 
      * 
-     * @return PAYLOADSIZE 
+     * @return payloadsize 
      */ 
-    virtual inline int getPayLoadSize() { return PAYLOADSIZE; }
+    virtual inline int getpayloadsize() { return payloadsize; }
     
     /**
      * Compute the DATA generation rate, that can be constant and equal to the PERIOD
@@ -399,12 +399,12 @@ protected:
     int debug_; /**< Used for debug purposes <i>1</i> debug activated <i>0</i> debug not activated*/
     int PERIOD; /**< Interval time between two successive generation data packets */
     //int SOCKET_CMN; /**< Enable or not the communication with socket <i>1</i> enabled <i>0</i> not enabled*/
-    int POISSON_TRAFFIC; /**< Enable or not the Poisson process for generation of data packets <i>1</i> enabled <i>0</i> not enabled*/
-    int PAYLOADSIZE; /**< Size of each data packet payaload generated */
-    int PORT_NUM; /**< Number of the port in which the server provide the service */
-    int DROP_OUT_OF_ORDER; /**< Enable or not the ordering of data packet received <i>1</i> enabled <i>0</i> not enabled*/
+    int poisson_traffic; /**< Enable or not the Poisson process for generation of data packets <i>1</i> enabled <i>0</i> not enabled*/
+    int payloadsize; /**< Size of each data packet payaload generated */
+    int port_num; /**< Number of the port in which the server provide the service */
+    int drop_out_of_order; /**< Enable or not the ordering of data packet received <i>1</i> enabled <i>0</i> not enabled*/
     //int TCP_CMN; /**< Enable or not the use of TCP protocol when is used the socket communication <i>1</i> use TCP <i>0</i> use UDP*/
-    uint8_t DST_ADDR;    /**< IP destination address. */
+    uint8_t dst_addr;    /**< IP destination address. */
     
     //TIMER VARIABLES
     uwSendTimerAppl chkTimerPeriod; /**< Timer that schedule the period between two successive generation of DATA packets*/

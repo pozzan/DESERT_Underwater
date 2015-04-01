@@ -129,9 +129,9 @@ void uwApplicationModule::init_Packet_UDP(){
         ch->direction_ = hdr_cmn::DOWN; 
         ch->timestamp() = Scheduler::instance().clock();
         
-        uwudph->dport() = PORT_NUM; 
+        uwudph->dport() = port_num; 
         
-        uwiph->daddr() = DST_ADDR; 
+        uwiph->daddr() = dst_addr; 
         
         uwApph->sn_ = txsn++; //Sequence number to the data packet
         if (rftt >= 0) {

@@ -164,10 +164,10 @@ void uwApplicationModule::init_Packet_TCP(){
         ch->timestamp() = Scheduler::instance().clock();
         
         //Transport header fields
-        uwudph->dport() = PORT_NUM; 
+        uwudph->dport() = port_num; 
         
         //IP header fields
-        uwiph->daddr() = DST_ADDR; 
+        uwiph->daddr() = dst_addr; 
         
         //uwApplication packet header fields
         uwApph->sn_ = txsn++; //Sequence number to the data packet

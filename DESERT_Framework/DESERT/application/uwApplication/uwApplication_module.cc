@@ -74,19 +74,18 @@ exp_id(0)
     bind("period_", (int*) &PERIOD);
     bind("node_ID_", (int*) &node_id);
     bind("EXP_ID_", (int*) &exp_id);
-    bind("PoissonTraffic_", (int*) &POISSON_TRAFFIC);
-    bind("Payload_size_", (int*) &PAYLOADSIZE);
-    bind("destAddr_", (int*) &DST_ADDR);
-    bind("destPort_", (int*) &PORT_NUM);
+    bind("PoissonTraffic_", (int*) &poisson_traffic);
+    bind("Payload_size_", (int*) &payloadsize);
+    bind("destAddr_", (int*) &dst_addr);
+    bind("destPort_", (int*) &port_num);
     bind("Socket_Port_", (int*) &servPort);
-    bind("drop_out_of_order_", (int*) &DROP_OUT_OF_ORDER);
-    //bind("pattern_sequence_", (int*) &PATTERN_SEQUENCE);
+    bind("drop_out_of_order_", (int*) &drop_out_of_order);
 
     sn_check = new bool[USHRT_MAX];
     for (int i = 0; i < USHRT_MAX; i++) {
         sn_check[i] = false;
     }
-    //servPort = PORT_NUM;
+    //servPort = port_num;
 } //end uwApplicationModule() Method
 
 uwApplicationModule::~uwApplicationModule() {
@@ -309,15 +308,15 @@ void uwApplicationModule::init_Packet() {
     //Common header fields
     ch->uid() = uidcnt++; //Increase the id of data packet
     ch->ptype_ = PT_DATA_APPLICATION; //Assign the type of packet that is being created
-    ch->size() = PAYLOADSIZE; //Assign the size of data payload 
-    uwApph->payload_size() = PAYLOADSIZE;
+    ch->size() = payloadsize; //Assign the size of data payload 
+    uwApph->payload_size() = payloadsize;
     ch->direction() = hdr_cmn::DOWN; //The packet must be forward at the level above of him
 
     //Transport header fields
-    uwudp->dport() = PORT_NUM; //Set the destination port
+    uwudp->dport() = port_num; //Set the destination port
 
     //IP header fields
-    uwiph->daddr() = DST_ADDR; //Set the IP destination address
+    uwiph->daddr() = dst_addr; //Set the IP destination address
 
     //Application header fields
     incrPktSent();
@@ -332,11 +331,11 @@ void uwApplicationModule::init_Packet() {
     uwApph->priority_ = 0; //Priority of the message
 
     //Create the payload message
-    if (getPayLoadSize() < MAX_LENGTH_PAYLOAD) {
-        for (int i = 0; i < getPayLoadSize(); i++) {
+    if (getpayloadsize() < MAX_LENGTH_PAYLOAD) {
+        for (int i = 0; i < getpayloadsize(); i++) {
             (*uwApph).payload_msg[i] = rand() % 26 + 'a';
         }
-        for (int i = getPayLoadSize(); i < MAX_LENGTH_PAYLOAD; i++) {
+        for (int i = getpayloadsize(); i < MAX_LENGTH_PAYLOAD; i++) {
             (*uwApph).payload_msg[i] = '0';
         }
     } else {
@@ -432,7 +431,7 @@ double uwApplicationModule::GetFTTstd() const {
 } //end getFTT() method
 
 double uwApplicationModule::GetPER() const {
-    if (DROP_OUT_OF_ORDER) {
+    if (drop_out_of_order) {
         if ((pkts_recv + pkts_lost) > 0) {
             return ((double) pkts_lost / (double) (pkts_recv + pkts_lost));
         } else {
