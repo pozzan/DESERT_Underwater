@@ -29,9 +29,8 @@
 
 /* 
  * File:   uwApplication_module.h
- * Author: Loris Brolo
+ * Author: Federico Favaro
  *
- * Created on 15 dicembre 2013, 14.54
  */
 
 #ifndef UWAPPLICATION_MODULE_H
