@@ -235,8 +235,6 @@ void uwApplicationModule::statistics(Packet* p) {
     if (useDropOutOfOrder()) {
         if (uwApph->sn_ < esn) { // packet is out of sequence and is to be discarded
             incrPktOoseq(); //Increase the number of data packets receive out of sequence.
-            //if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::recv() ---> Packet received with SN " << uwApph->sn_ << " is out of sequence."
-            //        << " The highest sequence number received is " << hrsn << ". DROP IT!" << std::endl;
             if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_PACKET_OOS_ID_" << (int)uwApph->sn_ << "_LAST_SN_" << hrsn << endl;
             if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_PACKET_OOS_ID_" << (int)uwApph->sn_ << "_LAST_SN_" << hrsn << endl;
             drop(p, 1, UWAPPLICATION_DROP_REASON_OUT_OF_SEQUENCE);

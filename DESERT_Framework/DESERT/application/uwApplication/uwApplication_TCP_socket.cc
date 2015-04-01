@@ -114,7 +114,6 @@ void uwApplicationModule::handleTCPclient(int clnSock)
             break;
         } else {
             int status = pthread_mutex_lock(&mutex_tcp);
-//            TCPmsgsize = recvMsgSize;
             if (status != 0)
             {
                 if (debug_ >= 0) std::cout << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::PTHREAD_MUTEX_LOCK_FAILED " << endl;
@@ -149,7 +148,6 @@ void uwApplicationModule::handleTCPclient(int clnSock)
 void uwApplicationModule::init_Packet_TCP(){
     if( queuePckReadTCP.empty() ) {
     } else {
-        //Packet *ptmp = Packet::alloc();
         Packet* ptmp = queuePckReadTCP.front();
         queuePckReadTCP.pop();
         hdr_cmn *ch = HDR_CMN(ptmp);
@@ -191,4 +189,4 @@ void uwApplicationModule::init_Packet_TCP(){
         if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW <<  "::UWAPPLICATION::INIT_PACKET_TCP::INIT_PACKET_TCP::SEND_DOWN_PACKET" << endl;
         sendDown(ptmp);
     }
-}//end init_Packet_TCP() method
+}
