@@ -80,7 +80,7 @@ exp_id(0)
     bind("destPort_", (int*) &PORT_NUM);
     bind("Socket_Port_", (int*) &servPort);
     bind("drop_out_of_order_", (int*) &DROP_OUT_OF_ORDER);
-    bind("pattern_sequence_", (int*) &PATTERN_SEQUENCE);
+    //bind("pattern_sequence_", (int*) &PATTERN_SEQUENCE);
 
     sn_check = new bool[USHRT_MAX];
     for (int i = 0; i < USHRT_MAX; i++) {
@@ -466,14 +466,8 @@ void uwApplicationModule::updateThroughput(const int& bytes, const double& dt) {
 
 void uwApplicationModule::uwSendTimerAppl::expire(Event* e) {
     if (m_->withoutSocket()) {
-        //Communication take placing without socket 
-        if (m_->usePatternSequence()) {
-            //Using a pattern sequence for data payload
-            // m_-> initialize_DATA_Pck_Pattern();
-        } else {
-            //Using a random sequence for data payload
-            m_->init_Packet();
-        }
+        //Using a random sequence for data payload
+        m_->init_Packet();
     } else {
         //Communication take placing with sockets 
         if (m_->useTCP()) {

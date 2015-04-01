@@ -255,15 +255,6 @@ protected:
      *          <i>false</i> not enabled drop out of order 
      */
     virtual inline bool useDropOutOfOrder() {bool test;DROP_OUT_OF_ORDER == 1 ? test = true : test = false; return test;}
-    /**
-     * If the communication take place without sockets decide if the payload of data 
-     * packet must be generated with a known sequence or must be generated with a 
-     * randomly sequence
-     * 
-     * @return <i>true</i> use a known sequence for data payload
-     *          <i>false</i> use a randomly sequence for data payload
-     */
-    virtual bool usePatternSequence() {bool test;PATTERN_SEQUENCE == 1 ? test = true : test = false; return test;}
 
     /**************************************************************************
      *                       METHODS GET and SET                              *
@@ -412,7 +403,6 @@ protected:
     int PAYLOADSIZE; /**< Size of each data packet payaload generated */
     int PORT_NUM; /**< Number of the port in which the server provide the service */
     int DROP_OUT_OF_ORDER; /**< Enable or not the ordering of data packet received <i>1</i> enabled <i>0</i> not enabled*/
-    int PATTERN_SEQUENCE; /**< Enable or not the fill of payload of data packet with a known and pre-established sequence <i>1</i> enabled <i>0</i> not enabled*/
     //int TCP_CMN; /**< Enable or not the use of TCP protocol when is used the socket communication <i>1</i> use TCP <i>0</i> use UDP*/
     uint8_t DST_ADDR;    /**< IP destination address. */
     
