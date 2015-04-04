@@ -26,7 +26,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Loris Brolo <brololor@dei.unipd.it>
+# Author: Federico Favaro
 # Version: 1.0.0
 # NOTE: tcl sample tested on Ubuntu 12.04, 64 bits OS
 #
@@ -75,7 +75,7 @@
 # Flags to enable or disable options #
 ######################################
 set opt(trace_files)        1
-set opt(bash_parameters)    1
+set opt(bash_parameters)    0
 
 #####################
 # Library Loading   #
@@ -154,7 +154,7 @@ if {$opt(bash_parameters)} {
 } else {
     set opt(pktsize)    125
     set opt(cbr_period) 60
-#	 set opt(socket_comm) 0
+	set opt(socket_comm) 0
 }
 
 
@@ -185,12 +185,11 @@ $data_mask setBandwidth  $opt(bw)
 # Module Configuration  #
 #########################
 #UW/APPLICATION
-Module/UW/APPLICATION set debug_ 0							;# 1= debug activated
+Module/UW/APPLICATION set debug_ -1							;# 1= debug activated
 Module/UW/APPLICATION set period_ $opt(cbr_period)
 Module/UW/APPLICATION set PoissonTraffic_ 0		   ;# 1= use a Poisson process for generate packets
 Module/UW/APPLICATION set Payload_size_ $opt(pktsize)
 Module/UW/APPLICATION set drop_out_of_order_ 1 		;# 1= drop out of order activate 
-Module/UW/APPLICATION set pattern_sequence_ 0			;# 1= use pattern sequence for data payload message
 Module/UW/APPLICATION set Socket_Port_ 4000
 Module/UW/APPLICATION set EXP_ID_ 1
 
@@ -204,13 +203,13 @@ Module/MPhy/BPSK  set TxPower_          $opt(txpower)
 ################################
 proc createNode { id } {
 
-    global channel propagation data_mask ns cbr position node udp portnum ipr ipif
+    global channel propagation data_mask ns app position node udp portnum ipr ipif
     global phy posdb opt rvposx mll mac db_manager
     global node_coordinates
     
     set node($id) [$ns create-M_Node $opt(tracefile) $opt(cltracefile)] 
 
-    set cbr($id)  [new Module/UW/APPLICATION] 
+    set app($id)  [new Module/UW/APPLICATION] 
     set udp($id)  [new Module/UW/UDP]
     set ipr($id)  [new Module/UW/StaticRouting]
     set ipif($id) [new Module/UW/IP]
@@ -218,7 +217,7 @@ proc createNode { id } {
     set mac($id)  [new Module/UW/CSMA_ALOHA] 
     set phy($id)  [new Module/MPhy/BPSK]
 
-    $node($id) addModule 7 $cbr($id)   0  "CBR"
+    $node($id) addModule 7 $app($id)   0  "CBR"
     $node($id) addModule 6 $udp($id)   0  "UDP"
     $node($id) addModule 5 $ipr($id)   0  "IPR"
     $node($id) addModule 4 $ipif($id)  0  "IPF"   
@@ -226,7 +225,7 @@ proc createNode { id } {
     $node($id) addModule 2 $mac($id)   0  "MAC"
     $node($id) addModule 1 $phy($id)   0  "PHY"
 
-    $node($id) setConnection $cbr($id)   $udp($id)   0
+    $node($id) setConnection $app($id)   $udp($id)   0
     $node($id) setConnection $udp($id)   $ipr($id)   0
     $node($id) setConnection $ipr($id)   $ipif($id)  0
     $node($id) setConnection $ipif($id)  $mll($id)   0
@@ -234,7 +233,7 @@ proc createNode { id } {
     $node($id) setConnection $mac($id)   $phy($id)   0
     $node($id) addToChannel  $channel    $phy($id)   0
 
-    set portnum($id) [$udp($id) assignPort $cbr($id) ]
+    set portnum($id) [$udp($id) assignPort $app($id) ]
     if {$id > 254} {
     puts "hostnum > 254!!! exiting"
     exit
@@ -253,9 +252,8 @@ proc createNode { id } {
     $interf_data($id) set debug_       0
 
     $phy($id) setPropagation $propagation
-    $cbr($id) setSocketProtocol "TCP"
-    $cbr($id) set node_ID_  $tmp_
-    $cbr($id) print_log
+    #$cbr($id) setSocketProtocol "TCP"
+    $app($id) set node_ID_  $tmp_
     $phy($id) setSpectralMask $data_mask
     $phy($id) setInterference $interf_data($id)
     $mac($id) $opt(ack_mode)
@@ -264,13 +262,13 @@ proc createNode { id } {
 
 proc createSink { } {
 
-    global channel propagation smask data_mask ns cbr_sink position_sink node_sink udp_sink portnum_sink interf_data_sink
+    global channel propagation smask data_mask ns app_sink position_sink node_sink udp_sink portnum_sink interf_data_sink
     global phy_data_sink posdb_sink opt mll_sink mac_sink ipr_sink ipif_sink bpsk interf_sink
 
     set node_sink [$ns create-M_Node $opt(tracefile) $opt(cltracefile)]
 
     for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-        set cbr_sink($cnt)  [new Module/UW/APPLICATION] 
+        set app_sink($cnt)  [new Module/UW/APPLICATION] 
     }
     set udp_sink       [new Module/UW/UDP]
     set ipr_sink       [new Module/UW/StaticRouting]
@@ -280,7 +278,7 @@ proc createSink { } {
     set phy_data_sink  [new Module/MPhy/BPSK] 
 
     for { set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-        $node_sink addModule 7 $cbr_sink($cnt) 0 "CBR"
+        $node_sink addModule 7 $app_sink($cnt) 0 "CBR"
     }
     $node_sink addModule 6 $udp_sink       0 "UDP"
     $node_sink addModule 5 $ipr_sink       0 "IPR"
@@ -290,7 +288,7 @@ proc createSink { } {
     $node_sink addModule 1 $phy_data_sink  0 "PHY"
 
     for { set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-        $node_sink setConnection $cbr_sink($cnt)  $udp_sink      0   
+        $node_sink setConnection $app_sink($cnt)  $udp_sink      0   
     }
     $node_sink setConnection $udp_sink  $ipr_sink            0
     $node_sink setConnection $ipr_sink  $ipif_sink           0
@@ -300,7 +298,7 @@ proc createSink { } {
     $node_sink addToChannel  $channel   $phy_data_sink       0
 
     for { set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-        set portnum_sink($cnt) [$udp_sink assignPort $cbr_sink($cnt)]
+        set portnum_sink($cnt) [$udp_sink assignPort $app_sink($cnt)]
         if {$cnt > 252} {
             puts "hostnum > 252!!! exiting"
             exit
@@ -323,9 +321,8 @@ proc createSink { } {
     $phy_data_sink setInterference $interf_data_sink
     $phy_data_sink setPropagation $propagation
     for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
-        $cbr_sink($cnt) setSocketProtocol "TCP"
-        $cbr_sink($cnt) set node_ID_ 254
-        $cbr_sink($cnt) print_log
+        #$cbr_sink($cnt) setSocketProtocol "TCP"
+        $app_sink($cnt) set node_ID_ 254
     }
     $mac_sink $opt(ack_mode)
     $mac_sink initialize
@@ -344,12 +341,12 @@ createSink
 # Inter-node module connection #
 ################################
 proc connectNodes {id1} {
-    global ipif ipr portnum cbr cbr_sink ipif_sink portnum_sink ipr_sink
+    global ipif ipr portnum app app_sink ipif_sink portnum_sink ipr_sink
 
-    $cbr($id1) set destAddr_ [$ipif_sink addr]
-    $cbr($id1) set destPort_ $portnum_sink($id1)
-    $cbr_sink($id1) set destAddr_ [$ipif($id1) addr]
-    $cbr_sink($id1) set destPort_ $portnum($id1)
+    $app($id1) set destAddr_ [$ipif_sink addr]
+    $app($id1) set destPort_ $portnum_sink($id1)
+    $app_sink($id1) set destAddr_ [$ipif($id1) addr]
+    $app_sink($id1) set destPort_ $portnum($id1)
 }
 
 # Setup flows
@@ -399,16 +396,16 @@ $ipr(0) addRoute [$ipif_sink addr] [$ipif_sink addr];#[$ipif(1) addr]
 # Define here the procedure to call at the end of the simulation
 proc finish {} {
     global ns opt
-    global mac propagation cbr_sink mac_sink phy_data phy_data_sink channel db_manager propagation
+    global mac propagation app_sink mac_sink phy_data phy_data_sink channel db_manager propagation
     global node_coordinates
-    global ipr_sink ipr ipif udp cbr phy phy_data_sink
+    global ipr_sink ipr ipif udp app phy phy_data_sink
     global node_stats tmp_node_stats sink_stats tmp_sink_stats
 
     puts "---------------------------------------------------------------------"
     puts "Simulation summary"
     puts "number of nodes  : $opt(nn)"
     puts "packet size      : $opt(pktsize) byte"
-    puts "cbr period       : $opt(cbr_period) s"
+    puts "app period       : $opt(cbr_period) s"
     puts "number of nodes  : $opt(nn)"
     puts "simulation length: $opt(txduration) s"
     puts "tx frequency     : $opt(freq) Hz"
@@ -423,12 +420,12 @@ proc finish {} {
     set sum_cbr_queue_pkts		 0.0
 
     for {set i 0} {$i < $opt(nn)} {incr i}  {
-        set cbr_throughput           [$cbr_sink($i) getthr]
-        set cbr_sent_pkts        [$cbr($i) getsentpkts]
+        set cbr_throughput           [$app_sink($i) getthr]
+        set cbr_sent_pkts        [$app($i) getsentpkts]
         
-        set cbr_rcv_pkts           [$cbr_sink($i) getrecvpkts]
+        set cbr_rcv_pkts           [$app_sink($i) getrecvpkts]
 		  if { $opt(socket_comm) == 1 } {	
-        		set cbr_queue_pkts			[$cbr($i) getrecvpktsqueue]
+        		set cbr_queue_pkts			[$app($i) getrecvpktsqueue]
 		  }
  		  set sum_cbr_throughput [expr $sum_cbr_throughput + $cbr_throughput]
         set sum_cbr_sent_pkts  [expr $sum_cbr_sent_pkts + $cbr_sent_pkts]
@@ -438,23 +435,11 @@ proc finish {} {
 		  }
     }
         
-#    set ipheadersize        [$ipif(1) getipheadersize]
-#    set udpheadersize       [$udp(1) getudpheadersize]
-#    set cbrheadersize       [$cbr(1) getcbrheadersize]
-    
     puts "Mean Throughput          : [expr ($sum_cbr_throughput/($opt(nn)))]"
-#    if { $opt(socket_comm) == 1 } {
-#	 		puts "Packets stored by server : $sum_cbr_queue_pkts"
-#    }
-	 puts "Sent Packets             : $sum_cbr_sent_pkts"
-	 puts "Received Packets         : $sum_cbr_rcv_pkts"
+
+	puts "Sent Packets             : $sum_cbr_sent_pkts"
+	puts "Received Packets         : $sum_cbr_rcv_pkts"
     puts "Packet Delivery Ratio    : [expr $sum_cbr_rcv_pkts / $sum_cbr_sent_pkts * 100]"
-#	 if { $opt(socket_comm) == 1 } {
-#	     puts "Packets received by server but not yet passed to the below level: [expr ($sum_cbr_queue_pkts-$sum_cbr_rcv_pkts)]"
-#	 }
-#    puts "IP Pkt Header Size       : $ipheadersize"
-#    puts "UDP Header Size          : $udpheadersize"
-#    puts "CBR Header Size          : $cbrheadersize"
   
     $ns flush-trace
     close $opt(tracefile)
@@ -463,14 +448,9 @@ proc finish {} {
 ###################
 # start simulation
 ###################
-#if { $opt(socket_comm) == 1 } {
-#	$ns at [expr $opt(stoptime) + 30.0]  "finish; $ns halt"
-#} else {
-#	$ns at [expr $opt(stoptime) + 3600]  "finish; $ns halt" 
-#}
 for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
-    $ns at $opt(starttime)    "$cbr($id1) start"
-    $ns at $opt(stoptime)     "$cbr($id1) stop"
+    $ns at $opt(starttime)    "$app($id1) start"
+    $ns at $opt(stoptime)     "$app($id1) stop"
 }
 
 $ns at [expr $opt(stoptime) + 30.0] "finish; $ns halt"

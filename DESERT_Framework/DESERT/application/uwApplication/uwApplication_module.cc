@@ -14,9 +14,8 @@
 
 /* 
  * File:   uwApplication_module.cc
- * Author: Loris Brolo
+ * Author: Federico Favaro
  *
- * Created on 15 dicembre 2013, 14.54
  */
 
 #include <sstream>
@@ -75,19 +74,18 @@ exp_id(0)
     bind("period_", (int*) &PERIOD);
     bind("node_ID_", (int*) &node_id);
     bind("EXP_ID_", (int*) &exp_id);
-    bind("PoissonTraffic_", (int*) &POISSON_TRAFFIC);
-    bind("Payload_size_", (int*) &PAYLOADSIZE);
-    bind("destAddr_", (int*) &DST_ADDR);
-    bind("destPort_", (int*) &PORT_NUM);
+    bind("PoissonTraffic_", (int*) &poisson_traffic);
+    bind("Payload_size_", (int*) &payloadsize);
+    bind("destAddr_", (int*) &dst_addr);
+    bind("destPort_", (int*) &port_num);
     bind("Socket_Port_", (int*) &servPort);
-    bind("drop_out_of_order_", (int*) &DROP_OUT_OF_ORDER);
-    bind("pattern_sequence_", (int*) &PATTERN_SEQUENCE);
+    bind("drop_out_of_order_", (int*) &drop_out_of_order);
 
     sn_check = new bool[USHRT_MAX];
     for (int i = 0; i < USHRT_MAX; i++) {
         sn_check[i] = false;
     }
-    //servPort = PORT_NUM;
+    //servPort = port_num;
 } //end uwApplicationModule() Method
 
 uwApplicationModule::~uwApplicationModule() {
@@ -237,8 +235,6 @@ void uwApplicationModule::statistics(Packet* p) {
     if (useDropOutOfOrder()) {
         if (uwApph->sn_ < esn) { // packet is out of sequence and is to be discarded
             incrPktOoseq(); //Increase the number of data packets receive out of sequence.
-            //if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::recv() ---> Packet received with SN " << uwApph->sn_ << " is out of sequence."
-            //        << " The highest sequence number received is " << hrsn << ". DROP IT!" << std::endl;
             if (debug_ >= 0 ) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_PACKET_OOS_ID_" << (int)uwApph->sn_ << "_LAST_SN_" << hrsn << endl;
             if (logging) out_log << left << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::DROP_PACKET_PACKET_OOS_ID_" << (int)uwApph->sn_ << "_LAST_SN_" << hrsn << endl;
             drop(p, 1, UWAPPLICATION_DROP_REASON_OUT_OF_SEQUENCE);
@@ -292,9 +288,8 @@ void uwApplicationModule::statistics(Packet* p) {
 }//end statistics method
 
 void uwApplicationModule::start_generation() {
-    //if (debug_) std::cout << "Time: " << NOW << " uwApplicationModule::start_generation() ---> Start the process to generate DATA packets." << std::endl;
     if(debug_ >= 1) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::START_GENERATION_DATA" << endl;
-    if(logging) std::cout << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::START_GENERATION_DATA" << endl;
+    if(logging) out_log << "[" << getEpoch() << "]::" << NOW << "::UWAPPLICATION::START_GENERATION_DATA" << endl;
     chkTimerPeriod.resched(getTimeBeforeNextPkt());
 } //end start_generation() method
 
@@ -311,15 +306,15 @@ void uwApplicationModule::init_Packet() {
     //Common header fields
     ch->uid() = uidcnt++; //Increase the id of data packet
     ch->ptype_ = PT_DATA_APPLICATION; //Assign the type of packet that is being created
-    ch->size() = PAYLOADSIZE; //Assign the size of data payload 
-    uwApph->payload_size() = PAYLOADSIZE;
+    ch->size() = payloadsize; //Assign the size of data payload 
+    uwApph->payload_size() = payloadsize;
     ch->direction() = hdr_cmn::DOWN; //The packet must be forward at the level above of him
 
     //Transport header fields
-    uwudp->dport() = PORT_NUM; //Set the destination port
+    uwudp->dport() = port_num; //Set the destination port
 
     //IP header fields
-    uwiph->daddr() = DST_ADDR; //Set the IP destination address
+    uwiph->daddr() = dst_addr; //Set the IP destination address
 
     //Application header fields
     incrPktSent();
@@ -334,11 +329,11 @@ void uwApplicationModule::init_Packet() {
     uwApph->priority_ = 0; //Priority of the message
 
     //Create the payload message
-    if (getPayLoadSize() < MAX_LENGTH_PAYLOAD) {
-        for (int i = 0; i < getPayLoadSize(); i++) {
+    if (getpayloadsize() < MAX_LENGTH_PAYLOAD) {
+        for (int i = 0; i < getpayloadsize(); i++) {
             (*uwApph).payload_msg[i] = rand() % 26 + 'a';
         }
-        for (int i = getPayLoadSize(); i < MAX_LENGTH_PAYLOAD; i++) {
+        for (int i = getpayloadsize(); i < MAX_LENGTH_PAYLOAD; i++) {
             (*uwApph).payload_msg[i] = '0';
         }
     } else {
@@ -434,7 +429,7 @@ double uwApplicationModule::GetFTTstd() const {
 } //end getFTT() method
 
 double uwApplicationModule::GetPER() const {
-    if (DROP_OUT_OF_ORDER) {
+    if (drop_out_of_order) {
         if ((pkts_recv + pkts_lost) > 0) {
             return ((double) pkts_lost / (double) (pkts_recv + pkts_lost));
         } else {
@@ -468,14 +463,8 @@ void uwApplicationModule::updateThroughput(const int& bytes, const double& dt) {
 
 void uwApplicationModule::uwSendTimerAppl::expire(Event* e) {
     if (m_->withoutSocket()) {
-        //Communication take placing without socket 
-        if (m_->usePatternSequence()) {
-            //Using a pattern sequence for data payload
-            // m_-> initialize_DATA_Pck_Pattern();
-        } else {
-            //Using a random sequence for data payload
-            m_->init_Packet();
-        }
+        //Using a random sequence for data payload
+        m_->init_Packet();
     } else {
         //Communication take placing with sockets 
         if (m_->useTCP()) {

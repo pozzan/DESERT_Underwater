@@ -52,23 +52,22 @@
 # x seconds (specified as an input parameter). In this case, the user doesn't have to send data, and uwApplication will automatically send a Packet
 # with random payload to the receiver through the modem.
 
-set opt(AppSocket)  0 ;# if set to 1 the Application listen from the socket port provided in input
+set opt(AppSocket)  1 ;# if set to 1 the Application listen from the socket port provided in input
 set opt(protocol) "TCP" ;# Protocol to use for the Application socket, TCP or UDP
 
 # Terminal's parameter check
 if {$opt(AppSocket) == 1} {
-  if {$argc != 10} {
+  if {$argc != 9} {
     puts "The script needs 10 input to work"
     puts "1 - ID of the node"
     puts "2 - ID of the receiver"
     puts "3 - Start time"
     puts "4 - Stop time"
     puts "5 - Packet generation period (0 if the node doesn't generate data)"
-    puts "6 - ID of the experiment"
-    puts "7 - IP of the modem"
-    puts "8 - Port of the modem"
-    puts "9 - Application socket port"
-    puts "10 - Experiment ID"
+    puts "6 - IP of the modem"
+    puts "7 - Port of the modem"
+    puts "8 - Application socket port"
+    puts "9 - Experiment ID"
     puts "Please try again."
     exit
   } else {
@@ -77,25 +76,23 @@ if {$opt(AppSocket) == 1} {
     set opt(start)    [lindex $argv 2]
     set opt(stop)     [lindex $argv 3]
     set opt(traffic)  [lindex $argv 4]
-    set opt(n_run)    [lindex $argv 5]
-    set opt(ip)       [lindex $argv 6]
-    set opt(port)     [lindex $argv 7]
-    set opt(app_port) [lindex $argv 8]
-    set opt(exp_ID) [lindex $argv 9]
+    set opt(ip)       [lindex $argv 5]
+    set opt(port)     [lindex $argv 6]
+    set opt(app_port) [lindex $argv 7]
+    set opt(exp_ID) [lindex $argv 8]
   }
 } else {
-  if {$argc != 10} {
+  if {$argc != 9} {
     puts "The script needs 10 input to work"
     puts "1 - ID of the node"
     puts "2 - ID of the receiver"
     puts "3 - Start time"
     puts "4 - Stop time"
     puts "5 - Packet generation period (0 if the node doesn't generate data)"
-    puts "6 - ID of the experiment"
-    puts "7 - IP of the modem"
-    puts "8 - Port of the modem"
-    puts "9 - Payload size (byte)"
-    puts "10 - Experiment ID"
+    puts "6 - IP of the modem"
+    puts "7 - Port of the modem"
+    puts "8 - Payload size (byte)"
+    puts "9 - Experiment ID"
     puts "Please try again."
     exit
   } else {
@@ -104,11 +101,10 @@ if {$opt(AppSocket) == 1} {
     set opt(start)    [lindex $argv 2]
     set opt(stop)     [lindex $argv 3]
     set opt(traffic)  [lindex $argv 4]
-    set opt(n_run)    [lindex $argv 5]
-    set opt(ip)       [lindex $argv 6]
-    set opt(port)     [lindex $argv 7]
-    set opt(payload_size) [lindex $argv 8]
-    set opt(exp_ID) [lindex $argv 9]
+    set opt(ip)       [lindex $argv 5]
+    set opt(port)     [lindex $argv 6]
+    set opt(payload_size) [lindex $argv 7]
+    set opt(exp_ID) [lindex $argv 8]
   }
 }
 
@@ -218,16 +214,16 @@ UW/UDP/Packer set DPort_Bits 2
 UW/UDP/Packer set debug_ 0
 
 UW/APP/uwApplication/Packer set SN_FIELD_ 8
-UW/APP/uwApplication/Packer set RFFT_FIELD_ 8
-UW/APP/uwApplication/Packer set RFFTVALID_FIELD_ 8
+UW/APP/uwApplication/Packer set RFFT_FIELD_ 5
+UW/APP/uwApplication/Packer set RFFTVALID_FIELD_ 2
 UW/APP/uwApplication/Packer set PRIORITY_FIELD_ 8
-UW/APP/uwApplication/Packer set PAYLOADMSG_FIELD_SIZE_ 32
+UW/APP/uwApplication/Packer set PAYLOADMSG_FIELD_SIZE_ 8
 UW/APP/uwApplication/Packer set debug_ 1
 
 
-Module/UW/APPLICATION set debug_ 0              
+Module/UW/APPLICATION set debug_ -1              
 Module/UW/APPLICATION set period_ $opt(traffic)
-Module/UW/APPLICATION set PoissonTraffic_ 1
+Module/UW/APPLICATION set PoissonTraffic_ 0
 if {$opt(AppSocket) == 1} {
   Module/UW/APPLICATION set Socket_Port_ $opt(app_port)
 } else {
@@ -244,6 +240,7 @@ Module/UW/MPhy_modem/S2C set period_ 			        1
 Module/UW/MPhy_modem/S2C set debug_ 			        1
 Module/UW/MPhy_modem/S2C set log_                       0
 Module/UW/MPhy_modem/S2C set SetModemID_	 	        0
+Module/UW/MPhy_modem/S2C set UseKeepOnline_             1
 #######
 
 ################################
@@ -401,7 +398,7 @@ proc finish {} {
 ##################
 # Specify the time at which to call the finish procedure and halt ns
 
-$ns at $time_stop "finish; $ns halt"
+$ns at [expr $time_stop] "finish; $ns halt"
 
 # You always need the following line to run the NS-Miracle simulator
 $ns run

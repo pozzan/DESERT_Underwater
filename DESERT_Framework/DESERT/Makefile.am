@@ -37,6 +37,7 @@ EXTRA_DIST = autogen.sh
 SUBDIRS = m4 \
     application/uwcbr \
     application/uwvbr \
+    application/uwApplication \
     transport/uwudp \
     network/uwstaticrouting \
     network/uwsun \
