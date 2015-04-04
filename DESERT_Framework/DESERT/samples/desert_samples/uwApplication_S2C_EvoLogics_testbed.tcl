@@ -52,7 +52,7 @@
 # x seconds (specified as an input parameter). In this case, the user doesn't have to send data, and uwApplication will automatically send a Packet
 # with random payload to the receiver through the modem.
 
-set opt(AppSocket)  0 ;# if set to 1 the Application listen from the socket port provided in input
+set opt(AppSocket)  1 ;# if set to 1 the Application listen from the socket port provided in input
 set opt(protocol) "TCP" ;# Protocol to use for the Application socket, TCP or UDP
 
 # Terminal's parameter check
@@ -240,7 +240,7 @@ Module/UW/MPhy_modem/S2C set period_ 			        1
 Module/UW/MPhy_modem/S2C set debug_ 			        1
 Module/UW/MPhy_modem/S2C set log_                       0
 Module/UW/MPhy_modem/S2C set SetModemID_	 	        0
-Module/UW/MPhy_modem/S2C set RemoteControl_             1
+Module/UW/MPhy_modem/S2C set UseKeepOnline_             1
 #######
 
 ################################

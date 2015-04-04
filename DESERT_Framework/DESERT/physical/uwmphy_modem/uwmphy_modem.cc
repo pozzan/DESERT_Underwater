@@ -45,7 +45,7 @@ UWMPhy_modem::UWMPhy_modem(std::string pToDevice_) {
     bind("debug_", &debug_);
     bind("log_", &log_);
     bind("SetModemID_", &SetModemID);
-    bind("RemoteControl_", &UseKeepOnline);
+    bind("UseKeepOnline_", &UseKeepOnline);
     t = -1;
     PktRx = NULL;
     pcheckTmr = NULL;

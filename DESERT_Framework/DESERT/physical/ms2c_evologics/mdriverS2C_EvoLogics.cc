@@ -251,12 +251,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
                         outLog.flush();
                         outLog.close();
                     }
-                } else if (pr_msg.find("USBLANGLES") != string::npos) {
-
-
-                } else if (pr_msg.find("USBLLONG") != string::npos) {
-
-
+                    
                 } else if (pr_msg.find("DELIVERED") != string::npos) {
 /*                    if (debug_ >= 1) {
                         hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
@@ -295,7 +290,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     queue_tx.push(pr_msg);
 
 
-                } else {
+                } else if ((pr_msg.find("USBLANGLES") != string::npos) && (pr_msg.find("USBLLONG") != string::npos)) { //positioning messages, we don't care about it
 
                     if (debug_ >= 0) {
                         hexdump("MS2C_EVOLOGICS::UPDATESTATUS::UNKNOWN_PACKET_", pr_msg);
@@ -380,7 +375,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
                         status = _IDLE;
                     } else {
                         if (debug_ >= 0) {
-                            cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::ERROR_WRONG_STATUS_" << m_status_tx << "_" << status << endl;
+                            cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::ERROR_WRONG_STATUS_TX_" << m_status_tx << "_STATUS_" << status << endl;
                         }
                         if (getLog()) {
                             outLog.open((getLogFile()).c_str(), ios::app);
@@ -418,9 +413,6 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::DELIVERED" << endl;
                     }
-                    //cread = false;
-                    //status = _IDLE;
-                    //do nothing
                 } else if  (rx_msg.find("BUSY DELIVERING") != string::npos) {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::MODEM BUSY DELIVERING PIGGYBACK MESSAGE" << endl;   
@@ -487,8 +479,6 @@ int MdriverS2C_EvoLogics::updateStatus() {
 }
 
 void MdriverS2C_EvoLogics::modemTxManager() {
-
-    // Variable to store the message to be sent to the modem
     std::string tx_msg;
     if (status == _TX || status == _CFG || status == _RESET || status == _QUIT) {
         switch (m_status_tx) {
