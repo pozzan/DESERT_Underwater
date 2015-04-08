@@ -30,15 +30,15 @@
 # Version: 1.0.0
 
 
-# This script is used to test UW-POLLING protocol
-# There are 8 nodes in a square of 4 x 4 nodes with nearest neighbour
-# 1 km apart and an SINK that patrols the network retreiving data packets
-# making a trajectory described in the Waypoints
+###########
+#
+# Add description
+#
+############
 # 
 # N.B.: This example uses the Waypoint mobility model provided by WOSS.
 # For more informations please refer to http://telecom.dei.unipd.it/ns/woss/
 #
-# NOTE: tcl sample tested on Ubuntu 11.10, 64 bits OS
 #
 #
 #
