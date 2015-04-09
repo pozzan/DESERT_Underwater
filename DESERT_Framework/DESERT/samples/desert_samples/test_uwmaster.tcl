@@ -26,37 +26,41 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# This script is used to test UW-CSMA-ALOHA protocol
-# There are 4 nodes placed in line that can transmit each other 
-# packets with a CBR (Constant Bit Rate) Application Module
+# This script is used to test MULTI_STACK_CONTROLLER_PHY MASTER and SLAVE module
+# There are 2 nodes that can transmit each other packets with a CBR (Constant 
+# Bit Rate) Application Module
+# The MASTER controls the switch between three UW/PHYSICAL layers with different
+# frequency and bandwidth, according with the received power metrics. The slave 
+# switches according to the MASTER behavior. UnderwaterChannel is used as channel.
 #
-# N.B.: This Example require WOSS installed for the Underwater Channel
-#
-# Author: Federico Favaro <favarofe@dei.unipd.it>
+# Author: Filippo Campagnaro <campagn1@dei.unipd.it>
 # Version: 1.0.0
 #
 # NOTE: tcl sample tested on Ubuntu 11.10, 64 bits OS
 #
 # Stack of the nodes
-#   +-------------------------+
-#   |  7. UW/CBR              |
-#   +-------------------------+
-#   |  6. UW/UDP              |
-#   +-------------------------+
-#   |  5. UW/STATICROUTING    |
-#   +-------------------------+
-#   |  4. UW/IP               |
-#   +-------------------------+
-#   |  3. UW/MLL              |
-#   +-------------------------+
-#   |  2. UW/CSMA_ALOHA       |
-#   +-------------------------+
-#   |  1. MPHY/BPSK/Underwater|
-#   +-------------------------+
-#           |         |    
-#   +-------------------------+
-#   |    UnderwaterChannel    |
-#   +-------------------------+
+#                   MASTER                                         SLAVE 
+#   +------------------------------------------+   +------------------------------------------+
+#   |  10. UW/CBR                              |   |  10. UW/CBR                              |
+#   +------------------------------------------+   +------------------------------------------+
+#   |  9. UW/UDP                               |   |  9. UW/UDP                               |
+#   +------------------------------------------+   +------------------------------------------+
+#   |  8. UW/STATICROUTING                     |   |  8. UW/STATICROUTING                     |
+#   +------------------------------------------+   +------------------------------------------+
+#   |  7. UW/IP                                |   |  7. UW/IP                                |
+#   +------------------------------------------+   +------------------------------------------+
+#   |  6. UW/MLL                               |   |  6. UW/MLL                               | 
+#   +------------------------------------------+   +------------------------------------------+
+#   |  5. UW/CSMA_ALOHA                        |   |  5. UW/CSMA_ALOHA                        |
+#   +------------------------------------------+   +------------------------------------------+
+#   |  4. UW/MULTI_STACK_CONTROLLER_PHY_MASTER |   |  4. UW/MULTI_STACK_CONTROLLER_PHY_SLAVE  |
+#   +--------------+-------------+-------------+   +--------------+-------------+-------------+
+#   | 3.UW/PHYSICAL|2.UW/PHYSICAL|1.UW/PHYSICAL|   | 3.UW/PHYSICAL|2.UW/PHYSICAL|1.UW/PHYSICAL|
+#   +--------------+-------------+-------------+   +--------------+-------------+-------------+ 
+#           |             |              |                  |             |            |     
+#   +-----------------------------------------------------------------------------------------+
+#   |                                     UnderwaterChannel                                   |   
+#   +-----------------------------------------------------------------------------------------+   
 
 ######################################
 # Flags to enable or disable options #
@@ -198,8 +202,8 @@ Module/UW/PHYSICAL  set BandwidthOptimization_      0
 Module/UW/PHYSICAL  set SPLOptimization_            0
 Module/UW/PHYSICAL  set debug_                      0
 
-Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE set debug_        1
-Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set debug_       1
+# Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE set debug_        1
+# Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set debug_       1
 ################################
 # Procedure(s) to create nodes #
 ################################

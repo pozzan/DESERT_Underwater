@@ -31,8 +31,15 @@
 
 
 ###########
-#
-# Add description
+# This script is used to test data muling in a multimodal acoustic and optical 
+# network. 
+# There are 8 nodes in a rectangle of 4 x 2 nodes with nearest neighbour
+# 1 km apart and an AUV that patrols the network retreiving data packets
+# making a trajectory described in the Waypoints. 
+# The MASTER is placed in the AUV and controls the switch between UW/PHYSICAL 
+# and UW/OPTICAL/PHY layers, according with the received power metrics. 
+# The slave switches according to the MASTER behavior.
+# Both acoustic and optical channels and PHY layers are employed.
 #
 ############
 # 
@@ -42,26 +49,32 @@
 #
 #
 #
-# Stack of the nodes                               Stack of the SINK
-#	+-----------------------+                       +-----------------------+
-#	|    7.  UW/CBR  (tx)    |                      |      7. UW/CBR(rx)     |
-#	+-----------------------+	                      +-----------------------+
-#	|       6. UW/UDP        |                      |       6. UW/UDP        |
-#	+-----------------------+	                      +-----------------------+
-#	|  5. UW/staticROUTING   |                      |  5. UW/staticROUTING   |
-#	+-----------------------+	                      +-----------------------+
-#	|       4. UW/IP         |                      |       4. UW/IP         |
-#	+-----------------------+	                      +-----------------------+
-#	|       3. UW/MLL        |                      |       3. UWMLL        |
-#	+-----------------------*                       +-----------------------+
-#	|2.   UW/POLLING_NODE    |                      | 2.  UW/POLLING_SINK     |
-# +.......................+                       +.......................+
-#	: 1 Module/UW/PHYSICAL   :                      : 1. Module/UW/PHYSICAL  :
-#	+.......................+	                      +.......................+
-#           |                                               |
-#	      +-------------------------------------------------------------+
-#       |                       UnderwaterChannel                    |
-#       +-------------------------------------------------------------+
+# Stack of the nodes                                           Stack of the SINK
+#	+------------------------------------------+            +-------------------------------------------+
+#	|       9. UW/CBR  (tx)                    |            |       9. UW/CBR(rx)                       |
+#	+------------------------------------------+	          +-------------------------------------------+
+#	|       8. UW/UDP                          |            |       8. UW/UDP                           |
+#	+------------------------------------------+	          +-------------------------------------------+
+#	|       7. UW/staticROUTING                |            |       7. UW/staticROUTING                 |
+#	+------------------------------------------+	          +-------------------------------------------+
+#	|       6. UW/IP                           |            |       6. UW/IP                            |
+#	+------------------------------------------+	          +-------------------------------------------+
+#	|       5. UW/MLL                          |            |       5. UWMLL                            |
+#	+------------------------------------------+            +-------------------------------------------+
+#	|       4. UW/CSMA_ALOHA/TRIGGER/NODE      |            |       4. UW/CSMA_ALOHA/TRIGGER/SINK       |
+# +------------------------------------------+            +-------------------------------------------+
+#	|  3. UW/MULTI_STACK_CONTROLLER_PHY_SLAVE  |            |  3. UW/MULTI_STACK_CONTROLLER_PHY_MASTER  |
+# +-----------------+------------------------+            +-----------------+-------------------------+
+# | 2. UW/PHYSICAL  | 1. UW/OPTICAL/PHY      |            | 1. UW/OPTICAL/PHY      | 2. UW/PHYSICAL   |
+#	+-----------------+------------------------+	          +------------------------+------------------+                      
+#           |                    |                                 |                      |
+#           |             +------------------------------------------------+              |
+#           |             |                 UW/Optical/Channel             |              |
+#           |             +------------------------------------------------+              |
+#           |                                                                             |
+#	      +-------------------------------------------------------------------------------------+
+#       |                       UnderwaterChannel                                             |
+#       +-------------------------------------------------------------------------------------+
 
 ######################################
 # Flags to enable or disable options #

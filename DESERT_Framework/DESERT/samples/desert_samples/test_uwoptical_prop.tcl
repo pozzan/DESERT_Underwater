@@ -26,11 +26,12 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# This script is used to test UW-CSMA-ALOHA protocol
-# There are 3 nodes placed in line that can transmit each other packets 
-# with a CBR (Constant Bit Rate) Application Module
+# This script is used to test UW-OPTICAL-Propagation and UW-OPTICAL-PHY with 
+# addition of ambient light noise provided by Hydrolight LUT.
+# There are 2 nodes that can transmit each other packets in a point 2 point
+# netwerk with a CBR (Constant Bit Rate) Application Module
 #
-# DumbWirelessChannel and MPHYPATCH is used for PHY layer and channel
+# UW/Optical/Channel and UW/OPTICAL/PHY is used for PHY layer and channel
 #
 # Author: Filippo Campagnaro <campagn1@dei.unipd.it>
 # Version: 1.0.0
@@ -50,11 +51,11 @@
 #   +-------------------------+
 #   |  2. UW/CSMA_ALOHA       |
 #   +-------------------------+
-#   |  1. MPHYPATCH 
+#   |  1. UW/OPTICAL/PHY      | 
 #   +-------------------------+
 #           |         |    
 #   +-------------------------+
-#   |  DumbWirelessChannel    |
+#   |   UW/Optical/Channel    |
 #   +-------------------------+
 
 ######################################
@@ -170,11 +171,6 @@ Module/UW/CBR set period_              $opt(cbr_period)
 Module/UW/CBR set PoissonTraffic_      1
 Module/UW/CBR set debug_               0
 
-# Module/MPhy/BPSK  set TxPower_                $opt(txpower)
-# Module/MPhy/BPSK  set BitRate_                    $opt(bitrate)
-# Module/MPhy/BPSK  set AcquisitionThreshold_dB_   -15.0 
-# Module/MPhy/BPSK  set NoiseSPD_ [expr 1.28e-26]
-
 Module/UW/OPTICAL/PHY   set TxPower_                    $opt(txpower)
 Module/UW/OPTICAL/PHY   set BitRate_                    $opt(bitrate)
 Module/UW/OPTICAL/PHY   set AcquisitionThreshold_dB_    $opt(opt_acq_db)
@@ -184,7 +180,7 @@ Module/UW/OPTICAL/PHY   set R_                          $opt(shuntRes)
 Module/UW/OPTICAL/PHY   set S_                          $opt(sensitivity)
 Module/UW/OPTICAL/PHY   set T_                          $opt(temperatura)
 Module/UW/OPTICAL/PHY   set Ar_                         $opt(rxArea)
-# Module/UW/OPTICAL/PHY   set debug_                      1
+Module/UW/OPTICAL/PHY   set debug_                      0
 
 set data_mask [new MSpectralMask/Rect]
 $data_mask setFreq       $opt(freq)
@@ -199,7 +195,6 @@ Module/UW/OPTICAL/Propagation set debug_    0
 set propagation [new Module/UW/OPTICAL/Propagation]
 $propagation setOmnidirectional
 
-# set channel [new Module/DumbWirelessCh]
 set channel [new Module/UW/Optical/Channel]
 
 Module/UW/CSMA_ALOHA set listen_time_          [expr 1.0e-12]
@@ -336,9 +331,6 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 		}
 	}
 }
-
-# $ns at $opt(starttime)    "$cbr(0,1) start"
-# $ns at $opt(stoptime)     "$cbr(0,1) stop"
 
 ###################
 # Final Procedure #
