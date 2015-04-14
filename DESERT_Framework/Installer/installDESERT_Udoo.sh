@@ -745,7 +745,7 @@ build_NETCDFCXX() {
     start="$(date +%s)"
 
     if [ -f Makefile ]; then
-        make distclean > "${currentBuildLog}/netcdfcxx-${NETCDFCXX_VERSION}-$*.log" 2>&1
+        make distclean > "${currentBuildLog}/netcdf-cxx-${NETCDFCXX_VERSION}-$*.log" 2>&1
     fi
     info_L2 "configure  [$*]"
     CXXFLAGS="-Wno-write-strings"                           \
@@ -757,22 +757,22 @@ build_NETCDFCXX() {
                 --build=${HOST}                             \
                 --enable-shared                             \
                 --prefix=${DEST_FOLDER}                     \
-                >> "${currentBuildLog}/netcdfcxx-${NETCDFCXX_VERSION}-$*.log" 2>&1
+                >> "${currentBuildLog}/netcdf-cxx-${NETCDFCXX_VERSION}-$*.log" 2>&1
     if [ $? -ne 0 ]; then
         err_L1 "Error during the configuration of netcdf-cxx-${NETCDFCXX_VERSION}! Exiting ..."
-        tail ${currentBuildLog}/netcdfcxx-${NETCDFCXX_VERSION}-$*.log
+        tail ${currentBuildLog}/netcdf-cxx-${NETCDFCXX_VERSION}-$*.log
         exit 1
     fi
 
     info_L2 "make       [$*]"
-    make check install >> "${currentBuildLog}/netcdfcxx-${NETCDFCXX_VERSION}-$*.log" 2>&1
+    make check install >> "${currentBuildLog}/netcdf-cxx-${NETCDFCXX_VERSION}-$*.log" 2>&1
     if [ $? -ne 0 ]; then
         err_L1 "Error during the compilation or installation of netcdf-cxx-${NETCDFCXX_VERSION}! Exiting ..."
-        tail ${currentBuildLog}/netcdfcxx-${NETCDFCXX_VERSION}-$*.log
+        tail ${currentBuildLog}/netcdf-cxx-${NETCDFCXX_VERSION}-$*.log
         exit 1
     fi
 
-    ln -sf ${currentBuildLog}/netcdfcxx-${NETCDFCXX_VERSION}/cxx/netcdfcpp.h ../netcdf-4.2.1.1/include/
+    ln -sf ${currentBuildLog}/netcdf-cxx-${NETCDFCXX_VERSION}/cxx/netcdfcpp.h ../netcdf-4.2.1.1/include/
     elapsed=`expr $(date +%s) - $start`
     ok_L1 "completed in ${elapsed}s"
 }
@@ -875,7 +875,7 @@ build_WOSS() {
     info_L2 "configure  [$*]"
     CXXFLAGS="-Wno-write-strings"                                                  \
       CFLAGS="-Wno-write-strings"                                                  \
-    CPPFLAGS=-I${currentBuildLog}/netcdfcxx-${NETCDFCXX_VERSION}/cxx               \
+    CPPFLAGS=-I${currentBuildLog}/netcdf-cxx-${NETCDFCXX_VERSION}/cxx               \
      LDFLAGS=-L${DEST_FOLDER}/lib                                                  \
     ./configure --target=${ARCH}                                                   \
                 --host=${ARCH}                                                     \
