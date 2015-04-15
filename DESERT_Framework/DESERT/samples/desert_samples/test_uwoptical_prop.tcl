@@ -120,7 +120,7 @@ set opt(id)                [expr 1.0e-9]
 set opt(il)                [expr 1.0e-6]
 set opt(shuntRes)          [expr 1.49e9]
 set opt(sensitivity)       0.26
-
+set opt(LUTpath)           "dbs/optical_noise"
 
 set rng [new RNG]
 
@@ -250,7 +250,7 @@ proc createNode { id } {
     $phy($id) setInterference $interf_data($id)
     $phy($id) setPropagation $propagation
     $phy($id) setSpectralMask $data_mask
-    $phy($id) setLUTFileName "LUT.txt"
+    $phy($id) setLUTFileName "$opt(LUTpath)/LUT.txt"
     $phy($id) setLUTSeparator " "
     $phy($id) useLUT
 

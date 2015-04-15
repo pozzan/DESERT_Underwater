@@ -121,7 +121,7 @@ if {$opt(ACK_Active)} {
 } else {
     set opt(ack_mode)           "setNoAckMode"
 }
-set opt(waypoint_file)  "rov_path.csv"
+set opt(waypoint_file)  "dbs/wp_path/rov_path.csv"
 
 set rng [new RNG]
 set rng_position [new RNG]

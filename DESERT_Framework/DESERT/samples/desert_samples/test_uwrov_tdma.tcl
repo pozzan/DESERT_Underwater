@@ -128,7 +128,7 @@ set opt(CTR_timeout)             [expr 6+2*($opt(max_rtt)+$opt(ROV_period))];#ti
 #} else {
 #    set opt(ack_mode)           "setNoAckMode"
 #}
-set opt(waypoint_file)  "rov_path.csv"
+set opt(waypoint_file)  "dbs/wp_path/rov_path.csv"
 
 set rng [new RNG]
 set rng_position [new RNG]
