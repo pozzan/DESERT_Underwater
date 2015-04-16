@@ -72,6 +72,7 @@ DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/data_link/uwsr'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/data_link/uw-t-lohi'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/data_link/uw-csma-aloha-trigger'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/data_link/uwUFetch'
+DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/data_link/uwtdma'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwmphy_modem'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/ms2c_evologics'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwmphypatch'
@@ -85,9 +86,12 @@ DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uw-al/packer_common
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uw-al/packer_mac'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwphysicalracun'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwhermesphy'
+DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/physical/uwoptical_phy'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/mobility/uwdriftposition'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/mobility/uwgmposition'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/interference/uwinterference'
+DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/propagation/uwoptical_propagation'
+DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/channel/uwoptical_channel'
 
 #if test x$have_woss != xyes ; then
     #AC_MSG_WARN([---------------------------------------------------------------------])
@@ -128,6 +132,7 @@ AC_CONFIG_FILES([
     data_link/uw-t-lohi/Makefile
     data_link/uwUFetch/Makefile
     data_link/uw-csma-aloha-trigger/Makefile
+    data_link/uwtdma/Makefile
     physical/uwmphy_modem/Makefile
     physical/ms2c_evologics/Makefile
     physical/uwmphypatch/Makefile
@@ -140,9 +145,12 @@ AC_CONFIG_FILES([
     physical/uw-al/packer_common/Makefile
     physical/uw-al/packer_mac/Makefile    
     physical/uwhermesphy/Makefile
+    physical/uwoptical_phy/Makefile
     mobility/uwdriftposition/Makefile
     mobility/uwgmposition/Makefile
     interference/uwinterference/Makefile
+    propagation/uwoptical_propagation/Makefile
+    channel/uwoptical_channel/Makefile
     ])
 
 AC_OUTPUT 
