@@ -58,6 +58,7 @@ UwROVCtrModule::UwROVCtrModule(Position p) : UwCbrModule(), sn(0) {
 }
 
 UwROVCtrModule::UwROVCtrModule() : UwCbrModule(), sn(0) {
+	p = NULL;
 	posit = Position();
 	speed = 1;
 }

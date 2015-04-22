@@ -52,7 +52,8 @@ SUBDIRS = m4 \
     data_link/uwsr \
     data_link/uw-t-lohi \
     data_link/uwUFetch \
-    data_link/uw-csma-aloha-triggered \
+    data_link/uw-csma-aloha-trigger \
+    data_link/uwtdma \
     physical/uwphysical \
     physical/uwgainfromdb \
     physical/uwphysicaldb\
@@ -62,10 +63,13 @@ SUBDIRS = m4 \
     physical/ms2c_evologics \
     physical/uwmphypatch \
     physical/uwhermesphy \
+    physical/uwoptical_phy \
     physical/uw-al \
     physical/uw-al/packer_common \
     physical/uw-al/packer_mac \
     mobility/uwdriftposition \
     mobility/uwgmposition \
-    interference/uwinterference
+    interference/uwinterference \
+    propagation/uwoptical_propagation \
+    channel/uwoptical_channel
 

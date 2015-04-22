@@ -82,7 +82,7 @@ public:
 	float newZ;
 	float speed;
 	int sn;
-	Packet * p = NULL;
+	Packet* p;
 
 	/**
 	* Constructor of UwROVCtrModule class.
