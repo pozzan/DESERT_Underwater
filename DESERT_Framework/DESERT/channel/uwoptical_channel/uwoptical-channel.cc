@@ -38,7 +38,6 @@
 
 #include <iostream>
 #include <cassert>
-//#include <coordinates-definitions.h>
 
 #include "uwoptical-channel.h"
 
@@ -46,6 +45,9 @@
 #define REFRACTIVE_INDEX_MIN (1)
 #define REFRACTIVE_INDEX_WATER (1.33)
 
+/**
+ * Adds the module for UwOpticalChannel in ns2.
+ */
 static class UwOpticalChannelClass : public TclClass {
 public:
 	UwOpticalChannelClass() : TclClass("Module/UW/Optical/Channel") {}
