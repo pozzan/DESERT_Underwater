@@ -76,14 +76,11 @@ load libuwstaticrouting.so
 load libmphy.so
 load libmmac.so
 load libuwcsmaaloha.so
-load libuwaloha.so
 load libuwmll.so
 load libuwudp.so
 load libuwcbr.so
-load libuwmphypatch.so
 load libuwoptical_propagation.so
 load libuwoptical_channel.so
-load libuwmulti_stack_controller.so
 load libuwoptical_phy.so
 
 #############################
@@ -120,7 +117,7 @@ set opt(id)                [expr 1.0e-9]
 set opt(il)                [expr 1.0e-6]
 set opt(shuntRes)          [expr 1.49e9]
 set opt(sensitivity)       0.26
-set opt(LUTpath)           "dbs/optical_noise"
+set opt(LUTpath)           "dbs/optical_noise/LUT.txt"
 
 set rng [new RNG]
 
@@ -182,25 +179,23 @@ Module/UW/OPTICAL/PHY   set T_                          $opt(temperatura)
 Module/UW/OPTICAL/PHY   set Ar_                         $opt(rxArea)
 Module/UW/OPTICAL/PHY   set debug_                      0
 
-set data_mask [new MSpectralMask/Rect]
-$data_mask setFreq       $opt(freq)
-$data_mask setBandwidth  $opt(bw)
-
 Module/UW/OPTICAL/Propagation set Ar_       $opt(rxArea)
 Module/UW/OPTICAL/Propagation set At_       $opt(txArea)
 Module/UW/OPTICAL/Propagation set c_        $opt(c)
 Module/UW/OPTICAL/Propagation set theta_    $opt(theta)
 Module/UW/OPTICAL/Propagation set debug_    0
-# Module/UW/OPTICAL/Propagation set debug_ 1
 set propagation [new Module/UW/OPTICAL/Propagation]
 $propagation setOmnidirectional
 
 set channel [new Module/UW/Optical/Channel]
 
+
+set data_mask [new MSpectralMask/Rect]
+$data_mask setFreq       $opt(freq)
+$data_mask setBandwidth  $opt(bw)
+
 Module/UW/CSMA_ALOHA set listen_time_          [expr 1.0e-12]
 Module/UW/CSMA_ALOHA set wait_costant_         [expr 1.0e-12]
-# Module/UW/ALOHA set listen_time_          [expr 1.0e-12]
-# Module/UW/ALOHA set wait_costant_         [expr 1.0e-12]
 ################################
 # Procedure(s) to create nodes #
 ################################
@@ -218,7 +213,6 @@ proc createNode { id } {
     set ipr($id)  [new Module/UW/StaticRouting]
     set ipif($id) [new Module/UW/IP]
     set mll($id)  [new Module/UW/MLL] 
-    # set mac($id)  [new Module/UW/ALOHA] 
     set mac($id)  [new Module/UW/CSMA_ALOHA] 
     set phy($id)  [new Module/UW/OPTICAL/PHY]
 	
@@ -250,7 +244,7 @@ proc createNode { id } {
     $phy($id) setInterference $interf_data($id)
     $phy($id) setPropagation $propagation
     $phy($id) setSpectralMask $data_mask
-    $phy($id) setLUTFileName "$opt(LUTpath)/LUT.txt"
+    $phy($id) setLUTFileName "$opt(LUTpath)"
     $phy($id) setLUTSeparator " "
     $phy($id) useLUT
 

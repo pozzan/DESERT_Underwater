@@ -31,5 +31,4 @@
 # @version 1.0.0
 
 Module/UW/Optical/Channel set RefractiveIndex_ 1.33
-Module/UW/Optical/Channel set UseCartesianCoords_ 1.0
 
