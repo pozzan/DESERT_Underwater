@@ -1,5 +1,3 @@
-/* -*-	Mode:C++ -*- */
-
 /*
  * Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
@@ -34,7 +32,7 @@
  * @author Filippo Campagnaro, Federico Favaro, Federico Guerra
  * @version 1.0.0
  *
- * \brief Definition of UwOptical_propagation class.
+ * \brief Definition of UwOpticalMPropagation class.
  *
  */
 
@@ -45,11 +43,21 @@
 #include <mphy.h>
 #include <iostream>
 
-
+/**
+ * Class used to represents the UWOPTICAL_MPROPAGATION.
+ */
 class UwOpticalMPropagation : public MPropagation
 {  
 public:
+
+  /**
+   * Constructor of the UwOpticalMPropagation class
+   */
   UwOpticalMPropagation();
+
+  /**
+   * Destructor of the UwOpticalMPropagation class
+   */
   virtual ~UwOpticalMPropagation() { }
 
   /**
@@ -63,7 +71,7 @@ public:
   virtual int command(int, const char*const*);
   
   /**
-   * calculate the gain following the Lambert and Beer's law
+   * Calculate the gain following the Lambert and Beer's law
    *
    * @param Packet* Pointer to the packet that has to be received.
    * @return the gain due to the optical propagation.
@@ -75,12 +83,20 @@ public:
 
 protected:
 
+  /**
+   * Calculate the gain following the Lambert and Beer's law
+   *
+   * @param d Distance between transmitter and receiver.
+   * @param angle Longitude angle between transmitter and receiver.
+   * @return the gain due to the optical propagation.
+   * 
+   */
   virtual double getLambertBeerGain(double d, double angle);
-  double Ar_; // receiver area [m^2]
-  double At_; // transmitter size [m^2]
-  double c_; // beam light attenuation coefficient c = a + b [m^-1]
-  double theta_; // transmitting beam diverge angle [rad]
-  bool omnidirectional_; // flag to set whether the system is omnidirectional or not. By default it is false.
+  double Ar_; /**< Receiver area [m^2] */
+  double At_; /**< Transmitter size [m^2] */
+  double c_; /**< Beam light attenuation coefficient c = a + b [m^-1] */
+  double theta_; /**< Transmitting beam diverge angle [rad] */
+  bool omnidirectional_; /**< Flag to set whether the system is omnidirectional or not. By default it is false */
 };
 
 
