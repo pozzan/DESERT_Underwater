@@ -27,20 +27,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Author: Filippo Campagnaro
-
-#Module/UW/TDMA set debug_ 		0
-#Module/UW/TDMA set HDR_size_ 		0
-#Module/UW/TDMA set ACK_size_  		10
-#Module/UW/TDMA set max_tx_tries_		5
-#Module/UW/TDMA set wait_constant_		0.1
-#Module/UW/TDMA set uwTDMA_debug_		0
-#Module/UW/TDMA set max_payload_		125
-#Module/UW/TDMA set ACK_timeout_		5.0
-#Module/UW/TDMA set alpha_			0.8
-#Module/UW/TDMA set buffer_pkts_		-1
-#Module/UW/TDMA set backoff_tuner_   	1
-#Module/UW/TDMA set max_backoff_counter_   4
-#Module/UW/TDMA set MAC_addr_ 		0
+# version: 1.0.0
 
 Module/UW/TDMA set debug_ 		0
 Module/UW/TDMA set slot_status  0 
