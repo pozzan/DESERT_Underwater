@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,10 @@ class UwROVCtrModule;
 class UwROVCtrSendTimer : public UwSendTimer {
 	public:
 
+	/**
+   * Conscructor of UwSendTimer class 
+   * @param UwROVCtrModule *m pointer to an object of type UwROVCtrModule
+   */
 	UwROVCtrSendTimer(UwROVCtrModule *m) : UwSendTimer((UwCbrModule*)(m)){
 	};
 };
@@ -72,17 +76,6 @@ class UwROVCtrSendTimer : public UwSendTimer {
 */
 class UwROVCtrModule : public UwCbrModule {
 public:
-
-	Position posit;
-	float x_rov;
-	float y_rov;
-	float z_rov;
-	float newX;
-	float newY;
-	float newZ;
-	float speed;
-	int sn;
-	Packet* p;
 
 	/**
 	* Constructor of UwROVCtrModule class.
@@ -100,29 +93,53 @@ public:
 	virtual ~UwROVCtrModule();
 
 	/**
-	* Tcl command management
-	*/
+	* TCL command interpreter. It implements the following OTcl methods:
+	* 
+	* @param argc Number of arguments in <i>argv</i>.
+	* @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
+	* @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
+	* 
+	**/
 	virtual int command(int argc, const char*const* argv);
 
 	/**
-	* Performs the initialization of a control packet.
-	*/
+   * Initializes a control data packet passed as argument with the default values.
+   * 
+   * @param Packet* Pointer to a packet already allocated to fill with the right values.
+   */
 	virtual void initPkt(Packet* p) ;
 
 	/**
 	* Reset retransmissions
 	*/
-	inline void reset_retx() {p=NULL;sendTmr_.force_cancel();}
+	inline void reset_retx() {p=NULL; sendTmr_.force_cancel();}
 
 	/**
-	* Set the position of the ROV
+	* Set the position of the ROVCtr
+	*
+	* @param Position * p Pointer to the ROVCtr position
 	*/
 	virtual void setPosition(Position p);
 
 	/**
-	* Get the position of the ROV
+	* Returns the position of the ROVCtr
+	*
+	* @return the current ROVCtr position
 	*/
-	virtual Position getPosition();
+	inline Position getPosition() { return posit;}
+	
+	/**
+	* Returns the last ROV position monitored
+	*
+	* @return the last ROV position monitored
+	*/
+	inline Position getMonitoredROVPosition() { 
+		Position monitored_p_rov;
+		monitored_p_rov.setX(x_rov);
+		monitored_p_rov.setY(y_rov);
+		monitored_p_rov.setZ(z_rov);
+		return monitored_p_rov;
+	}
 
 	/**
 	* Performs the reception of packets from upper and lower layers.
@@ -147,7 +164,7 @@ public:
 	virtual void transmit();
 
 	/**
-	* Start .
+	* Start the controller.
 	*/
 	virtual void start();
 
@@ -164,6 +181,21 @@ public:
 	* @return The size of a <i>hdr_uwROV_monitoring</i> packet header.
 	*/
 	static inline int getROVCTRHeaderSize() { return sizeof(hdr_uwROV_ctr); }
+
+
+
+protected:
+
+	Position posit; /**< Controller position.*/
+	float x_rov; /**< X of the last ROV position monitored.*/
+	float y_rov; /**< Y of the last ROV position monitored.*/
+	float z_rov; /**< Z of the last ROV position monitored.*/
+	float newX; /**< X of the new position sent to the ROV.*/
+	float newY; /**< Y of the new position sent to the ROV.*/
+	float newZ; /**< Z of the new position sent to the ROV.*/
+	float speed; /**< Moving speed sent to the ROV.*/
+	int sn; /**Sequence number of the last control packet sent.*/
+	Packet* p;
 	
 };
 

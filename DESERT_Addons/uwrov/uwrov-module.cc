@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+
 /**
 * @file uwrov-module.cc
 * @author Filippo Campagnaro
@@ -33,8 +33,8 @@
 *
 * \brief Provides the <i>UWROV</i> class implementation.
 *
-* Provides the <i>UWROV</i> class implementation.
 */
+
 #include "uwrov-module.h"
 #include <iostream>
 #include <rng.h>
@@ -49,11 +49,23 @@ int hdr_uwROV_ctr::offset_; /**< Offset used to access in <i>hdr_uwROV</i> packe
 /**
 * Adds the module for UwROVModuleClass in ns2.
 */
+
+/**
+ * Class that represents the binding with the tcl configuration script 
+ */
 static class UwROVModuleClass : public TclClass {
 public:
 
+	/**
+   * Constructor of the class
+   */
 	UwROVModuleClass() : TclClass("Module/UW/ROV") {
 	}
+
+	/**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
 	TclObject* create(int, const char*const*) {
 		return (new UwROVModule());
 	}
@@ -74,10 +86,6 @@ UwROVModule::~UwROVModule() {}
 
 void UwROVModule::setPosition(SMPosition* p){
 	posit = p;
-}
-
-SMPosition* UwROVModule::getPosition(){
-	return posit;
 }
 
 int UwROVModule::command(int argc, const char*const* argv) {

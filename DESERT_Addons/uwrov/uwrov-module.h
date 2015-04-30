@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+
 /**
 * @file uwrov-module.h
 * @author Filippo Campagnaro
@@ -40,6 +40,7 @@
 * the current position and acknowledges the last control packet received.
 * Each control packet contains the next waypoint that has to be reach.
 */
+
 #ifndef UWROV_MODULE_H
 #define UWROV_MODULE_H
 #include <uwcbr-module.h>
@@ -70,11 +71,6 @@ public:
 */
 class UwROVModule : public UwCbrModule {
 public:
-	SMPosition* posit;
-	int last_sn_confirmed;
-	int ack;
-	int send_ack_immediately; //flag either to send acks immediately or not.
-	std::queue<Packet*> buffer;
 
 	/**
 	* Default Constructor of UwROVModule class.
@@ -83,6 +79,8 @@ public:
 
 	/**
 	* Constructor with position setting of UwROVModule class.
+	*
+	* @param SMPosition* p Pointer to the ROV position
 	*/
 	UwROVModule(SMPosition* p);
 
@@ -92,13 +90,20 @@ public:
 	virtual ~UwROVModule();
 
 	/**
-	* Tcl command management
-	*/
+   * TCL command interpreter. It implements the following OTcl methods:
+   * 
+   * @param argc Number of arguments in <i>argv</i>.
+   * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
+   * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
+   * 
+   **/
 	virtual int command(int argc, const char*const* argv);
 
 	/**
-	* Performs the initialization of a monitoring packet.
-	*/
+   * Initializes a monitoring data packet passed as argument with the default values.
+   * 
+   * @param Packet* Pointer to a packet already allocated to fill with the right values.
+   */
 	virtual void initPkt(Packet* p) ;
 
 	/**
@@ -117,14 +122,18 @@ public:
 	virtual void recv(Packet* p, Handler* h);
 
 	/**
-	* Set the position of the ROV
+	* Sets the position of the ROV
+	*
+	* @param SMPosition * p Pointer to the ROV position
 	*/
 	virtual void setPosition(SMPosition* p);
 
 	/**
-	* Get the position of the ROV
+	* Returns the position of the ROV
+	*
+	* @return the current ROV position
 	*/
-	virtual SMPosition* getPosition();
+  inline SMPosition* getPosition() { return posit; }
 
 	/**
 	* Returns the size in byte of a <i>hdr_uwROV_monitoring</i> packet header.
@@ -139,6 +148,14 @@ public:
 	* @return The size of a <i>hdr_uwROV_ctr</i> packet header.
 	*/
 	static inline int getROVCTRHeaderSize() { return sizeof(hdr_uwROV_ctr); }
+
+protected:
+
+	SMPosition* posit; /**< ROV position.*/
+	int last_sn_confirmed;/**< Sequence number of the last command Packete received.*/
+	int ack; /**< If not zero, contains the ACK to the last command Packete received.*/
+	int send_ack_immediately; /**< Flag either to send acks immediately or not.*/
+	std::queue<Packet*> buffer; /**< Packets buffer.*/
 	
 };
 

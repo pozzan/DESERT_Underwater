@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+
 /**
 * @file uwrovctr-module.cc
 * @author Filippo Campagnaro
@@ -35,6 +35,7 @@
 *
 * Provides the <i>UWROVCtr</i> class implementation.
 */
+
 #include "uwrovctr-module.h"
 #include <iostream>
 #include <rng.h>
@@ -44,10 +45,23 @@ extern packet_t PT_UWCBR;
 /**
 * Adds the module for UwROVModuleClass in ns2.
 */
+
+/**
+* Class that represents the binding with the tcl configuration script 
+*/
 static class UwROVCtrModuleClass : public TclClass {
 public:
+
+	/**
+   * Constructor of the class
+   */
 	UwROVCtrModuleClass() : TclClass("Module/UW/ROV/CTR") {
 	}
+
+	/**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
 	TclObject* create(int, const char*const*) {
 		return (new UwROVCtrModule());
 	}
@@ -133,10 +147,6 @@ void UwROVCtrModule::start() {}
 
 void UwROVCtrModule::setPosition(Position p){
 	posit = p;
-}
-
-Position UwROVCtrModule::getPosition(){
-	return posit;
 }
 
 void UwROVCtrModule::initPkt(Packet* p) {
