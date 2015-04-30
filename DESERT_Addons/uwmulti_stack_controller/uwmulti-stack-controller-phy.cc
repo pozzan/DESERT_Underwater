@@ -37,9 +37,19 @@
 
 #include "uwmulti-stack-controller-phy.h"
 
+/**
+ * Class that represents the binding with the tcl configuration script 
+ */
 static class UwMultiStackControllerPhyClass : public TclClass {
 public:
+  /**
+   * Constructor of the class
+   */
   UwMultiStackControllerPhyClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY") {}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
   TclObject* create(int, const char*const*) {
       return (new UwMultiStackControllerPhy);
   }

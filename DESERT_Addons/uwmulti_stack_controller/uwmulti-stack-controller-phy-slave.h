@@ -41,9 +41,13 @@
 #include "uwmulti-stack-controller-phy.h"
 #include <mac.h>
 
+/**
+ * Class used to represents the UwMultiStackControllerPhySlave layer of a node.
+ */
 class UwMultiStackControllerPhySlave : public UwMultiStackControllerPhy {
 
 public:
+  
   /**
    * Constructor of UwMultiPhy class.
   **/ 

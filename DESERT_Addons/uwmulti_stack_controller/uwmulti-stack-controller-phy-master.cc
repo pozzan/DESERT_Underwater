@@ -39,18 +39,27 @@
 
 #include <mphy_pktheader.h>
 
+/**
+ * Class that represents the binding with the tcl configuration script 
+ */
 static class UwMultiStackControllerPhyMasterClass : public TclClass 
 {
   public:
+  /**
+   * Constructor of the class
+   */
   UwMultiStackControllerPhyMasterClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER") {}
+
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
   TclObject* create(int, const char*const*) 
   {
     return (new UwMultiStackControllerPhyMaster);
   }
 } class_uwmulti_stack_controller_phy_master;
 
-/*const double UwMultiStackControllerPhyMaster::min_value = -numeric_limits<double>::max();//-10*pow(10.0,100);
-const double UwMultiStackControllerPhyMaster::max_value = numeric_limits<double>::max();//10*pow(10.0,100);*/
 
 UwMultiStackControllerPhyMaster::UwMultiStackControllerPhyMaster() 
 : 
@@ -92,7 +101,6 @@ void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
 
 int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p) 
 {
-  //TODO: define if doing it directly for doubble physical or in a more general way.
   assert(switch_mode_ == UW_AUTOMATIC_SWITCH);
 
   int mac_addr = -1;
