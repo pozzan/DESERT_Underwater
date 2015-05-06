@@ -68,7 +68,8 @@ public:
 } class_module_uwROV_ctr;
 
 UwROVCtrModule::UwROVCtrModule(Position p) : UwCbrModule(), sn(0) {
-	posit=p;speed=1;
+	posit=p;
+	speed=1;
 }
 
 UwROVCtrModule::UwROVCtrModule() : UwCbrModule(), sn(0) {
@@ -166,14 +167,15 @@ void UwROVCtrModule::initPkt(Packet* p) {
 		uwROVh->z() = newZ;
 		uwROVh->speed() = speed;
 		uwROVh->sn() = sn;
-		if (debug_ > 10){ 
-			printf("RITRASMETTO \n");
+		if (debug_) { 
+			std::cout << NOW << " UwROVCtrModule::initPkt(Packet *p)  Retransmitting"<< std::endl;
 		}
 	}
 	UwCbrModule::initPkt(p);
-	if (debug_ > 10){
+	if (debug_) {
 		hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
-		printf("CTR set new ROV position: X = %f, Y = %f, Z = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
+		std::cout << NOW << " UwROVCtrModule::initPkt(Packet *p)  setting new ROV way-point: X = "<< uwROVh->x() <<", Y = " 
+			<< uwROVh->y() << ", Z = " << uwROVh->z()<< std::endl;
 	}
 }
 
@@ -186,15 +188,17 @@ void UwROVCtrModule::recv(Packet* p) {
 	x_rov = monitoring->x();
 	y_rov = monitoring->y();
 	z_rov = monitoring->z();
-	if(monitoring->ack()>0){
+
+	if(monitoring->ack()>0) {
 		sendTmr_.force_cancel();
 		this->p = NULL;
-		if (debug_ > 10)
-			printf("Ack ok \n");
+		if (debug_)
+			std::cout << NOW << " UwROVCtrModule::recv(Packet *p) control ACK received"<< std::endl;
 	}
-	if((monitoring->ack())<0 && debug_ > 10)
-		printf("Errore \n");
+	else if((monitoring->ack())<0 && debug_)
+		std::cout << NOW << " UwROVCtrModule::recv(Packet *p) control error received"<< std::endl;
 	if (debug_ > 10)
-		printf("ROV CTR monitoring position: X = %f, Y = %f, Z = %f\n", x_rov,y_rov,z_rov);
+		std::cout << NOW << " UwROVCtrModule::recv(Packet *p) ROV monitoring position: X = " << x_rov << ", Y = " 
+			<< y_rov << ", Z = " << z_rov << std::endl;
 	UwCbrModule::recv(p);
 }

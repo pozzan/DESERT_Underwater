@@ -122,18 +122,12 @@ int UwROVModule::command(int argc, const char*const* argv) {
 	}
 	else if(argc == 5){
 		if (strcasecmp(argv[1], "setdest") == 0) {
-			if (debug_ > 10)
-				cerr << NOW << "SMPosition::command(setdest, "<< argv[2] << ", " 
-					<< argv[3] << ", "<< argv[4] << ")"<< endl;
 			posit->setdest(atof(argv[2]),atof(argv[3]),atof(argv[4]));
 			return TCL_OK;
 		}
 	}
 	else if(argc == 6){
 	if (strcasecmp(argv[1], "setdest") == 0) {
-		if (debug_ > 10)
-		cerr << NOW << "SMPosition::command(setdest, "<< argv[2] << ", "<< argv[3] 
-			<< ", "<< argv[4] << ", "<< argv[5] << ")"<< endl;
 		posit->setdest(atof(argv[2]),atof(argv[3]),atof(argv[4]),atof(argv[5]));
 		return TCL_OK;
 		}
@@ -148,9 +142,9 @@ void UwROVModule::initPkt(Packet* p) {
 	uwROVh->z() = posit->getZ();
 	uwROVh->ack() = ack;
 	ack=0;
-	if (debug_ > 10)
-		printf("ROV send realtime position: X = %f, Y = %f, Z = %f\n", uwROVh->x(), 
-			uwROVh->y(), uwROVh->z());
+	if (debug_)
+		std::cout << NOW << " UwROVModule::initPkt(Packet *p) ROV current position: X = "
+			<< uwROVh->x() << ", Y = " << uwROVh->y() << ", Z = " << uwROVh->z()<< std::endl;
 	UwCbrModule::initPkt(p);
 }
 
@@ -163,9 +157,9 @@ void UwROVModule::recv(Packet* p) {
 	posit->setdest(uwROVh->x(),uwROVh->y(),uwROVh->z(),uwROVh->speed());
 	last_sn_confirmed = uwROVh->sn();
 	ack=last_sn_confirmed+1;
-	if (debug_ > 10)
-		printf("ROV get new position: X = %f, Y = %f, Z = %f\n", uwROVh->x(), uwROVh->y(), 
-			uwROVh->z());
+	if (debug_)
+		std::cout << NOW << " UwROVModule::recv(Packet *p) ROV received new way point: X = "
+			<< uwROVh->x() << ", Y = " << uwROVh->y() << ", Z = " << uwROVh->z()<< std::endl;
 	UwCbrModule::recv(p);
 	if (send_ack_immediately > 0)
 		UwCbrModule::sendPkt();

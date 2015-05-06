@@ -36,8 +36,6 @@
 #
 # Author: Filippo Campagnaro <campagn1@dei.unipd.it>
 #
-#
-# Author: Federico Favaro <favarofe@dei.unipd.it>
 # Version: 1.0.0
 #
 # NOTE: tcl sample tested on Ubuntu 11.10, 64 bits OS
