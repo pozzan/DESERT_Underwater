@@ -176,8 +176,10 @@ double UwHermesPhy::getDistance(Packet* _p){
 
 double UwHermesPhy::matchPS(double distance, int size) { // success probability of Hermes
     if (debug_)
-        std::cout << NOW << "  UnderwaterPhysical(" << mac_addr << ")::matchPS(double distance, int size)" 
-            << "distance = " << distance <<  " packet size = " << size <<;
+/*        std::cout << NOW << "  UnderwaterPhysical(" << mac_addr << ")::matchPS(double distance, int size)" 
+            << "distance = " << distance <<  " packet size = " << size <<;*/
+                std::cout << NOW << "  UnderwaterPhysical()::matchPS(double distance, int size)" 
+            << "distance = " << distance <<  " packet size = " << size << std::endl;
     int n = sizeof(L)/sizeof(double);
     if ( distance <= L[0] )
         return chunckInterpolator(P_SUCC[ 0 ], size );
@@ -208,7 +210,9 @@ double UwHermesPhy::linearInterpolator( double x, double x1, double y1,
     double m = (y1-y2)/(x1-x2);
     double q = y1 - m * x1;
     if (debug_)
-        std::cout << NOW << "  UnderwaterPhysical(" << mac_addr << ")::linearInterpolator( double x, double x1, double y1, double x2, double y2 )" 
+/*        std::cout << NOW << "  UnderwaterPhysical(" << mac_addr << ")::linearInterpolator( double x, double x1, double y1, double x2, double y2 )" 
+            << "m = " << m << " q= " << q << std::endl;*/
+        std::cout << NOW << "  UnderwaterPhysical::linearInterpolator( double x, double x1, double y1, double x2, double y2 )" 
             << "m = " << m << " q= " << q << std::endl;
     return m * x + q;
 }
@@ -217,7 +221,9 @@ double UwHermesPhy::chunckInterpolator( double p, int size ) {
     int n_chunck_coded_frame=ceil(float(FRAME_BIT)/11); //BCH(15,11,1)
     int n_chunck_coded_packet=ceil(float(size)/11);
     if (debug_)
-        std::cout <<  NOW << "  UnderwaterPhysical(" << mac_addr << ")::chunckInterpolator( double p, int size ) n_chunck_coded_frame = " 
+/*        std::cout <<  NOW << "  UnderwaterPhysical(" << mac_addr << ")::chunckInterpolator( double p, int size ) n_chunck_coded_frame = " 
+            << n_chunck_coded_frame <<  " n_chunck_coded_packet = " << n_chunck_coded_packet << std::endl;*/
+        std::cout <<  NOW << "  UnderwaterPhysical::chunckInterpolator( double p, int size ) n_chunck_coded_frame = " 
             << n_chunck_coded_frame <<  " n_chunck_coded_packet = " << n_chunck_coded_packet << std::endl;
     return pow(p,(float(n_chunck_coded_packet)/n_chunck_coded_frame));
 }
