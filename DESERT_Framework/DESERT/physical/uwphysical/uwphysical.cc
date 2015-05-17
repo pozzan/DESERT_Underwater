@@ -325,6 +325,7 @@ void UnderwaterPhysical::endRx(Packet* p) {
                         for (PowerChunkList::const_iterator itInterf = power_chunk_list.begin(); itInterf != power_chunk_list.end(); itInterf++) {
                             if (itInterf->first > (ph->Pn / 2)) {
                                 int nbits2 = itInterf->second * BitRate_;
+                                std:cout << "Interference CHUNK " << itInterf->first << endl;
                                 per_ni = getPER(ph->Pr / (ph->Pn + itInterf->first), nbits2, p);
                                 x = RNG::defaultrng()->uniform_double();
                                 error_ni = x <= per_ni;
@@ -336,6 +337,7 @@ void UnderwaterPhysical::endRx(Packet* p) {
                     } else if (Interference_Model == "MEANPOWER") {
                         double interference = interference_->getInterferencePower(p);
                         per_ni = getPER(ph->Pr / (ph->Pn + interference), nbits, p);
+                        std::cout << "Interference " << interference << endl;
                     } else {
                         std::cerr << "Please choose the right interference model to use: CHUNK or MEANPOWER" << std::endl;
                         exit(1);

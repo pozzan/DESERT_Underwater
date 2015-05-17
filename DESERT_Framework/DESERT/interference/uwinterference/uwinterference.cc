@@ -257,74 +257,79 @@ double uwinterference::getInterferencePower(Packet* p)
 
 double uwinterference::getInterferencePower(double power, double starttime, double duration)
 {
+	Function::reverse_iterator rit;  
+  	double integral = 0;
+  	double lasttime = NOW;
 
-  Function::reverse_iterator rit; 
+  	assert(starttime<= NOW);
+  	assert(duration > 0);
+  	assert(maxinterval_ > duration);
+
+  	for (rit = pp.rbegin(); rit != pp.rend(); ++rit ) 
+  	{
+    	if (starttime < rit->time)
+    	{
+	      	integral += rit->value * (lasttime - rit->time);
+	      	Function::reverse_iterator rit2 = rit;
+			rit2++;
+      		lasttime = rit2->time;	  
+    	} else {
+      		integral += rit->value * (lasttime - starttime);
+      		break;
+    	}
+  	}
   
-  double integral = 0;
-  double lasttime = NOW;
+  	//assegnazioni nuove
+  
+  	initial_interference_time = lasttime;
+  	start_rx_time = starttime;
+  	end_rx_time = starttime + duration;
+  
+  	//cout << "Start Rx Time of packet " << starttime << endl;
+  	//cout << "Initial Interference Time " << initial_interference_time << endl;
+  
+/*  	if (starttime > initial_interference_time)
+  	{
+    	cout << "Interferenza prima dell'inizio sync pacchetto!!" << endl;
+  	}*/
 
-  assert(starttime<= NOW);
-  assert(duration > 0);
-  assert(maxinterval_ > duration);
+    assert(starttime <= initial_interference_time);
 
-  for (rit = pp.rbegin(); rit != pp.rend(); ++rit ) 
-  {
-    if (starttime < rit->time)
-    {
-      integral += rit->value * (lasttime - rit->time);
-      Function::reverse_iterator rit2 = rit;
-      rit2++;
-      lasttime = rit2->time;	  
-    } else {
-      integral += rit->value * (lasttime - starttime);
-      break;
+    cout << "Integral " << integral << endl;
+    cout << "Duration " << duration << endl;
+    cout << "power " << power << endl;
+
+  	double interference = (integral/duration) - power;
+
+  	// Check for cancellation errors
+  	// which can arise when interference is subtracted
+  	if (interference < 0)
+  	{
+  		//cout << "Interference negativa " << endl;
+    	if (interference < POWER_PRECISION_THRESHOLD)
+    	{
+	   		// should be a cancellation error, but it exceeds the
+	   		// precision threshold, so we print a warning 
+	   		if (debug_)
+      			cerr << "MInterferenceMIV::getInterferencePower() WARNING:" 
+		    		<< " interference=" << interference 
+		    		<< " POWER_PRECISION_THRESHOLD=" <<  POWER_PRECISION_THRESHOLD
+		 			<< endl;
+		}
+      	interference = 0;
     }
-  }
-  
-  //assegnazioni nuove
-  
-  initial_interference_time = lasttime;
-  start_rx_time = starttime;
-  end_rx_time = starttime + duration;
-  
-  //cout << "Start Rx Time of packet " << starttime << endl;
-  //cout << "Initial Interference Time " << initial_interference_time << endl;
-  
-  if (starttime > initial_interference_time)
-  {
-    cout << "Interferenza prima dell'inizio sync pacchetto!!" << endl;
-  }
-
-  double interference = (integral/duration) - power;
-
-  // Check for cancellation errors
-  // which can arise when interference is subtracted
-  if (interference < 0)
-  {
-    if (interference < POWER_PRECISION_THRESHOLD)
-    {
-	   // should be a cancellation error, but it exceeds the
-	   // precision threshold, so we print a warning 
-	   if (debug_)
-      cerr << "MInterferenceMIV::getInterferencePower() WARNING:" 
-		    << " interference=" << interference 
-		    << " POWER_PRECISION_THRESHOLD=" <<  POWER_PRECISION_THRESHOLD
-		 << endl;
-	}
-      interference = 0;
-    }
 
 
-  if (debug_) {
-    dump("Interference::getInterferencePower");
-    std::cout << "transmission from " << starttime 
-	      << " to " << starttime + duration 
-	      << " power " << power
-	      << " gets interference " << interference
-	      << std::endl;
-  }
+  	if (debug_) {
+    	dump("Interference::getInterferencePower");
+    	std::cout << "transmission from " << starttime 
+	    	<< " to " << starttime + duration 
+	      	<< " power " << power
+	      	<< " gets interference " << interference
+	      	<< std::endl;
+  	}
 
-  return interference;
+  	return interference;
 }
 
 double uwinterference::getCurrentTotalPower()
