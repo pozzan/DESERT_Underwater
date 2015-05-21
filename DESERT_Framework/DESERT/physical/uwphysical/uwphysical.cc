@@ -337,7 +337,7 @@ void UnderwaterPhysical::endRx(Packet* p) {
                     } else if (Interference_Model == "MEANPOWER") {
                         double interference = interference_->getInterferencePower(p);
                         per_ni = getPER(ph->Pr / (ph->Pn + interference), nbits, p);
-                        std::cout << "Interference " << interference << endl;
+                        error_ni = x <= per_ni;
                     } else {
                         std::cerr << "Please choose the right interference model to use: CHUNK or MEANPOWER" << std::endl;
                         exit(1);

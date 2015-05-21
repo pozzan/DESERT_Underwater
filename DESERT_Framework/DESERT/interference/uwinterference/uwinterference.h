@@ -135,20 +135,6 @@ class uwinterference : public MInterferenceMIV
          */
         virtual ~uwinterference();
         /**
-         * Returns the power of interference that a certain packet experienced
-         * @param p The Packet for which the calculation of the interference experienced is needed
-         * @return Amount of interference power
-         */
-        virtual double getInterferencePower(Packet* p);
-        /**
-         * Returns the power of interference that a certain packet experienced
-         * @param power Reception power of the desired packet
-         * @param starttime timestamp of the begin of the reception of the desired packet
-         * @param endtime timestamp of the end of the reception of the desired packet
-         * @return Amount of interference power
-         */
-        virtual double getInterferencePower(double power, double starttime, double endtime);
-        /**
          * Add a packet to the interference calculation
          * @param p Pointer to the interferer packet
          */
