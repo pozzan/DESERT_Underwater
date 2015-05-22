@@ -31,7 +31,7 @@ AM_CXXFLAGS = -Wall -ggdb3
 
 lib_LTLIBRARIES = libuwrov.la
 
-libuwrov_la_SOURCES = uwrov-module.cc uwrov-tracer.cc uwrov-module.h uwrov-packet.h uwrovctr-module.cc uwrovctr-tracer.cc uwrovctr-module.h smposition.h smposition.cc initlib.cc
+libuwrov_la_SOURCES = uwrov-module.cc uwrov-tracer.cc uwrov-module.h uwrov-packet.h uwrovctr-module.cc uwrovctr-tracer.cc uwrovctr-module.h initlib.cc
 
 libuwrov_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
 libuwrov_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@

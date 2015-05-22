@@ -45,7 +45,7 @@
 #define UWROV_MODULE_H
 #include <uwcbr-module.h>
 #include <uwrov-packet.h>
-#include "smposition.h"
+#include "uwsmposition.h"
 #include <queue>
 #define UWROV_DROP_REASON_UNKNOWN_TYPE "UKT" /**< Reason for a drop in a <i>UWROV</i> module. */
 #define UWROV_DROP_REASON_OUT_OF_SEQUENCE "OOS" /**< Reason for a drop in a <i>UWROV</i> module. */
@@ -80,9 +80,9 @@ public:
 	/**
 	* Constructor with position setting of UwROVModule class.
 	*
-	* @param SMPosition* p Pointer to the ROV position
+	* @param UWSMPosition* p Pointer to the ROV position
 	*/
-	UwROVModule(SMPosition* p);
+	UwROVModule(UWSMPosition* p);
 
 	/**
 	* Destructor of UwROVModule class.
@@ -124,16 +124,16 @@ public:
 	/**
 	* Sets the position of the ROV
 	*
-	* @param SMPosition * p Pointer to the ROV position
+	* @param UWSMPosition * p Pointer to the ROV position
 	*/
-	virtual void setPosition(SMPosition* p);
+	virtual void setPosition(UWSMPosition* p);
 
 	/**
 	* Returns the position of the ROV
 	*
 	* @return the current ROV position
 	*/
-  inline SMPosition* getPosition() { return posit; }
+  inline UWSMPosition* getPosition() { return posit; }
 
 	/**
 	* Returns the size in byte of a <i>hdr_uwROV_monitoring</i> packet header.
@@ -151,7 +151,7 @@ public:
 
 protected:
 
-	SMPosition* posit; /**< ROV position.*/
+	UWSMPosition* posit; /**< ROV position.*/
 	int last_sn_confirmed;/**< Sequence number of the last command Packete received.*/
 	int ack; /**< If not zero, contains the ACK to the last command Packete received.*/
 	int send_ack_immediately; /**< Flag either to send acks immediately or not.*/

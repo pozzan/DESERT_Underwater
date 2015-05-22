@@ -72,19 +72,19 @@ public:
 } class_module_uwROV;
 
 UwROVModule::UwROVModule() : UwCbrModule(), last_sn_confirmed(0), ack(0), send_ack_immediately(0){
-	SMPosition p = SMPosition();
+	UWSMPosition p = UWSMPosition();
 	posit=&p;
     bind("send_ack_immediately", (int*) &send_ack_immediately);
 }
 
-UwROVModule::UwROVModule(SMPosition* p) : UwCbrModule(), last_sn_confirmed(0), ack(0), send_ack_immediately(0){
+UwROVModule::UwROVModule(UWSMPosition* p) : UwCbrModule(), last_sn_confirmed(0), ack(0), send_ack_immediately(0){
 	posit = p;
     bind("send_ack_immediately", (int*) &send_ack_immediately);
 }
 
 UwROVModule::~UwROVModule() {}
 
-void UwROVModule::setPosition(SMPosition* p){
+void UwROVModule::setPosition(UWSMPosition* p){
 	posit = p;
 }
 
@@ -114,7 +114,7 @@ int UwROVModule::command(int argc, const char*const* argv) {
 	}
 	else if(argc == 3){
 		if (strcasecmp(argv[1], "setPosition") == 0) {
-			SMPosition* p = dynamic_cast<SMPosition*> (tcl.lookup(argv[2]));
+			UWSMPosition* p = dynamic_cast<UWSMPosition*> (tcl.lookup(argv[2]));
 			posit=p;
 			tcl.resultf("%s", "position Setted\n");
 			return TCL_OK;

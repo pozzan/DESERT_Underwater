@@ -71,6 +71,6 @@ Module/UW/ROV/CTR instproc init {args} {
 #    $self settag "UW/TDMA"
 #}
 
-Position/SM set debug_ 0
+Position/UWSM set debug_ 0
 
 PlugIn/PositionDB set debug_ 0
