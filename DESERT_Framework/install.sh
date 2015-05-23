@@ -313,6 +313,8 @@ if [ $? -ne 0 ]; then
     exit
 fi
 
+delete_recursive_soft_link
+
 info_L0 "after_building"
 after_building
 if [ $? -ne 0 ]; then

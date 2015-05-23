@@ -931,3 +931,11 @@ debug__print_parameters() {
     return 0
 }
 
+delete_recursive_soft_link() {
+    cd ${DEST_FOLDER}/${DESERT_DIR}-${DESERT_VERSION}-ADDONS-build
+    rm -rf DESERT_ADDON
+    cd ${DEST_FOLDER}/${DESERT_DIR}-${DESERT_VERSION}-ADDONS-src
+    rm -rf DESERT_Addons
+    return 0
+}
+
