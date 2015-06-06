@@ -30,7 +30,7 @@ AM_CFLAGS = -Wall -ggdb3
 
 lib_LTLIBRARIES = libuwrandom.la
 
-libuwrandom_la_SOURCES = randomlib.h\
-    							randomlib.c
+libuwrandom_la_SOURCES = uwrandomlib.h\
+    					uwrandomlib.c
 
 
