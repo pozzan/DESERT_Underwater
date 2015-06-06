@@ -37,7 +37,7 @@
  */
 
 
-#include "randomlib.h"
+#include "uwrandomlib.h"
 
 void SetSeed(long int s,int type){
   int j;
