@@ -39,7 +39,16 @@
 
 #include "uwrandomlib.h"
 
-void SetSeed(long int s,int type){
+Uwrandomlib::Uwrandomlib()
+ {
+  for(int i = 0; i < GENER; i ++)
+  {
+    s1[i] = 1;
+    s2[i] = 123456789L;
+    iy[i] = 0;
+  }
+}
+void Uwrandomlib::SetSeed(long int s,int type){
   int j;
   long int k;
 
@@ -55,7 +64,7 @@ void SetSeed(long int s,int type){
   iy[type]=iv[type][0];
 }
 
-double Rand01(int type){
+double Uwrandomlib::Rand01(int type){
   int j;
   long int k;
   double t;
@@ -79,7 +88,7 @@ double Rand01(int type){
 }
 
 // Generate gaussian distributed numbers with mean m and stdev sigma
-double Gauss(double m,double sigma,int type){
+double Uwrandomlib::Gauss(double m,double sigma,int type){
   static int cache=0;
   static float v1;
   float v2,w,y;
@@ -105,7 +114,7 @@ double Gauss(double m,double sigma,int type){
 // FX(x)=Prob(X<=x)
 // FX(x)=1-((beta+x)/beta)^-alpha	x>=0
 // FX(x)=0				otherwise
-double Pareto(double alpha, double beta, int type)
+double Uwrandomlib::Pareto(double alpha, double beta, int type)
 {	
 	return( beta*(pow( (1.-Rand01(type)),alpha)-1.) );
 }

@@ -55,18 +55,28 @@
 #define EPS 1.0e-10
 #define RNMX (1.0-EPS)
 
-static long int s1[GENER]={1,1,1};
-static long int s2[GENER]={123456789L,123456789L,123456789L};
-static long int iy[GENER]={0,0,0};
-static long int iv[GENER][NTAB];
+
+class Uwrandomlib
+{
+	public:
+
+		Uwrandomlib();
+
+		double Gauss(double m,double sigma,int type);
+
+		double Pareto(double alpha, double beta, int type);
+
+	private:
+
+		long int s1[GENER];
+		long int s2[GENER];
+		long int iy[GENER];
+		long int iv[GENER][NTAB];		
+
+		void SetSeed(long int s,int type);
+
+		double Rand01(int type);
 
 
 
-
-void SetSeed(long int s,int type);
-
-double Rand01(int type);
-
-double Gauss(double m,double sigma,int type);
-
-double Pareto(double alpha, double beta, int type);
+};
