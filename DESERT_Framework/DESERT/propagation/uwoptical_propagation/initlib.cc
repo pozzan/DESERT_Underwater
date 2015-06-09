@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
  * @author Filippo Campagnaro
  * @version 1.0.0
  * 
- * \brief file to initialize the libuwphysical.so library
+ * \brief file to initialize the libuwoptical_propagation.so library
  */
 
 #include <tclcl.h>
