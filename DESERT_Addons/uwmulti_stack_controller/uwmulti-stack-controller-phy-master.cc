@@ -240,6 +240,12 @@ int UwMultiStackControllerPhyMaster::recvSyncClMsg(ClMessage* m) {
     if (ch->ptype() == PT_MULTI_ST_SIGNALING)
       return 0;
   }
+  else if (m->type() == CLMSG_PHY2MAC_STARTRX)
+  {
+    hdr_cmn* ch = hdr_cmn::access( static_cast<ClMsgPhy2MacStartRx *>(m)->pkt);
+    if (ch->ptype() == PT_MULTI_ST_SIGNALING)
+      return 0;
+  }
   return UwMultiStackControllerPhy::recvSyncClMsg(m);
 }
 

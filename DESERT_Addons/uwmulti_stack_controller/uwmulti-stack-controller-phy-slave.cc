@@ -128,7 +128,13 @@ void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc)
 }
 
 int UwMultiStackControllerPhySlave::recvSyncClMsg(ClMessage* m) {
-  if (m->type() == CLMSG_PHY2MAC_STARTRX)
+  if (m->type() == CLMSG_PHY2MAC_ENDTX)
+  {
+    hdr_cmn* ch = hdr_cmn::access( static_cast<ClMsgPhy2MacEndTx *>(m)->pkt);
+    if (ch->ptype() == PT_MULTI_ST_SIGNALING)
+      return 0;
+  }
+  else if (m->type() == CLMSG_PHY2MAC_STARTRX)
   {
     hdr_cmn* ch = hdr_cmn::access( static_cast<ClMsgPhy2MacStartRx *>(m)->pkt);
     if (ch->ptype() == PT_MULTI_ST_SIGNALING)
