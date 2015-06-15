@@ -83,6 +83,7 @@ protected:
   // Variables
   int slave_lower_layer_;
   int signaling_recv_; /** Number of signaling packets received*/
+  int signaling_active_; /**If true slave is in signaling mode, otherwise not */
   
   /** 
    * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.

@@ -38,4 +38,5 @@ Module/UW/MULTI_STACK_CONTROLLER set signaling_pktSize_  5
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set alpha_ 0.5
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_active_ 0
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_period_ 10
+Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE set signaling_active_ 0
 

@@ -58,9 +58,10 @@ public:
 UwMultiStackControllerPhySlave::UwMultiStackControllerPhySlave() 
 : 
   UwMultiStackControllerPhy(),
-  signaling_recv_(0)
+  signaling_recv_(0),
+  signaling_active_(0)
 { 
-  
+  bind("signaling_active_", &signaling_active_);
 }
 
 int UwMultiStackControllerPhySlave::command(int argc, const char*const* argv) 
@@ -68,7 +69,17 @@ int UwMultiStackControllerPhySlave::command(int argc, const char*const* argv)
   Tcl& tcl = Tcl::instance();
   if (argc == 2)
   {
-    if(strcasecmp(argv[1], "getSignalsRecv") == 0)
+    if(strcasecmp(argv[1], "signalingON") == 0)
+    {
+      signaling_active_ = 1;
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "signalingOFF") == 0)
+    {
+      signaling_active_ = 0;
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "getSignalsRecv") == 0)
     {
       tcl.resultf("%d", signaling_recv_);
       return TCL_OK;
@@ -92,7 +103,21 @@ void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc)
   hdr_cmn* ch = hdr_cmn::access(p);
   if (ch->ptype() == PT_MULTI_ST_SIGNALING) {
     signaling_recv_++;
-    Packet::free(p);
+    //Filippo: signaling con risposta
+    if (signaling_active_) {
+      hdr_mac* mach = HDR_MAC(p);
+      int my_mac_addr = -1;
+      ClMsgPhy2MacAddr msg;
+      sendSyncClMsg(&msg);
+      my_mac_addr = msg.getAddr(); 
+
+      mach->macDA() = mach->macSA();
+      mach->macSA() = my_mac_addr;
+      sendDown(lower_id_active_, p, min_delay_);
+    }
+    else
+      Packet::free(p);
+    
     if (debug_)
     {
       std::cout << NOW << " ControllerPhySlave::recv(Packet *p, int idSrc) signaling "<< ch->ptype() << " " << PT_MULTI_ST_SIGNALING<< std::endl;

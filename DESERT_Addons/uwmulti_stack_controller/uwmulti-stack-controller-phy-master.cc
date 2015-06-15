@@ -130,7 +130,11 @@ void UwMultiStackControllerPhyMaster::recv(Packet *p, int idSrc)
   hdr_cmn *ch = HDR_CMN(p);
   if (ch->direction() == hdr_cmn::UP)
     updateMasterStatistics(p,idSrc);
-  UwMultiStackControllerPhy::recv(p, idSrc);
+  // Filippo: signaling con risposta
+  if (ch->ptype() == PT_MULTI_ST_SIGNALING)
+    Packet::free(p);
+  else
+    UwMultiStackControllerPhy::recv(p, idSrc);
 }
 
 int UwMultiStackControllerPhyMaster::getBestLayer(Packet *p) 
@@ -205,6 +209,12 @@ int UwMultiStackControllerPhyMaster::checkBestLayer()
 void UwMultiStackControllerPhyMaster::signalsBestPhy()
 {
   assert(signaling_active_);
+  //Retreive my mac to set macSA
+  int my_mac_addr = -1;
+  ClMsgPhy2MacAddr msg;
+  sendSyncClMsg(&msg);
+  my_mac_addr = msg.getAddr(); 
+
   Packet *p = Packet::alloc();
   hdr_cmn* ch = hdr_cmn::access(p);
   ch->ptype() = PT_MULTI_ST_SIGNALING;
@@ -212,6 +222,7 @@ void UwMultiStackControllerPhyMaster::signalsBestPhy()
   hdr_mac* mach = HDR_MAC(p);
   //mach->macDA() = MAC_BROADCAST;
   mach->macDA() = power_stat_node_;
+  mach->macSA() = my_mac_addr;
   if (debug_)
   {
     std::cout << NOW << " ControllerPhyMaster::signalsBestPhy()" << std::endl;
