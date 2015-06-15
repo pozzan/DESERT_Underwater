@@ -41,9 +41,13 @@
 #include "uwmulti-stack-controller-phy.h"
 #include <mac.h>
 
+/**
+ * Class used to represents the UwMultiStackControllerPhySlave layer of a node.
+ */
 class UwMultiStackControllerPhySlave : public UwMultiStackControllerPhy {
 
 public:
+  
   /**
    * Constructor of UwMultiPhy class.
   **/ 
@@ -78,6 +82,7 @@ public:
 protected:
   // Variables
   int slave_lower_layer_;
+  int signaling_recv_; /** Number of signaling packets received*/
   
   /** 
    * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.
@@ -97,6 +102,20 @@ protected:
    * @param idSrc unique id of the module that has sent the packet
   **/
   virtual void updateSlave(Packet *p, int idSrc);
+
+    /**
+  * Cross-Layer messages synchronous interpreter. It has to be properly extended in order to 
+  * interpret custom cross-layer messages used by this particular plug-in.
+  * This type of communication need to be directly answered in the message exchanged in 
+  * order to be synchronous with the source.
+  * 
+  * @param m an instance of <i>ClMessage</i> that represent the message received and used for the answer
+  *
+  * @return zero if successful
+  * 
+  * @see NodeCore, ClMessage, ClSAP, ClTracer, UwMultiStackControllerPhy
+  **/
+  int recvSyncClMsg(ClMessage* m);
 
 private:
   //Variables

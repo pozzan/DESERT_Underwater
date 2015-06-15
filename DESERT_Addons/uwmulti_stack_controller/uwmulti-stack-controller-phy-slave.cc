@@ -37,17 +37,28 @@
 
 #include "uwmulti-stack-controller-phy-slave.h"
 
+/**
+ * Class that represents the binding with the tcl configuration script 
+ */
 static class UwMultiStackControllerPhySlaveClass : public TclClass {
 public:
-    UwMultiStackControllerPhySlaveClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE") {}
-    TclObject* create(int, const char*const*) {
-        return (new UwMultiStackControllerPhySlave);
-    }
+  /**
+   * Constructor of the class
+   */
+  UwMultiStackControllerPhySlaveClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE") {}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
+  TclObject* create(int, const char*const*) {
+    return (new UwMultiStackControllerPhySlave);
+  }
 } class_uwmulti_stack_controller_phy_slave;
 
 UwMultiStackControllerPhySlave::UwMultiStackControllerPhySlave() 
 : 
-  UwMultiStackControllerPhy()
+  UwMultiStackControllerPhy(),
+  signaling_recv_(0)
 { 
   
 }
@@ -55,7 +66,15 @@ UwMultiStackControllerPhySlave::UwMultiStackControllerPhySlave()
 int UwMultiStackControllerPhySlave::command(int argc, const char*const* argv) 
 {
   Tcl& tcl = Tcl::instance();
-  if (argc == 3) 
+  if (argc == 2)
+  {
+    if(strcasecmp(argv[1], "getSignalsRecv") == 0)
+    {
+      tcl.resultf("%d", signaling_recv_);
+      return TCL_OK;
+    }
+  }
+  else if (argc == 3) 
   {
     if(strcasecmp(argv[1], "setManualLowerlId") == 0)
     {
@@ -70,7 +89,27 @@ int UwMultiStackControllerPhySlave::command(int argc, const char*const* argv)
 void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc)
 {
   updateSlave(p,idSrc);
-  UwMultiStackControllerPhy::recv(p, idSrc);
+  hdr_cmn* ch = hdr_cmn::access(p);
+  if (ch->ptype() == PT_MULTI_ST_SIGNALING) {
+    signaling_recv_++;
+    Packet::free(p);
+    if (debug_)
+    {
+      std::cout << NOW << " ControllerPhySlave::recv(Packet *p, int idSrc) signaling "<< ch->ptype() << " " << PT_MULTI_ST_SIGNALING<< std::endl;
+    }
+  }
+  else
+    UwMultiStackControllerPhy::recv(p, idSrc);
+}
+
+int UwMultiStackControllerPhySlave::recvSyncClMsg(ClMessage* m) {
+  if (m->type() == CLMSG_PHY2MAC_STARTRX)
+  {
+    hdr_cmn* ch = hdr_cmn::access( static_cast<ClMsgPhy2MacStartRx *>(m)->pkt);
+    if (ch->ptype() == PT_MULTI_ST_SIGNALING)
+      return 0;
+  }
+  return UwMultiStackControllerPhy::recvSyncClMsg(m);
 }
 
 int UwMultiStackControllerPhySlave::getBestLayer(Packet *p) { 

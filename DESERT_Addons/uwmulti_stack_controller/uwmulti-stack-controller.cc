@@ -37,17 +37,24 @@
 
 #include "uwmulti-stack-controller.h"
 
-/*packet_t NOT_CONTROLLED;
-packet_t CONTROLLED;*/
-
+/**
+ * Class that represents the binding with the tcl configuration script 
+ */
 static class UwMultiStackControllerClass : public TclClass 
 {
 public:
-    UwMultiStackControllerClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER") {}
-    TclObject* create(int, const char*const*) 
-    {
-      return (new UwMultiStackController);
-    }
+  /**
+   * Constructor of the class
+   */
+  UwMultiStackControllerClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER") {}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
+  TclObject* create(int, const char*const*) 
+  {
+    return (new UwMultiStackController);
+  }
 } class_stack_controller;
 
 const double UwMultiStackController::threshold_not_exist = nan("");;
@@ -59,12 +66,14 @@ UwMultiStackController::UwMultiStackController()
   debug_(0),
   min_delay_(0),
   switch_mode_(UW_MANUAL_SWITCH),
-  lower_id_active_(0)
+  lower_id_active_(0),
+  signaling_pktSize_(1)
 {
 	bind("debug_", &debug_);
 	bind("min_delay_", &min_delay_);
 	bind("switch_mode_", (int*) &switch_mode_);
 	bind("set_lower_id_active_", &lower_id_active_);
+  bind("signaling_pktSize_", &signaling_pktSize_);
 }
 
 int UwMultiStackController::command(int argc, const char*const* argv) 
