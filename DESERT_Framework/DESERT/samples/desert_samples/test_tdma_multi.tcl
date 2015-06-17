@@ -153,8 +153,10 @@ set opt(hermes_txpower)            180.0  ;#Power transmitted in dB re uPa (32 W
 ######################
 
 set opt(optical_freq)              10000000
-set opt(optical_bw)                100000
-set opt(optical_bitrate)           1000000
+# set opt(optical_bw)                100000
+# set opt(optical_bitrate)           1000000
+set opt(optical_bw)                200000
+set opt(optical_bitrate)           2000000
 set opt(optical_txpower)           100
 set opt(opt_acq_db)        10
 set opt(temperatura)       293.15 ; # in Kelvin
@@ -398,7 +400,7 @@ proc createNode {id} {
   #Setup positions
   $position($id) setX_ [expr $id*100]
   $position($id) setY_ [expr $id*0]
-  $position($id) setZ_ [expr -13.5 -$id*1.5] 
+  $position($id) setZ_ [expr -38.5 -$id*1.5] 
   
   $application($id) setPosition $position($id)
   #Interference model
@@ -430,7 +432,7 @@ proc createNode {id} {
   $optical_phy($id) setInterference $optical_interf_data($id)
   $optical_phy($id) setLUTFileName "$opt(LUTpath)"
   $optical_phy($id) setLUTSeparator " "
-  #$optical_phy($id) useLUT
+  $optical_phy($id) useLUT
 
   $ctr($id) setManualLowerlId [$hermes_phy($id) Id_]
   $ctr($id) setAutomaticSwitch

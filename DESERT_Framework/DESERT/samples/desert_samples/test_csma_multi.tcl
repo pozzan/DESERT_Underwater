@@ -153,8 +153,10 @@ set opt(hermes_txpower)            180.0  ;#Power transmitted in dB re uPa (32 W
 ######################
 
 set opt(optical_freq)              10000000
-set opt(optical_bw)                100000
-set opt(optical_bitrate)           1000000
+# set opt(optical_bw)                100000
+# set opt(optical_bitrate)           1000000
+set opt(optical_bw)                200000
+set opt(optical_bitrate)           2000000
 set opt(optical_txpower)           100
 set opt(opt_acq_db)        10
 set opt(temperatura)       293.15 ; # in Kelvin
@@ -277,7 +279,12 @@ Module/UW/CSMA_ALOHA set alpha_           0.99
 Module/UW/CSMA_ALOHA set buffer_pkts_     100
 Module/UW/CSMA_ALOHA set max_backoff_counter_     4
 
-Module/UW/CSMA_ALOHA set listen_time_          [expr 4.0e-2]
+# Module/UW/CSMA_ALOHA set listen_time_          [expr 4.0e-2]
+# Module/UW/CSMA_ALOHA set wait_costant_         [expr 1.0e-3]
+# Module/UW/CSMA_ALOHA set backoff_tuner_        [expr 1.e-0]
+# Module/UW/CSMA_ALOHA set max_tx_tries_         5
+
+Module/UW/CSMA_ALOHA set listen_time_          [expr 5.0e-2]
 Module/UW/CSMA_ALOHA set wait_costant_         [expr 1.0e-3]
 Module/UW/CSMA_ALOHA set backoff_tuner_        [expr 1.e-0]
 Module/UW/CSMA_ALOHA set max_tx_tries_         5
@@ -342,7 +349,7 @@ Module/UW/ROV/CTR set debug_               0
 
 Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE set debug_                 0
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set debug_                0
-Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set alpha_                0.5
+# Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set alpha_                0.5
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_pktSize_    $opt(signaling_size)
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_active_     $opt(master_signaling_active)
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_period_     100
@@ -416,7 +423,7 @@ proc createNode {id} {
   #Setup positions
   $position($id) setX_ [expr $id*100]
   $position($id) setY_ [expr $id*0]
-  $position($id) setZ_ [expr -13.5 -$id*1.5] 
+  $position($id) setZ_ [expr -38.5 -$id*1.5] 
   
   $application($id) setPosition $position($id)
   #Interference model
@@ -448,7 +455,7 @@ proc createNode {id} {
   $optical_phy($id) setInterference $optical_interf_data($id)
   $optical_phy($id) setLUTFileName "$opt(LUTpath)"
   $optical_phy($id) setLUTSeparator " "
-  #$optical_phy($id) useLUT
+  $optical_phy($id) useLUT
 
   $ctr($id) setManualLowerlId [$hermes_phy($id) Id_]
   $ctr($id) setAutomaticSwitch
