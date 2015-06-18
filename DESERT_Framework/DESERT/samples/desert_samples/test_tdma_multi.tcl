@@ -191,8 +191,8 @@ set opt(opt2hermes_thresh) 1e-8
 #################
 # Waypoint file #
 #################
-# set opt(waypoint_file)  "dbs/wp_path/rov_path.csv"
-set opt(waypoint_file)  "path_matlab_def.csv"
+set opt(waypoint_file)  "dbs/wp_path/path2/path_tg2_5.csv"
+#set opt(waypoint_file)  "path_matlab_def.csv"
 
 set rng [new RNG]
 set rng_position [new RNG]
@@ -597,6 +597,8 @@ proc finish {} {
   set CTR_rcv_pkts                [$applicationCTR getrecvpkts]
   set mac_ctr_rcv_pkts            [$mac(0) getDataPktsRx] 
   set mac_rov_rcv_pkts            [$mac(1) getDataPktsRx] 
+  set mac_ctr_sent_pkts            [$mac(0) getDataPktsTx] 
+  set mac_rov_sent_pkts            [$mac(1) getDataPktsTx] 
   if ($opt(verbose)) {
     puts "applicationROV Throughput     : $ROV_throughput"
     puts "applicationROV PER            : $ROV_per       "
@@ -618,6 +620,7 @@ proc finish {} {
     set sum_sent_pkts  [expr $ROV_sent_pkts + $CTR_sent_pkts]
     set sum_rcv_pkts   [expr $ROV_rcv_pkts + $CTR_rcv_pkts]
     set sum_mac_rcv_pkts  [expr $mac_ctr_rcv_pkts + $mac_rov_rcv_pkts]
+    set sum_mac_sent_pkts  [expr $mac_ctr_sent_pkts + $mac_rov_sent_pkts]
     if {$opt(ack_mode) == "setAckMode"} {
       set sum_rtx      [expr $rtx_ROV + $rtx_CTR]
     }
@@ -644,6 +647,8 @@ proc finish {} {
     puts "Received Packets ROV --> CTR   : $CTR_rcv_pkts"
     puts "Received Packets ROV --> CTR mac : $mac_ctr_rcv_pkts"
     puts "Received Packets CTR --> ROV mac : $mac_rov_rcv_pkts"
+    puts "Sent Packets ROV --> CTR mac : $mac_ctr_sent_pkts"
+    puts "Sent Packets CTR --> ROV mac : $mac_rov_sent_pkts"
     puts "---------------------------------------------------------------------"
     puts "Sent Packets     : $sum_sent_pkts"
     puts "Received   : $sum_rcv_pkts"
