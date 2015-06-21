@@ -5,11 +5,11 @@
 \image html http://nautilus.dei.unipd.it/images/DESERT.png
 \image latex ./docs/DESERT.eps
 
-@version 2.0.0
+@version 2.1.0
 
-@authors <b> Members: </b> Federico Favaro - favarofe@dei.unipd.it , Giovanni Toso - tosogiov@dei.unipd.it, Ivano Calabrese - icalabre@dei.unipd.it
+@authors <b> Members: </b> Federico Favaro - favarofe@dei.unipd.it, Ivano Calabrese - icalabre@dei.unipd.it, Filippo Campagnaro - campagn1@dei.unipd.it, Federico Guerra - 	federico@guerra-tlc.com
 
-@authors <b> Other contributors and former members: </b> Riccardo Masiero - masieror@dei.unipd.it, Saiful Azad - azad@dei.unipd.it, Cristiano Tapparello - tappare1@dei.unipd.it, Loris Brolo - brololor@dei.unipd.it, Paolo Casari - casarip@dei.unipd.it
+@authors <b> Other contributors and former members: </b> Riccardo Masiero - masieror@dei.unipd.it, Saiful Azad - azad@dei.unipd.it, Cristiano Tapparello - tappare1@dei.unipd.it, Loris Brolo - brololor@dei.unipd.it, Paolo Casari - casarip@dei.unipd.it, Giovanni Toso
 
 <br>
 
@@ -35,9 +35,11 @@ DESERT Underwater has been adopted in several research projects (see also the <A
 A considerable amount of work has been done in order to make the installation of the software automatic via a modular installation script, that includes a fully-guided wizard mode.
 At the same time, the installation is organized in separate modules, so an experienced users can easily extend the process to accommodate specific requirements, new functionalities, or even to make DESERT part of larger projects.
 As a further help for users wishing to experiment with real hardware using DESERT, we also provide different installer modules, suitable for different hardware platforms, starting from the <A HREF="https://www.gumstix.com/">Gumstix</A> and the <A HREF="http://www.raspberrypi.org/">Raspberry Pi</A>. This set will be extended in the future.
-Finally, the functionalities offered by DESERT have been extended with a control framework that provides a set of primitives to remotely control the hardware modems, and thus the network operations. This framework was preliminarily released in September 2013, and a revised and further tested version thereof comes along with DESERT Underwater v2.0.0.
+Finally, the functionalities offered by DESERT have been extended with a control framework that provides a set of primitives to remotely control the hardware modems, and thus the network operations. This framework was preliminarily released in September 2013, and a revised and further tested version thereof comes along with DESERT Underwater v2.1.0.
 
 The improvements and additional features that we implemented have been packed together into version 2.0.0 of <A HREF="http://nautilus.dei.unipd.it/desert-underwater/">DESERT Underwater</A>.
+
+FF : re-write this paragraph for new version.
 
 <br>
 
@@ -587,7 +589,7 @@ If you are using a Debian-based Linux distribution, you can type this command in
 
 in order to install all dependencies above.
 
-DESERT 2.0.0 is compatible with automake up to the version 1.14.
+DESERT 2.1.0 is compatible with automake up to the version 1.14.
 
 In order to check the version installed type this command in a terminal:
 
@@ -606,7 +608,7 @@ If the command returns a version lower or equal to 1.14, e.g.:
 
 </small>
 
-than your version is compatible with DESERT 2.0.0, otherwise you have to intall a compatible version.
+than your version is compatible with DESERT 2.1.0, otherwise you have to install a compatible version.
 
 If you are using a Debian-based Linux distro, you can type this command
 
