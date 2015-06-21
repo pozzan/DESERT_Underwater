@@ -68,10 +68,25 @@ For questions, problems, suggestions, or if you want to get involved in the DESE
  
 \section application Modules for the Application Layer
 
-Currently, in DESERT there are two modules for the application layer: the <tt> uwcbr </tt> and the <tt> uwvbr </tt> modules, detailed in
-the following. Both modules send dummy packets (i.e., with a random payload) and serve to generate network traffic according to two
-different mechanisms. To work correctly, all the modules of the application layer must be connected to a module of the transport layer
+Currently, in DESERT there are three modules for the application layer: The <tt> uwApplication </tt>, the <tt> uwcbr </tt> and the <tt> uwvbr </tt> modules, detailed in
+the following. Both <tt> uwcbr </tt> and <tt> uwvbr </tt> modules send dummy packets (i.e., with a random payload) and serve to generate network traffic according to two
+different mechanisms. 
+<tt> uwApplication </tt> instead is an protocol to carry real payload as data packet. In simulation mode, a dummy string of random characters and legth fixed can be generated as payload, meanwhile, in experiment mode, it is possible to send to the module data through an UDP or TCP socket on a specified port. In this modality, real data can ben sent as payload as well as a simple chat can be implemented.
+To work correctly, all the modules of the application layer must be connected to a module of the transport layer
 (for the technical details on how to connected two or more NS-Miracle modules, the reader may refer to the NS-Miracle documentation see http://telecom.dei.unipd.it/pages/read/58/).
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwApplication, </tt> see uwApplicationModule </dd>
+<dt><b> Description: </b></dt>
+<dd> This module permits to send a fixed amount of data generated as random characters as payload of packet to do some tests and simulations. Real data can be sent using the DESERT stack if the module is set to expimental mode. You can also implement a simple "acoustic underwater" chat between two end-points </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwapplication.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/Application </tt> </dd>
+</dl>
+
+<br>
 
 <dl>
 <dt><b> Name:</b></dt>
