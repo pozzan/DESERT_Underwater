@@ -79,11 +79,11 @@ To work correctly, all the modules of the application layer must be connected to
 <dt><b> Name:</b></dt>
 <dd> <tt> uwApplication, </tt> see uwApplicationModule </dd>
 <dt><b> Description: </b></dt>
-<dd> This module permits to send a fixed amount of data generated as random characters as payload of packet to do some tests and simulations. Real data can be sent using the DESERT stack if the module is set to expimental mode. You can also implement a simple "acoustic underwater" chat between two end-points </dd>
+<dd> This module permits to send a fixed amount of data generated as random characters as payload of packet to do some tests and simulations. Real data can be sent using the DESERT stack if the module is set to expimental mode. You can also implement a simple "acoustic underwater" chat between two end-points. </dd>
 <dt><b> Library name: </b></dt>
 <dd> <tt> libuwapplication.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
-<dd> <tt> Module/UW/Application </tt> </dd>
+<dd> <tt> Module/UW/APPLICATION </tt> </dd>
 </dl>
 
 <br>
@@ -195,6 +195,17 @@ The switch between the processes can be configured by the user by providing the 
 </dl>
 
 <br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwflooding, </tt> see UwFlooding </dd>
+<dt><b> Description: </b></dt>
+<dd> This module provide a flooding routing protocol. The packet is reliably delivered to the destination forwarding it in broadcast mode with multiple hops. A system to avoid loops and a TTL system is also implemented.</dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwflooding.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/FLOODING </tt> </dd>
+</dl>
  
 
  \section data_link Modules for the Data Link Layer
@@ -310,13 +321,13 @@ Since the actual transmission of tones depends on the available hardware, this m
 
 <dl>
 <dt><b> Name:</b></dt>
-<dd> <tt> uw-csma-aloha-triggered, </tt> see UwCsmaAloha_Triggered_AUV and UwCsmaAloha_Triggered_NODE </dd>
+<dd> <tt> uw-csma-aloha-trigger, </tt> see UwCsmaAloha_Trigger_SINK and UwCsmaAloha_Trigger_NODE </dd>
 <dt><b> Description: </b></dt>
 <dd> Even though the 1-persistent CSMA protocol implemented by the <tt> uw-csma-aloha </tt> module has been shown to achieve good performance in underwater networks, sometimes it is useful to constrain packet transmissions so that they only take place when the sink is actually within the communication range of the nodes. This is particularly important if the sink is a mobile node or AUV. To do so, <tt> uw-csma-aloha-triggered </tt> extends the <tt> uw-csma-aloha </tt> module by allowing a mobile sink to enable communications in its neighborhood via the periodic transmission of a special TRIGGER packet. After receiving the TRIGGER, the nodes will contend for the channel via a simple 1-persistent CSMA mechanism as in the plain <tt> uw-csma-aloha </tt> module, and will revert to silence if no TRIGGER is received for a given amount of time.</dd>
 <dt><b> Library name: </b></dt>
-<dd> <tt> libuwcsmaalohatriggered.so </tt> </dd>
+<dd> <tt> libuwcsmaalohatrigger.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
-<dd> <tt> Module/UW/CSMA_ALOHA/TRIGGERED/NODE for sensors, Module/UW/CSMA_ALOHA/TRIGGERED/AUV for the AUV</tt> </dd>
+<dd> <tt> Module/UW/CSMA_ALOHA/TRIGGER/NODE for sensors, Module/UW/CSMA_ALOHA/TRIGGER/SINK for the SINK</tt> </dd>
 </dl>
 
 
@@ -335,6 +346,19 @@ In this version of the protocol, the HNs are fixed and predetermined, and one-ho
 <dd> <tt> libuwufetch.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
 <dd> <tt> Module/UW/UFETCH/NODE </tt> for the sensor node and the HN, <tt> Module/UW/UFETCH/AUV </tt> for the AUV  </dd>
+</dl>
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwtdma, </tt> see UwTDMA </dd>
+<dt><b> Description: </b></dt>
+<dd> FC: Describe here module </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwtdma.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/TDMA </dd>
 </dl>
 
 <br>
@@ -431,6 +455,51 @@ networking prototypes to test.
 <dd> <tt> libpackercommon.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
 <dd> <tt> NS2/COMMON/Packer </tt> </dd>
+</dl>
+
+
+<br>
+
+<br>
+ 
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Uwoptical PHY, </tt> see UwOpticalPhy </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> FC: Describe this </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwoptical_phy.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/OPTICAL/PHY </tt> </dd>
+</dl>
+
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Rogers model physical layer, </tt> see UnderwaterPhysicalRogersModel </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> PC:Describe this </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwphysicalrogersmodel.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/PROPAGATIONROGERS </tt> </dd>
+</dl>
+
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Hermes PHY model, </tt> see UwHermesPhy </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> FC:Describe this </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwhermesphy.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/HERMES/PHY </tt> </dd>
 </dl>
 
 
@@ -1188,7 +1257,7 @@ Grateful thanks also go to the many collaborations that helped develop part of t
 /**
 * \page License License Terms
 //
-// Copyright (c) 2012-2014 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2012-2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
