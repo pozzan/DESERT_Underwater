@@ -7,9 +7,11 @@
 
 @version 2.1.0
 
+@authors <b> Project supervisor: Paolo Casari - casarip@dei.unipd.it
+
 @authors <b> Members: </b> Federico Favaro - favarofe@dei.unipd.it, Ivano Calabrese - icalabre@dei.unipd.it, Filippo Campagnaro - campagn1@dei.unipd.it, Federico Guerra - 	federico@guerra-tlc.com
 
-@authors <b> Other contributors and former members: </b> Riccardo Masiero - masieror@dei.unipd.it, Saiful Azad - azad@dei.unipd.it, Cristiano Tapparello - tappare1@dei.unipd.it, Loris Brolo - brololor@dei.unipd.it, Paolo Casari - casarip@dei.unipd.it, Giovanni Toso
+@authors <b> Other contributors and former members: </b> Riccardo Masiero - masieror@dei.unipd.it, Saiful Azad - azad@dei.unipd.it, Cristiano Tapparello - tappare1@dei.unipd.it, Loris Brolo - brololor@dei.unipd.it, \link Giovanni Giovanni Toso
 
 <br>
 
@@ -1287,4 +1289,13 @@ Grateful thanks also go to the many collaborations that helped develop part of t
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+*/
+
+
+/** \page Giovanni In memory of Giovanni Toso
+
+DESERT Underwater has been put together, tested, improved, and expanded over time also thanks to the continuous efforts of our beloved colleague and friend Giovanni Toso, who prematurely passed away in a car accident in August 2014. DESERT 2.1.0 is the first major release after his death, and it is dedicated to his memory.
+
+\image html http://nautilus.dei.unipd.it/people/people_photos/GiovanniToso.jpg
+
 */
