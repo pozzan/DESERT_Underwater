@@ -7,9 +7,9 @@
 
 @version 2.1.0
 
-@authors <b> Project supervisor: Paolo Casari - casarip@dei.unipd.it
+@authors <b> Project supervisor: Paolo Casari - casarip@dei.unipd.it </b>
 
-@authors <b> Members: </b> Federico Favaro - favarofe@dei.unipd.it, Ivano Calabrese - icalabre@dei.unipd.it, Filippo Campagnaro - campagn1@dei.unipd.it, Federico Guerra - 	federico@guerra-tlc.com
+@authors <b> Members: </b> Federico Favaro - favarofe@dei.unipd.it, Federico Guerra - federico@guerra-tlc.com, Filippo Campagnaro - campagn1@dei.unipd.it,  Ivano Calabrese - icalabre@dei.unipd.it
 
 @authors <b> Other contributors and former members: </b> Riccardo Masiero - masieror@dei.unipd.it, Saiful Azad - azad@dei.unipd.it, Cristiano Tapparello - tappare1@dei.unipd.it, Loris Brolo - brololor@dei.unipd.it, \link Giovanni Giovanni Toso
 
@@ -37,11 +37,15 @@ DESERT Underwater has been adopted in several research projects (see also the <A
 A considerable amount of work has been done in order to make the installation of the software automatic via a modular installation script, that includes a fully-guided wizard mode.
 At the same time, the installation is organized in separate modules, so an experienced users can easily extend the process to accommodate specific requirements, new functionalities, or even to make DESERT part of larger projects.
 As a further help for users wishing to experiment with real hardware using DESERT, we also provide different installer modules, suitable for different hardware platforms, starting from the <A HREF="https://www.gumstix.com/">Gumstix</A> and the <A HREF="http://www.raspberrypi.org/">Raspberry Pi</A>. This set will be extended in the future.
-Finally, the functionalities offered by DESERT have been extended with a control framework that provides a set of primitives to remotely control the hardware modems, and thus the network operations. This framework was preliminarily released in September 2013, and a revised and further tested version thereof comes along with DESERT Underwater v2.1.0.
+In order to use DESERT more and more in real environments, an new Application Layer protocol is provided, uwApplication. This module permits to transmit real payloads among nodes with tunable dimension. Moreover, a real data can be transmitted to uwApplication trough a TCP or UDP socket at a given port. Using this feature, you can implement a very simple "underwater chat", or even connect your sensor or device that will transmit its data to uwApplication through a socket. uwApplication encapsulate the payload with control headers and delivers packet to the lower layers.
+Finally, the functionalities offered by DESERT have been extended with a control framework that provides a set of primitives to remotely control the hardware modems, and thus the network operations. This framework was preliminarily released in September 2013.
 
-The improvements and additional features that we implemented have been packed together into version 2.0.0 of <A HREF="http://nautilus.dei.unipd.it/desert-underwater/">DESERT Underwater</A>.
+This new version of the framework, provides some new MAC protocols, such as TDMA and a revised version of the protocol already released on the previous version.
+Furthermore, an optical channel model, an optical propagation model and an optical PHY model are provided, together with a multi-stack controller, which permits to use two different PHY layers on the same node. The controller will decide which PHY layer to use upon channel statistics, in order to exploit the large bandwidth of optical communication, when the optical channel condition permits to do so, using instead the acoustic PHY layer for a more robust and reliable communication.
 
-FF : re-write this paragraph for new version.
+
+The improvements and additional features that we implemented have been packed together into version 2.0.1
+
 
 <br>
 
@@ -364,7 +368,26 @@ In this version of the protocol, the HNs are fixed and predetermined, and one-ho
 </dl>
 
 <br>
- 
+
+
+\section Propagation models
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwoptical_propagation, </tt> see UwOpticalMPropagation </dd>
+<dt><b> Description: </b></dt>
+<dd> FC: Describe here module </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwoptical_propagation.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/OPTICAL/Propagation </dd>
+</dl>
+
+<br>
+
+
 \section  PHY Modules for the Physical Layer 
 
 \subsection Modules Modules for simulate PHY layer
@@ -411,6 +434,45 @@ DESERT framework provides some modules to simulate PHY layers.
 </dl>
 
 <br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Uwoptical PHY, </tt> see UwOpticalPhy </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> FC: Describe this </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwoptical_phy.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/OPTICAL/PHY </tt> </dd>
+</dl>
+
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Rogers model physical layer, </tt> see UnderwaterPhysicalRogersModel </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> PC:Describe this </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwphysicalrogersmodel.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/PROPAGATIONROGERS </tt> </dd>
+</dl>
+
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Hermes PHY model, </tt> see UwHermesPhy </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> FC:Describe this </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwhermesphy.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/HERMES/PHY </tt> </dd>
+</dl>
  
 \subsection real_modem Interfaces with real modems
 
@@ -462,51 +524,6 @@ networking prototypes to test.
 
 <br>
 
-<br>
- 
-
-<dl>
-<dt><b> Name:</b></dt>
-<dd> <tt> Uwoptical PHY, </tt> see UwOpticalPhy </dd>
-<dt><b> Description: </b></dt>
-<dd> <tt> FC: Describe this </dd>
-<dt><b> Library name: </b></dt>
-<dd> <tt> libuwoptical_phy.so </tt> </dd>
-<dt><b> Tcl name: </b></dt>
-<dd> <tt> Module/UW/OPTICAL/PHY </tt> </dd>
-</dl>
-
-
-<br>
-
-<dl>
-<dt><b> Name:</b></dt>
-<dd> <tt> Rogers model physical layer, </tt> see UnderwaterPhysicalRogersModel </dd>
-<dt><b> Description: </b></dt>
-<dd> <tt> PC:Describe this </dd>
-<dt><b> Library name: </b></dt>
-<dd> <tt> libuwphysicalrogersmodel.so </tt> </dd>
-<dt><b> Tcl name: </b></dt>
-<dd> <tt> Module/UW/PROPAGATIONROGERS </tt> </dd>
-</dl>
-
-
-<br>
-
-<dl>
-<dt><b> Name:</b></dt>
-<dd> <tt> Hermes PHY model, </tt> see UwHermesPhy </dd>
-<dt><b> Description: </b></dt>
-<dd> <tt> FC:Describe this </dd>
-<dt><b> Library name: </b></dt>
-<dd> <tt> libuwhermesphy.so </tt> </dd>
-<dt><b> Tcl name: </b></dt>
-<dd> <tt> Module/UW/HERMES/PHY </tt> </dd>
-</dl>
-
-
-<br>
- 
 
 <dl>
 <dt><b> Name:</b></dt>
@@ -597,6 +614,21 @@ The DESERT libraries also include two modules to simulate node mobility. These m
 <dd> <tt> libuwgmposition.so </tt> </dd>
 <dt><b> Tcl name:  </b></dt>
 <dd> <tt> Position/UW/GM </tt> </dd>
+</dl>
+
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwsmposition, </tt> see UwSMPosition </dd>
+<dt><b> Description: </b></dt>
+<dd> This class implements the a simple movement behaviour: it is possible to define the direction and the speed of the linear movement thanks to a TCL command in which the user has to define the destination point an the speed of the movement required.
+NOTE: the destination point is used to define the direction od the node and when it is reached the node will proceed for the same direction </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwsmposition.so </tt> </dd>
+<dt><b> Tcl name:  </b></dt>
+<dd> <tt> Position/UWSM </tt> </dd>
 </dl>
 
 
