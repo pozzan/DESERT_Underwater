@@ -120,6 +120,7 @@ set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration 
 
 set opt(maxinterval_)       20.0
 set opt(ack_mode)           "setNoAckMode"
+# set opt(ack_mode)           "setAckMode"
 
 ####################
 # Evologics' 48/78 #
@@ -168,7 +169,8 @@ set opt(id)                [expr 1.0e-9]
 set opt(il)                [expr 1.0e-6]
 set opt(shuntRes)          [expr 1.49e9]
 set opt(sensitivity)       0.26
-set opt(LUTpath)           "dbs/optical_noise/LUT.txt"
+# set opt(LUTpath)           "dbs/optical_noise/LUT.txt"
+set opt(LUTpath)           "dbs/optical_noise/scenario1/Pc0.4_depth100.txtPc0.4_depth100.txt_atten_c_0.4.ascii"
 
 
 ###################################################
@@ -177,6 +179,7 @@ set opt(LUTpath)           "dbs/optical_noise/LUT.txt"
 
 set opt(master_signaling_active) 1
 set opt(signaling_size)          5
+set opt(master_signaling_period) 5
 
 ##################################
 # Switching thresholds           #
@@ -185,8 +188,8 @@ set opt(signaling_size)          5
 # set opt(evo2hermes_thresh) 3.846e12;# 119.5 m 48/78
 set opt(evo2hermes_thresh) 9.893e13;# 119.5m HS
 set opt(hermes2evo_thresh) 6.379e13; #120.5m
-set opt(hermes2opt_thresh) 1.58e16
-set opt(opt2hermes_thresh) 0.4e-8
+set opt(hermes2opt_thresh) 1.151e16
+set opt(opt2hermes_thresh) 0.35e-8
 
 #################
 # Waypoint file #
@@ -272,7 +275,7 @@ $optical_data_mask setBandwidth  $opt(optical_bw)
 
 Module/UW/CSMA_ALOHA set HDR_size_      0
 Module/UW/CSMA_ALOHA set ACK_size_        1
-Module/UW/CSMA_ALOHA set max_tx_tries_    5
+Module/UW/CSMA_ALOHA set max_tx_tries_    1
 Module/UW/CSMA_ALOHA set max_payload_     1000000
 Module/UW/CSMA_ALOHA set ACK_timeout_     5.0
 Module/UW/CSMA_ALOHA set alpha_           0.99
@@ -352,7 +355,7 @@ Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set debug_                0
 # Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set alpha_                0.5
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_pktSize_    $opt(signaling_size)
 Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_active_     $opt(master_signaling_active)
-Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_period_     100
+Module/UW/MULTI_STACK_CONTROLLER_PHY_MASTER set signaling_period_     $opt(master_signaling_period)
 Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE set min_delay_             [expr 0.5e-3]
 Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE set signaling_active_      0
 ################################
@@ -654,7 +657,7 @@ proc finish {} {
   if ($opt(master_signaling_active)) {
     set signalSent        [$ctr(0) getSignalsSent]
     set signalRecv        [$ctr(1) getSignalsRecv]
-    set percSignalRecv [expr (0.0 + $signalSent)/$signalRecv ]
+    set percSignalRecv [expr (0.0 + $signalRecv)/$signalSent ]
     set signaling_overhead_bit [expr (0.0 + $signalSent * $opt(signaling_size)) / ($mac_ctr_rcv_pkts * $opt(ROV_pktsize) + $mac_rov_rcv_pkts * $opt(CTR_pktsize))]
     set signaling_overhead_pkts [expr (0.0 + $signalSent) / ($mac_ctr_rcv_pkts + $mac_rov_rcv_pkts)]
   }
