@@ -695,6 +695,8 @@ Before installing the DESERT framework, please check that your host device has t
 - libxt-dev
 - libtool
 - gfortran
+- bison
+- flex
 </BLOCKQUOTE>
 </SMALL>
 
@@ -702,42 +704,11 @@ If you are using a Debian-based Linux distribution, you can type this command in
 
 <small>
 
-    sudo apt-get install build-essential autoconf automake libxmu-dev libx11-dev libxmu-dev libxmu-headers libxt-dev libtool gfortran
+    sudo apt-get install build-essential autoconf automake libxmu-dev libx11-dev libxmu-dev libxmu-headers libxt-dev libtool gfortran bison flex
 
 </small>
 
 in order to install all dependencies above.
-
-DESERT 2.1.0 is compatible with automake up to the version 1.14.
-
-In order to check the version installed type this command in a terminal:
-
-<small>
-
-    automake --version
-
-</small>
-
-If the command returns a version lower or equal to 1.14, e.g.:
-
-<small>
-
-    automake (GNU automake) 1.14
-    ...
-
-</small>
-
-than your version is compatible with DESERT 2.1.0, otherwise you have to install a compatible version.
-
-If you are using a Debian-based Linux distro, you can type this command
-
-<small>
-
-    sudo apt-get intall automake
-
-</small>
-
-<br>
 
 \section install Installation procedures
 
