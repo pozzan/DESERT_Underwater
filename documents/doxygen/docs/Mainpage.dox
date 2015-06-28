@@ -7,7 +7,7 @@
 
 @version 2.1.0
 
-@authors <b> Project supervisor: Paolo Casari - casarip@dei.unipd.it </b>
+@authors <b> Project supervisor: </b> Paolo Casari - casarip@dei.unipd.it
 
 @authors <b> Members: </b> Federico Favaro - favarofe@dei.unipd.it, Federico Guerra - federico@guerra-tlc.com, Filippo Campagnaro - campagn1@dei.unipd.it,  Ivano Calabrese - icalabre@dei.unipd.it
 
@@ -44,7 +44,7 @@ This new version of the framework, provides some new MAC protocols, such as TDMA
 Furthermore, an optical channel model, an optical propagation model and an optical PHY model are provided, together with a multi-stack controller, which permits to use two different PHY layers on the same node. The controller will decide which PHY layer to use upon channel statistics, in order to exploit the large bandwidth of optical communication, when the optical channel condition permits to do so, using instead the acoustic PHY layer for a more robust and reliable communication.
 
 
-The improvements and additional features that we implemented have been packed together into version 2.0.1
+The improvements and additional features that we implemented have been packed together into version 2.1.0
 
 
 <br>
@@ -395,7 +395,7 @@ In this version of the protocol, the HNs are fixed and predetermined, and one-ho
 DESERT framework provides some modules to simulate PHY layers.
 <dl>
 <dt><b> Name:</b></dt>
-<dd> <tt> uwphysical, </tt> see uwphysical </dd>
+<dd> <tt> uwphysical, </tt> see UnderwaterPhysical </dd>
 <dt><b> Description: </b></dt>
 <dd> <tt> uwphysical </tt> is a module that simulates the behavior of a BPSK or BFSK PHY layer (selectable by the user via a tcl variable). <tt> uwphysical </tt> provides also the possibility to calculate the amount of energy consumed by each node in transmission and reception phases separately, provided that the power consumption of the simulated PHY layer in each phase is specified by the user. <tt> uwphysical </tt> provides also the time (in seconds) that each node used for transmission and reception phases. Moreover, it counts the number of packets collided (i.e., packets discarded due to interference from concurrent transmissions) and also the type of collision (data packet vs control packet, data packet vs data packet, etc.), provided that this module is used together with the interference module <tt>uwinterference</tt> described below.  </dd>
 <dt><b> Library name: </b></dt>
@@ -476,8 +476,7 @@ DESERT framework provides some modules to simulate PHY layers.
  
 \subsection real_modem Interfaces with real modems
 
-Currently, DESERT supports three different hardware platforms for emulation and test-bed realization: the S2C hydroacoustic modem, a system developed by Evologics <b>[5]</b> which exploits the Sweep-Spread Carrier (S2C) technology for underwater data telemetry and communications; the FSK and PSK WHOI micro-modems, two small-footprint, low-power acoustic modems based on a Texas Instruments DSP and developed by the Woods Hole Oceanographic Institution (WHOI) <b>[6]</b>. However, the <tt> uwmphy_modem </tt> module, which implements the general interface between the acoustic modem hardware and NS-Miracle, can be easily extended to support other different hardware. In the following, we describe <tt> uwmphy_modem </tt>, along with the DESERT modules specialized for the above hardware (<tt> mfsk_whoi_mm </tt>, <tt> mpsk_whoi_mm </tt> and <tt> ms2c_evologics </tt>), as well as an additional module called <tt> uwmphypatch </tt> that is intended for preparing the OTcl scripts needed to set the parameters of the 
-networking prototypes to test.
+Currently, DESERT supports three different hardware platforms for emulation and test-bed realization: the S2C hydroacoustic modem, a system developed by Evologics <b>[5]</b> which exploits the Sweep-Spread Carrier (S2C) technology for underwater data telemetry and communications. However, the <tt> uwmphy_modem </tt> module, which implements the general interface between the acoustic modem hardware and NS-Miracle, can be easily extended to support other different hardware. In the following, we describe <tt> uwmphy_modem </tt>, along with the DESERT modules specialized for the above hardware (<tt> mfsk_whoi_mm </tt>, <tt> mpsk_whoi_mm </tt> and <tt> ms2c_evologics </tt>), as well as an additional module called <tt> uwmphypatch </tt> that is intended for preparing the OTcl scripts needed to set the parameters of the networking prototypes to test.
 
 
 <dl>
@@ -571,9 +570,11 @@ networking prototypes to test.
 
 In DESERT 2.0 we have also a module to simulate two interference models in underwater networks. In the first model, the MEANPOWER interference model, the Signal-to-Interference-and-Noise Ratio (SINR) of a received packet is averaged over the entire duration of the packet. In the second model, the CHUNK interference model, the received packet is split into several chunks, where the interference perceived over each chunk is constant over the chunk duration. The SINR is computed for every chunk and the PER for each chunk is derived from its SINR. The packet is finally considered correct only if all chunks are correctly received.
 
+<br>
+
 <dl>
 <dt><b> Name:</b></dt>
-<dd> <tt> Uwinterference, </tt> see uwinterference </dd>
+<dd> <tt> underwaterwinterference, </tt> see uwinterference </dd>
 <dt><b> Description: </b></dt>
 <dd> This module implement the interference model described above. Furthermore, this module provides the possibility to have the number of collisions occurred during the simulation, taking in account also different packets (e.g., the number of control packets collided with data packets and data packets collided with other data packets) </dd>
 <dt><b> Library name: </b></dt>
@@ -621,7 +622,7 @@ The DESERT libraries also include two modules to simulate node mobility. These m
 
 <dl>
 <dt><b> Name:</b></dt>
-<dd> <tt> uwsmposition, </tt> see UwSMPosition </dd>
+<dd> <tt> uwsmposition, </tt> see UWSMPosition </dd>
 <dt><b> Description: </b></dt>
 <dd> This class implements the a simple movement behaviour: it is possible to define the direction and the speed of the linear movement thanks to a TCL command in which the user has to define the destination point an the speed of the movement required.
 NOTE: the destination point is used to define the direction od the node and when it is reached the node will proceed for the same direction </dd>

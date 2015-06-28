@@ -50,8 +50,9 @@ INPUT       = ../../DESERT_Framework/DESERT/application/uwcbr \
 			../../DESERT_Framework/DESERT/data_link/uw-csma-aloha-trigger \
 			../../DESERT_Framework/DESERT/data_link/uwmll \
 			../../DESERT_Framework/DESERT/data_link/uwsr \
-			../../DESERT_Framework/DESERT/mobility/wossgmmob3D \
-			../../DESERT_Framework/DESERT/mobility/wossgroupmob3D \
+			../..//DESERT_Framework/DESERT/mobility/uwdriftposition \
+			../..//DESERT_Framework/DESERT/mobility/uwgmposition \
+			../..//DESERT_Framework/DESERT/mobility/uwsmposition \
 			../../DESERT_Framework/DESERT/mobility/uwsmposition \
 			../../DESERT_Framework/DESERT/transport/uwtp \
 			../../DESERT_Framework/DESERT/interference/uwinterference \
@@ -66,7 +67,7 @@ INPUT       = ../../DESERT_Framework/DESERT/application/uwcbr \
          	../../DESERT_Framework/DESERT/physical/uwphysicaldb \
          	../../DESERT_Framework/DESERT/physical/uwphysicalrogersmodel \
          	../../DESERT_Framework/DESERT/physical/uwhermesphy \
-         	../../DESERT_Framework/DESERT/physical/uwopticalphy \
+         	../../DESERT_Framework/DESERT/physical/uwoptical_phy \
          	../../DESERT_Framework/DESERT/propagation/uwoptical_propagation \
          	../../DESERT_Framework/DESERT/channel/uwoptical_channel \
             docs/Mainpage.dox
