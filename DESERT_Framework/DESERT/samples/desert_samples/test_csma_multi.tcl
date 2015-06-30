@@ -114,7 +114,7 @@ set opt(ROV_period)       0.02
 
 set opt(starttime)          1	
 set opt(stoptime)           2800 
-set opt(time_interval)      12
+set opt(time_interval)      6
 set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration of the simulation
 
 
@@ -159,12 +159,12 @@ set opt(optical_freq)              10000000
 set opt(optical_bw)                200000
 set opt(optical_bitrate)           2000000
 set opt(optical_txpower)           100
-set opt(opt_acq_db)        10
+set opt(opt_acq_db)        20
 set opt(temperatura)       293.15 ; # in Kelvin
 set opt(txArea)            0.000010
 set opt(rxArea)            0.0000011 ; # receveing area, it has to be the same for optical physical and propagation
 set opt(c)                 0.4 ; # seawater attenation coefficient
-set opt(theta)             1
+set opt(theta)             0.5
 set opt(id)                [expr 1.0e-9]
 set opt(il)                [expr 1.0e-6]
 set opt(shuntRes)          [expr 1.49e9]
@@ -177,9 +177,9 @@ set opt(LUTpath)           "dbs/optical_noise/scenario1/Pc0.4_depth100.txtPc0.4_
 # Multi stack controller signaling configuaration #
 ###################################################
 
-set opt(master_signaling_active) 1
+set opt(master_signaling_active) 0
 set opt(signaling_size)          5
-set opt(master_signaling_period) 5
+set opt(master_signaling_period) 3
 
 ##################################
 # Switching thresholds           #
@@ -188,8 +188,10 @@ set opt(master_signaling_period) 5
 # set opt(evo2hermes_thresh) 3.846e12;# 119.5 m 48/78
 set opt(evo2hermes_thresh) 9.893e13;# 119.5m HS
 set opt(hermes2evo_thresh) 6.379e13; #120.5m
-set opt(hermes2opt_thresh) 1.151e16
-set opt(opt2hermes_thresh) 0.35e-8
+set opt(hermes2opt_thresh) 1.48e16
+set opt(opt2hermes_thresh) 1.08e-8;#1.1e-8;#1.05 1.0565e-8;#0.995e-8
+# set opt(hermes2opt_thresh) 1.19e16;#1.151e16
+# set opt(opt2hermes_thresh) 0.38e-8;#0.35e-8
 
 #################
 # Waypoint file #
@@ -287,8 +289,8 @@ Module/UW/CSMA_ALOHA set max_backoff_counter_     4
 # Module/UW/CSMA_ALOHA set backoff_tuner_        [expr 1.e-0]
 # Module/UW/CSMA_ALOHA set max_tx_tries_         5
 
-Module/UW/CSMA_ALOHA set listen_time_          [expr 5.0e-2]
-Module/UW/CSMA_ALOHA set wait_costant_         [expr 1.0e-3]
+Module/UW/CSMA_ALOHA set listen_time_          [expr 5.01e-2]
+Module/UW/CSMA_ALOHA set wait_costant_         [expr 1.01e-3]
 Module/UW/CSMA_ALOHA set backoff_tuner_        [expr 1.e-0]
 Module/UW/CSMA_ALOHA set max_tx_tries_         5
 
@@ -670,8 +672,8 @@ proc finish {} {
     puts "Received Packets ROV --> CTR   : $CTR_rcv_pkts"
     puts "Received Packets ROV --> CTR mac : $mac_ctr_rcv_pkts"
     puts "Received Packets CTR --> ROV mac : $mac_rov_rcv_pkts"
-    puts "Sent Packets ROV --> CTR mac : $mac_ctr_sent_pkts"
-    puts "Sent Packets CTR --> ROV mac : $mac_rov_sent_pkts"
+    puts "Sent Packets ROV --> CTR mac : $mac_rov_sent_pkts"
+    puts "Sent Packets CTR --> ROV mac : $mac_ctr_sent_pkts"
     puts "---------------------------------------------------------------------"
     puts "Sent Packets     : $sum_sent_pkts"
     puts "Received   : $sum_rcv_pkts"
