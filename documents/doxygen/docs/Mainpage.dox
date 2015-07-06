@@ -360,7 +360,9 @@ In this version of the protocol, the HNs are fixed and predetermined, and one-ho
 <dt><b> Name:</b></dt>
 <dd> <tt> uwtdma, </tt> see UwTDMA </dd>
 <dt><b> Description: </b></dt>
-<dd> FC: Describe here module </dd>
+<dd> This module implements a MAC protocol which is based on a Time Division Multiple Access channel access method. 
+The TDMA slots have to be set in each node, in order to allow the user to employ the desired channel access subdivision. In this way, the user can set long time slot to nodes with big amount of data to send., an a shorter time slot to the others. 
+</dd>
 <dt><b> Library name: </b></dt>
 <dd> <tt> libuwtdma.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
@@ -378,7 +380,8 @@ In this version of the protocol, the HNs are fixed and predetermined, and one-ho
 <dt><b> Name:</b></dt>
 <dd> <tt> uwoptical_propagation, </tt> see UwOpticalMPropagation </dd>
 <dt><b> Description: </b></dt>
-<dd> FC: Describe here module </dd>
+<dd> This module implements a propagation model for optical underwater transmissions. It employs the Lambert-Beer law, taking into account: distance and alignment between transmitter and receiver, channel attenuation coefficient, beam diverge angle, receiving and transmitting area. It can be employed for omni-directional transmitter as well.
+</dd>
 <dt><b> Library name: </b></dt>
 <dd> <tt> libuwoptical_propagation.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
@@ -439,7 +442,7 @@ DESERT framework provides some modules to simulate PHY layers.
 <dt><b> Name:</b></dt>
 <dd> <tt> Uwoptical PHY, </tt> see UwOpticalPhy </dd>
 <dt><b> Description: </b></dt>
-<dd> <tt> FC: Describe this </dd>
+<dd> <tt> This module simulates the behavior of an optical PHY layer. In particular, the SNR of a received signal is calculated by taking into account the position of the transmitter and the receiver, the receiver sensitivity, noise and receiving area. In addition the ambient light noise is included by retrieving the solar irradiance from a file via a lookup table search. After that, the SNR associated to a given transmission is computed. The receiving model is based on a SNR threshold. </dd>
 <dt><b> Library name: </b></dt>
 <dd> <tt> libuwoptical_phy.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
