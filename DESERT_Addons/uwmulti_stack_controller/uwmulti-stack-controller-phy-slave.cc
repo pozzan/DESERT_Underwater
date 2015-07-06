@@ -110,10 +110,11 @@ void UwMultiStackControllerPhySlave::recv(Packet *p, int idSrc)
       ClMsgPhy2MacAddr msg;
       sendSyncClMsg(&msg);
       my_mac_addr = msg.getAddr(); 
-
-      mach->macDA() = mach->macSA();
-      mach->macSA() = my_mac_addr;
-      sendDown(lower_id_active_, p, min_delay_);
+      if (mach->macDA() == my_mac_addr || mach->macDA() == MAC_BROADCAST) {
+        mach->macDA() = mach->macSA();
+        mach->macSA() = my_mac_addr;
+        sendDown(lower_id_active_, p, min_delay_);
+      }
     }
     else
       Packet::free(p);

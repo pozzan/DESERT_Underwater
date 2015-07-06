@@ -177,7 +177,7 @@ set opt(LUTpath)           "dbs/optical_noise/scenario1/Pc0.4_depth100.txtPc0.4_
 # Multi stack controller signaling configuaration #
 ###################################################
 
-set opt(master_signaling_active) 0
+set opt(master_signaling_active) 1
 set opt(signaling_size)          5
 set opt(master_signaling_period) 3
 
