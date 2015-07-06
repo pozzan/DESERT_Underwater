@@ -442,7 +442,7 @@ DESERT framework provides some modules to simulate PHY layers.
 <dt><b> Name:</b></dt>
 <dd> <tt> Uwoptical PHY, </tt> see UwOpticalPhy </dd>
 <dt><b> Description: </b></dt>
-<dd> <tt> This module simulates the behavior of an optical PHY layer. In particular, the SNR of a received signal is calculated by taking into account the position of the transmitter and the receiver, the receiver sensitivity, noise and receiving area. In addition the ambient light noise is included by retrieving the solar irradiance from a file via a lookup table search. After that, the SNR associated to a given transmission is computed. The receiving model is based on a SNR threshold. </dd>
+<dd> <tt> This module simulates the behavior of an optical PHY layer. In particular, the SNR of a received signal is calculated by taking into account the position of the transmitter and the receiver, the receiver sensitivity, noise and receiving area. In addition the ambient light noise is included by retrieving the solar irradiance from a file via a lookup table search. After that, the SNR associated to a given transmission is computed. The receiving model is based on a SNR threshold and the interference is assumed to be destructive. </dd>
 <dt><b> Library name: </b></dt>
 <dd> <tt> libuwoptical_phy.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
@@ -470,7 +470,7 @@ DESERT framework provides some modules to simulate PHY layers.
 <dt><b> Name:</b></dt>
 <dd> <tt> Hermes PHY model, </tt> see UwHermesPhy </dd>
 <dt><b> Description: </b></dt>
-<dd> <tt> FC:Describe this </dd>
+<dd> <tt> This module simulates the behavior of the Hermes acoustic modem's physical layer. The success probability of a packet reception is obtained from a lookup table of packet error rate vs distance, by taking into account the position of the transmitter and the receiver and the packet size. The PER is assumed to be spread uniformly in all the packet chunks and the interference is destructive.</dd>
 <dt><b> Library name: </b></dt>
 <dd> <tt> libuwhermesphy.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
