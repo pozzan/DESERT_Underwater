@@ -577,7 +577,7 @@ In DESERT 2.0 we have also a module to simulate two interference models in under
 
 <dl>
 <dt><b> Name:</b></dt>
-<dd> <tt> underwaterwinterference, </tt> see uwinterference </dd>
+<dd> <tt> Underwater Interference, </tt> see uwinterference </dd>
 <dt><b> Description: </b></dt>
 <dd> This module implement the interference model described above. Furthermore, this module provides the possibility to have the number of collisions occurred during the simulation, taking in account also different packets (e.g., the number of control packets collided with data packets and data packets collided with other data packets) </dd>
 <dt><b> Library name: </b></dt>
