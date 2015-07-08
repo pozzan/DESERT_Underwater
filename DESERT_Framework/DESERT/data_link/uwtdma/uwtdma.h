@@ -45,11 +45,12 @@
 #define UW_TDMA_STATUS_MY_SLOT 1 /**< Status slot active, whether TDMA modality is on >**/
 #define UW_TDMA_STATUS_NOT_MY_SLOT 2 /**< Status slot not active, whether TDMA modality is on >**/
 
-#define UW_CHANNEL_IDLE 1 // status channel idle
-#define UW_CHANNEL_BUSY 2 // status channel busy
+#define UW_CHANNEL_IDLE 1  // status channel idle
+#define UW_CHANNEL_BUSY 2  // status channel busy
 
 
 using namespace std;
+
 
 class UwTDMA;
 

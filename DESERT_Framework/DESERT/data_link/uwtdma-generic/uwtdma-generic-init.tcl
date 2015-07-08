@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,54 +25,20 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Author: Roberto Francescon
+# Version: 0.0.1
 
-
-DISTCHECK_CONFIGURE_FLAGS = @NS_ALLINONE_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NSMIRACLE_DISTCHECK_CONFIGURE_FLAGS@ 
-
-ACLOCAL_AMFLAGS = -I m4 
-
-EXTRA_DIST = autogen.sh 
-
-SUBDIRS = m4 \
-    application/uwcbr \
-    application/uwvbr \
-    application/uwApplication \
-    transport/uwudp \
-    network/uwstaticrouting \
-    network/uwsun \
-    network/uwicrp \
-    network/uwip \
-    network/uwflooding \
-    data_link/uwmll \
-    data_link/uw-csma-aloha \
-    data_link/uwdacap \
-    data_link/uwpolling \
-    data_link/uwaloha \
-    data_link/uwsr \
-    data_link/uw-t-lohi \
-    data_link/uwUFetch \
-    data_link/uw-csma-aloha-trigger \
-    data_link/uwtdma \
-    data_link/uwtdma-fair \
-    data_link/uwtdma-generic \
-    physical/uwphysical \
-    physical/uwgainfromdb \
-    physical/uwphysicaldb\
-    physical/uwphysicalrogersmodel\
-    physical/uwphysicalfromdb\
-    physical/uwmphy_modem \
-    physical/ms2c_evologics \
-    physical/uwmphypatch \
-    physical/uwhermesphy \
-    physical/uwoptical_phy \
-    physical/uw-al \
-    physical/uw-al/packer_common \
-    physical/uw-al/packer_mac \
-    mobility/uwdriftposition \
-    mobility/uwgmposition \
-    mobility/uwrandomlib \
-    interference/uwinterference \
-    propagation/uwoptical_propagation \
-    channel/uwoptical_channel
-
+Module/UW/CSMA_ALOHA set HDR_size_ 		0
+Module/UW/TDMA_GENERIC set ACK_size_  		10
+Module/UW/TDMA_GENERIC set max_tx_tries_	5
+Module/UW/TDMA_GENERIC set wait_costant_	0.1
+Module/UW/TDMA_GENERIC set debug_		0
+Module/UW/TDMA_GENERIC set backoff_tuner_   	1
+Module/UW/TDMA_GENERIC set max_payload_		125
+Module/UW/TDMA_GENERIC set ACK_timeout_		5.0
+Module/UW/TDMA_GENERIC set alpha_		0.8
+Module/UW/TDMA_GENERIC set buffer_pkts_		-1
+Module/UW/TDMA_GENERIC set max_backoff_counter_  4
+Module/UW/TDMA_GENERIC set listen_time_ 	0.5
+Module/UW/TDMA_GENERIC set MAC_addr_ 		0
