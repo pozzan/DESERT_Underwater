@@ -43,7 +43,7 @@ BUILT_SOURCES = initTcl.cc
 
 CLEANFILES = initTcl.cc
 
-TCL_FILES =  uwtdma-init.tcl
+# TCL_FILES =  uwtdma-init.tcl
 
 initTcl.cc: Makefile $(TCL_FILES)
 		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwtdmaTclCode > initTcl.cc 

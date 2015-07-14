@@ -46,6 +46,6 @@ CLEANFILES = initTcl.cc
 TCL_FILES =  uwtdma-fair-init.tcl
 
 initTcl.cc: Makefile $(TCL_FILES)
-		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwtdmaTclCode > initTcl.cc 
+		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwtdmaFairTclCode > initTcl.cc 
 
 EXTRA_DIST = $(TCL_FILES)

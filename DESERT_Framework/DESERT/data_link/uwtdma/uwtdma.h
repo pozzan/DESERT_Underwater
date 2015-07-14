@@ -29,10 +29,10 @@
 
 /**
  * @file   uwtdma.h
- * @author Filippo Campagnaro
+ * @author Filippo Campagnaro, Roberto Francescon
  * @version 1.0.0
  * 
- * \brief Provides the definition of the class <i>UWTDMA</i>.
+ * @brief Provides the definition of the class <i>UWTDMA</i>.
  * 
  */
 
@@ -57,16 +57,27 @@ class UwTDMA;
 /**
  * UwTDMATimer class is used to handle the scheduling period of <i>UWTDMA</i> slots.
  */
-class UwTDMATimer : public TimerHandler {
-public:
+class UwTDMATimer : public TimerHandler
+{
 
+ public:
+  /**
+   * Costructor of the class UwTDMATimer
+   * @param Pointer of a UwTDMA object
+   */
     UwTDMATimer(UwTDMA *m) : TimerHandler() {
         module = m;
-    }
-protected:
-    virtual void expire(Event *e);
-    UwTDMA* module;
+    } 
+
+ protected:
+  /**
+   * Method call when the timer expire
+   * @param Event*  pointer to an object of type Event
+   */
+  virtual void expire(Event *e);
+  UwTDMA* module;
 };
+
 
 /*class BufferTimer : public TimerHandler {
 public:
@@ -79,59 +90,94 @@ protected:
     UwTDMA* module;
 };*/
 
+
+/**
+ * Class that represents a TDMA Node
+ */
 class UwTDMA: public MMac {
-public:
-	UwTDMA();
 
-	virtual ~UwTDMA();
+  friend class UwTDMATimer;
 
-	/**
-     * Change TDMA status from 
-     */
-	virtual void change_tdma_status();
- 	
- 	/**
-     * Schedule the beginning of TDMA slots
-     */
-    virtual void start();
+ public:
 
-    virtual int command(int argc, const char*const* argv);
+  /**
+   * Constructor of the TDMA class
+   */
+  UwTDMA();
+  
+  /**
+   * Constructor of the TDMA class
+   */
+  virtual ~UwTDMA();
 
-	/**
-     * transmit a data packet whether is my slot
-     */
-    virtual void txData();
+  /**
+   * TCL command interpreter. It implements the following OTcl methods:
+   * 
+   * @param argc Number of arguments in <i>argv</i>.
+   * @param argv Array of strings which are the command parameters 
+                            (Note that <i>argv[0]</i> is the name of the object).
+   * @return TCL_OK or TCL_ERROR whether the command has been dispatched 
+                                                             successfully or not.
+   */
+  virtual int command(int argc, const char*const* argv);
 
-    /**
-     * state status my slot and and start to txData
-     */
-    virtual void stateTxData();
+ protected:
+
+  /**
+   * transmit a data packet whether is my slot
+   */
+  virtual void txData();
+  /**
+   * state status my slot and and start to txData
+   */
+  virtual void stateTxData();
+  /**
+   * Change TDMA status from ACTIVE to NOT-ACTIVE
+   */
+  virtual void change_tdma_status();
+  /**
+   * Schedule the beginning of TDMA slots
+   */
+  virtual void start();
+  /**
+   * Receive the packet from the upper layer (e.g. IP)
+   * @param Packet* pointer to the packet received
+   *
+   */
+  virtual void recvFromUpperLayers(Packet* p);
+  /**
+   * Method called when the Phy Layer finish to receive a Packet 
+   * @param const Packet* Pointer to an Packet object that rapresent the packet in reception
+   */
+  virtual void Phy2MacEndRx(Packet* p);
+  /**
+   * Method called when the Phy Layer start to receive a Packet 
+   * @param const Packet* Pointer to an Packet object that rapresent the Packet in reception
+   */
+  virtual void Phy2MacStartRx(const Packet* p);
+  /** 
+   * Method called when the Mac Layer start to transmit a Packet 
+   * @param const Packet* Pointer to an Packet object that rapresent the Packet in transmission
+   */
+  virtual void Mac2PhyStartTx(Packet* p);
+  /** 
+   * Method called when the Mac Layer finish to transmit a Packet 
+   * @param const Packet* Pointer to an Packet object that rapresent the Packet in transmission
+   */
+  virtual void Phy2MacEndTx(const Packet* p);
 
 
-protected:
-
-	int slot_status; //active or not
-	int channel_status;
-	int debug_;
-	double num_hosts;
-	double host_id;
-	double frame_time; // frame duration
-	double guard_time; // guard time between slots
-	double slot_duration; // slot duration
-	UwTDMATimer tdma_timer; // tdma handler
-	//BufferTimer buffer_timer; // buffer handler
-	std::queue<Packet*> buffer;
-
-	virtual void recvFromUpperLayers(Packet* p);
-
-	virtual void Phy2MacEndRx(Packet* p);
-
-	virtual void Phy2MacStartRx(const Packet* p);
-
-	virtual void Mac2PhyStartTx(Packet* p);
-
-    virtual void Phy2MacEndTx(const Packet* p);
-
+  int slot_status; //active or not
+  int channel_status;
+  int debug_;
+  double num_hosts;
+  double host_id;
+  double frame_time; // frame duration
+  double guard_time; // guard time between slots
+  double slot_duration; // slot duration
+  UwTDMATimer tdma_timer; // tdma handler
+  //BufferTimer buffer_timer; // buffer handler
+  std::queue<Packet*> buffer;
 
 };
 

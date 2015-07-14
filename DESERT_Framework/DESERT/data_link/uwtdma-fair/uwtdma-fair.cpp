@@ -32,12 +32,82 @@
  * @author Roberto Francescon
  * @version 0.0.1
  * 
- * \brief Provides the implementation of UwTDMAFair Class
+ * @brief Provides the implementation of UwTDMAFair class
  * 
  */
 
 #include "uwtdma-fair.h"
+#include "uwtdma.h"
 
-UwTDMAFair::UwTDMAFair(){}
+/**
+ * Class that represent the binding of the protocol with tcl
+ */
+static class TDMAFairModuleClass : public TclClass 
+{
+
+  public:
+
+   /**
+   * Constructor of the class TDMAFairModuleClass
+   */
+  TDMAFairModuleClass() : TclClass("Module/UW/TDMAFair") {}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
+  TclObject* create(int, const char*const*){
+    return (new UwTDMAFair());
+  }
+
+} class_uwtdmafair;
+
+
+UwTDMAFair::UwTDMAFair() : UwTDMA()
+{
+  bind("nodes_number", (int*)& nodes_number);
+}
 
 UwTDMAFair::~UwTDMAFair(){}
+
+
+int UwTDMAFair::command(int argc, const char*const* argv)
+{
+	Tcl& tcl = Tcl::instance();
+ 	if (argc==2){
+    	if(strcasecmp(argv[1], "start") == 0){
+	      start();
+	      return TCL_OK;
+	    }
+	    else if(strcasecmp(argv[1], "stop") == 0){
+	      tdma_timer.cancel();
+	      return TCL_OK;
+	    } 
+	    else if (strcasecmp(argv[1], "get_buffer_size") == 0){
+	    	tcl.resultf("%d", buffer.size());
+		  	return TCL_OK;
+	    }
+	    else if (strcasecmp(argv[1], "get_upper_data_pkts_rx") == 0){
+	      tcl.resultf("%d", up_data_pkts_rx);
+	      return TCL_OK;
+	    }
+  	}		
+	else if (argc==3){
+		if(strcasecmp(argv[1], "setSlotStatus") == 0){
+		        slot_status=atoi(argv[2]);
+			return TCL_OK;
+		}
+		else if(strcasecmp(argv[1], "setHostId") == 0){
+		        host_id=atoi(argv[2]);
+			return TCL_OK;
+		}
+                else if(strcasecmp(argv[1], "setSlotDuration") == 0){
+			slot_duration=atof(argv[2]);
+			return TCL_OK;
+                }
+                else if(strcasecmp(argv[1], "setFrameTime") == 0){
+			frame_time=atof(argv[2]);
+			return TCL_OK;
+		}
+	}
+	return MMac::command(argc, argv);
+}

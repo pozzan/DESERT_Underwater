@@ -33,7 +33,7 @@
  * @author Roberto Francescon
  * @version 0.0.1
  * 
- * \brief Provides the description of TDMAFair Class
+ * @brief Provides the description of TDMAFair Class
  * 
  */
 
@@ -42,25 +42,37 @@
 
 #include <uwtdma.h>
 
+/**
+ * Class that represents a TDMAFair Node
+ */
 class UwTDMAFair : public UwTDMA
 {
 
   public:
-
+  
+  /**
+   * Constructor of the TDMAFair class
+   */
   UwTDMAFair();
-
+  /**
+   * Destructor of the TDMAFair class
+   */
   ~UwTDMAFair();
+  /**
+   * TCL command interpreter. It implements the following OTcl methods:
+   * 
+   * @param argc Number of arguments in <i>argv</i>.
+   * @param argv Array of strings which are the command parameters 
+                            (Note that <i>argv[0]</i> is the name of the object).
+   * @return TCL_OK or TCL_ERROR whether the command has been dispatched 
+                                                             successfully or not.
+   */
+  virtual int command(int argc, const char*const* argv);
 
   protected:
-    int slot_status; //active or not
-    int channel_status;
-    int debug_;
-    double num_hosts;
-    double host_id;
-    double frame_time; // frame duration
-    double guard_time; // guard time between slots
-    double slot_duration; // slot duration
-    //UwTDMATimer tdma_timer; // tdma handler
+  
+  int nodes_number;    
+
 };
 
 #endif
