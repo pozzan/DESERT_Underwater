@@ -37,7 +37,6 @@
  */
 
 #include "uwtdma-fair.h"
-#include "uwtdma.h"
 
 /**
  * Class that represent the binding of the protocol with tcl
@@ -104,8 +103,8 @@ int UwTDMAFair::command(int argc, const char*const* argv)
 			slot_duration=atof(argv[2]);
 			return TCL_OK;
                 }
-                else if(strcasecmp(argv[1], "setFrameTime") == 0){
-			frame_time=atof(argv[2]);
+                else if(strcasecmp(argv[1], "setFrameDuration") == 0){
+			frame_duration=atof(argv[2]);
 			return TCL_OK;
 		}
 	}

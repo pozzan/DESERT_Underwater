@@ -41,6 +41,8 @@
 
 #include <mmac.h>
 #include <queue>
+#include <mphy.h>
+#include <iostream>
 
 #define UW_TDMA_STATUS_MY_SLOT 1 /**< Status slot active, whether TDMA modality is on >**/
 #define UW_TDMA_STATUS_NOT_MY_SLOT 2 /**< Status slot not active, whether TDMA modality is on >**/
@@ -147,24 +149,35 @@ class UwTDMA: public MMac {
   virtual void recvFromUpperLayers(Packet* p);
   /**
    * Method called when the Phy Layer finish to receive a Packet 
-   * @param const Packet* Pointer to an Packet object that rapresent the packet in reception
+   * @param const Packet* Pointer to an Packet object that rapresent the 
+   * Packet in reception
    */
   virtual void Phy2MacEndRx(Packet* p);
   /**
    * Method called when the Phy Layer start to receive a Packet 
-   * @param const Packet* Pointer to an Packet object that rapresent the Packet in reception
+   * @param const Packet* Pointer to an Packet object that rapresent the 
+   * Packet in reception
    */
   virtual void Phy2MacStartRx(const Packet* p);
   /** 
    * Method called when the Mac Layer start to transmit a Packet 
-   * @param const Packet* Pointer to an Packet object that rapresent the Packet in transmission
+   * @param const Packet* Pointer to an Packet object that rapresent the 
+   * Packet in transmission
    */
   virtual void Mac2PhyStartTx(Packet* p);
   /** 
    * Method called when the Mac Layer finish to transmit a Packet 
-   * @param const Packet* Pointer to an Packet object that rapresent the Packet in transmission
+   * @param const Packet* Pointer to an Packet object that rapresent the 
+   * Packet in transmission
    */
   virtual void Phy2MacEndTx(const Packet* p);
+  /** 
+   * Method called when the Packet received is determined to be not for me 
+   * @param const Packet* Pointer to an Packet object that rapresent the 
+   * Packet in reception
+   */
+  virtual void rxPacketNotForMe(Packet* p);
+
 
 
   int slot_status; //active or not
@@ -172,7 +185,7 @@ class UwTDMA: public MMac {
   int debug_;
   double num_hosts;
   double host_id;
-  double frame_time; // frame duration
+  double frame_duration; // frame duration
   double guard_time; // guard time between slots
   double slot_duration; // slot duration
   UwTDMATimer tdma_timer; // tdma handler
