@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ static class TDMAFairModuleClass : public TclClass
    /**
    * Constructor of the class TDMAFairModuleClass
    */
-  TDMAFairModuleClass() : TclClass("Module/UW/TDMAFair") {}
+  TDMAFairModuleClass() : TclClass("Module/UW/TDMAFair"){}
   /**
    * Creates the TCL object needed for the tcl language interpretation
    * @return Pointer to an TclObject
@@ -63,7 +63,8 @@ static class TDMAFairModuleClass : public TclClass
 
 UwTDMAFair::UwTDMAFair() : UwTDMA()
 {
-  bind("nodes_number", (int*)& nodes_number);
+  bind("number_slots",   (int*)& number_slots);
+  bind("start_slot",     (int*)& start_slot);
 }
 
 UwTDMAFair::~UwTDMAFair(){}
@@ -74,9 +75,16 @@ int UwTDMAFair::command(int argc, const char*const* argv)
 	Tcl& tcl = Tcl::instance();
  	if (argc==2){
     	if(strcasecmp(argv[1], "start") == 0){
-	      start();
-	      return TCL_OK;
-	    }
+	  if (number_slots==0){
+	    std::cout<<"Error: number of slots set to 0"<<std::endl;
+            return TCL_ERROR;
+	  }
+	  else {
+	    slot_duration = frame_duration/number_slots;
+	    start(slot_number*slot_duration);
+	    return TCL_OK;
+	  }
+	 }
 	    else if(strcasecmp(argv[1], "stop") == 0){
 	      tdma_timer.cancel();
 	      return TCL_OK;
@@ -91,21 +99,15 @@ int UwTDMAFair::command(int argc, const char*const* argv)
 	    }
   	}		
 	else if (argc==3){
-		if(strcasecmp(argv[1], "setSlotStatus") == 0){
-		        slot_status=atoi(argv[2]);
-			return TCL_OK;
+		if(strcasecmp(argv[1], "setSlotNumber") == 0){
+		  slot_number=atoi(argv[2]);
+		  return TCL_OK;
 		}
-		else if(strcasecmp(argv[1], "setHostId") == 0){
-		        host_id=atoi(argv[2]);
-			return TCL_OK;
-		}
-                else if(strcasecmp(argv[1], "setSlotDuration") == 0){
-			slot_duration=atof(argv[2]);
-			return TCL_OK;
-                }
-                else if(strcasecmp(argv[1], "setFrameDuration") == 0){
-			frame_duration=atof(argv[2]);
-			return TCL_OK;
+		else if(strcasecmp(argv[1],"setMacAddr") == 0){
+		  addr = atoi(argv[2]);
+		  if(debug_) cout << "TDMA MAC address of current node is " 
+				  << addr <<endl;
+		  return TCL_OK;
 		}
 	}
 	return MMac::command(argc, argv);

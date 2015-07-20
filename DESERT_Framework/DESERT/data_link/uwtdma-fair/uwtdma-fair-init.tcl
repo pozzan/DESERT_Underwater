@@ -29,20 +29,23 @@
 # Author: Roberto Francescon
 # Version: 0.0.1
 
-Module/UW/TDMAFair set HDR_size_ 	       0
-Module/UW/TDMAFair set ACK_size_  	       10
-Module/UW/TDMAFair set max_tx_tries_	       5
-Module/UW/TDMAFair set wait_costant_	       0.1
-Module/UW/TDMAFair set debug_		       0
-Module/UW/TDMAFair set backoff_tuner_         1
-Module/UW/TDMAFair set max_payload_	       125
+Module/UW/TDMAFair set HDR_size_ 	        0
+Module/UW/TDMAFair set ACK_size_  	        10
+Module/UW/TDMAFair set max_tx_tries_	        5
+Module/UW/TDMAFair set wait_costant_	        0.1
+Module/UW/TDMAFair set debug_		        0
+Module/UW/TDMAFair set backoff_tuner_           1
+Module/UW/TDMAFair set max_payload_	        125
 Module/UW/TDMAFair set ACK_timeout_	        5.0
 Module/UW/TDMAFair set alpha_		        0.8
 Module/UW/TDMAFair set buffer_pkts_	        -1
-Module/UW/TDMAFair set max_backoff_counter_    4
+Module/UW/TDMAFair set max_backoff_counter_     4
 Module/UW/TDMAFair set listen_time_ 	        0.5
-Module/UW/TDMAFair set MAC_addr_ 		0
-Module/UW/TDMAFair set slot_status 		1
+Module/UW/TDMAFair set addr      		0
+Module/UW/TDMAFair set slot_status 		2
+Module/UW/TDMAFair set slot_duration 		0
+Module/UW/TDMAFair set frame_duration 		0
+Module/UW/TDMAFair set start_slot 		0
 
 # Module/UW/TDMAFair instproc init {args} {
 #     $self next $args

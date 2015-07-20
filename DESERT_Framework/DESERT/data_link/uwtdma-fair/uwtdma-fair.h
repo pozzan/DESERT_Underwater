@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @author Roberto Francescon
  * @version 0.0.1
  * 
- * @brief Provides the description of TDMAFair Class
+ * @brief A TDMA MAC algorithm with equal length time slots.
  * 
  */
 
@@ -71,7 +71,9 @@ class UwTDMAFair : public UwTDMA
 
   protected:
   
-  int nodes_number;    
+  int start_slot; //slot from which will start the TDMA simulation
+  int slot_number;  //set the position of the node in the frame
+  int number_slots; //simply the number of nodes in the simulation   
 
 };
 

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,8 @@ class UwTDMATimer : public TimerHandler
    * Costructor of the class UwTDMATimer
    * @param Pointer of a UwTDMA object
    */
-    UwTDMATimer(UwTDMA *m) : TimerHandler() {
-        module = m;
+    UwTDMATimer(UwTDMA* m) : TimerHandler() {
+        module = m; 
     } 
 
  protected:
@@ -78,6 +78,7 @@ class UwTDMATimer : public TimerHandler
    */
   virtual void expire(Event *e);
   UwTDMA* module;
+
 };
 
 
@@ -121,7 +122,7 @@ class UwTDMA: public MMac {
    * @return TCL_OK or TCL_ERROR whether the command has been dispatched 
                                                              successfully or not.
    */
-  virtual int command(int argc, const char*const* argv);
+  /* virtual int command(int argc, const char*const* argv); */
 
  protected:
 
@@ -136,11 +137,11 @@ class UwTDMA: public MMac {
   /**
    * Change TDMA status from ACTIVE to NOT-ACTIVE
    */
-  virtual void change_tdma_status();
+  virtual void changeStatus();
   /**
    * Schedule the beginning of TDMA slots
    */
-  virtual void start();
+  virtual void start(float delay);
   /**
    * Receive the packet from the upper layer (e.g. IP)
    * @param Packet* pointer to the packet received
@@ -179,17 +180,15 @@ class UwTDMA: public MMac {
   virtual void rxPacketNotForMe(Packet* p);
 
 
-
-  int slot_status; //active or not
-  int channel_status;
-  int debug_;
-  double num_hosts;
-  double host_id;
-  double frame_duration; // frame duration
-  double guard_time; // guard time between slots
-  double slot_duration; // slot duration
-  UwTDMATimer tdma_timer; // tdma handler
-  //BufferTimer buffer_timer; // buffer handler
+  int slot_status; //is it my turn to transmit data?
+  int channel_status; //set the channel status
+  int debug_;  //debug variable
+  int addr; //MAC address of the node
+  double frame_duration; //frame duration
+  double guard_time; //guard time between slots
+  double slot_duration; //slot duration
+  UwTDMATimer tdma_timer; //tdma handler
+  //BufferTimer buffer_timer; //buffer handler
   std::queue<Packet*> buffer;
 
 };
