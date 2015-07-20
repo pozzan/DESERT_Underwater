@@ -102,7 +102,7 @@ void UwTDMA::Mac2PhyStartTx(Packet* p)
 
 void UwTDMA::Phy2MacEndTx(const Packet* p)
 {
-  // stateTxData();
+  stateTxData();
 }
 
 void UwTDMA::Phy2MacStartRx(const Packet* p)
@@ -165,7 +165,7 @@ void UwTDMA::changeStatus()
     if(debug_<-5)
       std::cout <<NOW<< " On id " << addr << " " << slot_duration-guard_time 
 		<< "" << std::endl;
-    // stateTxData();
+    stateTxData();
   }
 }
 
