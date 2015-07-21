@@ -29,7 +29,8 @@
 # Author: Roberto Francescon
 # Version: 0.0.1
 
-Module/UW/TDMAFair set HDR_size_ 	        0
+#why rebind this and not use the base class one?
+Module/UW/TDMAFair set HDR_size_ 	        0 
 Module/UW/TDMAFair set ACK_size_  	        10
 Module/UW/TDMAFair set max_tx_tries_	        5
 Module/UW/TDMAFair set wait_costant_	        0.1

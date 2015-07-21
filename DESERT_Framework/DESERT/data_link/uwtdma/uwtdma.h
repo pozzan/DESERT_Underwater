@@ -113,14 +113,14 @@ class UwTDMA: public MMac {
    */
   virtual void stateTxData();
   /**
-   * Alternate TDMA status between MY_STATUS and NOT_MAY_STATUS
+   * Alternate TDMA status between MY_STATUS and NOT_MY_STATUS
    */
   virtual void changeStatus();
   /**
    * Schedule the beginning of each TDMA cycle, each one after \p delay
    * @param delay to await before starting the TDMA
    */
-  virtual void start(float delay);
+  virtual void start(float delay); //@fgue why float and not double?
   /**
    * Receive the packet from the upper layer (e.g. IP)
    * @param Packet* pointer to the packet received
