@@ -46,8 +46,3 @@ Module/UW/TDMAFair set slot_status 		2
 Module/UW/TDMAFair set slot_duration 		0
 Module/UW/TDMAFair set frame_duration 		0
 Module/UW/TDMAFair set start_slot 		0
-
-# Module/UW/TDMAFair instproc init {args} {
-#     $self next $args
-#     $self settag "UW/TDMAF"
-# }

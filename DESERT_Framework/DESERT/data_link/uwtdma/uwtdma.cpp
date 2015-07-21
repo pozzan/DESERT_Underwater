@@ -29,8 +29,9 @@
 
 /**
  * @file   uwtdma.h
- * @author Filippo Campagnaro, Roberto Francescon
- * @version 1.0.0
+ * @author Filippo Campagnaro
+ * @author Roberto Francescon
+ * @version 1.0.1
  * 
  * @brief Provides the implementation of the class <i>UWTDMA</i>.
  * 
@@ -41,38 +42,46 @@
 #include <stdint.h>
 #include <mac.h>
 
-void UwTDMATimer::expire(Event *e) {
+void UwTDMATimer::expire(Event *e)
+{
     ((UwTDMA *)module)->changeStatus();
 }
 
-/*void BufferTimer::expire(Event *e) {
-    ((UwTDMA *)module)->stateTxData();
-}*/
+UwTDMA::UwTDMA() 
+:
+  MMac(), tdma_timer(this), 
+  slot_status(UW_TDMA_STATUS_NOT_MY_SLOT), 
+  channel_status(UW_CHANNEL_IDLE),
+  tdma_sent_pkts(0),
+  tdma_recv_pkts(0) 
 
-UwTDMA::UwTDMA() : MMac(), tdma_timer(this), slot_status(UW_TDMA_STATUS_NOT_MY_SLOT){//, buffer_timer(this) {
+{
   bind("slot_status", (int*)& slot_status);
   bind("slot_duration", (double*)& slot_duration);
   bind("frame_duration", (double*)& frame_duration);
   bind("guard_time", (double*)& guard_time);
   bind("debug_", (int*) & debug_);
-  channel_status=UW_CHANNEL_IDLE;
 }
 
 UwTDMA::~UwTDMA() {}
 
-void UwTDMA::recvFromUpperLayers(Packet* p){
- 	buffer.push(p);
-	incrUpperDataRx();
-  	txData();
+void UwTDMA::recvFromUpperLayers(Packet* p)
+{
+  initPkt(p);
+  buffer.push(p);
+  incrUpperDataRx();
+  txData();
 }
 
-void UwTDMA::stateTxData(){
-	// channel_status=UW_CHANNEL_IDLE;
-	txData();
+void UwTDMA::stateTxData()
+{
+  channel_status=UW_CHANNEL_IDLE;
+  txData();
 }
 
-void UwTDMA::txData(){
-  if(slot_status==UW_TDMA_STATUS_MY_SLOT){//&& channel_status==UW_CHANNEL_IDLE){
+void UwTDMA::txData()
+{
+  if(slot_status==UW_TDMA_STATUS_MY_SLOT && channel_status==UW_CHANNEL_IDLE){
     if(buffer.size()>0){
       Packet* p = buffer.front();
       buffer.pop();
@@ -80,7 +89,8 @@ void UwTDMA::txData(){
       incrDataPktsTx();
     }
   }
-  else if(debug_<-5){
+  else if(debug_<-5)
+  {
     if(slot_status!=UW_TDMA_STATUS_MY_SLOT)
       std::cout << NOW << " ID " << addr << ": Wait my slot to send" 
 		<< std::endl;
@@ -93,11 +103,10 @@ void UwTDMA::txData(){
 
 void UwTDMA::Mac2PhyStartTx(Packet* p)
 {
-  // channel_status=UW_CHANNEL_BUSY;
+  channel_status=UW_CHANNEL_BUSY;
   MMac::Mac2PhyStartTx(p);
-  //buffer_timer.resched(Mac2PhyTxDuration(p)*1.001);
   if(debug_<-5)
-    std::cout << NOW << " Send packet id " << addr << "" << std::endl;
+    std::cout << NOW <<" ID "<< addr << ": Sending packet" << std::endl;
 }
 
 void UwTDMA::Phy2MacEndTx(const Packet* p)
@@ -107,7 +116,7 @@ void UwTDMA::Phy2MacEndTx(const Packet* p)
 
 void UwTDMA::Phy2MacStartRx(const Packet* p)
 {
-  // channel_status=UW_CHANNEL_BUSY;
+  channel_status=UW_CHANNEL_BUSY;
 }
 
 void UwTDMA::Phy2MacEndRx(Packet* p)
@@ -115,7 +124,8 @@ void UwTDMA::Phy2MacEndRx(Packet* p)
   hdr_cmn* ch = HDR_CMN(p);
   hdr_mac* mach = HDR_MAC(p);
   int dest_mac = mach->macDA();
-  // channel_status=UW_CHANNEL_IDLE;
+  int src_mac = mach->macSA();
+  channel_status=UW_CHANNEL_IDLE;
 
   if ( ch->error() ){
     if (debug_) 
@@ -124,12 +134,17 @@ void UwTDMA::Phy2MacEndRx(Packet* p)
     rxPacketNotForMe(NULL);
   }
   else { 
-    if ( dest_mac != addr || dest_mac != MAC_BROADCAST ) {
+    if ( dest_mac != addr && dest_mac != MAC_BROADCAST ) {
       rxPacketNotForMe(p);
+      if (debug_<-5)
+	std::cout<<NOW<<" ID "<<addr<<": packet was for "<<dest_mac<<std::endl;
     }
     else {
       sendUp(p);
       incrDataPktsRx();
+      if (debug_<-5)
+	std::cout<<NOW<<" ID "<<addr<<": Received packet from "
+                                    << src_mac<<std::endl;
     }
   }
   if(slot_status==UW_TDMA_STATUS_MY_SLOT){
@@ -138,13 +153,20 @@ void UwTDMA::Phy2MacEndRx(Packet* p)
 
 }
 
+void UwTDMA::initPkt(Packet* p)
+{
+  hdr_cmn* ch = hdr_cmn::access(p);
+  hdr_mac* mach = HDR_MAC(p);
+
+  int curr_size = ch->size();
+
+  ch->size() = curr_size + HDR_size;
+}
+
 void UwTDMA::rxPacketNotForMe(Packet* p)
 {
   if ( p != NULL ) 
     Packet::free(p);
-  else if (debug_)
-    std::cout << NOW << "Host ID: " << addr << " Not intended recipient" 
-  	      << endl;
 }
 
 void UwTDMA::changeStatus()
@@ -182,8 +204,10 @@ void UwTDMA::start(float delay)
   // if(debug_<-5)
   //   std::cout << NOW << " Status " << slot_status << " id " << addr 
   // 	      << "" << std::endl;
+
   tdma_timer.sched(delay);
+
   if(debug_<-5)
-    std::cout << NOW << " Status " << slot_status << " id " << addr 
+    std::cout << NOW << " Status " << slot_status << " on ID " << addr 
   	      << "" << std::endl;
 }

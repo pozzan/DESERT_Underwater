@@ -63,8 +63,9 @@ static class TDMAFairModuleClass : public TclClass
 
 UwTDMAFair::UwTDMAFair() : UwTDMA()
 {
-  bind("number_slots",   (int*)& number_slots);
-  bind("start_slot",     (int*)& start_slot);
+  bind("tot_slots",    (int*)& tot_slots);
+  bind("start_slot",   (int*)& start_slot);
+  bind("HDR_size",     (int*)& HDR_size);
 }
 
 UwTDMAFair::~UwTDMAFair(){}
@@ -74,34 +75,49 @@ int UwTDMAFair::command(int argc, const char*const* argv)
 {
 	Tcl& tcl = Tcl::instance();
  	if (argc==2){
-    	if(strcasecmp(argv[1], "start") == 0){
-	  if (number_slots==0){
-	    std::cout<<"Error: number of slots set to 0"<<std::endl;
-            return TCL_ERROR;
+	  if(strcasecmp(argv[1], "start") == 0){
+	    if (tot_slots==0){
+	      std::cout<<"Error: number of slots set to 0"<<std::endl;
+	      return TCL_ERROR;
+	    }
+	    else {
+	      slot_duration = frame_duration/tot_slots;
+	      start(slot_number*slot_duration);
+	      return TCL_OK;
+	    }
 	  }
-	  else {
-	    slot_duration = frame_duration/number_slots;
-	    start(slot_number*slot_duration);
+	  else if(strcasecmp(argv[1], "stop") == 0){
+	    tdma_timer.cancel();
+	    return TCL_OK;
+	  } 
+	  else if (strcasecmp(argv[1], "get_buffer_size") == 0){
+	    tcl.resultf("%d", buffer.size());
 	    return TCL_OK;
 	  }
-	 }
-	    else if(strcasecmp(argv[1], "stop") == 0){
-	      tdma_timer.cancel();
-	      return TCL_OK;
-	    } 
-	    else if (strcasecmp(argv[1], "get_buffer_size") == 0){
-	    	tcl.resultf("%d", buffer.size());
-		  	return TCL_OK;
-	    }
-	    else if (strcasecmp(argv[1], "get_upper_data_pkts_rx") == 0){
+	  else if (strcasecmp(argv[1], "get_sent_pkts") == 0){
+	    tcl.resultf("%d", data_pkts_tx);
+	    return TCL_OK;
+	  }
+	  else if (strcasecmp(argv[1], "get_recv_pkts") == 0){
+	    tcl.resultf("%d", data_pkts_rx);
+	    return TCL_OK;
+	  }
+	  else if (strcasecmp(argv[1], "get_upper_data_pkts_rx") == 0){
 	      tcl.resultf("%d", up_data_pkts_rx);
 	      return TCL_OK;
-	    }
-  	}		
+	  }
+        }		
 	else if (argc==3){
 		if(strcasecmp(argv[1], "setSlotNumber") == 0){
-		  slot_number=atoi(argv[2]);
-		  return TCL_OK;
+                  if(atoi(argv[2]) > tot_slots-1){
+		    if(debug_)
+		      std::cout<<"Error: slot assignment not valid"<<std::endl;
+		    return TCL_ERROR;
+		  }
+		  else {
+		    slot_number=atoi(argv[2]);
+		    return TCL_OK;
+		  }
 		}
 		else if(strcasecmp(argv[1],"setMacAddr") == 0){
 		  addr = atoi(argv[2]);

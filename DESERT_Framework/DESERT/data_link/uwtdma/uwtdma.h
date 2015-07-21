@@ -29,8 +29,9 @@
 
 /**
  * @file   uwtdma.h
- * @author Filippo Campagnaro, Roberto Francescon
- * @version 1.0.0
+ * @author Filippo Campagnaro
+ * @author Roberto Francescon
+ * @version 1.0.1
  * 
  * @brief Provides the definition of the class <i>UWTDMA</i>.
  * 
@@ -44,8 +45,8 @@
 #include <mphy.h>
 #include <iostream>
 
-#define UW_TDMA_STATUS_MY_SLOT 1 /**< Status slot active, whether TDMA modality is on >**/
-#define UW_TDMA_STATUS_NOT_MY_SLOT 2 /**< Status slot not active, whether TDMA modality is on >**/
+#define UW_TDMA_STATUS_MY_SLOT 1 /**< Status slot active>*/
+#define UW_TDMA_STATUS_NOT_MY_SLOT 2 /**< Status slot not active >*/
 
 #define UW_CHANNEL_IDLE 1  // status channel idle
 #define UW_CHANNEL_BUSY 2  // status channel busy
@@ -82,18 +83,6 @@ class UwTDMATimer : public TimerHandler
 };
 
 
-/*class BufferTimer : public TimerHandler {
-public:
-
-    BufferTimer(UwTDMA *m) : TimerHandler() {
-        module = m;
-    }
-protected:
-    virtual void expire(Event *e);
-    UwTDMA* module;
-};*/
-
-
 /**
  * Class that represents a TDMA Node
  */
@@ -109,37 +98,27 @@ class UwTDMA: public MMac {
   UwTDMA();
   
   /**
-   * Constructor of the TDMA class
+   * Destructor of the TDMA class
    */
   virtual ~UwTDMA();
-
-  /**
-   * TCL command interpreter. It implements the following OTcl methods:
-   * 
-   * @param argc Number of arguments in <i>argv</i>.
-   * @param argv Array of strings which are the command parameters 
-                            (Note that <i>argv[0]</i> is the name of the object).
-   * @return TCL_OK or TCL_ERROR whether the command has been dispatched 
-                                                             successfully or not.
-   */
-  /* virtual int command(int argc, const char*const* argv); */
 
  protected:
 
   /**
-   * transmit a data packet whether is my slot
+   * Transmit a data packet if in my slot
    */
   virtual void txData();
   /**
-   * state status my slot and and start to txData
+   * Change channel status and and start to transmit if in my slot
    */
   virtual void stateTxData();
   /**
-   * Change TDMA status from ACTIVE to NOT-ACTIVE
+   * Alternate TDMA status between MY_STATUS and NOT_MAY_STATUS
    */
   virtual void changeStatus();
   /**
-   * Schedule the beginning of TDMA slots
+   * Schedule the beginning of each TDMA cycle, each one after \p delay
+   * @param delay to await before starting the TDMA
    */
   virtual void start(float delay);
   /**
@@ -160,36 +139,44 @@ class UwTDMA: public MMac {
    * Packet in reception
    */
   virtual void Phy2MacStartRx(const Packet* p);
-  /** 
+  /**
    * Method called when the Mac Layer start to transmit a Packet 
    * @param const Packet* Pointer to an Packet object that rapresent the 
    * Packet in transmission
    */
   virtual void Mac2PhyStartTx(Packet* p);
-  /** 
+  /**
    * Method called when the Mac Layer finish to transmit a Packet 
    * @param const Packet* Pointer to an Packet object that rapresent the 
    * Packet in transmission
    */
   virtual void Phy2MacEndTx(const Packet* p);
-  /** 
+  /**
    * Method called when the Packet received is determined to be not for me 
    * @param const Packet* Pointer to an Packet object that rapresent the 
    * Packet in reception
    */
   virtual void rxPacketNotForMe(Packet* p);
+  /**
+   * Method called to add the MAC header size 
+   * @param const Packet* Pointer to an Packet object that rapresent the 
+   * Packet in transmission
+   */
+  virtual void initPkt(Packet* p);
 
 
   int slot_status; //is it my turn to transmit data?
   int channel_status; //set the channel status
   int debug_;  //debug variable
   int addr; //MAC address of the node
+  int tdma_sent_pkts; //counter for the sent packets
+  int tdma_recv_pkts; //counter for the received packets
+  int HDR_size; // Size of the HDR if any 
   double frame_duration; //frame duration
   double guard_time; //guard time between slots
   double slot_duration; //slot duration
-  UwTDMATimer tdma_timer; //tdma handler
-  //BufferTimer buffer_timer; //buffer handler
-  std::queue<Packet*> buffer;
+  UwTDMATimer tdma_timer; //tdma timer handler
+  std::queue<Packet*> buffer; // buffer of the MAC node
 
 };
 
