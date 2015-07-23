@@ -31,7 +31,7 @@
 /**
  * @file   uwtdma-fair.h
  * @author Roberto Francescon
- * @version 0.0.1
+ * @version 0.1.0
  * 
  * @brief A TDMA MAC algorithm with equal length time slots.
  * 
@@ -48,7 +48,7 @@
 class UwTDMAFair : public UwTDMA
 {
 
-  public:
+ public:
   
   /**
    * Constructor of the TDMAFair class
@@ -63,17 +63,18 @@ class UwTDMAFair : public UwTDMA
    * 
    * @param argc Number of arguments in <i>argv</i>.
    * @param argv Array of strings which are the command parameters 
-                            (Note that <i>argv[0]</i> is the name of the object).
+                           (Note that <i>argv[0]</i> is the name of the object).
    * @return TCL_OK or TCL_ERROR whether the command has been dispatched 
-                                                             successfully or not.
+                                                            successfully or not.
    */
   virtual int command(int argc, const char*const* argv);
 
-  protected:
+ protected:
   
-  int start_slot; //slot from which will start the TDMA simulation
-  int slot_number; //set the position of the node in the frame (starting from 0 to tot_slots-1)
-  int tot_slots; //simply the number of nodes in the simulation   
+  int start_slot;  /**Slot from which will start the TDMA simulation*/
+  int slot_number; /**set the position of the node in the frame 
+                                    (starting from 0 to tot_slots-1)*/
+  int tot_slots;   /**simply the number of nodes in the simulation*/
 
 };
 

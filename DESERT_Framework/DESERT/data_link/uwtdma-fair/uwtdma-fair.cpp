@@ -30,7 +30,7 @@
 /**
  * @file   uwtdma-fair.cpp
  * @author Roberto Francescon
- * @version 0.0.1
+ * @version 0.1.0
  * 
  * @brief Provides the implementation of UwTDMAFair class
  * 
@@ -54,7 +54,8 @@ static class TDMAFairModuleClass : public TclClass
    * Creates the TCL object needed for the tcl language interpretation
    * @return Pointer to an TclObject
    */
-  TclObject* create(int, const char*const*){
+  TclObject* create(int, const char*const*)
+  {
     return (new UwTDMAFair());
   }
 
@@ -65,7 +66,6 @@ UwTDMAFair::UwTDMAFair() : UwTDMA()
 {
   bind("tot_slots",    (int*)& tot_slots);
   bind("start_slot",   (int*)& start_slot);
-  bind("HDR_size",     (int*)& HDR_size); //@fgue why rebind this again? it was already binded by base class
 }
 
 UwTDMAFair::~UwTDMAFair(){}
@@ -73,73 +73,81 @@ UwTDMAFair::~UwTDMAFair(){}
 
 int UwTDMAFair::command(int argc, const char*const* argv)
 {
-	Tcl& tcl = Tcl::instance();
- 	if (argc==2)
+  Tcl& tcl = Tcl::instance();
+  if (argc==2)
   {
-	  if(strcasecmp(argv[1], "start") == 0)
+    if(strcasecmp(argv[1], "start") == 0)
     {
-	    if (tot_slots==0)
+      if (tot_slots==0)
       {
-	      std::cout<<"Error: number of slots set to 0"<<std::endl;
-	      return TCL_ERROR;
-	    }
-	    else 
+        std::cout<<"Error: number of slots set to 0"<<std::endl;
+        return TCL_ERROR;
+      }
+      else 
       {
-	      slot_duration = frame_duration/tot_slots;
-	      start(slot_number*slot_duration);
-	      return TCL_OK;
-	    }
-	  }
-	  else if(strcasecmp(argv[1], "stop") == 0)
+        slot_duration = frame_duration/tot_slots;
+        if (slot_duration - guard_time < 0)
+	{
+	  std::cout<<"Error: guard time or frame set incorrectly"<<std::endl;  
+          return TCL_ERROR;
+        }
+        else
+	{
+          start(slot_number*slot_duration);
+          return TCL_OK;
+        }
+      }
+    }
+    else if(strcasecmp(argv[1], "stop") == 0)
     {
-	    tdma_timer.cancel();
-	    return TCL_OK;
-	  } 
-	  else if (strcasecmp(argv[1], "get_buffer_size") == 0)
+      tdma_timer.cancel();
+      return TCL_OK;
+    } 
+    else if (strcasecmp(argv[1], "get_buffer_size") == 0)
     {
-	    tcl.resultf("%d", buffer.size());
-	    return TCL_OK;
-	  }
-	  else if (strcasecmp(argv[1], "get_sent_pkts") == 0)
+      tcl.resultf("%d", buffer.size());
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_sent_pkts") == 0)
     {
-	    tcl.resultf("%d", data_pkts_tx);
-	    return TCL_OK;
-	  }
-	  else if (strcasecmp(argv[1], "get_recv_pkts") == 0)
+      tcl.resultf("%d", data_pkts_tx);
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_recv_pkts") == 0)
     {
-	    tcl.resultf("%d", data_pkts_rx);
-	    return TCL_OK;
-	  }
-	  else if (strcasecmp(argv[1], "get_upper_data_pkts_rx") == 0){
-      
-	      tcl.resultf("%d", up_data_pkts_rx);
-	      return TCL_OK;
-	  }
+      tcl.resultf("%d", data_pkts_rx);
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_upper_data_pkts_rx") == 0)
+    {  
+      tcl.resultf("%d", up_data_pkts_rx);
+      return TCL_OK;
+    }
   }		
-	else if (argc==3)
+  else if (argc==3)
   {
-		if(strcasecmp(argv[1], "setSlotNumber") == 0)
+    if(strcasecmp(argv[1], "setSlotNumber") == 0)
     {
       if(atoi(argv[2]) > tot_slots-1)
       {
-		    if(debug_)
-		      std::cout<<"Error: slot assignment not valid"<<std::endl;
-		    return TCL_ERROR;
-		  }
-		  else 
+        if(debug_)
+	  std::cout<<"Error: slot assignment not valid"<<std::endl;
+	return TCL_ERROR;
+      }
+      else 
       {
-		    slot_number=atoi(argv[2]);
-		    return TCL_OK;
-		  }
-		}
-		else if(strcasecmp(argv[1],"setMacAddr") == 0)
+        slot_number=atoi(argv[2]);
+        return TCL_OK;
+      }
+    }
+    else if(strcasecmp(argv[1],"setMacAddr") == 0)
     {
-		  addr = atoi(argv[2]);
-		  if(debug_) cout << "TDMA MAC address of current node is " 
-                      << addr <<endl;
-      
-		  return TCL_OK;
-		}
-	}
-	return MMac::command(argc, argv);
+      addr = atoi(argv[2]);
+      if(debug_) cout << "TDMA MAC address of current node is " 
+		      << addr <<std::endl;
+    
+      return TCL_OK;
+    }
+  }
+  return MMac::command(argc, argv);
 }

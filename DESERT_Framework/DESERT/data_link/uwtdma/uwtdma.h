@@ -31,7 +31,7 @@
  * @file   uwtdma.h
  * @author Filippo Campagnaro
  * @author Roberto Francescon
- * @version 1.0.1
+ * @version 1.0.0
  * 
  * @brief Provides the definition of the class <i>UWTDMA</i>.
  * 
@@ -44,6 +44,7 @@
 #include <queue>
 #include <mphy.h>
 #include <iostream>
+#include <assert.h>
 
 #define UW_TDMA_STATUS_MY_SLOT 1 /**< Status slot active>*/
 #define UW_TDMA_STATUS_NOT_MY_SLOT 2 /**< Status slot not active >*/
@@ -68,9 +69,11 @@ class UwTDMATimer : public TimerHandler
    * Costructor of the class UwTDMATimer
    * @param Pointer of a UwTDMA object
    */
-    UwTDMATimer(UwTDMA* m) : TimerHandler() {
-        module = m; 
-    } 
+  UwTDMATimer(UwTDMA* m) : TimerHandler() 
+  {
+    assert(m != NULL);
+    module = m; 
+  } 
 
  protected:
   /**
@@ -109,7 +112,8 @@ class UwTDMA: public MMac {
    */
   virtual void txData();
   /**
-   * Change channel status and and start to transmit if in my slot
+   * Change transceiver status and and start to transmit if in my slot
+   * Used when there's spare time, useful for transmitting other packtes.
    */
   virtual void stateTxData();
   /**
@@ -120,7 +124,7 @@ class UwTDMA: public MMac {
    * Schedule the beginning of each TDMA cycle, each one after \p delay
    * @param delay to await before starting the TDMA
    */
-  virtual void start(float delay); //@fgue why float and not double?
+  virtual void start(double delay);
   /**
    * Receive the packet from the upper layer (e.g. IP)
    * @param Packet* pointer to the packet received
@@ -164,19 +168,25 @@ class UwTDMA: public MMac {
    */
   virtual void initPkt(Packet* p);
 
+  /**
+   * Enumeration class of UWTDMA status.
+   */
+  enum UWTDMA_STATUS {IDLE, TRANSMITTING, RECEIVING};
 
-  int slot_status; //is it my turn to transmit data?
-  int channel_status; //set the channel status
-  int debug_;  //debug variable
-  int addr; //MAC address of the node
-  int tdma_sent_pkts; //counter for the sent packets
-  int tdma_recv_pkts; //counter for the received packets
-  int HDR_size; // Size of the HDR if any 
-  double frame_duration; //frame duration
-  double guard_time; //guard time between slots
-  double slot_duration; //slot duration
-  UwTDMATimer tdma_timer; //tdma timer handler
-  std::queue<Packet*> buffer; // buffer of the MAC node
+
+  UWTDMA_STATUS transceiver_status; /**Variable holding the status enum type*/
+  int slot_status;              /**Is it my turn to transmit data?*/
+  int channel_status;           /**set the channel status*/
+  int debug_;                   /**Debug variable*/
+  int addr;                     /**MAC address of the node*/
+  int tdma_sent_pkts;           /**Counter for the sent packets*/
+  int tdma_recv_pkts;           /**Counter for the received packets*/
+  int HDR_size;                 /**Size of the HDR if any*/
+  double frame_duration;        /**Frame duration*/
+  double guard_time;            /**Guard time between slots*/
+  double slot_duration;         /**Slot duration*/
+  UwTDMATimer tdma_timer;       /**TDMA timer handler*/
+  std::queue<Packet*> buffer;   /** Buffer of the MAC node*/
 
 };
 

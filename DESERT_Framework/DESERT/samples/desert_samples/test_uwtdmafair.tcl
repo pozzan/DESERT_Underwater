@@ -101,7 +101,7 @@ set opt(start_clock) [clock seconds]
 
 set opt(nn)                 3 ;# Number of Nodes
 set opt(starttime)          1	
-set opt(stoptime)           10001
+set opt(stoptime)           1001
 set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration of the simulation
 set opt(txpower)            160;#158.263 ;#Power transmitted in dB re uPa 185.8 is the maximum
 set opt(propagation_speed) 1500;# m/s
@@ -131,7 +131,7 @@ if {$opt(bash_parameters)} {
 		$rng seed         $opt(seedcbr)
 	}
 } else {
-	set opt(cbr_period)     4
+	set opt(cbr_period)     6
 	set opt(pktsize)	1250
 	set opt(seedcbr)	1
 }
@@ -162,9 +162,9 @@ Module/UW/CBR set debug_               0
 
 ### TDMA MAC ###
 Module/UW/TDMAFair set frame_duration  9
-Module/UW/TDMAFair set guard_time      1
+Module/UW/TDMAFair set guard_time      0.05
 Module/UW/TDMAFair set tot_slots       $opt(nn)
-Module/UW/TDMAFair set debug_          0
+Module/UW/TDMAFair set debug_          -7
 
 ### Channel ###
 MPropagation/Underwater set practicalSpreading_ 2
@@ -250,8 +250,8 @@ proc createNode { id } {
     $node($id) addPosition $position($id)
     
     #Setup positions
-    $position($id) setX_ [expr $id*10]
-    $position($id) setY_ [expr $id*10]
+    $position($id) setX_ [expr $id*20]
+    $position($id) setY_ [expr $id*20]
     $position($id) setZ_ -100
 
     #Interference model
@@ -363,12 +363,16 @@ proc finish {} {
     }
 
     set sum_cbr_throughput    0
-    set sum_mac_sent_pkts     0.0
-    set sum_mac_recv_pkts     0.0    
+    set sum_mac_sent_pkts     0
+    set sum_mac_recv_pkts     0    
+    set sum_sent_pkts     0.0
+    set sum_recv_pkts     0.0    
     set sum_pcks_in_buffer    0
     set sum_upper_pcks_rx     0
     set sum_mac_pcks_tx       0
     set cbr_throughput        0
+    set sent_pkts 0
+    set recv_pkts 0
 
     for {set i 0} {$i < $opt(nn)} {incr i}  {
 
@@ -377,17 +381,22 @@ proc finish {} {
 
 	for {set j 0} {$j < $opt(nn)} {incr j} {
 	    if {$i != $j} {
-		set cbr_throughput       [$cbr($i,$j) getthr]
-	    }
-	    
-	    set sum_cbr_throughput [expr $sum_cbr_throughput + $cbr_throughput]
-	    set sum_mac_sent_pkts [expr $sum_mac_sent_pkts + $mac_sent_pkts]
-	    set sum_mac_recv_pkts  [expr $sum_mac_recv_pkts + $mac_recv_pkts]
-	    set sum_pcks_in_buffer [expr $sum_pcks_in_buffer + [$mac($i) get_buffer_size]]
-	    set sum_upper_pcks_rx [expr $sum_upper_pcks_rx + [$mac($i) get_upper_data_pkts_rx]]
-	    set sum_mac_pcks_tx [expr $sum_mac_pcks_tx + [$mac($i) getDataPktsTx]]
+		set cbr_throughput        [$cbr($i,$j) getthr]
+               	set sent_pkts        [$cbr($i,$j) getsentpkts]
+                set recv_pkts        [$cbr($i,$j) getrecvpkts]
+        }
+   
+        set sum_cbr_throughput [expr $sum_cbr_throughput + $cbr_throughput]
+        set sum_sent_pkts  [expr $sum_sent_pkts + $sent_pkts]
+        set sum_recv_pkts  [expr $sum_recv_pkts + $recv_pkts]
 	}
+        set sum_upper_pcks_rx  [expr $sum_upper_pcks_rx + [$mac($i) get_upper_data_pkts_rx]]
+        set sum_mac_pcks_tx    [expr $sum_mac_pcks_tx + [$mac($i) getDataPktsTx]]
+        set sum_mac_sent_pkts  [expr $sum_mac_sent_pkts + $mac_sent_pkts]
+        set sum_mac_recv_pkts  [expr $sum_mac_recv_pkts + $mac_recv_pkts]
+   	set sum_pcks_in_buffer [expr $sum_pcks_in_buffer + [$mac($i) get_buffer_size]]
     }
+
     set per_cbr1 [$cbr(0,1) getper]
     set per_cbr2 [$cbr(1,0) getper]
     set per_cbr3 [$cbr(0,2) getper]
@@ -399,6 +408,8 @@ proc finish {} {
         puts "Mean Throughput          : [expr ($sum_cbr_throughput/(($opt(nn))*($opt(nn)-1)))]"
         puts "MAC sent Packets         : $sum_mac_sent_pkts"
         puts "MAC received Packets     : $sum_mac_recv_pkts"
+        puts "CBR sent Packets         : $sum_sent_pkts"
+        puts "CBR received Packets     : $sum_recv_pkts"
         puts "Packets in buffer        : $sum_pcks_in_buffer"
         puts "PER CBR (0,1)            : $per_cbr1 "
         puts "PER CBR (1,0)            : $per_cbr2 "
