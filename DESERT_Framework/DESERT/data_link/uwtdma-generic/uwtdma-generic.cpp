@@ -28,16 +28,105 @@
 //
 
 /**
- * @file   uw-csma-aloha.cpp
+ * @file   uwtdma-generic.cpp
  * @author Roberto Francescon
  * @version 0.0.1
  * 
- * \brief Provides the implementation of UwTDMAGeneric Class
+ * @brief Provides the implementation of UwTDMAGeneric Class
  * 
  */
 
 #include "uwtdma-generic.h"
 
-UwTDMAGeneric::UwTDMAGeneric(){}
+/**
+ * Class that represent the binding of the protocol with tcl
+ */
+static class TDMAGenericModuleClass : public TclClass 
+{
+
+ public:
+
+  /**
+   * Constructor of the TDMAGenericModule class
+   */
+  TDMAGenericModuleClass() : TclClass("Module/UW/TDMAGeneric"){}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
+  TclObject* create(int, const char*const*)
+  {
+    return (new UwTDMAGeneric());
+  }
+
+} class_uwtdmageneric;
+
+
+UwTDMAGeneric::UwTDMAGeneric() : UwTDMA(){}
 
 UwTDMAGeneric::~UwTDMAGeneric(){}
+
+
+int UwTDMAGeneric::command(int argc, const char*const* argv)
+{
+  Tcl& tcl = Tcl::instance();
+  if (argc==2)
+  {
+    if(strcasecmp(argv[1], "start") == 0)
+    {
+      start(start_time);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "stop") == 0)
+    {
+      tdma_timer.cancel();
+      return TCL_OK;
+    } 
+    else if (strcasecmp(argv[1], "get_buffer_size") == 0)
+    {
+      tcl.resultf("%d", buffer.size());
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_upper_data_pkts_rx") == 0)
+    {
+      tcl.resultf("%d", up_data_pkts_rx);
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_sent_pkts") == 0)
+    {
+      tcl.resultf("%d", data_pkts_tx);
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_recv_pkts") == 0)
+    {
+      tcl.resultf("%d", data_pkts_rx);
+      return TCL_OK;
+    }
+  }		
+  else if (argc==3)
+  {
+    if(strcasecmp(argv[1], "setStartTime") == 0)
+    {
+      start_time=atof(argv[2]);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "setSlotDuration") == 0)
+    {
+      slot_duration=atof(argv[2]);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "setGuardTime") == 0)
+    {
+      guard_time=atof(argv[2]);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1],"setMacAddr") == 0)
+    {
+      addr = atoi(argv[2]);
+      if(debug_)  cout << "TDMA MAC address of current node is " 
+		       << addr <<endl;
+      return TCL_OK;
+    }
+  }
+  return MMac::command(argc, argv);
+}

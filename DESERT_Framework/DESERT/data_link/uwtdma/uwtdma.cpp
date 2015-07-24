@@ -58,9 +58,7 @@ UwTDMA::UwTDMA()
 
 {
   bind("slot_status", (int*) &slot_status);
-  bind("slot_duration", (double*) &slot_duration);
   bind("frame_duration", (double*) &frame_duration);
-  bind("guard_time", (double*) &guard_time);
   bind("debug_", (int*) &debug_);
 }
 
@@ -152,8 +150,8 @@ void UwTDMA::Phy2MacEndRx(Packet* p)
         rxPacketNotForMe(p);
 
         if (debug_<-5)
-          std::cout<< NOW <<" ID "<< addr <<": packet was for " << dest_mac
-                   << std::endl;
+          std::cout << NOW << " ID " << addr << ": packet was for " << dest_mac
+                    << std::endl;
       }
       else 
       {
@@ -165,12 +163,13 @@ void UwTDMA::Phy2MacEndRx(Packet* p)
 	            << src_mac <<std::endl;
       }
     }
+
+    transceiver_status=IDLE;
+
+    if(slot_status==UW_TDMA_STATUS_MY_SLOT)
+      txData();
+
   }
-
-  transceiver_status=IDLE;
-
-  if(slot_status==UW_TDMA_STATUS_MY_SLOT)
-    txData();
 
 }
 

@@ -44,7 +44,7 @@
 static class TDMAFairModuleClass : public TclClass 
 {
 
-  public:
+ public:
 
    /**
    * Constructor of the class TDMAFairModuleClass
@@ -66,6 +66,8 @@ UwTDMAFair::UwTDMAFair() : UwTDMA()
 {
   bind("tot_slots",    (int*)& tot_slots);
   bind("start_slot",   (int*)& start_slot);
+  bind("slot_duration", (double*) &slot_duration);
+  bind("guard_time", (double*) &guard_time);
 }
 
 UwTDMAFair::~UwTDMAFair(){}
