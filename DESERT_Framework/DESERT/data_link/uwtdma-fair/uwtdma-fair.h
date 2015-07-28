@@ -71,10 +71,10 @@ class UwTDMAFair : public UwTDMA
 
  protected:
   
-  int start_slot;  /**Slot from which will start the TDMA simulation*/
-  int slot_number; /**set the position of the node in the frame 
-                                    (starting from 0 to tot_slots-1)*/
   int tot_slots;   /**simply the number of nodes in the simulation*/
+  int start_slot;    /**Slot from which will start the TDMA simulation*/
+  int slot_number; /**set the position of the node in the frame 
+                                         (starting from 0 to tot_slots-1)*/
 
 };
 

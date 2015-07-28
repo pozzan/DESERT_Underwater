@@ -40,5 +40,6 @@ Module/UW/TDMAGeneric set ACK_timeout_		5.0
 Module/UW/TDMAGeneric set alpha_		0.8
 Module/UW/TDMAGeneric set buffer_pkts_		-1
 Module/UW/TDMAGeneric set max_backoff_counter_  4
-Module/UW/TDMAGeneric set listen_time_ 	0.5
-Module/UW/TDMAGeneric set MAC_addr_ 		0
+Module/UW/TDMAGeneric set listen_time_  	0.5
+Module/UW/TDMAGeneric set addr  		0
+Module/UW/TDMAGeneric set start_time  		0

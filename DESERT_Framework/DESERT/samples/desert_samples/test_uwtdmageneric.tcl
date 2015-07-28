@@ -131,7 +131,7 @@ if {$opt(bash_parameters)} {
 		$rng seed         $opt(seedcbr)
 	}
 } else {
-	set opt(cbr_period)     2
+	set opt(cbr_period)     6
 	set opt(pktsize)	1250
 	set opt(seedcbr)	1
 }
@@ -161,20 +161,9 @@ Module/UW/CBR set PoissonTraffic_      2
 Module/UW/CBR set debug_               0
 
 ### TDMA MAC ###
-Module/UW/TDMAGeneric set frame_duration  6
-Module/UW/TDMAGeneric set debug_          -7
-
-set sstime(0) 0
-set sstime(1) 2
-set sstime(2) 4
-
-set sd(0) 2
-set sd(1) 2
-set sd(2) 2
-
-set gt(0) 0.5
-set gt(1) 0.5
-set gt(2) 0.5
+Module/UW/TDMAGeneric set frame_duration   3
+Module/UW/TDMAGeneric set debug_           -7
+Module/UW/TDMAGeneric set sea_trial_       1
 
 
 ### Channel ###
@@ -288,16 +277,16 @@ for {set id 0} {$id < $opt(nn)} {incr id}  {
 
 # Node 1
 $mac(0) setStartTime    0
-$mac(0) setSlotDuration 3
-$mac(0) setGuardTime    1
+$mac(0) setSlotDuration 1
+$mac(0) setGuardTime    0.1
 # Node 2
-$mac(1) setStartTime    3
-$mac(1) setSlotDuration 2
-$mac(1) setGuardTime    1
+$mac(1) setStartTime    1
+$mac(1) setSlotDuration 1
+$mac(1) setGuardTime    0.1
 # Node 3
-$mac(2) setStartTime    5
+$mac(2) setStartTime    2
 $mac(2) setSlotDuration 1
-$mac(2) setGuardTime    0.5
+$mac(2) setGuardTime    0.1
 
 
 

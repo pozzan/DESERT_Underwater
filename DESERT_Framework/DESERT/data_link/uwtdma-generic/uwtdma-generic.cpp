@@ -79,7 +79,7 @@ int UwTDMAGeneric::command(int argc, const char*const* argv)
     }
     else if(strcasecmp(argv[1], "stop") == 0)
     {
-      tdma_timer.cancel();
+      stop();
       return TCL_OK;
     } 
     else if (strcasecmp(argv[1], "get_buffer_size") == 0)

@@ -43,7 +43,8 @@ Module/UW/TDMAFair set buffer_pkts_	        -1
 Module/UW/TDMAFair set max_backoff_counter_     4
 Module/UW/TDMAFair set listen_time_ 	        0.5
 Module/UW/TDMAFair set addr      		0
-Module/UW/TDMAFair set slot_status 		2
 Module/UW/TDMAFair set slot_duration 		0
-Module/UW/TDMAFair set frame_duration 		0
+Module/UW/TDMAFair set slot_number 		0
+Module/UW/TDMAFair set slot_status 		2
+Module/UW/TDMAFair set tot_slots 		1
 Module/UW/TDMAFair set start_slot 		0

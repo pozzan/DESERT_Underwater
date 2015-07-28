@@ -43,12 +43,11 @@ Module/UW/TDMA set max_backoff_counter_  4
 Module/UW/TDMA set MAC_addr_ 		0
 
 Module/UW/TDMA set debug_ 		0
+Module/UW/TDMA set sea_trial_ 		0
 Module/UW/TDMA set slot_status          0 
-Module/UW/TDMA set num_hosts            2 
-Module/UW/TDMA set host_id              2
-Module/UW/TDMA set frame_time           10
-Module/UW/TDMA set guard_time           1
-Module/UW/TDMA set slot_duration        4
+Module/UW/TDMA set frame_time           0
+Module/UW/TDMA set guard_time           0
+Module/UW/TDMA set slot_duration        0
 
 Module/UW/TDMA instproc init {args} {
     $self next $args

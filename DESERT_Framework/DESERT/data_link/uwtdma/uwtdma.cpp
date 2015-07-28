@@ -54,12 +54,14 @@ UwTDMA::UwTDMA()
   slot_status(UW_TDMA_STATUS_NOT_MY_SLOT), 
   transceiver_status(IDLE),
   tdma_sent_pkts(0),
-  tdma_recv_pkts(0) 
+  tdma_recv_pkts(0),
+  out_file_stats(0)
 
 {
   bind("slot_status", (int*) &slot_status);
   bind("frame_duration", (double*) &frame_duration);
   bind("debug_", (int*) &debug_);
+  bind("sea_trial_", (int*) &sea_trial_);
 }
 
 UwTDMA::~UwTDMA() {}
@@ -199,6 +201,9 @@ void UwTDMA::changeStatus()
     if(debug_<-5)
       std::cout << NOW << " Off ID " << addr << " " 
                 << frame_duration-slot_duration+guard_time << "" << std::endl;
+    if(sea_trial_)
+      out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
+                     << "::TDMA_node("<< addr << ")::Off" << endl;
   } 
   else 
   {
@@ -208,6 +213,9 @@ void UwTDMA::changeStatus()
     if(debug_<-5)
       std::cout << NOW << " On ID " << addr << " " << slot_duration-guard_time 
                 << " " << std::endl;
+    if(sea_trial_)
+      out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
+                     << "::TDMA_node("<< addr << ")::On" << endl;
 
     stateTxData();
   }
@@ -215,9 +223,30 @@ void UwTDMA::changeStatus()
 
 void UwTDMA::start(double delay)
 {
+  if(sea_trial_)  
+  {
+    std::stringstream stat_file;
+    stat_file << "./TDMA_node_" << addr << ".out";
+    std::cout << stat_file.str().c_str() << endl;
+    out_file_stats.open(stat_file.str().c_str(), std::ios_base::app);
+
+    out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
+                   << "::TDMA_node("<< addr << ")::Start simulation" 
+                   << endl;
+  }
+
   tdma_timer.sched(delay);
 
   if(debug_<-5)
     std::cout << NOW << " Status " << slot_status << " on ID " << addr 
   	      << " " << std::endl;
+}
+
+void UwTDMA::stop()
+{
+  tdma_timer.cancel();
+  if(sea_trial_)
+      out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
+                     << "::TDMA_node("<< addr << ")::Terminate simulation" 
+                     << endl;
 }

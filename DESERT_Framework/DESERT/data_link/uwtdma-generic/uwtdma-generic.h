@@ -63,9 +63,9 @@ class UwTDMAGeneric : public UwTDMA
    * 
    * @param argc Number of arguments in <i>argv</i>.
    * @param argv Array of strings which are the command parameters 
-                            (Note that <i>argv[0]</i> is the name of the object).
+                           (Note that <i>argv[0]</i> is the name of the object).
    * @return TCL_OK or TCL_ERROR whether the command has been dispatched 
-                                                             successfully or not.
+                                                            successfully or not.
    */
   virtual int command(int argc, const char*const* argv);
 

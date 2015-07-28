@@ -42,16 +42,14 @@
 
 #include <mmac.h>
 #include <queue>
-#include <mphy.h>
 #include <iostream>
 #include <assert.h>
+#include <sstream>
+#include <fstream>
+#include <sys/time.h>
 
 #define UW_TDMA_STATUS_MY_SLOT 1 /**< Status slot active>*/
 #define UW_TDMA_STATUS_NOT_MY_SLOT 2 /**< Status slot not active >*/
-
-#define UW_CHANNEL_IDLE 1  // status channel idle
-#define UW_CHANNEL_BUSY 2  // status channel busy
-
 
 using namespace std;
 
@@ -126,6 +124,10 @@ class UwTDMA: public MMac {
    */
   virtual void start(double delay);
   /**
+   * Terminate a TDMA cycle, essentially cancel the TDMA timer
+   */
+  virtual void stop();
+  /**
    * Receive the packet from the upper layer (e.g. IP)
    * @param Packet* pointer to the packet received
    *
@@ -167,6 +169,14 @@ class UwTDMA: public MMac {
    * Packet in transmission
    */
   virtual void initPkt(Packet* p);
+  /**
+   * Calculate the epoch of the event. Used in sea-trial mode
+   * @return the epoch of the system
+   */
+  inline unsigned long int getEpoch()
+  {
+    return time(NULL);
+  }
 
   /**
    * Enumeration class of UWTDMA status.
@@ -176,8 +186,8 @@ class UwTDMA: public MMac {
 
   UWTDMA_STATUS transceiver_status; /**Variable holding the status enum type*/
   int slot_status;              /**Is it my turn to transmit data?*/
-  int channel_status;           /**set the channel status*/
   int debug_;                   /**Debug variable*/
+  int sea_trial_;               /**Written log variable*/
   int addr;                     /**MAC address of the node*/
   int tdma_sent_pkts;           /**Counter for the sent packets*/
   int tdma_recv_pkts;           /**Counter for the received packets*/
@@ -186,7 +196,8 @@ class UwTDMA: public MMac {
   double guard_time;            /**Guard time between slots*/
   double slot_duration;         /**Slot duration*/
   UwTDMATimer tdma_timer;       /**TDMA timer handler*/
-  std::queue<Packet*> buffer;   /** Buffer of the MAC node*/
+  std::queue<Packet*> buffer;   /**Buffer of the MAC node*/
+  std::ofstream out_file_stats; /**File stream for the log file*/
 
 };
 

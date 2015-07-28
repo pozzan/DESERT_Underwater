@@ -27,9 +27,8 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # This script is used to test UW-TDMAFair protocol
-# There are 2 nodes placed in line that can transmit each other packets 
 # with a CBR (Constant Bit Rate) Application Module
-# Here the complete stack used for the simulation
+# Here is the complete stack used for the simulation
 #
 # N.B.: UnderwaterChannel and UW/PHYSICAL are used for PHY layer and channel
 #
@@ -39,7 +38,7 @@
 #
 # NOTE: tcl sample tested on Ubuntu 11.10, 64/32 bits OS
 #
-# Stack of the nodes
+# Stack of each node
 #   +-------------------------+
 #   |  7. UW/CBR              |
 #   +-------------------------+
@@ -64,7 +63,7 @@
 # Flags to enable or disable options #
 ######################################
 set opt(verbose) 		1
-set opt(trace_files)		1
+set opt(trace_files)		0
 set opt(bash_parameters) 	0
 
 #####################
@@ -104,7 +103,7 @@ set opt(starttime)          1
 set opt(stoptime)           1001
 set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration of the simulation
 set opt(txpower)            160;#158.263 ;#Power transmitted in dB re uPa 185.8 is the maximum
-set opt(propagation_speed) 1500;# m/s
+set opt(propagation_speed)  1500;# m/s
 
 set opt(maxinterval_)       200
 set opt(freq)               50000.0 ;#Frequency used in Hz
@@ -139,10 +138,10 @@ if {$opt(bash_parameters)} {
 set rnd_gen [new RandomVariable/Uniform]
 $rnd_gen use-rng $rng
 if {$opt(trace_files)} {
-	set opt(tracefilename) "./test_uwtdma_simple.tr"
+	set opt(tracefilename) "./test_uwtdmafair.tr"
 	set opt(tracefile) [open $opt(tracefilename) w]
-	set opt(cltracefilename) "./test_uwtdma_simple.cltr"
-	set opt(cltracefile) [open $opt(tracefilename) w]
+	set opt(cltracefilename) "./test_uwtdmafair.cltr"
+	set opt(cltracefile) [open $opt(cltracefilename) w]
 } else {
 	set opt(tracefilename) "/dev/null"
 	set opt(tracefile) [open $opt(tracefilename) w]
@@ -162,9 +161,10 @@ Module/UW/CBR set debug_               0
 
 ### TDMA MAC ###
 Module/UW/TDMAFair set frame_duration  9
-Module/UW/TDMAFair set guard_time      0.05
+Module/UW/TDMAFair set guard_time      0.5
 Module/UW/TDMAFair set tot_slots       $opt(nn)
 Module/UW/TDMAFair set debug_          -7
+Module/UW/TDMAFair set sea_trial_      1
 
 ### Channel ###
 MPropagation/Underwater set practicalSpreading_ 2
@@ -340,6 +340,7 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
 
 for {set ii 0} {$ii < $opt(nn)} {incr ii} {
     $ns at $opt(starttime)    "$mac($ii) start"
+    $ns at $opt(stoptime)    "$mac($ii) stop"
 }
 ###################
 # Final Procedure #
