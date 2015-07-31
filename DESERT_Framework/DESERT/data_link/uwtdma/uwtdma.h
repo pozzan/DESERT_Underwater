@@ -177,7 +177,16 @@ class UwTDMA: public MMac {
   {
     return time(NULL);
   }
-
+  /**
+   * TCL command interpreter. It implements the following OTcl methods:
+   * 
+   * @param argc Number of arguments in <i>argv</i>.
+   * @param argv Array of strings which are the command parameters 
+                           (Note that <i>argv[0]</i> is the name of the object).
+   * @return TCL_OK or TCL_ERROR whether the command has been dispatched 
+                                                            successfully or not.
+   */
+  virtual int command(int argc, const char*const* argv);
   /**
    * Enumeration class of UWTDMA status.
    */
@@ -188,13 +197,17 @@ class UwTDMA: public MMac {
   int slot_status;              /**Is it my turn to transmit data?*/
   int debug_;                   /**Debug variable*/
   int sea_trial_;               /**Written log variable*/
-  int addr;                     /**MAC address of the node*/
-  int tdma_sent_pkts;           /**Counter for the sent packets*/
-  int tdma_recv_pkts;           /**Counter for the received packets*/
+  int fair_mode;                /**Fair modality if 1*/
+
+  int tot_slots;    /**Number of slots in the frame (fair_mode)*/
+  int slot_number;  /**set the position of the node in the frame (fair_mode) 
+                                         (starting from 0 to tot_slots-1)*/
+
   int HDR_size;                 /**Size of the HDR if any*/
   double frame_duration;        /**Frame duration*/
   double guard_time;            /**Guard time between slots*/
   double slot_duration;         /**Slot duration*/
+  double start_time;            /**Time to wait before starting the protocol*/
   UwTDMATimer tdma_timer;       /**TDMA timer handler*/
   std::queue<Packet*> buffer;   /**Buffer of the MAC node*/
   std::ofstream out_file_stats; /**File stream for the log file*/

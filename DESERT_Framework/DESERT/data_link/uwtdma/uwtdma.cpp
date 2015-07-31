@@ -42,6 +42,29 @@
 #include <stdint.h>
 #include <mac.h>
 
+/**
+ * Class that represent the binding of the protocol with tcl
+ */
+static class TDMAModuleClass : public TclClass 
+{
+
+ public:
+
+  /**
+   * Constructor of the TDMAGenericModule class
+   */
+  TDMAModuleClass() : TclClass("Module/UW/TDMA"){}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
+  TclObject* create(int, const char*const*)
+  {
+    return (new UwTDMA());
+  }
+
+} class_uwtdma;
+
 void UwTDMATimer::expire(Event *e)
 {
   ((UwTDMA *)module)->changeStatus();
@@ -53,15 +76,19 @@ UwTDMA::UwTDMA()
   tdma_timer(this), 
   slot_status(UW_TDMA_STATUS_NOT_MY_SLOT), 
   transceiver_status(IDLE),
-  tdma_sent_pkts(0),
-  tdma_recv_pkts(0),
   out_file_stats(0)
-
 {
-  bind("slot_status", (int*) &slot_status);
+  // bind("slot_status", (int*) &slot_status);
   bind("frame_duration", (double*) &frame_duration);
   bind("debug_", (int*) &debug_);
   bind("sea_trial_", (int*) &sea_trial_);
+  bind("fair_mode", (int*) &fair_mode);
+  if (fair_mode == 1)
+  {
+    bind("slot_duration", (double*) &slot_duration);
+    bind("guard_time", (double*) &guard_time);
+    bind("tot_slots", (int*) &tot_slots);
+  }
 }
 
 UwTDMA::~UwTDMA() {}
@@ -249,4 +276,96 @@ void UwTDMA::stop()
       out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
                      << "::TDMA_node("<< addr << ")::Terminate simulation" 
                      << endl;
+}
+
+int UwTDMA::command(int argc, const char*const* argv)
+{
+  Tcl& tcl = Tcl::instance();
+  if (argc==2)
+  {
+    if(strcasecmp(argv[1], "start") == 0)
+    {
+      if (fair_mode == 1)
+      {
+        if (tot_slots==0)
+        {
+          std::cout<<"Error: number of slots set to 0"<<std::endl;
+          return TCL_ERROR;
+        }
+        else 
+        {
+          slot_duration = frame_duration/tot_slots;
+          if (slot_duration - guard_time < 0)
+	  {
+	    std::cout<<"Error: guard time or frame set incorrectly"<<std::endl; 
+            return TCL_ERROR;
+          }
+          else
+	  {
+            start(slot_number*slot_duration);
+            return TCL_OK;
+          }
+        }
+      }
+      
+      start(start_time);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "stop") == 0)
+    {
+      stop();
+      return TCL_OK;
+    } 
+    else if (strcasecmp(argv[1], "get_buffer_size") == 0)
+    {
+      tcl.resultf("%d", buffer.size());
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_upper_data_pkts_rx") == 0)
+    {
+      tcl.resultf("%d", up_data_pkts_rx);
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_sent_pkts") == 0)
+    {
+      tcl.resultf("%d", data_pkts_tx);
+      return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "get_recv_pkts") == 0)
+    {
+      tcl.resultf("%d", data_pkts_rx);
+      return TCL_OK;
+    }
+  }		
+  else if (argc==3)
+  {
+    if(strcasecmp(argv[1], "setStartTime") == 0)
+    {
+      start_time=atof(argv[2]);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "setSlotDuration") == 0)
+    {
+      slot_duration=atof(argv[2]);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "setGuardTime") == 0)
+    {
+      guard_time=atof(argv[2]);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1], "setSlotNumber") == 0)
+    {
+      slot_number=atoi(argv[2]);
+      return TCL_OK;
+    }
+    else if(strcasecmp(argv[1],"setMacAddr") == 0)
+    {
+      addr = atoi(argv[2]);
+      if(debug_)  cout << "TDMA MAC address of current node is " 
+		       << addr <<endl;
+      return TCL_OK;
+    }
+  }
+  return MMac::command(argc, argv);
 }
