@@ -13,3 +13,12 @@ Implementing research solutions on actual devices, in fact, is of key
 importance to realize a communication and networking architecture that 
 allows heterogeneous nodes to communicate reliably in the underwater 
 environment.
+
+
+**Install**
+
+To install 
+
+```bash
+./DESERT_Framework/install.sh --wizard
+```
