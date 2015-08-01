@@ -15,10 +15,6 @@ allows heterogeneous nodes to communicate reliably in the underwater
 environment.
 
 
-**Install**
+**Installation**
 
-To install 
-
-```bash
-./DESERT_Framework/install.sh --wizard
-```
+To install DESERT Underwater follow the instructions at the [doxygen documentation][http://telecom.dei.unipd.it/ns/desert/DESERT_HTML_doxygen_doc/INSTALL1.html]
