@@ -28,7 +28,7 @@
 #
 # This script is used to test UW-TDMA protocol
 # with a CBR (Constant Bit Rate) Application Module
-# Here the complete stack used for the simulation
+# Here the complete stack used for each node in the simulation
 #
 # N.B.: UnderwaterChannel and UW/PHYSICAL are used for PHY layer and channel
 #
@@ -164,7 +164,6 @@ Module/UW/TDMA set debug_           -7
 Module/UW/TDMA set sea_trial_       1
 Module/UW/TDMA set fair_mode        0
 # FAIR Modality on
-# Module/UW/TDMA set slot_duration    1
 # Module/UW/TDMA set guard_time       0.1
 # Module/UW/TDMA set tot_slots        3
 
@@ -279,10 +278,9 @@ for {set id 0} {$id < $opt(nn)} {incr id}  {
 }
 
 
-
-#################
-# MAC settings  #
-#################
+###############################
+# MAC settings: Generic mode  #
+###############################
 # Node 1
 $mac(0) setStartTime    0
 $mac(0) setSlotDuration 2

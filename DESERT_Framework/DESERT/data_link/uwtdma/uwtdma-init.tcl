@@ -40,13 +40,11 @@ Module/UW/TDMA set ACK_timeout_		5.0
 Module/UW/TDMA set alpha_		0.8
 Module/UW/TDMA set buffer_pkts_		-1
 Module/UW/TDMA set backoff_tuner_   	1
-Module/UW/TDMA set max_backoff_counter_  4
+Module/UW/TDMA set max_backoff_counter_ 4
 Module/UW/TDMA set MAC_addr_ 		0
 
-Module/UW/TDMA set debug_ 		1
 Module/UW/TDMA set sea_trial_ 		0
 Module/UW/TDMA set frame_time           0
-Module/UW/TDMA set slot_duration        0
 Module/UW/TDMA set guard_time           0
 Module/UW/TDMA set tot_slots            0
 Module/UW/TDMA set fair_mode            0

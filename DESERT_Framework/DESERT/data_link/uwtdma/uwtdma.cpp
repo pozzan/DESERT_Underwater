@@ -75,17 +75,17 @@ UwTDMA::UwTDMA()
   MMac(), 
   tdma_timer(this), 
   slot_status(UW_TDMA_STATUS_NOT_MY_SLOT), 
+  slot_duration(0),
+  start_time(0),
   transceiver_status(IDLE),
   out_file_stats(0)
 {
-  // bind("slot_status", (int*) &slot_status);
   bind("frame_duration", (double*) &frame_duration);
   bind("debug_", (int*) &debug_);
   bind("sea_trial_", (int*) &sea_trial_);
   bind("fair_mode", (int*) &fair_mode);
   if (fair_mode == 1)
   {
-    bind("slot_duration", (double*) &slot_duration);
     bind("guard_time", (double*) &guard_time);
     bind("tot_slots", (int*) &tot_slots);
   }
@@ -140,6 +140,10 @@ void UwTDMA::Mac2PhyStartTx(Packet* p)
 
   if(debug_<-5)
     std::cout << NOW <<" ID "<< addr << ": Sending packet" << std::endl;
+  if(sea_trial_)
+    out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
+                   << "::TDMA_node("<< addr << ")::PCK_SENT" << std::endl;
+
 }
 
 void UwTDMA::Phy2MacEndTx(const Packet* p)
@@ -189,7 +193,11 @@ void UwTDMA::Phy2MacEndRx(Packet* p)
 
         if (debug_<-5)
           std::cout << NOW <<" ID "<< addr << ": Received packet from "
-	            << src_mac <<std::endl;
+	            << src_mac << std::endl;
+        if(sea_trial_)
+          out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
+                         << "::TDMA_node("<< addr << ")::PCK_FROM:" 
+                         <<  src_mac << std::endl;
       }
     }
 
@@ -230,7 +238,7 @@ void UwTDMA::changeStatus()
                 << frame_duration-slot_duration+guard_time << "" << std::endl;
     if(sea_trial_)
       out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
-                     << "::TDMA_node("<< addr << ")::Off" << endl;
+                     << "::TDMA_node("<< addr << ")::Off" << std::endl;
   } 
   else 
   {
@@ -242,7 +250,7 @@ void UwTDMA::changeStatus()
                 << " " << std::endl;
     if(sea_trial_)
       out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
-                     << "::TDMA_node("<< addr << ")::On" << endl;
+                     << "::TDMA_node("<< addr << ")::On" << std::endl;
 
     stateTxData();
   }
@@ -254,12 +262,12 @@ void UwTDMA::start(double delay)
   {
     std::stringstream stat_file;
     stat_file << "./TDMA_node_" << addr << ".out";
-    std::cout << stat_file.str().c_str() << endl;
+    std::cout << stat_file.str().c_str() << std::endl;
     out_file_stats.open(stat_file.str().c_str(), std::ios_base::app);
 
     out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
-                   << "::TDMA_node("<< addr << ")::Start simulation" 
-                   << endl;
+                   << "::TDMA_node("<< addr << ")::Start_simulation" 
+                   << std::endl;
   }
 
   tdma_timer.sched(delay);
@@ -274,8 +282,8 @@ void UwTDMA::stop()
   tdma_timer.cancel();
   if(sea_trial_)
       out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
-                     << "::TDMA_node("<< addr << ")::Terminate simulation" 
-                     << endl;
+                     << "::TDMA_node("<< addr << ")::Terminate_simulation" 
+                     << std::endl;
 }
 
 int UwTDMA::command(int argc, const char*const* argv)
@@ -346,13 +354,29 @@ int UwTDMA::command(int argc, const char*const* argv)
     }
     else if(strcasecmp(argv[1], "setSlotDuration") == 0)
     {
-      slot_duration=atof(argv[2]);
-      return TCL_OK;
+      if (fair_mode==1)
+      {
+	std::cout<<"Fair mode is being used! Change to generic TDMA"<<std::endl;
+        return TCL_ERROR;
+      }
+      else
+      {
+        slot_duration=atof(argv[2]);
+        return TCL_OK;
+      }
     }
     else if(strcasecmp(argv[1], "setGuardTime") == 0)
     {
-      guard_time=atof(argv[2]);
-      return TCL_OK;
+    if (fair_mode==1)
+      {
+	std::cout<<"Fair mode is being used! Change to generic TDMA"<<std::endl;
+        return TCL_ERROR;
+      }
+      else
+      {
+        guard_time=atof(argv[2]);
+        return TCL_OK;
+      }
     }
     else if(strcasecmp(argv[1], "setSlotNumber") == 0)
     {
@@ -363,7 +387,7 @@ int UwTDMA::command(int argc, const char*const* argv)
     {
       addr = atoi(argv[2]);
       if(debug_)  cout << "TDMA MAC address of current node is " 
-		       << addr <<endl;
+		       << addr << std::endl;
       return TCL_OK;
     }
   }
