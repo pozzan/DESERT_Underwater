@@ -1,7 +1,7 @@
-sun angle: 0°
-location: undefined
+Solar zenith: 0°
+Location: equator at noon
 
-pattern       a     b     c
+Pattern       a     b     c
 0.15          0.1   0.05  0.15
 0.4           0.2   0.2   0.4
 2.19          0.5   1.69  2.19
