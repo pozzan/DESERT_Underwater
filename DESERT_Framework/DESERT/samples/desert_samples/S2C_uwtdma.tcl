@@ -26,7 +26,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Federico Favaro
+# Author: Federico Favaro, Filippo Campagnaro
 # Version: 1.0.0
 #
 ######################
@@ -198,7 +198,7 @@ UW/CBR/Packer set debug_ 0
 Module/UW/MPhy_modem/S2C set period_ 			        1
 Module/UW/MPhy_modem/S2C set debug_ 			        1
 Module/UW/MPhy_modem/S2C set log_                 1
-Module/UW/MPhy_modem/S2C set SetModemID_	 	      0
+Module/UW/MPhy_modem/S2C set SetModemID_	 	      1; # set 0 for burst mode
 Module/UW/MPhy_modem/S2C set RemoteControl_       1
 #######
 

@@ -28,7 +28,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #
-# Author: Federico Favaro
+# Author: Filippo Campagnaro
 # Version: 1.0.0
 if [ $# -lt 4 ]
 then
@@ -52,9 +52,9 @@ else
 		then
 			echo "The socket ${1}:${2} is not active! Check the IP and the port associated!"
 		else
-			rm -rf S2C_Evologics_Uwpolling.tr
+			rm -rf S2C_Evologics_Uwtdma.tr
 			rm -rf MODEM_log_*
-			rm -rf Uwtdma_*_${4}.out
+			rm -rf TDMA_node_*_${4}.out
 			ns S2C_uwtdma.tcl $1 5 360000 5 $4 $2 $3
 		fi
 	fi
