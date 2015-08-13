@@ -50,17 +50,20 @@
 #include <climits>
 #include "controller-clmsg.h"
 
-typedef std::map <int, double> ThresMap;
-typedef std::map <int, ThresMap> ThresMatrix;
+typedef std::map <int, double> ThresMap; /**< Threshoold map <PHY_order, threshold>*/
+typedef std::map <int, ThresMap> ThresMatrix; /**< Thresholds matrix*/
 
+/**
+ * Class used to represents the UwMultiStackController layer of a node.
+ */
 class UwMultiStackController : public Module {
 
 
 public:
 
   // constant definitions
-  static double const threshold_not_exist; // this constant is returned when a searched threshold does not exist
-  static int const layer_not_exist; // this constant is returned when a searched layer does not exist
+  static double const threshold_not_exist; /**< This constant is returned when a searched threshold does not exist>*/
+  static int const layer_not_exist; /**< This constant is returned when a searched layer does not exist>*/
 
   /**
    * Constructor of UwMultiPhy class.
@@ -131,20 +134,21 @@ public:
                                               order2id.find(layer_order)->second; }
 protected:
   // Variables
+  /**< Switch modes >*/
   enum Mode
   {
-    UW_MANUAL_SWITCH = 0, // state to switch_mode manually
-    UW_AUTOMATIC_SWITCH // state to switch_mode automatically
+    UW_MANUAL_SWITCH = 0, /**< State to switch-mode manually.*/
+    UW_AUTOMATIC_SWITCH /**< State to switch-mode automatically.*/
   };
 
-  int debug_;
-  int min_delay_;
-  Mode switch_mode_; // AUTOMATIC or MANUAL MODE
-  int lower_id_active_; // used just in MANUAL MODE
+  int debug_; /**< Flag to activate debug verbosity.*/
+  int min_delay_; 
+  Mode switch_mode_; /** <Current switch mode (either AUTOMATIC or MANUAL).*/
+  int lower_id_active_; /**< Id of the current lower layer active. It is used only in MANUAL MODE.*/
 
-  std::map<int, int> id2order; // layer_id, order
-	ThresMatrix threshold_map; // layer_order, thresholds
-  std::map<int, int> order2id; // layer_order, layer_id
+  std::map<int, int> id2order; /**< Maps each layer id to its order in the threshold matrix. (layer_id, order).*/
+	ThresMatrix threshold_map; /**< Returns the switch layer theshold given a layer order.*/
+  std::map<int, int> order2id; /**< Return the layer order given its order in the threshold matrix. (layer_order, layer_id).*/
 
   /** 
    * Handle a packet coming from upper layers

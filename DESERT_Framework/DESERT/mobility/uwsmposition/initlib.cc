@@ -27,67 +27,26 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file   uwicrp-hdr-data.h
- * @author Giovanni Toso
+ * @file   mobility/uwsmposition/initlib.cc
+ * @author Filippo Campagnaro
  * @version 1.0.0
- * 
- * \brief Provides the Data Messages header description.
  *
+ * \brief Provides the initialization of uwsmposition libraries.
+ *
+ * Provides the initialization of uwsmposition libraries.
  */
 
-#ifndef UWICRP_HDR_DATA_H
-#define	UWICRP_HDR_DATA_H
+#include "uwsmposition.h"
 
-#include "uwicrp-common.h"
+#include <tclcl.h>
 
-#include <module.h>
+extern EmbeddedTcl UwSMPositionTclCode;
 
-#define HDR_UWICRP_DATA(p) (hdr_uwicrp_data::access(p))
+extern "C" int Uwsmposition_Init() {
+    UwSMPositionTclCode.load();
+    return 0;
+}
 
-extern packet_t PT_UWICRP_DATA;
-
-/**
- * <i>hdr_uwicrp_data</i> describes data packets used by <i>UWICRP</i>
- */
-typedef struct hdr_uwicrp_data {
-    
-    nsaddr_t list_of_hops_[MAX_HOP_NUMBER];     /**< List of IPs saved in the header */
-    int pointer_to_list_of_hops_;               /**< Pointer used to keep track of the last IPs processed */
-    int list_of_hops_length_;                   /**< Current number of IPs stored in the header */
-    static int offset_;                         /**< Required by the PacketHeaderManager */
-
-    /**
-     * Reference to the offset_ variable
-     */
-    inline static int& offset() {
-        return offset_;
-    }
-
-    inline static struct hdr_uwicrp_data * access(const Packet * p) {
-        return (struct hdr_uwicrp_data*) p->access(offset_);
-    }
-    
-    /**
-     * Pointer to the list_of_hops_ variable
-     */
-    nsaddr_t* list_of_hops() {
-        return list_of_hops_;
-    }
-    
-    /**
-     * Reference to the pointer_to_list_of_hops_ variable
-     */
-    int& pointer_to_list_of_hops() {
-        return pointer_to_list_of_hops_;
-    }
-    
-    /**
-     * Reference to the list_of_hops_length_ variable
-     */
-    int& list_of_hops_length() {
-        return list_of_hops_length_;
-    }
-} hdr_uwicrp_data;
-
-#endif // UWICRP_HDR_DATA_H
-
+extern "C" int Cygsmposition_Init() {
+    Uwsmposition_Init();
+}

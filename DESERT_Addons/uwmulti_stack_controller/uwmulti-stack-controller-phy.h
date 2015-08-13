@@ -47,6 +47,7 @@
 class UwMultiStackControllerPhy : public UwMultiStackController {
 
 public:
+
   /**
    * Constructor of UwMultiPhy class.
    */
@@ -95,7 +96,7 @@ public:
   
 protected:
 
-  int receiving_id;
+  int receiving_id; /**< current receiving PHY ID */
   
   enum UWPHY_CONTROLLER_STATE 
   {

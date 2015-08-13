@@ -1,6 +1,5 @@
-#!/bin/sh
-
-# Copyright (c) 2013 Regents of the SIGNET lab, University of Padova.
+#
+# Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,44 +25,9 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @file   uwsmposition-defaults.tcl
+# @author Filippo Campagnaro
+# @version 1.0.0
 
-color1='\033[0;34m'
-color2='\033[1;31m'
-nc='\033[0m'
-
-info1()
-{
-    echo "${nc}${color1} $*${nc}"
-}
-
-err()
-{
-    echo "${nc}${color2} $*${nc}"
-}
-
-DESERTad=$(pwd)
-DESERTfw=$DESERTad/../DESERT_Framework
-M4FOLDER=$DESERTfw/DESERT/m4
-
-for dir in $(ls -d */) ; do
-    cd $DESERTad/$dir
-    if [ -d m4 ] ; then
-        cp $M4FOLDER/desert.m4 ./m4/
-        info1 "desert.m4 updated in $dir"
-    else
-        err   "---There is no ./m4/ directory in $dir"
-        err   "---Attempting subfolder exploration..."
-	for ddir in $(ls -d */) ; do
-            cd $DESERTad/$dir/$ddir
-            if [ -d m4 ] ; then
-                cp $M4FOLDER/desert.m4 ./m4/
-                info1 "---desert.m4 updated in ${dir}${ddir}"
-            else
-                err   "---There is no m4 directory in ${dir}${ddir}"
-            fi
-	done
-    fi
-done
-
-
-
+Position/UWSM set debug        0

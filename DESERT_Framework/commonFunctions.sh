@@ -331,10 +331,17 @@ wizard_function_wossRequire() {
     sleep ${SLEEP05}
     echo ""
     wizard__print_L2 "Setting of the WOSS_${WOSS_VERSION} libraries installation."
-    wizard__print_L3 "WARNING: To install the WOSS libraries, you need the gfortran compiler to be."
+    wizard__print_L3 "WARNING: To install the WOSS libraries, you need the gfortran compiler "
     wizard__print_L3 "         to be available on your OS."
     wizard__print_L3 "         If you are using a Debian-based OS, you can try to execute"
     wizard__print_L3 "         this command: sudo apt-get install gfortran"
+    wizard__print_L3 "WARNING: If you want to use enviromental databases for SSP, bathymetry,"
+    wizard__print_L3 "         sediments, as well as for the characteristics of electro-acoustic transducers"
+    wizard__print_L3 "         You can download the sediment and SSP databases at the following link:"
+    wizard__print_L3 "         http://telecom.dei.unipd.it/ns/woss/files/WOSS-dbs-v1.2.0.tar.gz"
+    wizard__print_L3 "         Please note that we cannot redistribute the GEBCO bathymetry database"
+    wizard__print_L3 "         You can download the database by registering on the GEBCO web site at:"
+    wizard__print_L3 "         http://http://www.gebco.net/"
     echo -n "Do you need the WOSS_${WOSS_VERSION} libraries (N, by default)?"
     woss_require=""
     read_input "woss_require"
@@ -928,6 +935,14 @@ debug__print_parameters() {
     debug__print_screen_L1 "BUILD_TARGET (target Destination Folder)    = ${BUILD_TARGET}"
     debug__print_screen_L1 "CUSTOM_PAR   (Custom Parameters)            = ${CUSTOM_PAR}"
     debug__print_screen_L1 "ADDONS       (names of the Addons)          = ${ADDONS}"
+    return 0
+}
+
+delete_recursive_soft_link() {
+    cd ${DEST_FOLDER}/${DESERT_DIR}-${DESERT_VERSION}-ADDONS-build
+    rm -rf DESERT_ADDON
+    cd ${DEST_FOLDER}/${DESERT_DIR}-${DESERT_VERSION}-ADDONS-src
+    rm -rf DESERT_Addons
     return 0
 }
 

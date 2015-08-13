@@ -1,4 +1,7 @@
 //
+// Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
+// All rights reserved.
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
@@ -25,11 +28,11 @@
 //
 
 /**
- * @file   uw-interference-miv-plain.cc
+ * @file   uwinterference.cc
  * @author Federico Favaro
  * @version 1.0.0
  * 
- * \brief Implementation of MinterferenceMIV_plain_Class class.
+ * \brief Implementation of uwinterference class.
  * 
  */
 

@@ -37,17 +37,24 @@
 
 #include "uwmulti-stack-controller.h"
 
-/*packet_t NOT_CONTROLLED;
-packet_t CONTROLLED;*/
-
+/**
+ * Class that represents the binding with the tcl configuration script 
+ */
 static class UwMultiStackControllerClass : public TclClass 
 {
 public:
-    UwMultiStackControllerClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER") {}
-    TclObject* create(int, const char*const*) 
-    {
-      return (new UwMultiStackController);
-    }
+  /**
+   * Constructor of the class
+   */
+  UwMultiStackControllerClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER") {}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
+  TclObject* create(int, const char*const*) 
+  {
+    return (new UwMultiStackController);
+  }
 } class_stack_controller;
 
 const double UwMultiStackController::threshold_not_exist = nan("");;

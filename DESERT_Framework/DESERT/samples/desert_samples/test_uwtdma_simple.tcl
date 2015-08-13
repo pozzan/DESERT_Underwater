@@ -164,7 +164,7 @@ Module/UW/CBR set debug_               0
 
 Module/UW/TDMA set frame_time  4
 Module/UW/TDMA set guard_time 1
-Module/UW/TDMA set debug 0
+Module/UW/TDMA set debug 1
 
 
 MPropagation/Underwater set practicalSpreading_ 2
@@ -216,11 +216,9 @@ proc createNode { id } {
     set mac($id)  [new Module/UW/TDMA] 
     if {$id == 1} {
         $mac($id) setSlotStatus 2
-        $mac($id) setHostId 1
         $mac($id) setSlotDuration 2
     } else {
         $mac($id) setSlotStatus 1
-        $mac($id) setHostId 2
         $mac($id) setSlotDuration 2        
     }
     set phy($id)  [new Module/UW/PHYSICAL]  

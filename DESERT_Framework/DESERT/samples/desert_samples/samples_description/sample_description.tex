@@ -29,10 +29,12 @@
 
 \vspace{0.8cm}
 \section{Introduction}
-In this document we describe in details two tcl samples
+In this document we describe in details four tcl samples
 \begin{itemize}
   \item{\tt test\_uwcsmaaloha.tcl} that well represents a general structure of a tcl script to test various protocols;
   \item{\tt S2C\_uwpolling\_sample.tcl} and {\tt S2C\_EvoLogics\_uwpolling\_sample.sh} scripts that make it possible to test protocols using S2C EvoLogics modems.
+  \item{\tt test\_uwoptical\_prop.tcl} that explains how to simulate an underwater optical network with inclusion of ambient light noise.
+  \item{\tt test\_uwrov.tcl} that explains how to simulate a ROV moving toward the way-points sent by a wireless remote control.
 \end{itemize}
 
 
@@ -527,12 +529,179 @@ fi
 }
 
 In the lines above, the script checks whether the IP and the port specified as input exist and are actually reachable. If the IP address is not reachable or the TCP port is not open, the script will return an error and will stop the experiment. 
-Assuming that the socket with the EvoLogics modem is open and working, the script removes the tracefiles and the logs of the corrispondent experiment ID. Finally, the script launches the tcl by providing giving all needed parameters. Some of these are the same input parameters of the sh script, but we can notice some additional ones:
+Assuming that the socket with the EvoLogics modem is open and working, the script removes the tracefiles and the logs of the correspondent experiment ID. Finally, the script launches the tcl by providing giving all needed parameters. Some of these are the same input parameters of the sh script, but we can notice some additional ones:
 \begin{itemize}
 \item The time at which the traffic generation starts (set to 5 seconds in this script)
 \item The time at which the traffic generation stops (set to 3600 seconds in this script)
 \item The inter-arrival period of the traffic generation process (set to 5 seconds in this script).
 \end{itemize}
-This value is actually quite low in this configuration, as it is inteded for a test with two nodes (one node and one sink). For networks composed of more than two nodes, it is suggested to balance the network load by setting higher value.
+This value is actually quite low in this configuration, as it is intended for a test with two nodes (one node and one sink). For networks composed of more than two nodes, it is suggested to balance the network load by setting higher value.
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Underwater optical network simulator}
+\label{sec:optical}
+In this section we will explain how to simulate an underwater optical network with ambient light noise. First, we will describe the {\tt test\_uwoptical\_prop.tcl} sample, then we will explain the correct use of the ambient light noise Lookup Tables database.
+\subsection{Description of  \ {\tt test\_uwoptical\_prop.tcl}}
+Please note that we will not describe every part of the tcl script. We will analyze only the section where the optical communication is configured. All other parts are similar to what you can find in the other samples.
+
+\ 
+{\scriptsize\tt
+\begin{lstlisting}[language=tcl]
+Module/UW/OPTICAL/PHY   set TxPower_                    $opt(txpower)
+Module/UW/OPTICAL/PHY   set BitRate_                    $opt(bitrate)
+Module/UW/OPTICAL/PHY   set AcquisitionThreshold_dB_    $opt(opt_acq_db)
+Module/UW/OPTICAL/PHY   set Id_                         $opt(id)
+Module/UW/OPTICAL/PHY   set Il_                         $opt(il)
+Module/UW/OPTICAL/PHY   set R_                          $opt(shuntRes)
+Module/UW/OPTICAL/PHY   set S_                          $opt(sensitivity)
+Module/UW/OPTICAL/PHY   set T_                          $opt(temperatura)
+Module/UW/OPTICAL/PHY   set Ar_                         $opt(rxArea)
+Module/UW/OPTICAL/PHY   set debug_                      0
+
+Module/UW/OPTICAL/Propagation set Ar_       $opt(rxArea)
+Module/UW/OPTICAL/Propagation set At_       $opt(txArea)
+Module/UW/OPTICAL/Propagation set c_        $opt(c)
+Module/UW/OPTICAL/Propagation set theta_    $opt(theta)
+Module/UW/OPTICAL/Propagation set debug_    0
+
+set propagation [new Module/UW/OPTICAL/Propagation]
+$propagation setOmnidirectional
+
+set channel [new Module/UW/Optical/Channel]
+\end{lstlisting}
+}
+
+Three modules are mainly involved in the simulation of an underwater optical network are: optical physical layer, propagation and channel. 
+
+{\tt UW/OPTICAL/PHY} is the physical layer employed. It simulates the behavior of a SI PIN photo-diode receiver and a finite light source transmitter. The receiver settings can be retrieved from real devices data-sheets.
+
+{\tt UW/OPTICAL/Propagation} models the optical propagation underwater, taking into account of transmitter and receiver effective area ({\tt At\_} and {\tt Ar\_}), diverge angle ({\tt theta\_}) and water attenuation coefficient ({\tt c\_}). Transmitter and receiver informations can be found in real devices data-sheets. In this example, an omnidirectional transmitter is used. 
+
+{\tt UW/Optical/Channel} is the optical underwater channel employed where the refractive index of the medium can be set (using the {\tt RefractiveIndex\_} attribute), however, we used the default value.
+
+\ 
+{\scriptsize\tt
+\begin{lstlisting}[language=tcl]
+set interf_data($id) [new "MInterference/MIV"]
+$interf_data($id) set maxinterval_ $opt(maxinterval_)
+$interf_data($id) set debug_       0
+
+$phy($id) setInterference $interf_data($id)
+$phy($id) setPropagation $propagation
+$phy($id) setSpectralMask $data_mask
+$phy($id) setLUTFileName "$opt(LUTpath)"
+$phy($id) setLUTSeparator " "
+$phy($id) useLUT 
+ 
+\end{lstlisting}
+}
+
+In the lines above we assign to the optical PHY layer all the necessary parameters. Namely, we assign the propagation model and the spectral mask, as well as the interference model. In addition, we assign also the optical ambient light noise Lookup Table parameters: file name (with relative path) and separator. We final enable the LUT use.
+
+\subsection{Description of  optical database}
+Inside the folder {\tt samples/desert\_samples/dbs/optical\_noise} we provide a database of optical ambient light noise lookup tables for different scenarios of location, solar zenith inclination, water column depth, scattering, absorption and attenuation coefficients. 
+Each LUT contains two columns: water depth and solar irradiance.
+In each scenario folder there is an {\tt info} file providing information about the partition of the attenuation coefficient (c) in absorption (a) and scattering (b) coefficient of the LUTs. Some additional informations concerning the water conditions are embedded in each LUT file name: e.g., the file {\tt PcXX\_depthYY.ascii} refers to a water column with maximum depth {\tt YY} meters, with attenuation coefficient described by the {\tt XX} pattern. For instance, in the {\tt scenario3/Pc0.15a\_depth40.ascii}, refers to a water column of 40 meters and the case {\tt a} with attenuation coefficient of 0.15 $m^{-1}$ (the combination of absorption and scattering is described in the info file).
+
+All the ambient light noise LUTs have been retrieved by employing Hydrolight, a state of the art radiative transfer model.
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{ROV - controller system}
+\label{sec:uwrov}
+In this section, we will explain how to simulate the behavior of a ROV moving towards the way points sent by a wireless remote control and monitoring its current position and speed. First, we will describe the {\tt test\_uwrov.tcl} sample, then we will explain how to import the way points from an external file. Both ROV and controller are in the application layer.
+{\tt uwrov} is a DESERT Add-on, and it has to be installed in order to use it.
+\subsection{Description of  \ {\tt test\_rov.tcl}}
+Please note that we will not describe every part of the tcl script. We will analyze only the section where the optical communication is configured. All other parts are similar to what you can find in the other samples.
+
+\ 
+{\scriptsize\tt
+\begin{lstlisting}[language=tcl]
+Module/UW/ROV set packetSize_          $opt(ROV_pktsize)
+Module/UW/ROV set period_              $opt(ROV_period)
+Module/UW/ROV set debug_               0
+
+Module/UW/ROV/CTR set packetSize_          $opt(CTR_pktsize)
+Module/UW/ROV/CTR set debug_               0
+\end{lstlisting}
+}
+
+In these lines we set both control and monitoring packet size. 
+The controller sends consecutive way-points to the ROV, by using control packets. When the ROV receives a new way-point, it moves toward the new position.
+The ROV monitors its current position to the controller by sending monitoring packets. The ROV monitoring feature is a periodic process, thus, also the ROV packet period needs to be set like in the CBR application, described in Section~\ref{sec:uwcsmaaloha}.
+
+\ 
+{\scriptsize\tt
+\begin{lstlisting}[language=tcl]
+set nodeCTR [$ns create-M_Node $opt(tracefile) $opt(cltracefile)] 
+set applicationCTR  [new Module/UW/ROV/CTR]
+createNode $nodeCTR $applicationCTR 0
+set nodeROV [$ns create-M_Node $opt(tracefile) $opt(cltracefile)] 
+set applicationROV  [new Module/UW/ROV]
+createNode $nodeROV $applicationROV 1
+\end{lstlisting}
+}
+
+With the the {\tt createNode} function, we set and connect the network stack layers for both ROV and controller nodes. Their stack differs only for the application layer, passed as a function parameter, while the other layers are set like in tcl example presented in Section~\ref{sec:uwcsmaaloha}. The application layer employed to simulate the ROV behavior is {\tt UW/ROV}, while the controller uses the {\tt UW/ROV/CTR}.
+
+\ 
+{\scriptsize\tt
+\begin{lstlisting}[language=tcl]  
+    set position($id) [new "Position/SM"]
+    $node addPosition $position($id)
+    $position($id) setX_ [expr $id*5]
+    $position($id) setY_ [expr $id*5]
+    $position($id) setZ_ -10
+    $application setPosition $position($id)
+\end{lstlisting}
+}
+
+In addition, in the {\tt createNode} function, we set the initial position of both the nodes. 
+In particular, we employ the {\tt SMPosition} position type, in order to move from the current position toward a way-point with constant speed. The position pointer is passed to the application layer, in order to allow the application to monitor and control the node position.
+
+\ 
+{\scriptsize\tt
+\begin{lstlisting}[language=tcl]  
+set outfile [open "test_uwrov_results.csv" "w"]
+close $outfile
+set fp [open $opt(waypoint_file) r]
+set file_data [read $fp]
+set data [split $file_data "\n"]
+foreach line $data {
+  if {[regexp {^(.*),(.*),(.*),(.*)$} $line -> t x y z]} {
+    $ns at $t "update_and_check"
+    $ns at $t "$applicationCTR sendPosition $x $y $z"
+  }
+}
+$ns at $opt(starttime)    "$applicationROV start"
+$ns at $opt(stoptime)     "$applicationROV stop"
+
+proc update_and_check {} {
+  global position applicationROV
+  $position(1) update
+  set outfile [open "test_uwrov_results.csv" "a"]
+  puts $outfile "positions ROV: x = [$applicationROV getX], y = [$applicationROV getY], z =  [$applicationROV getZ]" 
+  close $outfile
+}
+
+\end{lstlisting}
+}
+
+During a simulation run, the controller sends to the ROV command packets containing one way-point each. The packet transmission moment plus the way-point coordinates are obtained by reading the {\tt waypoint\_file}. As we will see in the next Section, we provide a database of way-point files for a well defined trajectory.  Before to send a new way-point, the current actual position of the ROV is salved in the {\tt outfile}, in order to permit post processing analysis.
+
+\subsection{Description of paths database}
+Inside the folder {\tt samples/desert\_samples/dbs/wp\_path} we provide a database of way-point files for a well known path. Each path details is described in a {\tt readme.txt} file. The path files are formatted as following:
+\begin{itemize}
+ \item there are four columns, separated with a comma,
+ \item the first column contains the simulated packet transmission time,
+ \item the second column contains the x coordinate of the way-point position,
+ \item the third column contains the y coordinate of the way-point position,
+ \item the last column contains the z coordinate of the way-point position.
+\end{itemize}
+To create this files we payed attention on the following things: assuming an ROV that moves at constant speed (specified in the {\tt readme.txt} file), each way-point is sent when the previous one is supposed to be achieved, plus a guard time {\tt tg}. The value of {\tt tg} is reported in each file name (e.g., {\tt path\_tg2s.csv} has a guard time of 2~s).
+
+
 
 \end{document}

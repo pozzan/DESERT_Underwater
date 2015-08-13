@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,9 +27,12 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-/* 
- * File:   uwApplication_module.h
- * Author: Federico Favaro
+/**
+ * @file   uwApplication_module.cc
+ * @author Federico Favaro
+ * @version 1.1.0
+ *
+ * \brief Provides the definition of uwApplicationmodule class
  *
  */
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
+ * Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,42 +28,42 @@
  */
 
  /**
- * @file   smposition.cc
+ * @file   uwsmposition.cc
  * @author Filippo Campagnaro
  * @version 1.0.0
  * 
- * \brief Provides the <i>SMPosition</i> class implementation.
+ * \brief Provides the <i>UWSMPosition</i> class implementation.
  * 
- * Provides the <i>SMPosition</i> class implementation.
+ * Provides the <i>UWSMPosition</i> class implementation.
  */
 
 
 
 #include <iostream>
-#include "smposition.h"
+#include "uwsmposition.h"
 
 
 /* ======================================================================
    TCL Hooks for the simulator
    ====================================================================== */
-static class SMPositionClass : public TclClass {
+static class UWSMPositionClass : public TclClass {
 public:
-	SMPositionClass() : TclClass("Position/SM") {}
+	UWSMPositionClass() : TclClass("Position/UWSM") {}
 	TclObject* create(int, const char*const*) {
-		return (new SMPosition());
+		return (new UWSMPosition());
 	}
-} class_smposition;
+} class_uwsmposition;
 
-SMPosition::SMPosition() : Position(), trgTime_(-1), Xsorg_(0), Ysorg_(0), Zsorg_(0) , Xdest_(0), Ydest_(0), Zdest_(0), speed_(0), lastUpdateTime_(0)
+UWSMPosition::UWSMPosition() : Position(), trgTime_(-1), Xsorg_(0), Ysorg_(0), Zsorg_(0) , Xdest_(0), Ydest_(0), Zdest_(0), speed_(0), lastUpdateTime_(0)
 {
 	bind("debug_", &debug_);
 }
 
-SMPosition::~SMPosition()
+UWSMPosition::~UWSMPosition()
 {
 }
 
-int SMPosition::command(int argc, const char*const* argv)
+int UWSMPosition::command(int argc, const char*const* argv)
 {
 	Tcl& tcl = Tcl::instance();
 	if(argc == 6)
@@ -71,7 +71,7 @@ int SMPosition::command(int argc, const char*const* argv)
 		if(strcasecmp(argv[1], "setdest") == 0)
 		{
 		  if (debug_ > 10)
-		    cerr << NOW << "SMPosition::command(setdest, "
+		    cerr << NOW << "UWSMPosition::command(setdest, "
 			 << argv[2] << ", "
 			 << argv[3] << ", "
 			 << argv[4] << ", "
@@ -89,7 +89,7 @@ int SMPosition::command(int argc, const char*const* argv)
 		if(strcasecmp(argv[1], "setdest") == 0)
 		{
 		  if (debug_ > 10)
-		    cerr << NOW << "SMPosition::command(setdest, "
+		    cerr << NOW << "UWSMPosition::command(setdest, "
 			 << argv[2] << ", "
 			 << argv[3] << ", "
 			 << argv[4] << ")"
@@ -113,7 +113,7 @@ int SMPosition::command(int argc, const char*const* argv)
 	return Position::command(argc, argv);
 }
 
-void SMPosition::setdest(double x_dest,double y_dest,double z_dest,double spead_setted){
+void UWSMPosition::setdest(double x_dest,double y_dest,double z_dest,double spead_setted){
 	double now = Scheduler::instance().clock();
 	update(now);
 	trgTime_ = now;
@@ -126,7 +126,7 @@ void SMPosition::setdest(double x_dest,double y_dest,double z_dest,double spead_
 	Zsorg_ = z_;
 }
 
-void SMPosition::setdest(double x_dest,double y_dest,double z_dest){
+void UWSMPosition::setdest(double x_dest,double y_dest,double z_dest){
 	double now = Scheduler::instance().clock();
 	update(now);
 	trgTime_ = now;
@@ -138,7 +138,7 @@ void SMPosition::setdest(double x_dest,double y_dest,double z_dest){
 	Zsorg_ = z_;
 }
 
-void SMPosition::update(double now)
+void UWSMPosition::update(double now)
 {
 	if ((trgTime_<0.)||(now<lastUpdateTime_+1e-6))
 		return;
@@ -169,7 +169,7 @@ void SMPosition::update(double now)
 	lastUpdateTime_ = now;
 }
 
-double SMPosition::getX()
+double UWSMPosition::getX()
 {
 	double now = Scheduler::instance().clock();
 	if ((trgTime_>0.)&&(now>lastUpdateTime_+1e-6))
@@ -177,22 +177,22 @@ double SMPosition::getX()
 	return (x_);
 }
 
-void SMPosition::setX(double x){
+void UWSMPosition::setX(double x){
 	x_=x;
 	Xdest_=x;
 	Xsorg_=x;
 }
-void SMPosition::setY(double y){
+void UWSMPosition::setY(double y){
 	y_=y;
 	Ydest_=y;
 	Ysorg_=y;
 }
-void SMPosition::setZ(double z){
+void UWSMPosition::setZ(double z){
 	z_=z;
 	Zdest_=z;
 	Zsorg_=z;
 }
-double SMPosition::getY()
+double UWSMPosition::getY()
 {
 	double now = Scheduler::instance().clock();
 	if ((trgTime_>0.)&&(now>lastUpdateTime_+1e-6))
@@ -200,7 +200,7 @@ double SMPosition::getY()
 	return (y_);
 }
 
-double SMPosition::getZ()
+double UWSMPosition::getZ()
 {
 	double now = Scheduler::instance().clock();
 	if ((trgTime_>0.)&&(now>lastUpdateTime_+1e-6))

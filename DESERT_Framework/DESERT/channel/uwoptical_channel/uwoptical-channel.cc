@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
+ * Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
 
 #include <iostream>
 #include <cassert>
-//#include <coordinates-definitions.h>
 
 #include "uwoptical-channel.h"
 
@@ -46,6 +45,9 @@
 #define REFRACTIVE_INDEX_MIN (1)
 #define REFRACTIVE_INDEX_WATER (1.33)
 
+/**
+ * Adds the module for UwOpticalChannel in ns2.
+ */
 static class UwOpticalChannelClass : public TclClass {
 public:
 	UwOpticalChannelClass() : TclClass("Module/UW/Optical/Channel") {}

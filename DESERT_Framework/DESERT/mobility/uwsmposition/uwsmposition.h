@@ -1,6 +1,5 @@
-/* -*- Mode:C++; -*- */
 /*
- * Copyright (c) 2007 Regents of the SIGNET lab, University of Padova.
+ * Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,13 +28,13 @@
  */
 
 /**
- * @file   smposition.h
+ * @file   uwsmposition.h
  * @author Filippo Campagnaro
  * @version 1.0.0
  * 
- * \brief Provides the definition of the class <i>SMPosition</i>.
+ * \brief Provides the definition of the class <i>UWSMPosition</i>.
  *
- * Provides the definition of the class <i>SMPosition</i>.
+ * Provides the definition of the class <i>UWSMPosition</i>.
  * This class implements the a simple movement behaviour: it is possible to define
  * the direction and the speed of the linear movement thanks to a TCL command
  * in which the user has to define the destination point an the speed of the
@@ -46,8 +45,8 @@
  * @see NodeCore, Position
  **/
 
-#ifndef _SMPOSITION_
-#define _SMPOSITION_
+#ifndef _UWSMPOSITION_
+#define _UWSMPOSITION_
 
 #include <node-core.h>
 
@@ -56,17 +55,17 @@
 #define pi (4*atan(1.0))
 
 
-class SMPosition : public Position
+class UWSMPosition : public Position
 {
 	public:
 		/**
 		* Constructor
 		*/
-		SMPosition();
+		UWSMPosition();
 		/**
 		* Destructor
 		*/
-		virtual ~SMPosition();
+		virtual ~UWSMPosition();
 		/**
 		* Method that return the current projection of the node on the x-axis.
 		* If it's necessary (updating time ia expired), update the position values 

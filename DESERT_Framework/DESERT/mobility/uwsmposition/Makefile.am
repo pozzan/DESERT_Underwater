@@ -1,6 +1,5 @@
-#!/bin/sh
 #
-# Copyright (c) 2013 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,8 +25,35 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-#
+
+AM_CXXFLAGS = -Wall -ggdb3
+
+lib_LTLIBRARIES = libuwsmposition.la
+check_PROGRAMS = 
+
+SUBDIRS = 
+
+TESTS = 
+
+libuwsmposition_la_SOURCES = initlib.cc\
+    uwsmposition-default.tcl\
+    uwsmposition.h\
+    uwsmposition.cc
+
+libuwsmposition_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+libuwsmposition_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@
+libuwsmposition_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@
+
+nodist_libuwsmposition_la_SOURCES = InitTcl.cc
 
 
-aclocal -I m4 --force && libtoolize --force && automake --foreign --add-missing && autoconf
+BUILT_SOURCES = InitTcl.cc
+
+CLEANFILES = InitTcl.cc
+
+TCL_FILES = uwsmposition-default.tcl
+
+InitTcl.cc: Makefile $(TCL_FILES)
+		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwSMPositionTclCode > InitTcl.cc
+
+EXTRA_DIST = $(TCL_FILES)

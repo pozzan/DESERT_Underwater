@@ -38,17 +38,17 @@ libuwmllwitharp_la_SOURCES = uwmll-with-arp-module.cc uwmll-with-arp-module.h \
 		arptable.cc arptable.h \
 		initlib.cc
 
-libuwmllwitharp_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@  @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
-libuwmllwitharp_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@  @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@
-libuwmllwitharp_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@  @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@
+libuwmllwitharp_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@  @DESERT_CPPFLAGS@
+libuwmllwitharp_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@  @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@
+libuwmllwitharp_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@  @DESERT_LIBADD@
 
 nodist_libuwmllwitharp_la_SOURCES = UWMllWithARPInitTcl.cc
 
 libuwmllwitharptracer_la_SOURCES = uwmll-with-arp-tracer.cc uwmll-with-arp-tracer.h
 
-libuwmllwitharptracer_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@ @DESERT_ADDON_CPPFLAGS@
-libuwmllwitharptracer_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ @DESERT_ADDON_LDFLAGS@ @DESERT_ADDON_LDFLAGS_BUILD@ -L./
-libuwmllwitharptracer_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ @DESERT_ADDON_LIBADD@ -lmll
+libuwmllwitharptracer_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+libuwmllwitharptracer_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ @DESERT_LDFLAGS_BUILD@ -L./
+libuwmllwitharptracer_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ -lmll
 
 BUILT_SOURCES = UWMllWithARPInitTcl.cc
 

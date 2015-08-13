@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+
 /**
 * @file uwrovctr-module.cc
 * @author Filippo Campagnaro
@@ -35,6 +35,7 @@
 *
 * Provides the <i>UWROVCtr</i> class implementation.
 */
+
 #include "uwrovctr-module.h"
 #include <iostream>
 #include <rng.h>
@@ -44,17 +45,31 @@ extern packet_t PT_UWCBR;
 /**
 * Adds the module for UwROVModuleClass in ns2.
 */
+
+/**
+* Class that represents the binding with the tcl configuration script 
+*/
 static class UwROVCtrModuleClass : public TclClass {
 public:
+
+	/**
+   * Constructor of the class
+   */
 	UwROVCtrModuleClass() : TclClass("Module/UW/ROV/CTR") {
 	}
+
+	/**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
 	TclObject* create(int, const char*const*) {
 		return (new UwROVCtrModule());
 	}
 } class_module_uwROV_ctr;
 
 UwROVCtrModule::UwROVCtrModule(Position p) : UwCbrModule(), sn(0) {
-	posit=p;speed=1;
+	posit=p;
+	speed=1;
 }
 
 UwROVCtrModule::UwROVCtrModule() : UwCbrModule(), sn(0) {
@@ -135,10 +150,6 @@ void UwROVCtrModule::setPosition(Position p){
 	posit = p;
 }
 
-Position UwROVCtrModule::getPosition(){
-	return posit;
-}
-
 void UwROVCtrModule::initPkt(Packet* p) {
 	if(this->p == NULL){
 		hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
@@ -156,14 +167,15 @@ void UwROVCtrModule::initPkt(Packet* p) {
 		uwROVh->z() = newZ;
 		uwROVh->speed() = speed;
 		uwROVh->sn() = sn;
-		if (debug_ > 10){ 
-			printf("RITRASMETTO \n");
+		if (debug_) { 
+			std::cout << NOW << " UwROVCtrModule::initPkt(Packet *p)  Retransmitting"<< std::endl;
 		}
 	}
 	UwCbrModule::initPkt(p);
-	if (debug_ > 10){
+	if (debug_) {
 		hdr_uwROV_ctr* uwROVh = HDR_UWROV_CTR(p);
-		printf("CTR set new ROV position: X = %f, Y = %f, Z = %f\n", uwROVh->x(), uwROVh->y(), uwROVh->z());
+		std::cout << NOW << " UwROVCtrModule::initPkt(Packet *p)  setting new ROV way-point: X = "<< uwROVh->x() <<", Y = " 
+			<< uwROVh->y() << ", Z = " << uwROVh->z()<< std::endl;
 	}
 }
 
@@ -176,15 +188,17 @@ void UwROVCtrModule::recv(Packet* p) {
 	x_rov = monitoring->x();
 	y_rov = monitoring->y();
 	z_rov = monitoring->z();
-	if(monitoring->ack()>0){
+
+	if(monitoring->ack()>0) {
 		sendTmr_.force_cancel();
 		this->p = NULL;
-		if (debug_ > 10)
-			printf("Ack ok \n");
+		if (debug_)
+			std::cout << NOW << " UwROVCtrModule::recv(Packet *p) control ACK received"<< std::endl;
 	}
-	if((monitoring->ack())<0 && debug_ > 10)
-		printf("Errore \n");
+	else if((monitoring->ack())<0 && debug_)
+		std::cout << NOW << " UwROVCtrModule::recv(Packet *p) control error received"<< std::endl;
 	if (debug_ > 10)
-		printf("ROV CTR monitoring position: X = %f, Y = %f, Z = %f\n", x_rov,y_rov,z_rov);
+		std::cout << NOW << " UwROVCtrModule::recv(Packet *p) ROV monitoring position: X = " << x_rov << ", Y = " 
+			<< y_rov << ", Z = " << z_rov << std::endl;
 	UwCbrModule::recv(p);
 }

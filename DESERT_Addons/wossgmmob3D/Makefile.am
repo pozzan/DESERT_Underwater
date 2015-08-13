@@ -46,4 +46,4 @@ TCL_FILES =  woss-gmmobility-3d-init.tcl
 embeddedtcl.cc: Makefile $(TCL_FILES)
 		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ GmMobilityInitTclCode > embeddedtcl.cc
 
-EXTRA_DIST = $(TCL_FILES) underwater_aloha_bpsk.tcl
+EXTRA_DIST = $(TCL_FILES)

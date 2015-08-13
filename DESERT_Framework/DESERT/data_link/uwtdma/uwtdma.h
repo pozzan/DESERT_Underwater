@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,10 @@ class UwTDMA;
 class UwTDMATimer : public TimerHandler {
 public:
 
+    /**
+     * Constructor of the UwTDMATimer class
+     * @param UwTDMA *m a pointer to an object of type Uwpolling_AUV
+     */
     UwTDMATimer(UwTDMA *m) : TimerHandler() {
         module = m;
     }
@@ -66,17 +70,6 @@ protected:
     virtual void expire(Event *e);
     UwTDMA* module;
 };
-
-/*class BufferTimer : public TimerHandler {
-public:
-
-    BufferTimer(UwTDMA *m) : TimerHandler() {
-        module = m;
-    }
-protected:
-    virtual void expire(Event *e);
-    UwTDMA* module;
-};*/
 
 class UwTDMA: public MMac {
 public:
@@ -94,43 +87,68 @@ public:
      */
     virtual void start();
 
+    /**
+     * TCL command interpreter. It implements the following OTcl methods:
+     * 
+     * @param argc Number of arguments in <i>argv</i>.
+     * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
+     * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
+     * 
+     **/
     virtual int command(int argc, const char*const* argv);
 
 	/**
-     * transmit a data packet whether is my slot
+     * Transmit a data packet whether is my slot
      */
     virtual void txData();
 
     /**
-     * state status my slot and and start to txData
+     * State status my slot and and start to txData
      */
     virtual void stateTxData();
 
 
 protected:
 
-	int slot_status; //active or not
-	int channel_status;
-	int debug_;
-	double num_hosts;
-	double host_id;
-	double frame_time; // frame duration
-	double guard_time; // guard time between slots
-	double slot_duration; // slot duration
-	UwTDMATimer tdma_timer; // tdma handler
-	//BufferTimer buffer_timer; // buffer handler
-	std::queue<Packet*> buffer;
+	int slot_status; /**< Flag about the slot status: it can be either active or not */
+	int channel_status; /**< Flag about the channel status: it can be either busy or idle */
+	int debug_; /**< Flag anabling debug print out */
+	double frame_time; /**< Frame duration */
+	double guard_time; /**< Guard time between slots */
+	double slot_duration; /**< Slot duration */
+	UwTDMATimer tdma_timer; /**< Tdma timer handler */
+	std::queue<Packet*> buffer; /**< Packet buffer*/
 
+    /**
+     * Receives the packet from the upper layer (e.g. IP)
+     * @param Packet* pointer to the packet received
+     *
+     */
 	virtual void recvFromUpperLayers(Packet* p);
 
-	virtual void Phy2MacEndRx(Packet* p);
+    /**
+     * Pass the packet to the PHY layer
+     * @param Packet* Pointer to an object of type Packet that rapresent the Packet to transmit
+     */
+    virtual void Mac2PhyStartTx(Packet* p);
 
-	virtual void Phy2MacStartRx(const Packet* p);
-
-	virtual void Mac2PhyStartTx(Packet* p);
-
+    /**
+     * Method called when the PHY layer finish to transmit the packet.
+     * @param Packet* Pointer to an object of type Packet that rapresent the Packet transmitted
+     */  
     virtual void Phy2MacEndTx(const Packet* p);
 
+    /**
+     * Method called when the Phy Layer start to receive a Packet 
+     * @param const Packet* Pointer to an object of type Packet that rapresent the Packet that is in reception
+     */
+    virtual void Phy2MacStartRx(const Packet* p);
+
+    /**
+     * Method called when the Phy Layer finish to receive a Packet 
+     * @param const Packet* Pointer to an object of type Packet that rapresent the packet received
+     */
+	virtual void Phy2MacEndRx(Packet* p);
 
 };
 

@@ -44,14 +44,13 @@
  
 #include <limits>
 
+/**
+ * Class used to represents the UwMultiStackControllerPhyMaster layer of a node.
+ */
 class UwMultiStackControllerPhyMaster : public UwMultiStackControllerPhy {
 
 
 public:
-
-/*  // constants defition
-  static double const min_value; // min value t
-  static double const max_value;*/
 
   /**
    * Constructor of UwMultiPhy class.
@@ -85,10 +84,10 @@ public:
     
 protected:
     // Variables
-	int last_layer_used_;
-	double power_statistics_;
-  int power_stat_node_;
-	double alpha_; //FIR parameter
+	int last_layer_used_; /**< ID of the last PHY layer used */
+	double power_statistics_; /**< Average received power from the closest node according to the IIR filter*/
+  int power_stat_node_; /**< Address of the node which the master is collecting the average power*/
+	double alpha_; /**< IIR parameter */
 
   /** 
    * Return the best layer to forward the packet when the system works in AUTOMATIC_MODE.

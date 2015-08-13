@@ -37,12 +37,22 @@
 
 #include "uwmulti-stack-controller-phy-slave.h"
 
+/**
+ * Class that represents the binding with the tcl configuration script 
+ */
 static class UwMultiStackControllerPhySlaveClass : public TclClass {
 public:
-    UwMultiStackControllerPhySlaveClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE") {}
-    TclObject* create(int, const char*const*) {
-        return (new UwMultiStackControllerPhySlave);
-    }
+  /**
+   * Constructor of the class
+   */
+  UwMultiStackControllerPhySlaveClass() : TclClass("Module/UW/MULTI_STACK_CONTROLLER_PHY_SLAVE") {}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
+  TclObject* create(int, const char*const*) {
+    return (new UwMultiStackControllerPhySlave);
+  }
 } class_uwmulti_stack_controller_phy_slave;
 
 UwMultiStackControllerPhySlave::UwMultiStackControllerPhySlave() 

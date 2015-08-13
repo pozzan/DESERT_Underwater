@@ -1,5 +1,3 @@
-/* -*-	Mode:C++ -*- */
-
 /*
  * Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
  * All rights reserved.
@@ -34,7 +32,7 @@
  * @author Filippo Campagnaro, Federico Favaro, Federico Guerra
  * @version 1.0.0
  *
- * \brief Definition of UwOpticas class.
+ * \brief Implementation of UwOpticalMPropagation class.
  *
  */
 
@@ -42,13 +40,21 @@
 #include "uwoptical-mpropagation.h"
 #include <math.h>
 
-// constants initialization
 
-//const string UwOpticalMPropagation::file_name_ = "optical_LUT.txt";
-
+/**
+ * Class that represents the binding with the tcl configuration script 
+ */
 static class UwOpticalMPropagationClass : public TclClass {
 public:
+
+  /**
+   * Constructor of the class
+   */
   UwOpticalMPropagationClass() : TclClass("Module/UW/OPTICAL/Propagation") {}
+  /**
+   * Creates the TCL object needed for the tcl language interpretation
+   * @return Pointer to an TclObject
+   */
   TclObject* create(int, const char*const*) {
     return (new UwOpticalMPropagation);
   }
@@ -122,7 +128,7 @@ double UwOpticalMPropagation::getGain(Packet* p)
 
 double UwOpticalMPropagation::getLambertBeerGain(double d, double beta){
   double cosBeta = omnidirectional_ ? 1 : cos(beta);
-  double L = d / cosBeta; // TODO: verify this 
+  double L = d / cosBeta;
   double PCgain = 2 * Ar_ * cosBeta / (M_PI * pow(L, 2.0) * (1 - cos(theta_)) + 2 * At_) 
          * exp(-c_*d);
   return (PCgain == PCgain) ? PCgain : 0;

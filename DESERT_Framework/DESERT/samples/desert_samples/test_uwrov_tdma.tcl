@@ -240,11 +240,9 @@ proc createNode {node application id} {
     set mac($id)  [new Module/UW/TDMA]
     if {$id == 1} {
         $mac($id) setSlotStatus 2
-        $mac($id) setHostId 1
         $mac($id) setSlotDuration 5
     } else {
         $mac($id) setSlotStatus 1
-        $mac($id) setHostId 2
         $mac($id) setSlotDuration 1        
     }
     

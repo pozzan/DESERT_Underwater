@@ -5,11 +5,13 @@
 \image html http://nautilus.dei.unipd.it/images/DESERT.png
 \image latex ./docs/DESERT.eps
 
-@version 2.0.0
+@version 2.1.0
 
-@authors <b> Members: </b> Federico Favaro - favarofe@dei.unipd.it , Giovanni Toso - tosogiov@dei.unipd.it, Ivano Calabrese - icalabre@dei.unipd.it
+@authors <b> Project supervisor: </b> Paolo Casari - casarip@dei.unipd.it
 
-@authors <b> Other contributors and former members: </b> Riccardo Masiero - masieror@dei.unipd.it, Saiful Azad - azad@dei.unipd.it, Cristiano Tapparello - tappare1@dei.unipd.it, Loris Brolo - brololor@dei.unipd.it, Paolo Casari - casarip@dei.unipd.it
+@authors <b> Members: </b> Federico Favaro - favarofe@dei.unipd.it, Federico Guerra - federico@guerra-tlc.com, Filippo Campagnaro - campagn1@dei.unipd.it,  Ivano Calabrese - icalabre@dei.unipd.it
+
+@authors <b> Other contributors and former members: </b> Riccardo Masiero - masieror@dei.unipd.it, Saiful Azad - azad@dei.unipd.it, Cristiano Tapparello - tappare1@dei.unipd.it, Loris Brolo - brololor@dei.unipd.it, \link Giovanni Giovanni Toso
 
 <br>
 
@@ -35,9 +37,15 @@ DESERT Underwater has been adopted in several research projects (see also the <A
 A considerable amount of work has been done in order to make the installation of the software automatic via a modular installation script, that includes a fully-guided wizard mode.
 At the same time, the installation is organized in separate modules, so an experienced users can easily extend the process to accommodate specific requirements, new functionalities, or even to make DESERT part of larger projects.
 As a further help for users wishing to experiment with real hardware using DESERT, we also provide different installer modules, suitable for different hardware platforms, starting from the <A HREF="https://www.gumstix.com/">Gumstix</A> and the <A HREF="http://www.raspberrypi.org/">Raspberry Pi</A>. This set will be extended in the future.
-Finally, the functionalities offered by DESERT have been extended with a control framework that provides a set of primitives to remotely control the hardware modems, and thus the network operations. This framework was preliminarily released in September 2013, and a revised and further tested version thereof comes along with DESERT Underwater v2.0.0.
+In order to use DESERT more and more in real environments, an new Application Layer protocol is provided, uwApplication. This module permits to transmit real payloads among nodes with tunable dimension. Moreover, a real data can be transmitted to uwApplication trough a TCP or UDP socket at a given port. Using this feature, you can implement a very simple "underwater chat", or even connect your sensor or device that will transmit its data to uwApplication through a socket. uwApplication encapsulate the payload with control headers and delivers packet to the lower layers.
+Finally, the functionalities offered by DESERT have been extended with a control framework that provides a set of primitives to remotely control the hardware modems, and thus the network operations. This framework was preliminarily released in September 2013.
 
-The improvements and additional features that we implemented have been packed together into version 2.0.0 of <A HREF="http://nautilus.dei.unipd.it/desert-underwater/">DESERT Underwater</A>.
+This new version of the framework, provides some new MAC protocols, such as TDMA and a revised version of the protocol already released on the previous version.
+Furthermore, an optical channel model, an optical propagation model and an optical PHY model are provided, together with a multi-stack controller, which permits to use two different PHY layers on the same node. The controller will decide which PHY layer to use upon channel statistics, in order to exploit the large bandwidth of optical communication, when the optical channel condition permits to do so, using instead the acoustic PHY layer for a more robust and reliable communication.
+
+
+The improvements and additional features that we implemented have been packed together into version 2.1.0
+
 
 <br>
 
@@ -66,10 +74,25 @@ For questions, problems, suggestions, or if you want to get involved in the DESE
  
 \section application Modules for the Application Layer
 
-Currently, in DESERT there are two modules for the application layer: the <tt> uwcbr </tt> and the <tt> uwvbr </tt> modules, detailed in
-the following. Both modules send dummy packets (i.e., with a random payload) and serve to generate network traffic according to two
-different mechanisms. To work correctly, all the modules of the application layer must be connected to a module of the transport layer
+Currently, in DESERT there are three modules for the application layer: The <tt> uwApplication </tt>, the <tt> uwcbr </tt> and the <tt> uwvbr </tt> modules, detailed in
+the following. Both <tt> uwcbr </tt> and <tt> uwvbr </tt> modules send dummy packets (i.e., with a random payload) and serve to generate network traffic according to two
+different mechanisms. 
+<tt> uwApplication </tt> instead is an protocol to carry real payload as data packet. In simulation mode, a dummy string of random characters and legth fixed can be generated as payload, meanwhile, in experiment mode, it is possible to send to the module data through an UDP or TCP socket on a specified port. In this modality, real data can ben sent as payload as well as a simple chat can be implemented.
+To work correctly, all the modules of the application layer must be connected to a module of the transport layer
 (for the technical details on how to connected two or more NS-Miracle modules, the reader may refer to the NS-Miracle documentation see http://telecom.dei.unipd.it/pages/read/58/).
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwApplication, </tt> see uwApplicationModule </dd>
+<dt><b> Description: </b></dt>
+<dd> This module permits to send a fixed amount of data generated as random characters as payload of packet to do some tests and simulations. Real data can be sent using the DESERT stack if the module is set to expimental mode. You can also implement a simple "acoustic underwater" chat between two end-points. </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwapplication.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/APPLICATION </tt> </dd>
+</dl>
+
+<br>
 
 <dl>
 <dt><b> Name:</b></dt>
@@ -178,6 +201,17 @@ The switch between the processes can be configured by the user by providing the 
 </dl>
 
 <br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwflooding, </tt> see UwFlooding </dd>
+<dt><b> Description: </b></dt>
+<dd> This module provide a flooding routing protocol. The packet is reliably delivered to the destination forwarding it in broadcast mode with multiple hops. A system to avoid loops and a TTL system is also implemented.</dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwflooding.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/FLOODING </tt> </dd>
+</dl>
  
 
  \section data_link Modules for the Data Link Layer
@@ -293,13 +327,13 @@ Since the actual transmission of tones depends on the available hardware, this m
 
 <dl>
 <dt><b> Name:</b></dt>
-<dd> <tt> uw-csma-aloha-triggered, </tt> see UwCsmaAloha_Triggered_AUV and UwCsmaAloha_Triggered_NODE </dd>
+<dd> <tt> uw-csma-aloha-trigger, </tt> see UwCsmaAloha_Trigger_SINK and UwCsmaAloha_Trigger_NODE </dd>
 <dt><b> Description: </b></dt>
 <dd> Even though the 1-persistent CSMA protocol implemented by the <tt> uw-csma-aloha </tt> module has been shown to achieve good performance in underwater networks, sometimes it is useful to constrain packet transmissions so that they only take place when the sink is actually within the communication range of the nodes. This is particularly important if the sink is a mobile node or AUV. To do so, <tt> uw-csma-aloha-triggered </tt> extends the <tt> uw-csma-aloha </tt> module by allowing a mobile sink to enable communications in its neighborhood via the periodic transmission of a special TRIGGER packet. After receiving the TRIGGER, the nodes will contend for the channel via a simple 1-persistent CSMA mechanism as in the plain <tt> uw-csma-aloha </tt> module, and will revert to silence if no TRIGGER is received for a given amount of time.</dd>
 <dt><b> Library name: </b></dt>
-<dd> <tt> libuwcsmaalohatriggered.so </tt> </dd>
+<dd> <tt> libuwcsmaalohatrigger.so </tt> </dd>
 <dt><b> Tcl name: </b></dt>
-<dd> <tt> Module/UW/CSMA_ALOHA/TRIGGERED/NODE for sensors, Module/UW/CSMA_ALOHA/TRIGGERED/AUV for the AUV</tt> </dd>
+<dd> <tt> Module/UW/CSMA_ALOHA/TRIGGER/NODE for sensors, Module/UW/CSMA_ALOHA/TRIGGER/SINK for the SINK</tt> </dd>
 </dl>
 
 
@@ -321,7 +355,42 @@ In this version of the protocol, the HNs are fixed and predetermined, and one-ho
 </dl>
 
 <br>
- 
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwtdma, </tt> see UwTDMA </dd>
+<dt><b> Description: </b></dt>
+<dd> This module implements a MAC protocol which is based on a Time Division Multiple Access channel access method. 
+The TDMA slots have to be set in each node, in order to allow the user to employ the desired channel access subdivision. In this way, the user can set long time slot to nodes with big amount of data to send., an a shorter time slot to the others. 
+</dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwtdma.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/TDMA </dd>
+</dl>
+
+<br>
+
+
+\section Propagation models
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwoptical_propagation, </tt> see UwOpticalMPropagation </dd>
+<dt><b> Description: </b></dt>
+<dd> This module implements a propagation model for optical underwater transmissions. It employs the Lambert-Beer law, taking into account: distance and alignment between transmitter and receiver, channel attenuation coefficient, beam diverge angle, receiving and transmitting area. It can be employed for omni-directional transmitter as well.
+</dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwoptical_propagation.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/OPTICAL/Propagation </dd>
+</dl>
+
+<br>
+
+
 \section  PHY Modules for the Physical Layer 
 
 \subsection Modules Modules for simulate PHY layer
@@ -329,7 +398,7 @@ In this version of the protocol, the HNs are fixed and predetermined, and one-ho
 DESERT framework provides some modules to simulate PHY layers.
 <dl>
 <dt><b> Name:</b></dt>
-<dd> <tt> uwphysical, </tt> see uwphysical </dd>
+<dd> <tt> uwphysical, </tt> see UnderwaterPhysical </dd>
 <dt><b> Description: </b></dt>
 <dd> <tt> uwphysical </tt> is a module that simulates the behavior of a BPSK or BFSK PHY layer (selectable by the user via a tcl variable). <tt> uwphysical </tt> provides also the possibility to calculate the amount of energy consumed by each node in transmission and reception phases separately, provided that the power consumption of the simulated PHY layer in each phase is specified by the user. <tt> uwphysical </tt> provides also the time (in seconds) that each node used for transmission and reception phases. Moreover, it counts the number of packets collided (i.e., packets discarded due to interference from concurrent transmissions) and also the type of collision (data packet vs control packet, data packet vs data packet, etc.), provided that this module is used together with the interference module <tt>uwinterference</tt> described below.  </dd>
 <dt><b> Library name: </b></dt>
@@ -368,11 +437,49 @@ DESERT framework provides some modules to simulate PHY layers.
 </dl>
 
 <br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Uwoptical PHY, </tt> see UwOpticalPhy </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> This module simulates the behavior of an optical PHY layer. In particular, the SNR of a received signal is calculated by taking into account the position of the transmitter and the receiver, the receiver sensitivity, noise and receiving area. In addition the ambient light noise is included by retrieving the solar irradiance from a file via a lookup table search. After that, the SNR associated to a given transmission is computed. The receiving model is based on a SNR threshold and the interference is assumed to be destructive. </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwoptical_phy.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/OPTICAL/PHY </tt> </dd>
+</dl>
+
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Rogers model physical layer, </tt> see UnderwaterPhysicalRogersModel </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> PC:Describe this </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwphysicalrogersmodel.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/PROPAGATIONROGERS </tt> </dd>
+</dl>
+
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> Hermes PHY model, </tt> see UwHermesPhy </dd>
+<dt><b> Description: </b></dt>
+<dd> <tt> This module simulates the behavior of the Hermes acoustic modem's physical layer. The success probability of a packet reception is obtained from a lookup table of packet error rate vs distance, by taking into account the position of the transmitter and the receiver and the packet size. The PER is assumed to be spread uniformly in all the packet chunks and the interference is destructive.</dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwhermesphy.so </tt> </dd>
+<dt><b> Tcl name: </b></dt>
+<dd> <tt> Module/UW/HERMES/PHY </tt> </dd>
+</dl>
  
 \subsection real_modem Interfaces with real modems
 
-Currently, DESERT supports three different hardware platforms for emulation and test-bed realization: the S2C hydroacoustic modem, a system developed by Evologics <b>[5]</b> which exploits the Sweep-Spread Carrier (S2C) technology for underwater data telemetry and communications; the FSK and PSK WHOI micro-modems, two small-footprint, low-power acoustic modems based on a Texas Instruments DSP and developed by the Woods Hole Oceanographic Institution (WHOI) <b>[6]</b>. However, the <tt> uwmphy_modem </tt> module, which implements the general interface between the acoustic modem hardware and NS-Miracle, can be easily extended to support other different hardware. In the following, we describe <tt> uwmphy_modem </tt>, along with the DESERT modules specialized for the above hardware (<tt> mfsk_whoi_mm </tt>, <tt> mpsk_whoi_mm </tt> and <tt> ms2c_evologics </tt>), as well as an additional module called <tt> uwmphypatch </tt> that is intended for preparing the OTcl scripts needed to set the parameters of the 
-networking prototypes to test.
+Currently, DESERT supports three different hardware platforms for emulation and test-bed realization: the S2C hydroacoustic modem, a system developed by Evologics <b>[5]</b> which exploits the Sweep-Spread Carrier (S2C) technology for underwater data telemetry and communications. However, the <tt> uwmphy_modem </tt> module, which implements the general interface between the acoustic modem hardware and NS-Miracle, can be easily extended to support other different hardware. In the following, we describe <tt> uwmphy_modem </tt>, along with the DESERT modules specialized for the above hardware (<tt> mfsk_whoi_mm </tt>, <tt> mpsk_whoi_mm </tt> and <tt> ms2c_evologics </tt>), as well as an additional module called <tt> uwmphypatch </tt> that is intended for preparing the OTcl scripts needed to set the parameters of the networking prototypes to test.
 
 
 <dl>
@@ -418,7 +525,7 @@ networking prototypes to test.
 
 
 <br>
- 
+
 
 <dl>
 <dt><b> Name:</b></dt>
@@ -466,9 +573,11 @@ networking prototypes to test.
 
 In DESERT 2.0 we have also a module to simulate two interference models in underwater networks. In the first model, the MEANPOWER interference model, the Signal-to-Interference-and-Noise Ratio (SINR) of a received packet is averaged over the entire duration of the packet. In the second model, the CHUNK interference model, the received packet is split into several chunks, where the interference perceived over each chunk is constant over the chunk duration. The SINR is computed for every chunk and the PER for each chunk is derived from its SINR. The packet is finally considered correct only if all chunks are correctly received.
 
+<br>
+
 <dl>
 <dt><b> Name:</b></dt>
-<dd> <tt> Uwinterference, </tt> see uwinterference </dd>
+<dd> <tt> Underwater Interference, </tt> see uwinterference </dd>
 <dt><b> Description: </b></dt>
 <dd> This module implement the interference model described above. Furthermore, this module provides the possibility to have the number of collisions occurred during the simulation, taking in account also different packets (e.g., the number of control packets collided with data packets and data packets collided with other data packets) </dd>
 <dt><b> Library name: </b></dt>
@@ -509,6 +618,21 @@ The DESERT libraries also include two modules to simulate node mobility. These m
 <dd> <tt> libuwgmposition.so </tt> </dd>
 <dt><b> Tcl name:  </b></dt>
 <dd> <tt> Position/UW/GM </tt> </dd>
+</dl>
+
+
+<br>
+
+<dl>
+<dt><b> Name:</b></dt>
+<dd> <tt> uwsmposition, </tt> see UWSMPosition </dd>
+<dt><b> Description: </b></dt>
+<dd> This class implements the a simple movement behaviour: it is possible to define the direction and the speed of the linear movement thanks to a TCL command in which the user has to define the destination point an the speed of the movement required.
+NOTE: the destination point is used to define the direction od the node and when it is reached the node will proceed for the same direction </dd>
+<dt><b> Library name: </b></dt>
+<dd> <tt> libuwsmposition.so </tt> </dd>
+<dt><b> Tcl name:  </b></dt>
+<dd> <tt> Position/UWSM </tt> </dd>
 </dl>
 
 
@@ -574,6 +698,8 @@ Before installing the DESERT framework, please check that your host device has t
 - libxt-dev
 - libtool
 - gfortran
+- bison
+- flex
 </BLOCKQUOTE>
 </SMALL>
 
@@ -581,42 +707,11 @@ If you are using a Debian-based Linux distribution, you can type this command in
 
 <small>
 
-    sudo apt-get install build-essential autoconf automake libxmu-dev libx11-dev libxmu-dev libxmu-headers libxt-dev libtool gfortran
+    sudo apt-get install build-essential autoconf automake libxmu-dev libx11-dev libxmu-dev libxmu-headers libxt-dev libtool gfortran bison flex
 
 </small>
 
 in order to install all dependencies above.
-
-DESERT 2.0.0 is compatible with automake up to the version 1.14.
-
-In order to check the version installed type this command in a terminal:
-
-<small>
-
-    automake --version
-
-</small>
-
-If the command returns a version lower or equal to 1.14, e.g.:
-
-<small>
-
-    automake (GNU automake) 1.14
-    ...
-
-</small>
-
-than your version is compatible with DESERT 2.0.0, otherwise you have to intall a compatible version.
-
-If you are using a Debian-based Linux distro, you can type this command
-
-<small>
-
-    sudo apt-get intall automake
-
-</small>
-
-<br>
 
 \section install Installation procedures
 
@@ -1171,7 +1266,7 @@ Grateful thanks also go to the many collaborations that helped develop part of t
 /**
 * \page License License Terms
 //
-// Copyright (c) 2012-2014 Regents of the SIGNET lab, University of Padova.
+// Copyright (c) 2012-2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -1201,4 +1296,13 @@ Grateful thanks also go to the many collaborations that helped develop part of t
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+*/
+
+
+/** \page Giovanni In memory of Giovanni Toso
+
+DESERT Underwater has been put together, tested, improved, and expanded over time also thanks to the continuous efforts of our beloved colleague and friend Giovanni Toso, who prematurely passed away in a car accident in August 2014. DESERT 2.1.0 is the first major release after his death, and it is dedicated to his memory.
+
+\image html http://nautilus.dei.unipd.it/people/people_photos/GiovanniToso.jpg
+
 */

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,6 @@ Module/UW/ROV/CTR instproc init {args} {
 #    $self settag "UW/TDMA"
 #}
 
-Position/SM set debug_ 0
+Position/UWSM set debug_ 0
 
 PlugIn/PositionDB set debug_ 0
