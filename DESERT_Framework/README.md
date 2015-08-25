@@ -5,7 +5,7 @@
  | |  | |/ _ \/ __|/ _ \ '__| __| | |  | | '_ \ / _` |/ _ \ '__\ \ /\ / / _` | __/ _ \ '__|
  | |__| |  __/\__ \  __/ |  | |_  | |__| | | | | (_| |  __/ |   \ V  V / (_| | ||  __/ |
  |_____/ \___||___/\___|_|   \__|  \____/|_| |_|\__,_|\___|_|    \_/\_/ \__,_|\__\___|_|
-______Copyright (c) 2014 Regents of the SIGNET lab, University of Padova  (ver. 2.0)_______
+______Copyright (c) 2015 Regents of the SIGNET lab, University of Padova  (ver. 2.0)_______
 ```
 
 README
@@ -117,7 +117,7 @@ Here is a list of all options currently available:
         e.g.,
         "param1 param2 param3"
 ```
-If you encounter any problem while building this library, we set up a desert-users
+If you should encounter any problem while building this library, we set up a 
 mailing list that you can refer to. Please point to:
     https://mail.dei.unipd.it/mailman/listinfo/desert-usergroup.
 
@@ -253,7 +253,7 @@ correctly complete the installation.
 COPYING / LICENSE
 -----------------
 
-__Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.__
+__Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.__
 
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
