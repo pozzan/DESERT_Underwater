@@ -45,7 +45,7 @@
 #include <map>
 
 namespace {
-    static const uint16_t IP_ROUTING_MAX_ROUTES = 100; /**< Maximum number of entries in the routing table of a node. */
+    static const uint16_t IP_ROUTING_MAX_ROUTES = 254; /**< Maximum number of entries in the routing table of a node. */
 }
 
 /**
