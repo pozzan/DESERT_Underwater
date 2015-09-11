@@ -59,8 +59,7 @@
 #   |  1. UW/PHYSICAL         |        |  1. UW/PHYSICAL         |
 #   +-------------------------+        +-------------------------+
 #           |         |                        |         |     
-#   +------------------------------------------------------------+                  
-#   |            UnderwaterChannel                               |
+#   +------------------------------------------------------------+              #   |                    UnderwaterChannel                       |
 #   +------------------------------------------------------------+
 
 ######################################
@@ -103,7 +102,7 @@ $ns use-Miracle
 ##################
 set opt(start_clock) [clock seconds]
 
-set opt(nn)                 2.0 ;# Number of Nodes
+set opt(nn)                     2.0 ;# Number of Nodes
 set opt(ROV_pktsize)            [expr 4024];#125  ;# Pkt size in byte
 set opt(CTR_pktsize)            [expr 1024/8];#125  ;# Pkt size in byte
 
@@ -195,15 +194,20 @@ Module/UW/ROV set debug_               0
 Module/UW/ROV/CTR set debug_               0
 
 #TDMA
-
-Module/UW/TDMA set frame_time 6 
+# CHANGE THISSSSSSSSSSSSSSSSSSSSSSSSS ---------------
+Module/UW/TDMA set frame_duration       6
 Module/UW/TDMA set debug_               0
-Module/UW/TDMA set guard_time 0.5 
-Module/UW/TDMA set ACK_size_           0
-Module/UW/TDMA set max_tx_tries_               1
-Module/UW/TDMA set wait_constant_              0
-Module/UW/TDMA set max_payload_                10000
-Module/UW/TDMA set ACK_timeout_                10000.0
+Module/UW/TDMA set sea_trial_           0
+Module/UW/TDMA set fair_mode            1
+# FAIR Modality on
+Module/UW/TDMA set guard_time           0.1
+Module/UW/TDMA set tot_slots            2
+
+Module/UW/TDMA set ACK_size_            0
+Module/UW/TDMA set max_tx_tries_        1
+Module/UW/TDMA set wait_constant_       0
+Module/UW/TDMA set max_payload_         10000
+Module/UW/TDMA set ACK_timeout_         10000.0
 
 
 Module/UW/PHYSICAL  set BitRate_                    $opt(bitrate)
@@ -239,13 +243,15 @@ proc createNode {node application id} {
     
     set mac($id)  [new Module/UW/TDMA]
     if {$id == 1} {
-        $mac($id) setSlotStatus 2
-        $mac($id) setHostId 1
-        $mac($id) setSlotDuration 5
+        # $mac($id) setSlotStatus 2
+        # $mac($id) setHostId 1
+        $mac($id) setMacAddr [expr $id + 1]
+        # $mac($id) setSlotDuration 5
     } else {
-        $mac($id) setSlotStatus 1
-        $mac($id) setHostId 2
-        $mac($id) setSlotDuration 1        
+        # $mac($id) setSlotStatus 1
+        # $mac($id) setHostId 2
+        $mac($id) setMacAddr [expr $id + 1]
+        # $mac($id) setSlotDuration 1        
     }
     
     #$mac($id)  setNoAckMode

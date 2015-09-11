@@ -50,7 +50,7 @@
 #   +-------------------------+
 #   |  3. UW/MLL              |
 #   +-------------------------+
-#   |  2. UW/TDMAFair         |
+#   |  2. UW/TDMA             |
 #   +-------------------------+
 #   |  1. UW/PHYSICAL         |
 #   +-------------------------+
@@ -164,6 +164,8 @@ Module/UW/TDMA set debug_           -7
 Module/UW/TDMA set sea_trial_       1
 Module/UW/TDMA set fair_mode        0
 # FAIR Modality on
+# Remeber to put silent the SetSlotDuration, SetGuardTime and setStartTime call
+# down below
 # Module/UW/TDMA set guard_time       0.1
 # Module/UW/TDMA set tot_slots        3
 
