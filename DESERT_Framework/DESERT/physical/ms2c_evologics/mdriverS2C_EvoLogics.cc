@@ -90,7 +90,12 @@ void MdriverS2C_EvoLogics::start() {
         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::START" << endl;
     }
     mConnector.openConnection();
-    if (getKeepOnlineMode()) {
+    if(getResetModemQueue())
+    {
+      status = _RESET;
+      m_status_tx = _DROPBUFFER;
+      modemTxManager();
+    } else if (getKeepOnlineMode()) {
         if (debug_ >= 0) cout << "MS2C_EVOLOGICS(" << ID << ")::SETTING_KEEP_ONLINE_MODALITY" << endl;
         status = _CFG;
         m_status_tx = _TXKO;
@@ -334,9 +339,22 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     }
                     if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET) || (m_status_tx == _BURSTS && status == _TX) || (m_status_tx == _PBMS && status == _TX)) {
                         // Update modem status
-                        status = _IDLE;
-                        m_status_tx = _IDLE;
-                        cread = false;
+                        if (m_status_tx == _DROPBUFFERS && status == _RESET)
+			{
+			  if (getKeepOnlineMode()) {
+			      status = _CFG;
+			      m_status_tx = _TXKO;
+			      cread = false;
+			  } else if (SetModemID) {
+			      status = _CFG;
+			      m_status_tx = _SETID;
+			      cread = false;
+			  }
+			} else {
+			    status = _IDLE;
+			    m_status_tx = _IDLE;
+			    cread = false;
+			}
                     } else if ((m_status_tx == _TXKOD && status == _CFG)) {
                         if (SetModemID)
                         {

@@ -46,6 +46,7 @@ UWMPhy_modem::UWMPhy_modem(std::string pToDevice_) {
     bind("log_", &log_);
     bind("SetModemID_", &SetModemID);
     bind("UseKeepOnline_", &UseKeepOnline);
+    bind("ResetQueue_",&ResetQueue);
     t = -1;
     PktRx = NULL;
     pcheckTmr = NULL;
@@ -171,6 +172,13 @@ void UWMPhy_modem::start() {
         pmDriver->setKeepOnlineMode(true);
     } else {
         pmDriver->setKeepOnlineMode(false);
+    }
+    if (getResetModemQueue() == 1)
+    {
+	pmDriver->setResetModemQueue(true);
+    } else {
+      
+	pmDriver->setResetModemQueue(false);
     }
     pmDriver -> start();
     pcheckTmr -> resched(period);
