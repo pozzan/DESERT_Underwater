@@ -341,6 +341,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
                         // Update modem status
                         if (m_status_tx == _DROPBUFFERS && status == _RESET)
 			{
+			  cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_" << m_status_tx << "_" << status << endl;
 			  if (getKeepOnlineMode()) {
 			      status = _CFG;
 			      m_status_tx = _TXKO;
@@ -349,6 +350,10 @@ int MdriverS2C_EvoLogics::updateStatus() {
 			      status = _CFG;
 			      m_status_tx = _SETID;
 			      cread = false;
+			  } else {
+			    status = _IDLE;
+			    m_status_tx = _IDLE;
+			    cread = false;
 			  }
 			} else {
 			    status = _IDLE;
