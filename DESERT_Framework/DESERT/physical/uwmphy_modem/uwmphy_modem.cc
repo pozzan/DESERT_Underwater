@@ -234,9 +234,12 @@ int UWMPhy_modem::check_modem() {
     }
     else if (modemStatus == _IDLE && modemStatus_old == _CFG) {
         if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::CONFIGURATION DONE!!!" << endl;
-        pmDriver->emptyModemQueue();
+        //pmDriver->emptyModemQueue();
+	return modemStatus;
     } else if (modemStatus == _IDLE && modemStatus_old == _RESET) {
         return modemStatus;
+    } else if (modemStatus == _CFG && modemStatus_old == _RESET) {
+      return modemStatus;
     } else if (modemStatus == _IDLE && modemStatus_old == _QUIT) {
         //do nothing
         if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::QUITTING_INTERFACE_BYE" << endl;
