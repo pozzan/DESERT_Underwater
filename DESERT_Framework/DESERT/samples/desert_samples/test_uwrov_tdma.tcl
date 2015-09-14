@@ -194,12 +194,12 @@ Module/UW/ROV set debug_               0
 Module/UW/ROV/CTR set debug_               0
 
 #TDMA
-# CHANGE THISSSSSSSSSSSSSSSSSSSSSSSSS ---------------
 Module/UW/TDMA set frame_duration       6
 Module/UW/TDMA set debug_               0
 Module/UW/TDMA set sea_trial_           0
 Module/UW/TDMA set fair_mode            1
 # FAIR Modality on
+# Remeber to put silent the SetSlotDuration, SetGuardTime and setStartTime call
 Module/UW/TDMA set guard_time           0.1
 Module/UW/TDMA set tot_slots            2
 
@@ -238,20 +238,14 @@ proc createNode {node application id} {
     set ipr($id)  [new Module/UW/StaticRouting]
     set ipif($id) [new Module/UW/IP]
     set mll($id)  [new Module/UW/MLL] 
-  #  set mac($id)  [new Module/UW/ALOHA] 
- #   set mac($id)  [new Module/UW/CSMA_ALOHA]
+    # set mac($id)  [new Module/UW/ALOHA] 
+    # set mac($id)  [new Module/UW/CSMA_ALOHA]
     
     set mac($id)  [new Module/UW/TDMA]
     if {$id == 1} {
-        # $mac($id) setSlotStatus 2
-        # $mac($id) setHostId 1
         $mac($id) setMacAddr [expr $id + 1]
-        # $mac($id) setSlotDuration 5
     } else {
-        # $mac($id) setSlotStatus 1
-        # $mac($id) setHostId 2
         $mac($id) setMacAddr [expr $id + 1]
-        # $mac($id) setSlotDuration 1        
     }
     
     #$mac($id)  setNoAckMode
@@ -301,8 +295,8 @@ proc createNode {node application id} {
     $phy($id) setSpectralMask $data_mask
     $phy($id) setInterference $interf_data($id)
     $phy($id) setInterferenceModel "MEANPOWER"
- #   $mac($id) $opt(ack_mode)
-#    $mac($id) initialize
+    # $mac($id) $opt(ack_mode)
+    # $mac($id) initialize
 }
 
 
@@ -311,8 +305,8 @@ proc createNode {node application id} {
 # Node Creation #
 #################
 # Create here all the nodes you want to network together
-#node 0 is the CTR
-#node 1 is the ROV
+# node 0 is the CTR
+# node 1 is the ROV
 global nodeCTR nodeROV applicationCTR applicationROV
 set nodeCTR [$ns create-M_Node $opt(tracefile) $opt(cltracefile)] 
 set applicationCTR  [new Module/UW/ROV/CTR]
@@ -352,6 +346,18 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
             $ipr($id1) addRoute ${ip_value} ${ip_value}
 	}
 }
+
+###############################
+# TDMA settings: Generic mode  #
+###############################
+# # Node CTR
+# $mac(0) setStartTime    0
+# $mac(0) setSlotDuration 2
+# $mac(0) setGuardTime    0.1
+# # Node ROV
+# $mac(1) setStartTime    2
+# $mac(1) setSlotDuration 4
+# $mac(1) setGuardTime    0.2
 
 #####################
 # Start/Stop Timers #
@@ -438,10 +444,10 @@ proc finish {} {
 	if ($opt(verbose)) {
 		    puts "applicationROV Throughput     : $ROV_throughput"
             puts "applicationROV PER            : $ROV_per       "
-            puts "-------------------------------------------"
+            puts "----------------------------------------------"
             puts "applicationCTR Throughput     : $CTR_throughput"
             puts "applicationCTR PER            : $CTR_per       "
-            puts "-------------------------------------------"
+            puts "----------------------------------------------"
 
  #       if {$opt(ack_mode) == "setAckMode"} {
  #           set DataPktsTx_CTR                  [$mac(0) getDataPktsTx]
@@ -466,19 +472,19 @@ proc finish {} {
     set CTRheadersize       [$applicationCTR getROVctrheadersize]
     
     if ($opt(verbose)) {
-        puts "Mean Throughput           : [expr ($sum_throughput/(($opt(nn))*($opt(nn)-1)))]"
-        puts "Sent Packets CTR --> ROV     : $CTR_sent_pkts"
-        puts "Received Packets CTR --> ROV     : $ROV_rcv_pkts"
-        puts "Sent Packets  ROV --> CTR   : $ROV_sent_pkts"
-        puts "Received Packets ROV --> CTR   : $CTR_rcv_pkts"
+        puts "Mean Throughput              : [expr ($sum_throughput/(($opt(nn))*($opt(nn)-1)))]"
+        puts "Sent Packets     CTR --> ROV : $CTR_sent_pkts"
+        puts "Received Packets CTR --> ROV : $ROV_rcv_pkts"
+        puts "Sent Packets     ROV --> CTR : $ROV_sent_pkts"
+        puts "Received Packets ROV --> CTR : $CTR_rcv_pkts"
         puts "---------------------------------------------------------------------"
         puts "Sent Packets     : $sum_sent_pkts"
         puts "Received   : $sum_rcv_pkts"
-        puts "Packet Delivery Ratio     : [expr 100*$sum_rcv_pkts / $sum_sent_pkts]"
-        puts "IP Pkt Header Size        : $ipheadersize"
-        puts "UDP Header Size           : $udpheadersize"
-        puts "ROV Header Size           : $ROVheadersize"
-        puts "CTR Header Size           : $CTRheadersize"
+        puts "Packet Delivery Ratio        : [expr 100*$sum_rcv_pkts / $sum_sent_pkts]"
+        puts "IP Pkt Header Size           : $ipheadersize"
+        puts "UDP Header Size              : $udpheadersize"
+        puts "ROV Header Size              : $ROVheadersize"
+        puts "CTR Header Size              : $CTRheadersize"
  #       if {$opt(ack_mode) == "setAckMode"} {
  #           puts "MAC-level average retransmissions per node : [expr $sum_rtx/($opt(nn))]"
  #       }
@@ -487,26 +493,26 @@ proc finish {} {
         set CTR_packet_lost             [$phy(0) getTotPktsLost]
         set packet_lost                 [expr $CTR_packet_lost + $ROV_packet_lost]
         puts "- PHY layer statistics for the ROV -"
-        puts "Tot. pkts lost            : $ROV_packet_lost"
-        puts "Tot. collision CTRL       : [$phy(1) getCollisionsCTRL]"
-        puts "Tot. collision DATA       : [$phy(1) getCollisionsDATA]"
-        puts "Tot. collision DATA vs CTRL : [$phy(1) getCollisionsDATAvsCTRL]"
-        puts "Tot. CTRL pkts lost       : [$phy(1) getTotCtrlPktsLost]"
+        puts "Tot. pkts lost               : $ROV_packet_lost"
+        puts "Tot. collision CTRL          : [$phy(1) getCollisionsCTRL]"
+        puts "Tot. collision DATA          : [$phy(1) getCollisionsDATA]"
+        puts "Tot. collision DATA vs CTRL  : [$phy(1) getCollisionsDATAvsCTRL]"
+        puts "Tot. CTRL pkts lost          : [$phy(1) getTotCtrlPktsLost]"
         puts "Tot. CTRL pkts lost due to Interference   : [$phy(1) getErrorCtrlPktsInterf]"
         puts "---------------------------------------------------------------------"
         puts "- PHY layer statistics for the CTR -"
-        puts "Tot. pkts lost            : $CTR_packet_lost"
-        puts "Tot. collision CTRL       : [$phy(0) getCollisionsCTRL]"
-        puts "Tot. collision DATA       : [$phy(0) getCollisionsDATA]"
-        puts "Tot. collision DATA vs CTRL : [$phy(0) getCollisionsDATAvsCTRL]"
-        puts "Tot. ROV pkts lost       : [$phy(0) getTotCtrlPktsLost]"
+        puts "Tot. pkts lost               : $CTR_packet_lost"
+        puts "Tot. collision CTRL          : [$phy(0) getCollisionsCTRL]"
+        puts "Tot. collision DATA          : [$phy(0) getCollisionsDATA]"
+        puts "Tot. collision DATA vs CTRL  : [$phy(0) getCollisionsDATAvsCTRL]"
+        puts "Tot. ROV pkts lost           : [$phy(0) getTotCtrlPktsLost]"
         puts "Tot. CTRL pkts lost due to Interference   : [$phy(0) getErrorCtrlPktsInterf]"
         puts "---------------------------------------------------------------------"
         puts "- Global situation -"
-        puts "Tot. pkts lost            : $packet_lost"
-        puts "done!"
+        puts "Tot. pkts lost               : $packet_lost"
 	set sum_pcks_in_buffer [expr [$mac(1) get_buffer_size] + [$mac(0) get_buffer_size]]
-   	puts "Pckts in buffer : $sum_pcks_in_buffer"
+   	puts "Pckts in buffer              : $sum_pcks_in_buffer"
+        puts "done!"
 
     }
     
