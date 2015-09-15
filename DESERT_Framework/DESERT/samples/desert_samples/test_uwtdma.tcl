@@ -91,7 +91,6 @@ load libuwphysical.so
 # You always need the following two lines to use the NS-Miracle simulator
 set ns [new Simulator]
 $ns use-Miracle
-$ns use-scheduler RealTime
 
 ##################
 # Tcl variables  #

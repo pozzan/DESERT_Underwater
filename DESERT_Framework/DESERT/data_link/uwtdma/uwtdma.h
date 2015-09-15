@@ -173,7 +173,7 @@ class UwTDMA: public MMac {
    * Calculate the epoch of the event. Used in sea-trial mode
    * @return the epoch of the system
    */
-  inline double getEpoch()
+  inline unsigned long int getEpoch()
   {
     return time(NULL);
   }
@@ -199,7 +199,8 @@ class UwTDMA: public MMac {
   int debug_;                       /**<Debug variable: 0 for no info,
                                     >-5 for small info, <-5 for complete info*/
   int sea_trial_;                   /**<Written log variable*/
-  int fair_mode;                    /**<Fair modality if 1*/
+  int fair_mode;                    /**<Fair modality on if 1: then only set 
+                                        tot_slots and common guard_time*/
 
   int tot_slots;    /**<Number of slots in the frame (fair_mode)*/
   int slot_number;  /**<set the position of the node in the frame (fair_mode) 
