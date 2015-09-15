@@ -78,7 +78,9 @@ UwTDMA::UwTDMA()
   slot_duration(0),
   start_time(0),
   transceiver_status(IDLE),
-  out_file_stats(0)
+  out_file_stats(0),
+  guard_time(0),
+  tot_slots(0)
 {
   bind("frame_duration", (double*) &frame_duration);
   bind("debug_", (int*) &debug_);
@@ -134,7 +136,9 @@ void UwTDMA::txData()
 
 void UwTDMA::Mac2PhyStartTx(Packet* p)
 {
-  assert(transceiver_status == IDLE);
+  if (sea_trial_ != 1)
+    assert(transceiver_status == IDLE);
+
   transceiver_status=TRANSMITTING;
   MMac::Mac2PhyStartTx(p);
 
@@ -154,7 +158,9 @@ void UwTDMA::Phy2MacEndTx(const Packet* p)
 
 void UwTDMA::Phy2MacStartRx(const Packet* p)
 {
-  assert(transceiver_status != RECEIVING);
+  if (sea_trial_ != 1)
+    assert(transceiver_status != RECEIVING);
+
   if (transceiver_status == IDLE)
     transceiver_status=RECEIVING;
 }
@@ -174,7 +180,8 @@ void UwTDMA::Phy2MacEndRx(Packet* p)
         cout << NOW << " TDMA(" << addr 
              << ")::Phy2MacEndRx() dropping corrupted pkt " << std::endl;
     
-      rxPacketNotForMe(NULL);
+      incrErrorPktsRx();
+      Packet::free(p);
     }
     else 
     {  
@@ -206,6 +213,17 @@ void UwTDMA::Phy2MacEndRx(Packet* p)
     if(slot_status==UW_TDMA_STATUS_MY_SLOT)
       txData();
 
+  }
+  else 
+  {
+    Packet::free(p);
+    if (debug_)
+      std::cout << NOW <<" ID "<< addr <<": Received packet while transmitting "
+                << std::endl;
+    if(sea_trial_)
+      out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
+		     << "::TDMA_node("<< addr << ")::RCVD_PCK_WHILE_TX" 
+		     << std::endl;
   }
 
 }
@@ -393,3 +411,4 @@ int UwTDMA::command(int argc, const char*const* argv)
   }
   return MMac::command(argc, argv);
 }
+

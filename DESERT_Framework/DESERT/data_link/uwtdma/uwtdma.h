@@ -173,10 +173,11 @@ class UwTDMA: public MMac {
    * Calculate the epoch of the event. Used in sea-trial mode
    * @return the epoch of the system
    */
-  inline unsigned long int getEpoch()
+  inline double getEpoch()
   {
     return time(NULL);
   }
+
   /**
    * TCL command interpreter. It implements the following OTcl methods:
    * 
@@ -193,24 +194,25 @@ class UwTDMA: public MMac {
   enum UWTDMA_STATUS {IDLE, TRANSMITTING, RECEIVING};
 
 
-  UWTDMA_STATUS transceiver_status; /**Variable holding the status enum type*/
-  int slot_status;              /**Is it my turn to transmit data?*/
-  int debug_;                   /**Debug variable*/
-  int sea_trial_;               /**Written log variable*/
-  int fair_mode;                /**Fair modality if 1*/
+  UWTDMA_STATUS transceiver_status; /**<Variable holding the status enum type*/
+  int slot_status;                  /**<Is it my turn to transmit data?*/
+  int debug_;                       /**<Debug variable: 0 for no info,
+                                    >-5 for small info, <-5 for complete info*/
+  int sea_trial_;                   /**<Written log variable*/
+  int fair_mode;                    /**<Fair modality if 1*/
 
-  int tot_slots;    /**Number of slots in the frame (fair_mode)*/
-  int slot_number;  /**set the position of the node in the frame (fair_mode) 
+  int tot_slots;    /**<Number of slots in the frame (fair_mode)*/
+  int slot_number;  /**<set the position of the node in the frame (fair_mode) 
                                          (starting from 0 to tot_slots-1)*/
 
-  int HDR_size;                 /**Size of the HDR if any*/
-  double frame_duration;        /**Frame duration*/
-  double guard_time;            /**Guard time between slots*/
-  double slot_duration;         /**Slot duration*/
-  double start_time;            /**Time to wait before starting the protocol*/
-  UwTDMATimer tdma_timer;       /**TDMA timer handler*/
-  std::queue<Packet*> buffer;   /**Buffer of the MAC node*/
-  std::ofstream out_file_stats; /**File stream for the log file*/
+  int HDR_size;                 /**<Size of the HDR if any*/
+  double frame_duration;        /**<Frame duration*/
+  double guard_time;            /**<Guard time between slots*/
+  double slot_duration;         /**<Slot duration*/
+  double start_time;            /**<Time to wait before starting the protocol*/
+  UwTDMATimer tdma_timer;       /**<TDMA timer handler*/
+  std::queue<Packet*> buffer;   /**<Buffer of the MAC node*/
+  std::ofstream out_file_stats; /**<File stream for the log file*/
 
 };
 
