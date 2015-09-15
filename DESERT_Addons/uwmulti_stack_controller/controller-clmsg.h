@@ -52,7 +52,7 @@
 
 extern ClMessage_t CLMSG_CONTROLLER;
 
-//extern packet_t NOT_CONTROLLED;
+extern packet_t PT_MULTI_ST_SIGNALING;
 //extern packet_t CONTROLLED;
 
 class ClMsgController : public ClMessage
