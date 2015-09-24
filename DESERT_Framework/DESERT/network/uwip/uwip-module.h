@@ -135,15 +135,7 @@ public:
      * @return <i>0</i> if successful.
      */
     virtual int recvSyncClMsg(ClMessage* m);
-    
-    /**
-     * Returns a nsaddr_t address from an IP written as a string in the form "x.x.x.x".
-     * 
-     * @param char* IP in string form
-     * @return nsaddr_t that contains the IP converter from the input string
-     */
-    static nsaddr_t str2addr(const char* str);
-    
+     
     /**
      * Returns a string with an IP in the classic form "x.x.x.x" converting an ns2 nsaddr_t address.
      * 

@@ -178,44 +178,6 @@ void UWIPModule::recv(Packet *p) {
     }
 }
 
-nsaddr_t UWIPModule::str2addr(const char *str) {
-    int level[4] = {0, 0, 0, 0};
-    char tmp[20];
-    strncpy(tmp, str, 19);
-    tmp[19] = '\0';
-    char *p = strtok(tmp, ".");
-    for (int i = 0; p && i < 4; p = strtok(NULL, "."), i++) {
-        
-        /*FF: Let's take in consideration only the last value of the IP address
-         e.g.: x.x.x.1 --> the address will be 1
-         since the netmask is not considered anymore and the address is 8 bit 
-         long, take in consideration the initial part of the IP doesn't make sense
-         anymore */
-        /*level[i] = atoi(p);
-        if (level[i] > 255)
-            level[i] = 255;
-        else if (level[i] < 0)
-            level[i] = 0;*/
-        
-        if (i == 3) {
-            level[i] = atoi(p);
-            if (level[i] > 255)
-                level[i] = 255;
-            else if (level[i] < 0)
-                level[i] = 0;
-        }
-        
-    }
-    nsaddr_t addr = 0;
-    //for (int i = 0; i < 4; i++) {
-    //    addr += (level[i] << 8 * (3 - i));
-    //}
-    
-    addr = level[3];
-    
-    return addr;
-}
-
 int UWIPModule::recvSyncClMsg(ClMessage* m) {
     if (m->type() == UWIP_CLMSG_SEND_ADDR) {
         UWIPClMsgSendAddr *c = new UWIPClMsgSendAddr(UNICAST, m->getSource());
