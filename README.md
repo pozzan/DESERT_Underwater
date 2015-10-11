@@ -14,8 +14,7 @@ importance to realize a communication and networking architecture that
 allows heterogeneous nodes to communicate reliably in the underwater 
 environment.
 
-
-[![Circle CI](https://circleci.com/gh/uwsignet/DESERT_Underwater_private.svg?style=svg)](https://circleci.com/gh/uwsignet/DESERT_Underwater_private)
+[![Circle CI](https://circleci.com/gh/uwsignet/DESERT_Underwater_private.svg?style=svg&circle-token=7babb737e85f922e024499fa72b2617fde77245e)](https://circleci.com/gh/uwsignet/DESERT_Underwater_private)
 
 ###Installation
 
