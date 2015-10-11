@@ -15,6 +15,8 @@ allows heterogeneous nodes to communicate reliably in the underwater
 environment.
 
 
+[![Circle CI](https://circleci.com/gh/uwsignet/DESERT_Underwater_private.svg?style=svg)](https://circleci.com/gh/uwsignet/DESERT_Underwater_private)
+
 ###Installation
 
 To install DESERT Underwater follow the instructions at the [doxygen documentation](http://telecom.dei.unipd.it/ns/desert/DESERT2_HTML_doxygen_doc/index.html)
