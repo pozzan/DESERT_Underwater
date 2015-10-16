@@ -374,6 +374,7 @@ build_NS() {
     patch -p1 < ${UNPACKED_FOLDER}/${PATCHES_DIR}/ns-${NS_VERSION}-without-x-cross.patch > "${currentBuildLog}/ns-${NS_VERSION}-$*.log"  2>&1
     patch -p1 < ${UNPACKED_FOLDER}/${PATCHES_DIR}/ns-${NS_VERSION}-compile.patch >> "${currentBuildLog}/ns-${NS_VERSION}-$*.log"  2>&1
     patch -p1 < ${UNPACKED_FOLDER}/${PATCHES_DIR}/ns-${NS_VERSION}-fix-gcc-4.7.patch >> "${currentBuildLog}/ns-${NS_VERSION}-$*.log"  2>&1
+    patch -p1 < ${UNPACKED_FOLDER}/${PATCHES_DIR}/ns-real-time.patch >> "${currentBuildLog}/ns-${NS_VERSION}-$*.log"  2>&1
     mv configure.in configure.ac
     # autoreconf || true >> "${currentBuildLog}/ns-${NS_VERSION}-$*.log"  2>&1
 
