@@ -1207,6 +1207,36 @@ On the UDOO website, at the <A HREF="http://www.udoo.org/downloads/">download</A
 
 At this point it is possible to use the installation script. To do so, go inside <tt>.../DESERT_Underwater/DESERT_Framework/</tt> and launch <tt>./install.sh [OPTION]</tt>. See section \ref install for more information about the options.
 
+
+\section pandaboard Pandaboard
+<b> Pandaboard® </b>
+
+See also: http://www.pandaboard.org/
+
+\image html http://www.liquidware.com/system/0000/3727/PandaBoard_Angle.jpg
+
+The Pandaboard is very powerful embedded board. It features a dual core Cortex A9 processor running at 1 GHz and a number of ports that outnmubers simpler boards such as the Raspberry or the Udoo, namely it comes with a HDMI output port, a DVI output port, 2 USB 2.0 ports a micro USB OTG port, a serial port, a 10/100 Ethernet connector and also a WLAN/Bluetooth module. Of course these specs raise its application level and, a bit, also its price ($100-$200).
+
+The horsepower of the Pandaboard makes it suitable for the installation of a complete OS like Ubuntu: on our Pandaboard we installed an Ubuntu image, cross compiled for ARM. We point the user to the following link to easily obtain an Ubuntu image for the Pandaboard:
+
+http://www.omappedia.org/wiki/Ubuntu_Pre-built_Binaries_Guide
+
+Once the Pandaboard is set up and working properly (e.g. you can view output or access it through ssh) you will have to cross compile DESERT for the ARM A9. We tested it un an Ubuntu installation, namely from 10. on. to accomplish this, a little number of dependencies must be solved, namely:
+
+- Open up a terminal and install the following packages:
+<small>
+
+     sudo apt-get install gcc-arm-linux-gnueabihf 
+
+</small>
+and then accept all the dependencies required.
+At this point, the toolchain needed for cross compilation is available and you only need to call the DESERT installer as usual and select the Pandaboard target. 
+<small>
+
+     ./install.sh --wizard
+
+</small>
+See section \ref install for more information about the options.
 */
 
 /** \page VirtualMachine Virtual Machine
