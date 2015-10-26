@@ -1234,20 +1234,26 @@ At this point, we need to create a folder in order to hold the files needed by t
 
 - As sudo do:
 <small>
+
     sudo mkdir /opt/pandaboard
     cd /opt/pandaboard
+
 </small>
 - then create an environment file
 <small>
+
      touch environment
+
 </small>
 - and finally fill the newly created environment file as the following:
 <small>
+
      export CC=arm-linux-gnueabihf-gcc 
      export CXX=arm-linux-gnueabihf-g++
      export GDB=arm-linux-gnueabihf-gdb
      export STRIP=arm-linux-gnueabihf-strip
      export AR=arm-linux-gnueabihf-ar     
+
 </small>
 
 Then, the toolchain needed for cross compilation is available and you only need to call the DESERT installer as usual and select the Pandaboard target. 
