@@ -27,13 +27,12 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# @name_file:   installDESERT_PC.sh
-# @author:      Ivano Calabrese
-# @last_update: 2014.05.07
-# --
-# @brief_description:
+# @name_file:   installDESERT_Pandaboard.sh
+# @author:      Roberto Francescon
+# @last_update: 2015.09.16
+# @version:     0.0.1
+# @brief_description: Pandaboard cross compilation script
 
-# INCLUDE
 #. ./commonVariables.sh
 . ${ROOT_DESERT}/commonFunctions.sh
 
@@ -73,35 +72,35 @@ if [ ! -d ${BUILD_TARGET} ]; then
 fi
 
 main() {
-    #******************************************************************************
+    #***************************************************************************
     # MAIN
     #     e.g handle_package host/target <pkt-name>
     #     e.g addon_installation_list host/target <addon-list>
 
     ## only for the cross-compilation session
-    export CROSS_ENV_DIR=""
-    export CROSS_ENV_FILE=""
-    #*
+    export CROSS_ENV_DIR="/opt/pandaboard"
+    export CROSS_ENV_FILE="${CROSS_ENV_DIR}/environment"
 
-    handle_package host ZLIB
-    handle_package host TCL
+    handle_package host/target ZLIB
+    handle_package host/target TCL
     export PATH="${BUILD_HOST}/bin:$PATH"
     export LD_LIBRARY_PATH="${BUILD_HOST}/lib"
-    handle_package host OTCL
-    handle_package host TCLCL
-    handle_package host NS
-    handle_package host NSMIRACLE
-    handle_package host DESERT
+    handle_package host/target OTCL
+    handle_package host/target TCLCL
+    handle_package target NS
+    handle_package target NSMIRACLE
+    handle_package target DESERT
     if [ ${WITHWOSS} -eq 1 ]; then
-        handle_package host NETCDF
-        handle_package host NETCDFCXX
-        handle_package host BELLHOP
-        handle_package host WOSS
+        #handle_package target NETCDF
+        #handle_package target NETCDFCXX
+        #handle_package target BELLHOP
+        #handle_package target WOSS
+        warn_L1 "The WOSS libreries wont be installed!"
     fi
     if [ ! -z "${ADDONS}" ]; then
-        addon_installation_list host "${ADDONS}"
+        addon_installation_list target "${ADDONS}"
     fi
-    #******************************************************************************
+    #***************************************************************************
 }
 
 #***
@@ -135,11 +134,11 @@ build_ZLIB() {
         fi
     else
         if [ -f Makefile ]; then
-            make distclean
+            make distclean > "${currentBuildLog}/zlib-${ZLIB_VERSION}-$*.log" 2>&1
         fi
         info_L2 "configure  [$*]"
-        CC=$ARCH-gcc
-        ./configure > "${currentBuildLog}/zlib-${ZLIB_VERSION}-$*.log"  2>&1
+        CC=${CC}
+        ./configure >> "${currentBuildLog}/zlib-${ZLIB_VERSION}-$*.log"  2>&1
         if [ $? -ne 0 ] ; then
             err_L1 "Error during the configuration of zlib-${ZLIB_VERSION}! Exiting ..."
             tail ${currentBuildLog}/zlib-${ZLIB_VERSION}-$*.log
@@ -261,6 +260,7 @@ build_OTCL() {
     CFLAGS=-I../tcl-${TCL_VERSION}/unix/
 
     info_L2 "configure  [$*]"
+    echo $ARCH
     ./configure --target=${ARCH}                  \
                 --host=${ARCH}                    \
                 --build=${HOST}                   \
@@ -384,8 +384,8 @@ build_NS() {
     if [ -f Makefile ] ; then
         make distclean >> "${currentBuildLog}/ns-${NS_VERSION}-$*.log"  2>&1
     fi
-    ./configure --enable-static                                        \
-                --target=${ARCH}                                       \
+    ./configure --target=${ARCH}                                       \
+                --enable-static                                        \
                 --host=${ARCH}                                         \
                 --build=${HOST}                                        \
                 --with-tcl=${currentBuildLog}/tcl-${TCL_VERSION}       \
@@ -437,7 +437,7 @@ build_NS() {
 # << NSMIRACLE package >>
 # -------
 # This function allows the compilation/cross-compilation of the zlib package.
-# Through the:
+# Through te:
 #    ${ARCH}
 #    ${HOST}
 # variables "build_NSMIRACLE ()" decides if do a compilation or a cross-compilation:
@@ -522,6 +522,7 @@ build_DESERT() {
             exit 1
         fi
     fi
+    info_L2 "patch      [$*]"
 
     (
         cd ${ROOT_DESERT}/${DESERT_DIR}
@@ -564,7 +565,6 @@ build_DESERT() {
         tail ${currentBuildLog}/desert-${DESERT_VERSION}-$*.log
         exit 1
     fi
-
     elapsed=`expr $(date +%s) - $start`
     ok_L1 "completed in ${elapsed}s"
 }
@@ -645,7 +645,6 @@ build_DESERT_addon() {
             tail ${currentBuildLog}/DESERT_ADDON/${1}-${2}.log
             exit 1
         fi
-
         info_L2 "patch      [${2}]"
         (
             cat "${UNPACKED_FOLDER}/${PATCHES_DIR}/001-desert-2.0.0-addon-libtool-no-verbose.patch" | patch -p1 >> "${currentBuildLog}/DESERT_ADDON/${1}-${2}.log"  2>&1
@@ -833,7 +832,6 @@ build_BELLHOP() {
         err_L1 "Error during the compilation or installation of Bellhop! Exiting ..."
         exit 1
     fi
-    cp bin/bellhop.exe ${DEST_FOLDER}/bin
     elapsed=`expr $(date +%s) - $start`
     ok_L1 "completed in ${elapsed}s"
 }
