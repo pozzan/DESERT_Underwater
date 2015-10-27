@@ -1215,13 +1215,13 @@ See also: http://www.pandaboard.org/
 
 \image html http://www.liquidware.com/system/0000/3727/PandaBoard_Angle.jpg
 
-The Pandaboard is very powerful embedded board. It features a dual core Cortex A9 processor running at 1 GHz and a number of ports that outnmubers simpler boards such as the Raspberry or the Udoo, namely it comes with a HDMI output port, a DVI output port, 2 USB 2.0 ports a micro USB OTG port, a serial port, a 10/100 Ethernet connector and also a WLAN/Bluetooth module. Of course these specs raise its application level and, a bit, also its price ($100-$200).
+The Pandaboard is a powerful embedded board. It features a dual core Cortex A9 processor running at 1 GHz and a number of ports that outnmubers simpler boards such as the Raspberry or the Udoo. Namely, it comes with a HDMI output port, a DVI output port, 2 USB 2.0 ports, 1 micro USB OTG port, a serial port, a 10/100 Ethernet connector and also a WLAN/Bluetooth module. Of course these specs extend the range of applications it can support, and impact on the price of the board ($100-$200).
 
 The horsepower of the Pandaboard makes it suitable for the installation of a complete OS like Ubuntu: on our Pandaboard we installed an Ubuntu image, cross compiled for ARM. We point the user to the following link to easily obtain an Ubuntu image for the Pandaboard:
 
 http://www.omappedia.org/wiki/Ubuntu_Pre-built_Binaries_Guide
 
-Once the Pandaboard is set up and working properly (e.g. you can view output or access it through ssh) you will have to cross compile DESERT for the ARM A9. We tested it un an Ubuntu installation, namely from 10. on. to accomplish this, a little number of dependencies must be solved, namely:
+Once the Pandaboard is set up and working properly (e.g., you can view terminal output or access the Pandaboard OS via ssh) you will have to cross-compile DESERT for the ARM A9 processor. We tested it on an Ubuntu 10.xx installation. To accomplish this, a few dependencies must be solved, namely:
 
 - Open up a terminal and install the following packages:
 <small>
@@ -1232,7 +1232,7 @@ Once the Pandaboard is set up and working properly (e.g. you can view output or 
 and then accept all the dependencies required.
 At this point, we need to create a folder in order to hold the files needed by the toolchain:
 
-- As sudo do:
+- As sudo, do the following:
 <small>
 
     sudo mkdir /opt/pandaboard
@@ -1245,7 +1245,7 @@ At this point, we need to create a folder in order to hold the files needed by t
      touch environment
 
 </small>
-- and finally fill the newly created environment file as the following:
+- and finally write the following lines into the newly created environment file:
 <small>
 
      export CC=arm-linux-gnueabihf-gcc 
@@ -1256,7 +1256,7 @@ At this point, we need to create a folder in order to hold the files needed by t
 
 </small>
 
-Then, the toolchain needed for cross compilation is available and you only need to call the DESERT installer as usual and select the Pandaboard target. 
+At this point, the toolchain needed for cross-compilation is available, and you only need to call the DESERT installer as usual, where of course you need to specifically select the Pandaboard target. 
 <small>
 
      ./install.sh --wizard
@@ -1269,7 +1269,7 @@ See section \ref install for more information about the options.
 
 <b> An option to play immediately with the DESERT Underwater libraries </b>
 
-If you do not want to install yet another library on your system, we provide the image of a ready-to-run virtual machine. This is an easy solution that will make it possible for you to start working directly with our software, before choosing whether to actually install it or not. The virtual machine is also a very feasible fallback for those users that are stuck with the Windows OS, and cannot install a fresh Linux distro on their host.
+If you do not want to install DESERT Underwater natively on your system, we provide the image of a ready-to-run virtual machine. This is an easy solution that will make it possible for you to start working directly with our software, before choosing whether to actually install it or not. The virtual machine is also a very feasible fallback for those users that are stuck with the Windows OS, and cannot install a fresh Linux distro on their host.
 
 To install the virtual machine, your system must satisfy these requirements:
 
