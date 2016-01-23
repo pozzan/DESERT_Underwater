@@ -88,6 +88,7 @@ priority_(0),
 PoissonTraffic_(0),
 debug_(0),
 drop_out_of_order_(0),
+traffic_type_(0),
 sendTmr_(this),
 txsn(1),
 hrsn(0),
@@ -120,6 +121,7 @@ esn(0)
     bind("PoissonTraffic_", &PoissonTraffic_);
     bind("debug_", &debug_);
     bind("drop_out_of_order_", &drop_out_of_order_);
+    bind("traffic_type_", (uint*) &traffic_type_);
     sn_check = new bool[USHRT_MAX];
     for (int i = 0; i < USHRT_MAX; i++) {
         sn_check[i] = false;
@@ -214,6 +216,7 @@ void UwCbrModule::initPkt(Packet* p) {
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
     uwcbrh->sn()       = txsn++;
     uwcbrh->priority() = priority_;
+    uwcbrh->traffic_type() = traffic_type_;
     ch->timestamp()    = Scheduler::instance().clock();
 
     if (rftt >= 0) {
