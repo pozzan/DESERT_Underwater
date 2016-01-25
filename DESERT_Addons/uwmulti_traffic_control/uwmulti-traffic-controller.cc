@@ -36,6 +36,7 @@
  */
 
 #include "uwmulti-traffic-controller.h"
+#include <clmsg-discovery.h>
 
 /**
  * Class that represents the binding with the tcl configuration script 
@@ -79,43 +80,121 @@ int UwMultiTrafficController::command(int argc, const char*const* argv)
     */
 		if(strcasecmp(argv[1], "addUpLayer") == 0)
     {
-      //addLayer(atoi(argv[2]),atoi(argv[3]));
+      addUpLayerFromName(atoi(argv[2]),argv[3]);
 			return TCL_OK;
 		}
     else if(strcasecmp(argv[1], "addRobustLowLayer") == 0)
     {
-      //addLayer(atoi(argv[2]),atoi(argv[3]));
+      addLowLayerFromName(atoi(argv[2]),argv[3],ROBUST);
       return TCL_OK;
     }
     else if(strcasecmp(argv[1], "addFastLowLayer") == 0)
     {
-      //addLayer(atoi(argv[2]),atoi(argv[3]));
+      addLowLayerFromName(atoi(argv[2]),argv[3],CHECK_RANGE);
       return TCL_OK;
     }
 	}
+  else if (argc == 4) 
+  {
+    if(strcasecmp(argv[1], "addLowLayer") == 0)
+    {
+      addLowLayerFromName(atoi(argv[2]),argv[3],atoi(argv[4]));
+      return TCL_OK;
+    }
+  }
 	
   return Module::command(argc, argv);     
 } /* UwMultiTrafficController::command */
 
+void UwMultiTrafficController::addUpLayerFromName(int traffic_id, std::string tcl_name) {
+  ClMsgDiscovery m;
+  m.addSenderData((const PlugIn*) this, getLayer(), getId(), getStackId(), name() , getTag());
+  sendSyncClMsgUp(&m);
+  DiscoveryStorage up_layer_storage = m.findTclName(tcl_name.c_str());
+  if (up_layer_storage.getSize() == 1) 
+  {
+    insertTraffic2UpLayer(traffic_id,(*up_layer_storage.begin()).first);
+  }  
+}
+
+void UwMultiTrafficController::addLowLayerFromName(int traffic_id, std::string tcl_name, int behavior) {
+  assert(behavior==ROBUST || behavior==CHECK_RANGE);
+  ClMsgDiscovery m;
+  m.addSenderData((const PlugIn*) this, getLayer(), getId(), getStackId(), name() , getTag());
+  sendSyncClMsgDown(&m);
+  DiscoveryStorage low_layer_storage = m.findTclName(tcl_name.c_str());
+  DiscoveryData low_layer = (*low_layer_storage.begin()).second;
+  if (low_layer_storage.getSize() == 1) 
+  {
+    insertTraffic2LowerLayer(traffic_id,low_layer.getId(),low_layer.getStackId(),behavior);
+  }  
+}
+
 void UwMultiTrafficController::recv(Packet* p)
 {
   hdr_cmn *ch = HDR_CMN(p);
-    if(ch->direction() == hdr_cmn::UP)
-    {
-      
-    }
-    else
-    {
-      //direction DOWN: packet is coming from upper layers
-      recvFromUpperLayers(p);
-    }
+  if(ch->direction() == hdr_cmn::UP)
+  {   
+    hdr_uwcbr *ah = HDR_UWCBR(p);
+    // TODO: wait cbr cointains traffic type
+    int app_type = 0; // ah.getTipe();
+    sendUp(getUpperLayer(app_type), p);
+  }
+  else
+  {
+    //direction DOWN: packet is coming from upper layers
+    recvFromUpperLayers(p);
+  }
 }
 
 void UwMultiTrafficController::recvFromUpperLayers(Packet *p)
 {
-  /*hdr_cmn *ch = HDR_CMN(p);*/
+  hdr_cmn *ch = HDR_CMN(p);
+  assert(ch->direction() == hdr_cmn::DOWN);
 
-  //TODO:queu management
+  hdr_uwcbr *ah = HDR_UWCBR(p);
+  // TODO: wait cbr cointains traffic type
+  int app_type = 0; // ah.getTipe();
+
+  //TODO:queue push
+  insertInBuffer(p,app_type);
+  //TODO:queue manager
+  manageBuffer(app_type);
+}
+
+void UwMultiTrafficController::insertInBuffer(Packet *p, int traffic) 
+{
+  DownTrafficBuffer::iterator it = down_buffer.find(traffic);
+  if (it != down_buffer.end()) {
+    it->second.push(p);
+  }
+  else {
+    std::queue<Packet*> *q = new std::queue<Packet*>;
+    q->push(p);
+    down_buffer[traffic] = *q;
+  }
+}
+
+void UwMultiTrafficController::manageBuffer(int traffic)
+{
+  DownTrafficBuffer::iterator it = down_buffer.find(traffic);
+  if (it != down_buffer.end()) {
+    int l_id = getBestLowerLayer(traffic);
+    if (status == IDLE) {
+      sendDown(l_id,removeFromBuffer(traffic));
+    }
+  }
+}
+
+Packet * UwMultiTrafficController::removeFromBuffer(int traffic) 
+{
+  Packet * p = NULL;
+  DownTrafficBuffer::iterator it = down_buffer.find(traffic);
+  if (it != down_buffer.end()) {
+    p = it->second.front();
+    it->second.pop();
+  }
+  return p;
 }
 
   

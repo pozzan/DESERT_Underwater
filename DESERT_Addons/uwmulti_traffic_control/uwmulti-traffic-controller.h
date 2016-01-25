@@ -117,6 +117,31 @@ protected:
   */
   virtual void recvFromUpperLayers(Packet *p);
 
+  /** 
+   * manage to tx a packet of traffic type
+   *
+   * @param traffic application traffic id
+   *
+   */
+  virtual void manageBuffer(int traffic);
+
+  /** 
+   * insert a packet of a searten type in the buffer
+   *
+   * @param p pointer of the packet
+   * @param traffic application traffic id
+   */
+  virtual void insertInBuffer(Packet *p, int traffic);
+
+  /** 
+   * remove a packet of a searten type from the buffer
+   * and return it
+   *
+   * @param traffic application traffic id
+   * @return the pointer of the removed packet
+   */
+  virtual Packet * removeFromBuffer(int traffic);
+
   /**
    * Set to which upper layer forward a specific kind of traffic received from the lower layers
    * 
@@ -183,6 +208,8 @@ protected:
 
 private:
   //Variables
+  virtual void addUpLayerFromName(int traffic_id, std::string tcl_name);
+  virtual void addLowLayerFromName(int traffic_id, std::string tcl_name, int behavior);
 };
 
 #endif /* UWMULTI_TRAFFIC_CONTROLLER_H  */
