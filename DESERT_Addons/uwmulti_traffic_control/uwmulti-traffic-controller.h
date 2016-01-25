@@ -43,8 +43,9 @@
 #include <module.h>
 #include <tclcl.h>
 #include <map>
-#include <uwcbr-modules.h>
 #include <queue>
+#include <pair>
+#include <uwcbr-modules.h>
 
 #include <iostream>
 #include <string.h>
@@ -59,8 +60,9 @@
 #define IDLE 1
 #define RANGE_CNF_WAIT 2
 
-typedef std::map <int, int> BehaviorMap; /**< stack_id, behavior>*/
-typedef std::map <int, int> UpTrafficMap; /**< app_type, stack_id>*/
+typedef std::map <int, int> UpTrafficMap; /**< app_type, module_id>*/
+typedef std::pair <int, int> BehaviorItem; /**< module_id, behavior>*/
+typedef std::map <int, BehaviorItem> BehaviorMap; /**< stack_id, behavior>*/
 typedef std::map <int, BehaviorMap> DownTrafficMap; /**< app_type, BehaviorMap*/
 typedef std::queue<Packet*> Buffer;
 typedef std::map <int, Buffer> DownTrafficBuffer; /**< app_type, PacketQueue*/
@@ -104,6 +106,7 @@ public:
 protected:
 
   int debug_; /**< Flag to activate debug verbosity.*/
+  int status;
   UpTrafficMap up_map;
   DownTrafficMap down_map;
   DownTrafficBuffer down_buffer;
@@ -119,10 +122,10 @@ protected:
    * Set to which upper layer forward a specific kind of traffic received from the lower layers
    * 
    * @param traffic application traffic id
-   * @param upper_layer_stack unique identifier of the upper layer stack
+   * @param upper_layer_id unique identifier of the upper layer id
    */
-  void inline insertTraffic2UpLayer(int traffic, int upper_layer_stack) { 
-    up_map[traffic] = upper_layer_stack; 
+  void inline insertTraffic2UpLayer(int traffic, int upper_layer_id) { 
+    up_map[traffic] = upper_layer_id; 
   }
 
   /**
@@ -132,8 +135,8 @@ protected:
    * @param lower_layer_stack unique identifier of the lower layer stack
    * @param check_range if <i>TRUE</i> follows the CHECK_RANGE behavior, else the ROBUST one
    */
-  void inline insertTraffic2LowerLayer(int traffic, int lower_layer_stack, int behavior) { 
-    down_map[traffic][lower_layer_stack] = behavior; 
+  void inline insertTraffic2LowerLayer(int traffic, int lower_layer_stack, int lower_layer_id, int behavior) { 
+    down_map[traffic][lower_layer_stack] = std::make_pair(lower_layer_id, behavior); 
   }
 
   /** 
@@ -158,10 +161,10 @@ protected:
    * remove the behavior from the traffic lower layers matrix
    *
    * @param traffic application traffic id
-   * @param lowLayerId lower layer id
+   * @param lower_layer_stack lower layer stack id
    *
    */
-  virtual void eraseTraffic2LowerLayer(int traffic, int lowLayerId);
+  virtual void eraseTraffic2LowerLayer(int traffic, int lower_layer_stack);
   
   /** 
    * remove the traffic from the lower layers matrix

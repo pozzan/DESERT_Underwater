@@ -61,6 +61,7 @@ UwMultiTrafficController::UwMultiTrafficController()
 : 
   Module(),
   debug_(0),
+  status(IDLE)
   up_map(),
   down_map(),
   down_buffer()
@@ -120,6 +121,20 @@ void UwMultiTrafficController::recvFromUpperLayers(Packet *p)
   
 int UwMultiTrafficController::getBestLowerLayer(int traffic) 
 {
+  DownTrafficMap::iterator it = down_map.find(traffic); 
+  if (it != down_map.end()) {
+    BehaviorMap temp = it->second;
+    BehaviorMap::iterator it_b = temp.begin()
+    for (; it_b!=temp.end(); ++it_b)
+    {
+      if (BehaviorItem(it_b->second)->second == CHECK_RANGE)
+      {
+        //TODO: check_range, status = RANGE_CNF_WAIT
+      }
+    }
+    if (status == IDLE)
+      return --it_b->first;
+  }
   return 0;
 }
 
@@ -132,14 +147,14 @@ int UwMultiTrafficController::getUpperLayer(int traffic)
   return 0;
 }
 
-void UwMultiTrafficController::eraseTraffic2LowerLayer(int traffic, int lowLayerId)
+void UwMultiTrafficController::eraseTraffic2LowerLayer(int traffic, int lower_layer_stack)
 {
   DownTrafficMap::iterator it = down_map.find(traffic); 
   if (it != down_map.end()) {
     BehaviorMap behav = it->second;
-    BehaviorMap::iterator it_layer = behav.find(lowLayerId);
+    BehaviorMap::iterator it_layer = behav.find(lower_layer_stack);
   if(it_layer != it.end())
-    it.erase(lowLayerId);
+    it.erase(lower_layer_stack);
   if(thres_i.size() == 0)
     down_map.erase(traffic);
 }
@@ -152,21 +167,10 @@ void UwMultiTrafficController::eraseTraffic2Low(int traffic)
   }
 }
 
-void UwMultiTrafficController::eraseTraffic2Up(int traffic){
+void UwMultiTrafficController::eraseTraffic2Up(int traffic)
+{
   UpTrafficMap::iterator it = up_map.find(traffic); 
   if (it != up_map.end()) {
     up_map.erase(traffic);
-  }
-}
-
-void UwMultiTrafficController::eraseThreshold(int i, int j) { 
-  ThresMatrix::iterator it = threshold_map.find(i); 
-  if (it != threshold_map.end()) {
-    ThresMap thres_i = it->second;
-    ThresMap::iterator it_thres_ij = thres_i.find(j);
-    if(it_thres_ij != thres_i.end())
-      thres_i.erase(j);
-    if(thres_i.size() == 0)
-      threshold_map.erase(i);
   }
 }
