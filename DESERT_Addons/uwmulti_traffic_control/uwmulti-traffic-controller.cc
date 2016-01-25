@@ -35,7 +35,7 @@
  *
  */
 
-#include "uwmulti-stack-controller.h"
+#include "uwmulti-traffic-controller.h"
 
 /**
  * Class that represents the binding with the tcl configuration script 
@@ -61,7 +61,7 @@ UwMultiTrafficController::UwMultiTrafficController()
 : 
   Module(),
   debug_(0),
-  status(IDLE)
+  status(IDLE),
   up_map(),
   down_map(),
   down_buffer()
@@ -124,16 +124,16 @@ int UwMultiTrafficController::getBestLowerLayer(int traffic)
   DownTrafficMap::iterator it = down_map.find(traffic); 
   if (it != down_map.end()) {
     BehaviorMap temp = it->second;
-    BehaviorMap::iterator it_b = temp.begin()
+    BehaviorMap::iterator it_b = temp.begin();
     for (; it_b!=temp.end(); ++it_b)
     {
-      if (BehaviorItem(it_b->second)->second == CHECK_RANGE)
+      if (BehaviorItem(it_b->second).second == CHECK_RANGE)
       {
         //TODO: check_range, status = RANGE_CNF_WAIT
       }
     }
     if (status == IDLE)
-      return --it_b->first;
+      return (--it_b)->first;
   }
   return 0;
 }
@@ -153,10 +153,11 @@ void UwMultiTrafficController::eraseTraffic2LowerLayer(int traffic, int lower_la
   if (it != down_map.end()) {
     BehaviorMap behav = it->second;
     BehaviorMap::iterator it_layer = behav.find(lower_layer_stack);
-  if(it_layer != it.end())
-    it.erase(lower_layer_stack);
-  if(thres_i.size() == 0)
-    down_map.erase(traffic);
+    if(it_layer != behav.end())
+      behav.erase(lower_layer_stack);
+    if(behav.size() == 0)
+      down_map.erase(traffic);
+  }
 }
 
 void UwMultiTrafficController::eraseTraffic2Low(int traffic)

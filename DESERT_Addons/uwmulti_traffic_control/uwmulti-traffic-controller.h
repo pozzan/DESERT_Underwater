@@ -44,8 +44,7 @@
 #include <tclcl.h>
 #include <map>
 #include <queue>
-#include <pair>
-#include <uwcbr-modules.h>
+#include <uwcbr-module.h>
 
 #include <iostream>
 #include <string.h>

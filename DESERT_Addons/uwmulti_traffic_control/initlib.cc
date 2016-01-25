@@ -39,7 +39,6 @@
 extern EmbeddedTcl UwMultiTrafficControllerInitTclCode;
 
 extern "C" int Uwmulti_traffic_controller_Init() {
-  PT_MULTI_ST_SIGNALING = p_info::addPacket("MULTI_ST_SIGNALING");
 	UwMultiTrafficControllerInitTclCode.load();
 	return 0;
 }
