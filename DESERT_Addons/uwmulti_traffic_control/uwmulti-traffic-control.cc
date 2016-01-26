@@ -73,10 +73,6 @@ int UwMultiTrafficControl::command(int argc, const char*const* argv)
 {
 	if (argc == 4) 
   {
-    /**
-     * parameters: layer_id, layer_order, a positive and
-     * unique integer to order the set if physical ids
-    */
 		if(strcasecmp(argv[1], "addUpLayer") == 0)
     {
       addUpLayerFromTag(atoi(argv[2]),argv[3]);

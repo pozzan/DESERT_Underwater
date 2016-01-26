@@ -35,12 +35,12 @@
  *
  */
 
-#include "uwmulti-traffic-control.h"
+#include "uwmulti-traffic-range-crt.h"
 
 /**
  * Class that represents the binding with the tcl configuration script 
  */
-static class UwMultiTrafficControlClass : public TclClass 
+static class UwMultiTrafficRangeCtrClass : public TclClass 
 {
 public:
   /**
@@ -59,7 +59,8 @@ public:
 
 UwMultiTrafficRangeCtr::UwMultiTrafficRangeCtr() 
 : 
-  UwMultiTrafficControl()
+  UwMultiTrafficControl(),
+  status()
 { 
 
 }
@@ -68,10 +69,6 @@ int UwMultiTrafficRangeCtr::command(int argc, const char*const* argv)
 {
 	if (argc == 4) 
   {
-    /**
-     * parameters: layer_id, layer_order, a positive and
-     * unique integer to order the set if physical ids
-    */
     if(strcasecmp(argv[1], "addRobustLowLayer") == 0)
     {
       addLowLayerFromTag(atoi(argv[2]),argv[3],ROBUST);
@@ -86,29 +83,12 @@ int UwMultiTrafficRangeCtr::command(int argc, const char*const* argv)
   return UwMultiTrafficControl::command(argc, argv);     
 } /* UwMultiTrafficRangeCtr::command */
 
-void UwMultiTrafficControl::recv(Packet* p)
-{
-  hdr_cmn *ch = HDR_CMN(p);
-  if(ch->direction() == hdr_cmn::UP)
-  {   
-    hdr_uwcbr *ah = HDR_UWCBR(p);
-    // TODO: wait cbr cointains traffic type
-    int app_type = 0; // ah.getTipe();
-    sendUp(getUpperLayer(app_type), p);
-  }
-  else
-  {
-    //direction DOWN: packet is coming from upper layers
-    recvFromUpperLayers(p);
-  }
-}
-
 void UwMultiTrafficRangeCtr::manageBuffer(int traffic)
 {
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end()) {
     int l_id = getBestLowerLayer(traffic);
-    if (status == IDLE) {
+    if (status[traffic].status == IDLE) {
       sendDown(l_id,removeFromBuffer(traffic));
     }
   }
@@ -116,6 +96,17 @@ void UwMultiTrafficRangeCtr::manageBuffer(int traffic)
   
 int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic) 
 {
+  StatusMap::iterator it_s = status.find(traffic);
+  if (it_s == status.end()) {
+    //
+    stack_status default_st;
+    default_st.status = ROBUST;
+    default_st.stack_id = 0;
+    default_st.mod_id = 0;
+    status[traffic] = default_st;
+  }
+  
+  //if (status[traffic].status == CHECK_RANGE)
   DownTrafficMap::iterator it = down_map.find(traffic); 
   if (it != down_map.end()) {
     BehaviorMap temp = it->second;
@@ -127,7 +118,7 @@ int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic)
         //TODO: check_range, status = RANGE_CNF_WAIT
       }
     }
-    if (status == IDLE)
+    if (status[traffic].status == IDLE)
       return (--it_b)->first;
   }
   return 0;

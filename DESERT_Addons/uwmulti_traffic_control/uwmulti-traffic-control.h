@@ -202,8 +202,21 @@ protected:
    */
   virtual void eraseTraffic2Up(int traffic);
 
+  /** 
+   * add an upper layer from the tag name in the map
+   *
+   * @param traffic application traffic id
+   * @param tag: tag of the upper module
+   */
   virtual void addUpLayerFromTag(int traffic_id, std::string tag);
 
+  /** 
+   * add a lower layer from the tag name in the map
+   *
+   * @param traffic application traffic id
+   * @param tag: tag of the lower module
+   * @param behavior: behavior of the layer
+   */
   virtual void addLowLayerFromTag(int traffic_id, std::string tag, int behavior);
 
 private:

@@ -35,8 +35,8 @@
 *
 */
 
-#ifndef UWMULTI_TRAFFIC_Control_H
-#define UWMULTI_TRAFFIC_Control_H
+#ifndef UWMULTI_TRAFFIC_CONTROL_H
+#define UWMULTI_TRAFFIC_CONTROL_H
 
 #include "uwmulti-traffic-control.h"
 
@@ -47,6 +47,13 @@
 // DEFINE STATES
 #define IDLE 2
 #define RANGE_CNF_WAIT 2
+
+struct stack_status {
+  int stack_id;
+  int mod_id;
+  int status;
+} ;
+typedef std::map <int, stack_status> StatusMap; /** traffic, status */
 
 /**
  * Class used to represents the UwMultiTrafficRangeCtr layer of a node.
@@ -77,15 +84,8 @@ public:
    */
   virtual int command(int, const char*const*);
 
-  /**
-   * recv method. It is called when a packet is received from the other layers
-   *
-   * @param Packet* Pointer to the packet that are going to be received
-   */
-  virtual void recv(Packet *p);
-
 protected:
-  int status;
+  StatusMap status;
   /** 
    * manage to tx a packet of traffic type
    *
@@ -107,4 +107,4 @@ private:
   //Variables
 };
 
-#endif /* UWMULTI_TRAFFIC_Control_H  */
+#endif /* UWMULTI_TRAFFIC_CONTROL_H  */
