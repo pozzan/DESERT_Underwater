@@ -60,9 +60,11 @@ public:
 UwMultiTrafficRangeCtr::UwMultiTrafficRangeCtr() 
 : 
   UwMultiTrafficControl(),
-  status()
+  check_to(0),
+  status(),
+  timers()
 { 
-
+  bind("check_to_", &check_to);
 }
 
 int UwMultiTrafficRangeCtr::command(int argc, const char*const* argv) 
@@ -96,30 +98,85 @@ void UwMultiTrafficRangeCtr::manageBuffer(int traffic)
   
 int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic) 
 {
-  StatusMap::iterator it_s = status.find(traffic);
-  if (it_s == status.end()) {
-    //
-    stack_status default_st;
-    default_st.status = ROBUST;
-    default_st.stack_id = 0;
-    default_st.mod_id = 0;
-    status[traffic] = default_st;
-  }
-  
-  //if (status[traffic].status == CHECK_RANGE)
   DownTrafficMap::iterator it = down_map.find(traffic); 
   if (it != down_map.end()) {
+    StatusMap::iterator it_s = status.find(traffic);
+    if (it_s == status.end()) {
+      initStatus(traffic);
+    }
+    if (status[traffic].status == RANGE_CNF_WAIT) // I'm checking the range
+      return 0;
     BehaviorMap temp = it->second;
     BehaviorMap::iterator it_b = temp.begin();
     for (; it_b!=temp.end(); ++it_b)
     {
-      if (BehaviorItem(it_b->second).second == CHECK_RANGE)
+      switch (BehaviorItem(it_b->second).second == CHECK_RANGE)
       {
-        //TODO: check_range, status = RANGE_CNF_WAIT
+        case(CHECK_RANGE):
+        {
+          checkRange(traffic, it_b->first,BehaviorItem(it_b->second).first);
+          break;
+        }
+        case(ROBUST):
+        {
+          status[traffic].robust_id = BehaviorItem(it_b->second).first;
+          break;
+        }
       }
     }
-    if (status[traffic].status == IDLE)
-      return (--it_b)->first;
+    if (status[traffic].status == IDLE && status[traffic].robust_id)
+      return status[traffic].robust_id;
   }
   return 0;
+}
+
+void UwMultiTrafficRangeCtr::checkRange(int traffic, int stack_id, int module_id) 
+{
+  StatusMap::iterator it_s = status.find(traffic);
+  if (it_s == status.end()) {
+    initStatus(traffic);
+  }
+  if(status[traffic].status == RANGE_CNF_WAIT)//already checking
+    return;
+  status[traffic].status = RANGE_CNF_WAIT;
+  status[traffic].stack_id = stack_id;
+  status[traffic].module_id = module_id;
+  //TODO_1: check_range with fgue via clmesgs
+
+  //TODO_2: take care about timer
+  std::map<int, UwCheckRangeTimer>::iterator it_t = timers.find(stack_id);
+  if (it_t == timers.end()) {
+    //initTimer(stack_id);
+    UwCheckRangeTimer *t_o = new UwCheckRangeTimer(this,traffic);
+    timers.insert(std::pair<int,UwCheckRangeTimer>(stack_id, *t_o));
+  }
+  it_t->second.resched(check_to * (it_t->second.num_expires + 1));
+}
+
+void UwMultiTrafficRangeCtr::timerExpired(int traffic) 
+{
+  if (status[traffic].status != RANGE_CNF_WAIT)
+    return;
+  if (status[traffic].robust_id)
+  {
+    std::map<int, UwCheckRangeTimer>::iterator it_t = timers.find(stack_id);
+    if (it_t != timers.end()) {
+      it_t->second.num_expires = 0;
+    }
+    sendDown(status[traffic].robust_id,removeFromBuffer(traffic));
+  }
+  else 
+  {
+    checkRange(traffic, status[traffic].stack_id, status[traffic].module_id);
+  }
+}
+
+void UwMultiTrafficRangeCtr::initStatus(int traffic)
+{
+  stack_status default_st;
+  default_st.status = IDLE;
+  default_st.stack_id = 0;
+  default_st.module_id = 0;
+  default_st.robust_id = 0;
+  status[traffic] = default_st;
 }

@@ -144,10 +144,7 @@ void UwMultiTrafficControl::recvFromUpperLayers(Packet *p)
   hdr_uwcbr *ah = HDR_UWCBR(p);
   // TODO: wait cbr cointains traffic type
   int app_type = 0; // ah.getTipe();
-
-  //TODO:queue push
   insertInBuffer(p,app_type);
-  //TODO:queue manager
   manageBuffer(app_type);
 }
 

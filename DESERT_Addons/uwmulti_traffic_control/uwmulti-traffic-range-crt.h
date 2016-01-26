@@ -50,8 +50,9 @@
 
 struct stack_status {
   int stack_id;
-  int mod_id;
+  int module_id;
   int status;
+  int robust_id;
 } ;
 typedef std::map <int, stack_status> StatusMap; /** traffic, status */
 
@@ -86,11 +87,11 @@ public:
 
 protected:
   StatusMap status;
+  double check_to;
   /** 
    * manage to tx a packet of traffic type
    *
    * @param traffic application traffic id
-   *
    */
   virtual void manageBuffer(int traffic);
 
@@ -103,8 +104,43 @@ protected:
    */
   virtual int getBestLowerLayer(int traffic);
 
+  /** 
+   * procedure to check if a 
+   * 
+   * @param traffic application traffic id
+   */
+  virtual void checkRange(int traffic, int stack_id, int module_id);
+
+  /** 
+   * default status initialization
+   * 
+   * @param traffic application traffic id
+   */
+  virtual void initStatus(int traffic);
+
+  virtual void timerExpired(int traffic);
+
 private:
   //Variables
+  class UwCheckRangeTimer : public TimerHandler {
+  public:
+
+      UwCheckRangeTimer(UwMultiTrafficRangeCtr *m, int traff) : 
+      TimerHandler(), 
+      traffic(traff),
+      num_expires(0)
+      {
+          module = m;
+      }
+      int traffic;
+      int num_expires;
+
+  protected:
+      inline void expire(Event *e) { num_expires++; module->timerExpired(traffic); }
+      UwMultiTrafficRangeCtr* module;
+  };
+
+  std::map <int, UwCheckRangeTimer> timers;
 };
 
 #endif /* UWMULTI_TRAFFIC_CONTROL_H  */
