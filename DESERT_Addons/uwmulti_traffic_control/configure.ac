@@ -27,7 +27,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-AC_INIT(uwmulti_traffic_controller, 1.0.0)
+AC_INIT(uwmulti_traffic_control, 1.0.0)
 AM_INIT_AUTOMAKE
 AM_PROG_AR
 
