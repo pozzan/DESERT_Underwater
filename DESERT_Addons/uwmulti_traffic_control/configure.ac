@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,54 +25,47 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
 
+AC_INIT(uwmulti_traffic_control, 1.0.0)
+AM_INIT_AUTOMAKE
+AM_PROG_AR
 
-DISTCHECK_CONFIGURE_FLAGS = @NS_ALLINONE_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NSMIRACLE_DISTCHECK_CONFIGURE_FLAGS@ 
+AC_CONFIG_MACRO_DIR([m4])
 
-ACLOCAL_AMFLAGS = -I m4 
+AC_PROG_CXX
+AC_PROG_MAKE_SET
 
-EXTRA_DIST = autogen.sh 
+AC_DISABLE_STATIC
+ 
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
 
-SUBDIRS = m4 \
-    application/uwcbr \
-    application/uwvbr \
-    application/uwApplication \
-    transport/uwudp \
-    network/uwstaticrouting \
-    network/uwsun \
-    network/uwicrp \
-    network/uwip \
-    network/uwflooding \
-    data_link/uwmll \
-    data_link/uw-csma-aloha \
-    data_link/uwdacap \
-    data_link/uwpolling \
-    data_link/uwaloha \
-    data_link/uwsr \
-    data_link/uw-t-lohi \
-    data_link/uwUFetch \
-    data_link/uw-csma-aloha-trigger \
-    data_link/uwtdma \
-    physical/uwphy_clmsgs \
-    physical/uwphysical \
-    physical/uwgainfromdb \
-    physical/uwphysicaldb\
-    physical/uwphysicalrogersmodel\
-    physical/uwphysicalfromdb\
-    physical/uwmphy_modem \
-    physical/ms2c_evologics \
-    physical/uwmphypatch \
-    physical/uwhermesphy \
-    physical/uwoptical_phy \
-    physical/uw-al \
-    physical/uw-al/packer_common \
-    physical/uw-al/packer_mac \
-    mobility/uwdriftposition \
-    mobility/uwgmposition \
-    mobility/uwrandomlib \
-    mobility/uwsmposition \
-    interference/uwinterference \
-    propagation/uwoptical_propagation \
-    channel/uwoptical_channel
+AC_PATH_NS_ALLINONE
 
+AC_ARG_WITH_NSMIRACLE
+
+AC_CHECK_NSMIRACLE([have_nsmiracle=yes],[have_nsmiracle=no])
+if test x$have_nsmiracle != xyes ; then
+  AC_MSG_ERROR([Could not find nsmiracle, is --with-nsmiracle set correctly?])
+fi  
+
+AC_ARG_WITH_DESERT
+AC_ARG_WITH_DESERT_BUILD
+
+AC_CHECK_DESERT([have_desert=yes],[have_desert=no])
+if test x$have_desert != xyes ; then
+  AC_MSG_ERROR([Could not find desert, is --with-desert set correctly?])
+fi  
+
+AC_ARG_WITH_DESERT_ADDON
+AC_ARG_WITH_DESERT_ADDON_BUILD
+
+AC_DEFINE(CPP_NAMESPACE,std)
+
+AC_CONFIG_FILES([
+		m4/Makefile
+		Makefile
+      ])
+
+AC_OUTPUT

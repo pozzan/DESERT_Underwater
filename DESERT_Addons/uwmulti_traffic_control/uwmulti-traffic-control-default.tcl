@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,54 +25,11 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @file   uwmultiphy-default.tcl
+# @author Filippo Campagnaro
+# @version 1.0.0
 
-
-DISTCHECK_CONFIGURE_FLAGS = @NS_ALLINONE_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NSMIRACLE_DISTCHECK_CONFIGURE_FLAGS@ 
-
-ACLOCAL_AMFLAGS = -I m4 
-
-EXTRA_DIST = autogen.sh 
-
-SUBDIRS = m4 \
-    application/uwcbr \
-    application/uwvbr \
-    application/uwApplication \
-    transport/uwudp \
-    network/uwstaticrouting \
-    network/uwsun \
-    network/uwicrp \
-    network/uwip \
-    network/uwflooding \
-    data_link/uwmll \
-    data_link/uw-csma-aloha \
-    data_link/uwdacap \
-    data_link/uwpolling \
-    data_link/uwaloha \
-    data_link/uwsr \
-    data_link/uw-t-lohi \
-    data_link/uwUFetch \
-    data_link/uw-csma-aloha-trigger \
-    data_link/uwtdma \
-    physical/uwphy_clmsgs \
-    physical/uwphysical \
-    physical/uwgainfromdb \
-    physical/uwphysicaldb\
-    physical/uwphysicalrogersmodel\
-    physical/uwphysicalfromdb\
-    physical/uwmphy_modem \
-    physical/ms2c_evologics \
-    physical/uwmphypatch \
-    physical/uwhermesphy \
-    physical/uwoptical_phy \
-    physical/uw-al \
-    physical/uw-al/packer_common \
-    physical/uw-al/packer_mac \
-    mobility/uwdriftposition \
-    mobility/uwgmposition \
-    mobility/uwrandomlib \
-    mobility/uwsmposition \
-    interference/uwinterference \
-    propagation/uwoptical_propagation \
-    channel/uwoptical_channel
+Module/UW/MULTI_TRAFFIC_CONTROL set debug_  0
+Module/UW/MULTI_TRAFFIC_RANGE_CTR set check_to_  2.5
 
