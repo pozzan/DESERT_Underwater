@@ -37,6 +37,7 @@
 
 #include "uwmulti-traffic-control.h"
 #include <clmsg-discovery.h>
+#include <uwcbr-module.h>
 
 /**
  * Class that represents the binding with the tcl configuration script 
@@ -125,13 +126,11 @@ void UwMultiTrafficControl::recv(Packet* p)
   if(ch->direction() == hdr_cmn::UP)
   {   
     hdr_uwcbr *ah = HDR_UWCBR(p);
-    // TODO: wait cbr cointains traffic type
-    int app_type = 0; // ah.getTipe();
-    sendUp(getUpperLayer(app_type), p);
+    int traf_type = ah->traffic_type();
+    sendUp(getUpperLayer(traf_type), p);
   }
-  else
+  else //direction DOWN: packet is coming from upper layers
   {
-    //direction DOWN: packet is coming from upper layers
     recvFromUpperLayers(p);
   }
 }
@@ -142,10 +141,9 @@ void UwMultiTrafficControl::recvFromUpperLayers(Packet *p)
   assert(ch->direction() == hdr_cmn::DOWN);
 
   hdr_uwcbr *ah = HDR_UWCBR(p);
-  // TODO: wait cbr cointains traffic type
-  int app_type = 0; // ah.getTipe();
-  insertInBuffer(p,app_type);
-  manageBuffer(app_type);
+  int traf_type = ah->traffic_type();
+  insertInBuffer(p,traf_type);
+  manageBuffer(traf_type);
 }
 
 void UwMultiTrafficControl::insertInBuffer(Packet *p, int traffic) 

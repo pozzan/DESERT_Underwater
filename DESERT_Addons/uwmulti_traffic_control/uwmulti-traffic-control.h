@@ -44,8 +44,6 @@
 #include <tclcl.h>
 #include <map>
 #include <queue>
-#include <uwcbr-module.h>
-
 #include <iostream>
 #include <string.h>
 #include <cmath>

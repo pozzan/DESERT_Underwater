@@ -45,7 +45,7 @@
 #define CHECK_RANGE 3
 
 // DEFINE STATES
-#define IDLE 2
+#define IDLE 1
 #define RANGE_CNF_WAIT 2
 
 struct stack_status {
@@ -85,6 +85,44 @@ public:
    */
   virtual int command(int, const char*const*);
 
+  /**
+  * Cross-Layer messages asynchronous interpreter. 
+  * 
+  * It has to be properly extended in order to 
+  * interpret custom cross-layer messages used by this particular plug-in.
+  * This type of communication does not necessarily need a reply.
+  *
+  * @note Each implementation of this method is responsible for
+  * deleting the ClMessage instance referred to by ClMessage* m
+  * when the message is received
+  *
+  * Normally, classes inheriting from other classes should call
+  * the recvAsyncClMsg() method of the parent when an unknown
+  * ClMsg is detected, in order to allow the parent to handle
+  * unknown message types. 
+  *
+  * A  very importan exception to this rule are classes
+  * inheriting directly from either Plugin or Module. These
+  * classes should NOT call  neither Plugin::recvAsyncClMsg()
+  * nor Module::recvAsyncClMsg() for unknown messages; instead,
+  * they should just free the memory associated with ClMessage* m
+  * 
+  * @param m an instance of <i>ClMessage</i> that represent the message received
+  *
+  * @return 0 if the method was re-implemented by somebody,
+  * RETVAL_NOT_IMPLEMENTED if it is the implementation provided
+  * by the parent Plugin class (note that Module does not
+  * re-implement it, so also Module::recvAsyncClMsg() returns
+  * RETVAL_NOT_IMPLEMENTED)
+  * 
+  * @see NodeCore, ClMessage, ClSAP, ClTracer
+  **/
+  int recvAsyncClMsg(ClMessage* m);
+
+  void sendDown(Packet* p) { if(p != NULL ) { Module::sendDown(p); } }
+
+  void sendDown(int moduleId, Packet* p) { if(p != NULL ) { Module::sendDown(moduleId, p); } }
+
 protected:
   StatusMap status;
   double check_to;
@@ -112,6 +150,14 @@ protected:
   virtual void checkRange(int traffic, int stack_id, int module_id);
 
   /** 
+   * procedure when a CHECKED stack is checked
+   * 
+   * @param stack_id stack id
+   * @param in_range true if the PHY is in range, false otherwise
+   */
+  virtual void manageCheckedStack(int stack_id, bool in_range);
+
+  /** 
    * default status initialization
    * 
    * @param traffic application traffic id
@@ -128,19 +174,21 @@ private:
       UwCheckRangeTimer(UwMultiTrafficRangeCtr *m, int traff) : 
       TimerHandler(), 
       traffic(traff),
+      max_increment(10),
       num_expires(0)
       {
           module = m;
       }
       int traffic;
       int num_expires;
+      int const max_increment;
 
   protected:
-      inline void expire(Event *e) { num_expires++; module->timerExpired(traffic); }
+      virtual void expire(Event *e);
       UwMultiTrafficRangeCtr* module;
   };
 
-  std::map <int, UwCheckRangeTimer> timers;
+  std::map <int, UwCheckRangeTimer> timers; //<stack_id, timer>
 };
 
 #endif /* UWMULTI_TRAFFIC_CONTROL_H  */
