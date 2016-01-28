@@ -119,6 +119,11 @@ public:
   virtual double getRange() { return range; }
 
 
+  virtual void setStackId(int s) { stack_id = s; }
+  
+  virtual double getStackId() { return stack_id; }
+
+
   virtual void setTimeValid(double t) { time_valid = t; }
 
   virtual double getTimeValid() {return time_valid; }
