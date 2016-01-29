@@ -164,7 +164,8 @@ protected:
    *
    * @return the layer id
    */
-  virtual int getBestLowerLayer(int traffic);
+  virtual int getBestLowerLayer(int traffic, Packet *p= NULL);
+  //virtual int getBestLowerLayer(int traffic, Packet *p = NULL);
 
    /** 
    * return the Upper Layer id where to forward the received packet of <i>traffic</i> type

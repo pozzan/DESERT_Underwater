@@ -27,7 +27,7 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
-* @file   uwmulti-stack-Control.h
+* @file   uwmulti-traffic-range-ctr.h
 * @author Filippo Campagnaro, Federico Guerra
 * @version 1.0.0
 *
@@ -39,6 +39,7 @@
 #define UWMULTI_TRAFFIC_CONTROL_H
 
 #include "uwmulti-traffic-control.h"
+#include <uwip-module.h>
 
 // DEFINE BEHAVIORS
 #define ROBUST 2
@@ -47,14 +48,39 @@
 // DEFINE STATES
 #define IDLE 1
 #define RANGE_CNF_WAIT 2
+#define HDR_UWMTR(P)      (hdr_uwm_tr::access(P))
 
-struct stack_status {
-  int stack_id;
+struct check_status {
   int module_id;
   int status;
   int robust_id;
 } ;
-typedef std::map <int, stack_status> StatusMap; /** traffic, status */
+typedef std::map <int, check_status> StatusMap; /** traffic, status */
+
+typedef struct hdr_uwm_tr {
+  int tr_id_;    /**< Id of the traffic app layer. */
+  static int offset_; /**< Required by the PacketHeaderManager. */
+
+  /**
+   * Reference to the offset_ variable.
+   */
+  inline static int& offset() {
+      return offset_;
+  }  
+  
+  inline static hdr_uwm_tr * access(const Packet * p) {
+      return (hdr_uwm_tr*) p->access(offset_);
+  }
+  
+  /**
+   * Reference to the traffic ID.
+   */
+  int& traffic() {
+      return tr_id_;
+  }
+  
+} hdr_uwm_tr;
+
 
 /**
  * Class used to represents the UwMultiTrafficRangeCtr layer of a node.
@@ -85,39 +111,7 @@ public:
    */
   virtual int command(int, const char*const*);
 
-  /**
-  * Cross-Layer messages asynchronous interpreter. 
-  * 
-  * It has to be properly extended in order to 
-  * interpret custom cross-layer messages used by this particular plug-in.
-  * This type of communication does not necessarily need a reply.
-  *
-  * @note Each implementation of this method is responsible for
-  * deleting the ClMessage instance referred to by ClMessage* m
-  * when the message is received
-  *
-  * Normally, classes inheriting from other classes should call
-  * the recvAsyncClMsg() method of the parent when an unknown
-  * ClMsg is detected, in order to allow the parent to handle
-  * unknown message types. 
-  *
-  * A  very importan exception to this rule are classes
-  * inheriting directly from either Plugin or Module. These
-  * classes should NOT call  neither Plugin::recvAsyncClMsg()
-  * nor Module::recvAsyncClMsg() for unknown messages; instead,
-  * they should just free the memory associated with ClMessage* m
-  * 
-  * @param m an instance of <i>ClMessage</i> that represent the message received
-  *
-  * @return 0 if the method was re-implemented by somebody,
-  * RETVAL_NOT_IMPLEMENTED if it is the implementation provided
-  * by the parent Plugin class (note that Module does not
-  * re-implement it, so also Module::recvAsyncClMsg() returns
-  * RETVAL_NOT_IMPLEMENTED)
-  * 
-  * @see NodeCore, ClMessage, ClSAP, ClTracer
-  **/
-  int recvAsyncClMsg(ClMessage* m);
+  void recv(Packet* p, int idSrc);
 
   void sendDown(Packet* p) { if(p != NULL ) { Module::sendDown(p); } }
 
@@ -125,7 +119,7 @@ public:
 
 protected:
   StatusMap status;
-  double check_to;
+  double check_to_period;
   /** 
    * manage to tx a packet of traffic type
    *
@@ -141,21 +135,22 @@ protected:
    * @return the layer id
    */
   virtual int getBestLowerLayer(int traffic);
+  virtual int getBestLowerLayer(int traffic, Packet *p = NULL);
 
   /** 
    * procedure to check if a 
    * 
    * @param traffic application traffic id
    */
-  virtual void checkRange(int traffic, int stack_id, int module_id);
+  virtual void checkRange(int traffic, int module_id, uint8_t destAdd = UWIP_BROADCAST);
 
   /** 
    * procedure when a CHECKED stack is checked
    * 
-   * @param stack_id stack id
+   * @param module id
    * @param in_range true if the PHY is in range, false otherwise
    */
-  virtual void manageCheckedStack(int stack_id, bool in_range);
+  virtual void manageCheckedLayer(int module_id, uint8_t destAdd, bool in_range);
 
   /** 
    * default status initialization
@@ -179,6 +174,7 @@ private:
       {
           module = m;
       }
+      ~UwCheckRangeTimer() {}
       int traffic;
       int num_expires;
       int const max_increment;
@@ -188,7 +184,7 @@ private:
       UwMultiTrafficRangeCtr* module;
   };
 
-  std::map <int, UwCheckRangeTimer> timers; //<stack_id, timer>
+  std::map <int, UwCheckRangeTimer> timers; //<traffic, timer>
 };
 
 #endif /* UWMULTI_TRAFFIC_CONTROL_H  */

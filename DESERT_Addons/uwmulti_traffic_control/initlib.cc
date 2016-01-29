@@ -35,16 +35,22 @@
  */
 
 #include <tclcl.h>
+#include "uwmulti-traffic-range-crt.h"
 
-extern EmbeddedTcl UwMultiTrafficControllerInitTclCode;
+extern EmbeddedTcl UwMultiTrafficControlInitTclCode;
 
-extern "C" int Uwmulti_traffic_controller_Init() {
-	UwMultiTrafficControllerInitTclCode.load();
+packet_t PT_MUTLI_TR_PROBE;
+packet_t PT_MUTLI_TR_PROBE_ACK;
+
+extern "C" int Uwmulti_traffic_control_Init() {
+	PT_MUTLI_TR_PROBE = p_info::addPacket("MUTLI_TR_PROBE");
+	PT_MUTLI_TR_PROBE_ACK = p_info::addPacket("MUTLI_TR_PROBE_ACK");
+	UwMultiTrafficControlInitTclCode.load();
 	return 0;
 }
 
-extern "C" int Cygmulti_traffic_controller_Init() {
-    Uwmulti_traffic_controller_Init();
+extern "C" int Cygmulti_traffic_control_Init() {
+    Uwmulti_traffic_control_Init();
     return 0;
 }
 

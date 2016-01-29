@@ -179,7 +179,7 @@ Packet * UwMultiTrafficControl::removeFromBuffer(int traffic)
 }
 
   
-int UwMultiTrafficControl::getBestLowerLayer(int traffic) 
+int UwMultiTrafficControl::getBestLowerLayer(int traffic, Packet *p) 
 {
   DownTrafficMap::iterator it = down_map.find(traffic); 
   if (it != down_map.end()) {

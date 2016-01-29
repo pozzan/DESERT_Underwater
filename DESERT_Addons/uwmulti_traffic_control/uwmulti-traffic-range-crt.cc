@@ -36,7 +36,12 @@
  */
 
 #include "uwmulti-traffic-range-crt.h"
-#include "uwphy-clmsg-range.h"
+#include "uwip-clmsg.h"
+
+extern packet_t PT_MUTLI_TR_PROBE;
+extern packet_t PT_MUTLI_TR_PROBE_ACK;
+
+int hdr_uwm_tr::offset_;
 
 void UwMultiTrafficRangeCtr::UwCheckRangeTimer::expire(Event *e) 
 { 
@@ -64,16 +69,16 @@ public:
   {
     return (new UwMultiTrafficRangeCtr);
   }
-} class_stack_Control;
+} class_stack_control;
 
 UwMultiTrafficRangeCtr::UwMultiTrafficRangeCtr() 
 : 
   UwMultiTrafficControl(),
-  check_to(0),
+  check_to_period(0),
   status(),
   timers()
 { 
-  bind("check_to_", &check_to);
+  bind("check_to_period_", &check_to_period);
 }
 
 int UwMultiTrafficRangeCtr::command(int argc, const char*const* argv) 
@@ -94,47 +99,69 @@ int UwMultiTrafficRangeCtr::command(int argc, const char*const* argv)
   return UwMultiTrafficControl::command(argc, argv);     
 } /* UwMultiTrafficRangeCtr::command */
 
-int UwMultiTrafficRangeCtr::recvAsyncClMsg(ClMessage* m)
+void UwMultiTrafficRangeCtr::recv(Packet* p, int idSrc)
 {
-  if(m->type() == CLMSG_UWPHY_RANGE) {
-    ClMsgUwPhyRange* temp = dynamic_cast<ClMsgUwPhyRange*>(m);
-    if(temp->getMsgType() == ClMsgUwPhyRange::UW_PHY_CLMSG_TYPE_RANGE_REPLY)
-    {
-      manageCheckedStack(temp->getStackId(), temp->getRange() != CLMSG_UWPHY_RANGE_NOT_VALID);
+  hdr_cmn *ch = HDR_CMN(p);
+  if (ch->direction() == hdr_cmn::UP){
+    if (ch->ptype() == PT_MUTLI_TR_PROBE_ACK) {
+      hdr_uwip* iph  = HDR_UWIP(p);
+      manageCheckedLayer(HDR_UWMTR(p)->traffic() , iph->saddr(), true);      
+      Packet::free(p);
     }
+    else if (ch->ptype() == PT_MUTLI_TR_PROBE) {
+      ch->ptype() = PT_MUTLI_TR_PROBE_ACK;
+      hdr_uwip* iph  = HDR_UWIP(p);
+      uint8_t send_add = iph->saddr();
+      iph->saddr() =  iph->daddr();
+      iph->daddr() = send_add;
+      sendDown(idSrc, p);
+    }
+    else
+      UwMultiTrafficControl::recv(p);
   }
-  free(m);
-  return 0;
+  else
+    UwMultiTrafficControl::recv(p);
 }
 
-void UwMultiTrafficRangeCtr::manageCheckedStack(int stack_id, bool in_range)
+void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bool in_range)
 {
-  std::map<int, UwCheckRangeTimer>::iterator it_t = timers.find(stack_id);
+  std::map<int, UwCheckRangeTimer>::iterator it_t = timers.find(traffic);
   if (it_t == timers.end()) 
     return;
   UwCheckRangeTimer to = it_t->second;
   if(to.status() == TIMER_IDLE) 
     return; // nothing to check is pending
   else {
-    to.force_cancel();
-    int traffic = to.traffic;
     StatusMap::iterator it_s = status.find(traffic);
     if (it_s == status.end()) 
       return;
     if(status[traffic].status == RANGE_CNF_WAIT){
       if(in_range) {
-        status[traffic].status == IDLE;
-        sendDown(status[traffic].module_id,removeFromBuffer(traffic));
-        to.num_expires = 0;
+        Packet *p = removeFromBuffer(traffic);
+        if(HDR_UWIP(p)->daddr() != destAdd) {
+          Packet *p0 = p;
+          do {
+            insertInBuffer(p,traffic);
+            p = removeFromBuffer(traffic);
+          } while (p!=NULL && p!= p0 && (HDR_UWIP(p)->daddr() != destAdd ));
+        }
+        if(HDR_UWIP(p)->daddr() == destAdd) {
+          to.force_cancel();
+          to.num_expires = 0;
+          sendDown(status[traffic].module_id,p);
+          status[traffic].status == IDLE;
+        }
       }
       else {
         if(status[traffic].robust_id) {
           status[traffic].status == IDLE;
+          to.force_cancel();
           sendDown(status[traffic].module_id,removeFromBuffer(traffic));
         }
         else {
+          to.force_cancel();
           ++to.num_expires;
-          checkRange(traffic, stack_id, status[traffic].module_id);
+          checkRange(traffic, status[traffic].module_id);
         }
       }
     }
@@ -146,7 +173,7 @@ void UwMultiTrafficRangeCtr::manageBuffer(int traffic)
 {
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end()) {
-    int l_id = getBestLowerLayer(traffic);
+    int l_id = getBestLowerLayer(traffic,(it->second).front());
     if (status[traffic].status == IDLE) {
       return l_id ? sendDown(l_id,removeFromBuffer(traffic)) 
                   : sendDown(removeFromBuffer(traffic));
@@ -154,7 +181,7 @@ void UwMultiTrafficRangeCtr::manageBuffer(int traffic)
   }
 }
   
-int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic) 
+int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic, Packet *p) 
 {
   DownTrafficMap::iterator it = down_map.find(traffic); 
   if (it != down_map.end()) {
@@ -172,7 +199,7 @@ int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic)
       {
         case(CHECK_RANGE):
         {
-          checkRange(traffic, it_b->first,BehaviorItem(it_b->second).first);
+          checkRange(traffic, BehaviorItem(it_b->second).first, HDR_UWIP(p)->daddr());
           break;
         }
         case(ROBUST):
@@ -188,7 +215,7 @@ int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic)
   return 0;
 }
 
-void UwMultiTrafficRangeCtr::checkRange(int traffic, int stack_id, int module_id) 
+void UwMultiTrafficRangeCtr::checkRange(int traffic, int module_id, uint8_t destAdd) 
 {
   StatusMap::iterator it_s = status.find(traffic);
   if (it_s == status.end()) {
@@ -197,20 +224,29 @@ void UwMultiTrafficRangeCtr::checkRange(int traffic, int stack_id, int module_id
   if(status[traffic].status == RANGE_CNF_WAIT)//already checking
     return;
   status[traffic].status = RANGE_CNF_WAIT;
-  status[traffic].stack_id = stack_id;
   status[traffic].module_id = module_id;
-  //TODO_1: check_range with fgue via clmesgs
-  ClMsgUwPhyRange m(getId(), stack_id);
-  sendAsyncClMsgDown(&m);
+  //TODO_1: check_range via CHECK packet
+  Packet* p = Packet::alloc();
+  hdr_cmn* ch = hdr_cmn::access(p);
+  ch->ptype() = PT_MUTLI_TR_PROBE;
+  hdr_uwm_tr* tr = HDR_UWMTR(p);
+  tr->traffic() = traffic;
+  hdr_uwip* iph  = HDR_UWIP(p);
+  //TODO: retreive my addr
+  UWIPClMsgSendAddr *msg = new UWIPClMsgSendAddr();
+  sendSyncClMsgUp(msg);
+  iph->saddr() =  msg->getAddr();
+  iph->daddr() = destAdd;
+  sendDown(module_id, p);
   //Taking care about timer
-  std::map<int, UwCheckRangeTimer>::iterator it_t = timers.find(stack_id);
+  std::map<int, UwCheckRangeTimer>::iterator it_t = timers.find(traffic);
   if (it_t == timers.end()) {
     UwCheckRangeTimer *t_o = new UwCheckRangeTimer(this,traffic);
-    timers.insert(std::pair<int,UwCheckRangeTimer>(stack_id, *t_o));
-    t_o->resched(check_to * (t_o->num_expires + 1));
+    timers.insert(std::pair<int,UwCheckRangeTimer>(traffic, *t_o));
+    t_o->resched(check_to_period * (t_o->num_expires + 1));
   }
   else
-    it_t->second.resched(check_to * (it_t->second.num_expires + 1));
+    it_t->second.resched(check_to_period * (it_t->second.num_expires + 1));
 }
 
 void UwMultiTrafficRangeCtr::timerExpired(int traffic) 
@@ -222,7 +258,7 @@ void UwMultiTrafficRangeCtr::timerExpired(int traffic)
     return;
   if (status[traffic].robust_id)
   {
-    std::map<int, UwCheckRangeTimer>::iterator it_t = timers.find(stack_id);
+    std::map<int, UwCheckRangeTimer>::iterator it_t = timers.find(status[traffic].module_id);
     if (it_t != timers.end()) {
       it_t->second.num_expires = 0;
     }
@@ -231,15 +267,14 @@ void UwMultiTrafficRangeCtr::timerExpired(int traffic)
   }
   else 
   {
-    checkRange(traffic, status[traffic].stack_id, status[traffic].module_id);
+    checkRange(traffic, status[traffic].module_id, UWIP_BROADCAST);
   }
 }
 
 void UwMultiTrafficRangeCtr::initStatus(int traffic)
 {
-  stack_status default_st;
+  check_status default_st;
   default_st.status = IDLE;
-  default_st.stack_id = 0;
   default_st.module_id = 0;
   default_st.robust_id = 0;
   status[traffic] = default_st;
