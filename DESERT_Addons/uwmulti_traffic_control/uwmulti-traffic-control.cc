@@ -27,7 +27,7 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file   uwmulti-stack-Control.cc
+ * @file   uwmulti-traffic-control.cc
  * @author Filippo Campagnaro, Federico Guerra
  * @version 1.0.0
  *
@@ -38,6 +38,7 @@
 #include "uwmulti-traffic-control.h"
 #include <clmsg-discovery.h>
 #include <uwcbr-module.h>
+#include <iostream>
 
 /**
  * Class that represents the binding with the tcl configuration script 
@@ -57,7 +58,7 @@ public:
   {
     return (new UwMultiTrafficControl);
   }
-} class_stack_Control;
+} class_traffic_control;
 
 UwMultiTrafficControl::UwMultiTrafficControl() 
 : 
@@ -102,8 +103,14 @@ void UwMultiTrafficControl::addUpLayerFromTag(int traffic_id, std::string tag) {
   m.addSenderData((const PlugIn*) this, getLayer(), getId(), getStackId(), name() , getTag());
   sendSyncClMsgUp(&m);
   DiscoveryStorage up_layer_storage = m.findTag(tag.c_str());
+  if (debug_)
+    std::cout << "UwMultiTrafficControl::addUpLayerFromTag(" << traffic_id << "," << tag << ")"
+              << up_layer_storage.getSize() << std::endl;
   if (up_layer_storage.getSize() == 1) 
   {
+    if (debug_) 
+      std::cout << "UwMultiTrafficControl::addUpLayerFromTag(" << traffic_id << "," << tag << ")" <<
+                (*up_layer_storage.begin()).first << std::endl;
     insertTraffic2UpLayer(traffic_id,(*up_layer_storage.begin()).first);
   }  
 }
@@ -114,9 +121,16 @@ void UwMultiTrafficControl::addLowLayerFromTag(int traffic_id, std::string tag, 
   sendSyncClMsgDown(&m);
   DiscoveryStorage low_layer_storage = m.findTag(tag.c_str());
   DiscoveryData low_layer = (*low_layer_storage.begin()).second;
+  if (debug_)
+    std::cout << "UwMultiTrafficControl::addLowLayerFromTag(" << traffic_id << "," << tag  
+              << ") disc size " << low_layer_storage.getSize() <<endl;
   if (low_layer_storage.getSize() == 1) 
   {
-    insertTraffic2LowerLayer(traffic_id,low_layer.getId(),low_layer.getStackId(),behavior);
+    if (debug_)
+      std::cout << "UwMultiTrafficControl::addLowLayerFromTag(" << traffic_id << "," << tag   
+                << ") disc data tr = "<< traffic_id << " m_id = " << low_layer.getId() 
+                << " st_id = " << low_layer.getStackId() << " " << behavior << std::endl;
+    insertTraffic2LowerLayer(traffic_id,low_layer.getStackId(),low_layer.getId(),behavior);
   }  
 }
 
@@ -200,6 +214,9 @@ int UwMultiTrafficControl::getUpperLayer(int traffic)
 {
   UpTrafficMap::iterator it = up_map.find(traffic); 
   if (it != up_map.end()) {
+    if(debug_)
+      std::cout << "UwMultiTrafficControl::getUpperLayer(" <<traffic<<") = " 
+                << it->second << std::endl;
     return it->second;
   }
   return 0;

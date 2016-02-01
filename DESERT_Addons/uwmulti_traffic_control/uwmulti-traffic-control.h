@@ -155,6 +155,7 @@ protected:
    */
   void inline insertTraffic2LowerLayer(int traffic, int lower_layer_stack, int lower_layer_id, int behavior) { 
     down_map[traffic][lower_layer_stack] = std::make_pair(lower_layer_id, behavior); 
+    //std::cout << "down_map(" << traffic << ", " << lower_layer_stack << ") = " << (down_map[traffic][lower_layer_stack]).first << std::endl;
   }
 
   /** 
@@ -165,7 +166,6 @@ protected:
    * @return the layer id
    */
   virtual int getBestLowerLayer(int traffic, Packet *p= NULL);
-  //virtual int getBestLowerLayer(int traffic, Packet *p = NULL);
 
    /** 
    * return the Upper Layer id where to forward the received packet of <i>traffic</i> type

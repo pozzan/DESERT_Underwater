@@ -120,6 +120,7 @@ public:
 protected:
   StatusMap status;
   double check_to_period;
+  int signaling_pktSize;
   /** 
    * manage to tx a packet of traffic type
    *
@@ -134,7 +135,6 @@ protected:
    *
    * @return the layer id
    */
-  virtual int getBestLowerLayer(int traffic);
   virtual int getBestLowerLayer(int traffic, Packet *p = NULL);
 
   /** 
@@ -166,25 +166,25 @@ private:
   class UwCheckRangeTimer : public TimerHandler {
   public:
 
-      UwCheckRangeTimer(UwMultiTrafficRangeCtr *m, int traff) : 
-      TimerHandler(), 
-      traffic(traff),
-      max_increment(10),
-      num_expires(0)
-      {
-          module = m;
-      }
-      ~UwCheckRangeTimer() {}
-      int traffic;
-      int num_expires;
-      int const max_increment;
+    UwCheckRangeTimer(UwMultiTrafficRangeCtr *m, int traff) : 
+    TimerHandler(), 
+    traffic(traff),
+    max_increment(10),
+    num_expires(0)
+    {
+        module = m;
+    }
+    ~UwCheckRangeTimer() {}
+    int traffic;
+    int num_expires;
+    int const max_increment;
 
   protected:
-      virtual void expire(Event *e);
-      UwMultiTrafficRangeCtr* module;
+    virtual void expire(Event *e);
+    UwMultiTrafficRangeCtr* module;
   };
 
-  std::map <int, UwCheckRangeTimer> timers; //<traffic, timer>
+  std::map <int, UwCheckRangeTimer*> timers; //<traffic, timer>
 };
 
 #endif /* UWMULTI_TRAFFIC_CONTROL_H  */
