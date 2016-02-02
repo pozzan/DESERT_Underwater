@@ -164,12 +164,12 @@ void UwMultiTrafficControl::insertInBuffer(Packet *p, int traffic)
 {
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end()) {
-    it->second.push(p);
+    it->second->push(p);
   }
   else {
     std::queue<Packet*> *q = new std::queue<Packet*>;
     q->push(p);
-    down_buffer[traffic] = *q;
+    down_buffer[traffic] = q;
   }
 }
 
@@ -185,9 +185,12 @@ Packet * UwMultiTrafficControl::removeFromBuffer(int traffic)
 {
   Packet * p = NULL;
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
-  if (it != down_buffer.end()) {
-    p = it->second.front();
-    it->second.pop();
+  if (it != down_buffer.end() && ! it->second->empty()) {
+    if (debug_)
+      std::cout << "UwMultiTrafficControl::removeFromBuffer(" << traffic 
+                << "), packet in buffer = " << it->second->size() << std::endl;
+    p = it->second->front();
+    it->second->pop();
   }
   return p;
 }

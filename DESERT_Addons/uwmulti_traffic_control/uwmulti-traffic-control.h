@@ -59,7 +59,7 @@ typedef std::pair <int, int> BehaviorItem; /**< module_id, behavior>*/
 typedef std::map <int, BehaviorItem> BehaviorMap; /**< stack_id, behavior>*/
 typedef std::map <int, BehaviorMap> DownTrafficMap; /**< app_type, BehaviorMap*/
 typedef std::queue<Packet*> Buffer;
-typedef std::map <int, Buffer> DownTrafficBuffer; /**< app_type, PacketQueue*/
+typedef std::map <int, Buffer*> DownTrafficBuffer; /**< app_type, PacketQueue*/
 
 /**
  * Class used to represents the UwMultiTrafficControl layer of a node.
