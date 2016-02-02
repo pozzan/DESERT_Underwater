@@ -176,6 +176,7 @@ $data_mask2 setBandwidth  $opt(bw2)
 #UW/CBR
 Module/UW/CBR set packetSize_          $opt(pktsize)
 Module/UW/CBR set period_              $opt(cbr_period)
+Module/UW/CBR set period_              60
 Module/UW/CBR set PoissonTraffic_      1
 
 # BPSK              
@@ -187,8 +188,8 @@ Module/UW/FLOODING set ttl_                       2
 Module/UW/FLOODING set maximum_cache_time__time_  $opt(stoptime)
 
 #TRAFFIC_CTR
-Module/UW/MULTI_TRAFFIC_RANGE_CTR set debug_ 0
-Module/UW/MULTI_TRAFFIC_RANGE_CTR set check_to_period_  2
+Module/UW/MULTI_TRAFFIC_RANGE_CTR set debug_ 1
+Module/UW/MULTI_TRAFFIC_RANGE_CTR set check_to_period_  100
 
 ################################
 # Procedure(s) to create nodes #
@@ -311,7 +312,7 @@ proc createNode { id } {
     $ctr($id) addRobustLowLayer 1  "MLL1"
     $ctr($id) addUpLayer 1         "IPF1"
 
-    $ctr($id) addRobustLowLayer 2  "MLL2"
+    $ctr($id) addRobustLowLayer 2  "MLL1"
     $ctr($id) addUpLayer 2         "IPF1"
 
     #$ctr($id) addRobustLowLayer 3   "MLL1"
