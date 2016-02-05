@@ -118,7 +118,7 @@ void UwMultiTrafficRangeCtr::recv(Packet* p, int idSrc)
       UWIPClMsgSendAddr msg;
       sendSyncClMsgUp(&msg);
       hdr_uwip* iph  = HDR_UWIP(p);
-      if (iph->daddr() ==  msg.getAddr() || iph->saddr() == UWIP_BROADCAST) {
+      if (iph->daddr() ==  msg.getAddr() || iph->daddr() == UWIP_BROADCAST) {
         ch->ptype() = PT_MUTLI_TR_PROBE_ACK;
         if (debug_)
           std::cout << "UwMultiTrafficRangeCtr::recv PT_MUTLI_TR_PROBE from:" 
@@ -128,14 +128,25 @@ void UwMultiTrafficRangeCtr::recv(Packet* p, int idSrc)
         sendDown(idSrc, p);
       }
       else {
+
+        if (debug_)
+          std::cout << "UwMultiTrafficRangeCtr::recv PT_MUTLI_TR_PROBE from :" << (int)iph->saddr() 
+                    << " for:" << (int)iph->daddr() << "and not " << msg.getAddr() << " in layer " 
+                    << idSrc << " discarded" << std::endl;
         Packet::free(p);
       }
     }
-    else
+    else {
       UwMultiTrafficControl::recv(p);
+      if(debug_)
+        std::cout << "UwMultiTrafficRangeCtr::recv(DIR=UP, no signaling)" << std::endl;
+    }
   }
-  else
+  else {
     UwMultiTrafficControl::recv(p);
+    if(debug_)
+      std::cout << "UwMultiTrafficRangeCtr::recv(DIR=DOWN)" << std::endl;
+  }
 }
 
 void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bool in_range)
@@ -168,21 +179,24 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
             to->num_expires = 0;
             status[traffic].status = IDLE;
             //do {
-              sendDown(status[traffic].module_id,p);
+            if(debug_)
+              std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer sending packet" << std::endl;
+            sendDown(status[traffic].module_id,p);
               //p = removeFromBuffer(traffic);
             //} while (p != NULL && HDR_UWIP(p)->daddr() == destAdd);
           }
           else if(p == NULL) {
             if(debug_)
-              std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer nothing to send to no one" << std::endl;
+              std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer nothing to send to no one" 
+                        << std::endl;
             break;
           }
 
           else{
             insertInBuffer(p,traffic);
             if(debug_)
-              std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer wrong daddr " << (int)HDR_UWIP(p)->daddr() 
-                        << ", " << (int)destAdd << std::endl;
+              std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer wrong daddr " 
+                        << (int)HDR_UWIP(p)->daddr() << ", " << (int)destAdd << std::endl;
             break;
           }
         }
@@ -242,14 +256,16 @@ int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic, Packet *p)
         case(CHECK_RANGE):
         {
           if (debug_)
-            std::cout << "UwMultiTrafficRangeCtr::getBestLowerLayer(" << traffic << "): CHECK_RANGE" << std::endl;
+            std::cout << "UwMultiTrafficRangeCtr::getBestLowerLayer(" << traffic << "): CHECK_RANGE" 
+                      << std::endl;
           checkRange(traffic, BehaviorItem(it_b->second).first, HDR_UWIP(p)->daddr());
           break;
         }
         case(ROBUST):
         {
           if (debug_)
-            std::cout << "UwMultiTrafficRangeCtr::getBestLowerLayer(" << traffic << "):  ROBUST" << std::endl;
+            std::cout << "UwMultiTrafficRangeCtr::getBestLowerLayer(" << traffic << "):  ROBUST" 
+                      << std::endl;
           status[traffic].robust_id = BehaviorItem(it_b->second).first;
           break;
         }

@@ -32,5 +32,5 @@
 
 Module/UW/MULTI_TRAFFIC_CONTROL set debug_  0
 Module/UW/MULTI_TRAFFIC_RANGE_CTR set check_to_period_  2.5
-Module/UW/MULTI_TRAFFIC_RANGE_CTR set signaling_pktSize_  1
+Module/UW/MULTI_TRAFFIC_RANGE_CTR set signaling_pktSize_  2
 

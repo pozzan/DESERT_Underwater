@@ -85,6 +85,8 @@ load libMiracleBasicMovement.so
 load libmphy.so
 load libUwmStd.so
 load libuwcsmaaloha.so
+load libuwtdma.so
+load libuwaloha.so
 load libuwip.so
 load libuwstaticrouting.so
 load libuwmll.so
@@ -176,7 +178,6 @@ $data_mask2 setBandwidth  $opt(bw2)
 #UW/CBR
 Module/UW/CBR set packetSize_          $opt(pktsize)
 Module/UW/CBR set period_              $opt(cbr_period)
-Module/UW/CBR set period_              60
 Module/UW/CBR set PoissonTraffic_      1
 
 # BPSK              
@@ -188,8 +189,15 @@ Module/UW/FLOODING set ttl_                       2
 Module/UW/FLOODING set maximum_cache_time__time_  $opt(stoptime)
 
 #TRAFFIC_CTR
-Module/UW/MULTI_TRAFFIC_RANGE_CTR set debug_ 1
-Module/UW/MULTI_TRAFFIC_RANGE_CTR set check_to_period_  100
+Module/UW/MULTI_TRAFFIC_RANGE_CTR set debug_ 0
+Module/UW/MULTI_TRAFFIC_RANGE_CTR set check_to_period_  50
+
+Module/UW/CSMA_ALOHA set wait_costant_ 0.001
+Module/UW/CSMA_ALOHA set listen_time_ 0.001
+
+Module/UW/TDMA set frame_duration   0.5
+Module/UW/TDMA set guard_time       0.04
+Module/UW/TDMA set tot_slots        2
 
 ################################
 # Procedure(s) to create nodes #
@@ -224,7 +232,8 @@ proc createNode { id } {
     $mll($id) setstackid 1
 
     set mll2($id)  [new Module/UW/MLL] 
-    set mac2($id)  [new Module/UW/CSMA_ALOHA] 
+    #set mac2($id)  [new Module/UW/TDMA] 
+    set mac2($id)  [new Module/UW/CSMA_ALOHA]
     set phy2($id)  [new Module/MPhy/BPSK]
     $mll2($id) setstackid 2
 
@@ -305,9 +314,13 @@ proc createNode { id } {
     $phy2($id) setInterference $interf_data2($id)
 
     $mac($id) $opt(ack_mode)
+    $mac($id) setMacAddr $tmp_
     $mac($id) initialize
+
+    $mac2($id) setMacAddr $tmp_
     $mac2($id) $opt(ack_mode)
     $mac2($id) initialize
+    #$mac2($id) setSlotNumber $tmp_
 
     $ctr($id) addRobustLowLayer 1  "MLL1"
     $ctr($id) addUpLayer 1         "IPF1"
@@ -378,10 +391,14 @@ for {set id1 0} {$id1 < $opt(nn)} {incr id1}  {
     $ns at $opt(stoptime)     "$cbr($id1) stop"
     $ns at $opt(starttime)    "$cbr2($id1) start"
     $ns at $opt(stoptime)     "$cbr2($id1) stop"
+    #$ns at $opt(starttime)    "$mac2($id1) start"
+    #$ns at $opt(stoptime)     "$mac2($id1) stop"
     $ns at $opt(starttime)    "$cbr3($id1) start"
     $ns at $opt(stoptime)     "$cbr3($id1) stop"
 }
 
+    # $ns at $opt(starttime)    "$cbr3(1) start"
+    # $ns at $opt(stoptime)     "$cbr3(1) stop"
 ###################
 # Final Procedure #
 ###################

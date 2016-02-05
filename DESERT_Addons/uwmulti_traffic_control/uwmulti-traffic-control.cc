@@ -146,6 +146,8 @@ void UwMultiTrafficControl::recv(Packet* p)
   else //direction DOWN: packet is coming from upper layers
   {
     recvFromUpperLayers(p);
+  if(debug_)
+    std::cout << "UwMultiTrafficControl::recv(" << std::endl;
   }
 }
 
@@ -156,6 +158,8 @@ void UwMultiTrafficControl::recvFromUpperLayers(Packet *p)
 
   hdr_uwcbr *ah = HDR_UWCBR(p);
   int traf_type = ah->traffic_type();
+  if(debug_)
+    std::cout << "UwMultiTrafficControl::recvFromUpperLayers" << std::endl;
   insertInBuffer(p,traf_type);
   manageBuffer(traf_type);
 }
@@ -165,11 +169,15 @@ void UwMultiTrafficControl::insertInBuffer(Packet *p, int traffic)
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end()) {
     it->second->push(p);
+    if(debug_)
+      std::cout << NOW <<"UwMultiTrafficControl::insertInBuffer, traffic = "<< traffic << ", buffer size =" << it->second->size() << std::endl;
   }
   else {
     std::queue<Packet*> *q = new std::queue<Packet*>;
     q->push(p);
     down_buffer[traffic] = q;
+    if(debug_)
+      std::cout << NOW <<"UwMultiTrafficControl::insertInBuffer, traffic = "<< traffic << ", buffer size =" << 1 << std::endl;
   }
 }
 
@@ -178,6 +186,7 @@ void UwMultiTrafficControl::manageBuffer(int traffic)
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end()) {
     sendDown(getBestLowerLayer(traffic),removeFromBuffer(traffic));
+    std::cout << "UwMultiTrafficControl::manageBuffer(" << traffic << ")" << std::endl;
   }
 }
 
@@ -187,7 +196,7 @@ Packet * UwMultiTrafficControl::removeFromBuffer(int traffic)
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end() && ! it->second->empty()) {
     if (debug_)
-      std::cout << "UwMultiTrafficControl::removeFromBuffer(" << traffic 
+      std::cout << NOW << "UwMultiTrafficControl::removeFromBuffer(" << traffic 
                 << "), packet in buffer = " << it->second->size() << std::endl;
     p = it->second->front();
     it->second->pop();
