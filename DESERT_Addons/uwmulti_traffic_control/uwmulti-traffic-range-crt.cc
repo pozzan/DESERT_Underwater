@@ -166,14 +166,7 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
       if(in_range) {
         Packet *p = NULL;
         while(true){
-          p = removeFromBuffer(traffic);
-          /*if(p != NULL && HDR_UWIP(p)->daddr() != destAdd) {
-            Packet *p0 = p;
-            do {
-              insertInBuffer(p,traffic);
-              p = removeFromBuffer(traffic);
-            } while (p != NULL && p != p0 && (HDR_UWIP(p)->daddr() != destAdd ));
-          }*/
+          p = getFromBuffer(traffic);
           if(p != NULL && HDR_UWIP(p)->daddr() == destAdd) {
             to->force_cancel();
             to->num_expires = 0;
@@ -182,6 +175,7 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
             if(debug_)
               std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer sending packet" << std::endl;
             sendDown(status[traffic].module_id,p);
+            removeFromBuffer(traffic);
               //p = removeFromBuffer(traffic);
             //} while (p != NULL && HDR_UWIP(p)->daddr() == destAdd);
           }
@@ -193,7 +187,6 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
           }
 
           else{
-            insertInBuffer(p,traffic);
             if(debug_)
               std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer wrong daddr " 
                         << (int)HDR_UWIP(p)->daddr() << ", " << (int)destAdd << std::endl;
@@ -221,9 +214,9 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
 
 void UwMultiTrafficRangeCtr::manageBuffer(int traffic)
 {
-  DownTrafficBuffer::iterator it = down_buffer.find(traffic);
-  if (it != down_buffer.end() && ! (it->second)->empty()) {
-    int l_id = getBestLowerLayer(traffic,(it->second)->front());
+  Packet *p = getFromBuffer(traffic);
+  if (p != NULL) {
+    int l_id = getBestLowerLayer(traffic,p);
     if (status[traffic].status == IDLE) {
       return l_id ? sendDown(l_id,removeFromBuffer(traffic)) 
                   : sendDown(removeFromBuffer(traffic));

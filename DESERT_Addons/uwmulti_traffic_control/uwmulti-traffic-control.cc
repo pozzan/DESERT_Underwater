@@ -204,6 +204,18 @@ Packet * UwMultiTrafficControl::removeFromBuffer(int traffic)
   return p;
 }
 
+Packet * UwMultiTrafficControl::getFromBuffer(int traffic) 
+{
+  Packet * p = NULL;
+  DownTrafficBuffer::iterator it = down_buffer.find(traffic);
+  if (it != down_buffer.end() && ! it->second->empty()) {
+    if (debug_)
+      std::cout << NOW << "UwMultiTrafficControl::removeFromBuffer(" << traffic 
+                << "), packet in buffer = " << it->second->size() << std::endl;
+    p = it->second->front();
+  }
+  return p;
+}
   
 int UwMultiTrafficControl::getBestLowerLayer(int traffic, Packet *p) 
 {

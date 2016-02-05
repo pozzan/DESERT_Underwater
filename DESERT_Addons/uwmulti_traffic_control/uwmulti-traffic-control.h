@@ -120,7 +120,7 @@ protected:
   virtual void manageBuffer(int traffic);
 
   /** 
-   * insert a packet of a searten type in the buffer
+   * insert a packet of a certain type in the buffer
    *
    * @param p pointer of the packet
    * @param traffic application traffic id
@@ -128,13 +128,22 @@ protected:
   virtual void insertInBuffer(Packet *p, int traffic);
 
   /** 
-   * remove a packet of a searten type from the buffer
+   * remove a packet of a certain type from the buffer
    * and return it
    *
    * @param traffic application traffic id
    * @return the pointer of the removed packet
    */
   virtual Packet * removeFromBuffer(int traffic);
+
+  /** 
+   * get a packet of a certain type from the buffer
+   * and return it
+   *
+   * @param traffic application traffic id
+   * @return the pointer of the removed packet
+   */
+  virtual Packet * getFromBuffer(int traffic);
 
   /**
    * Set to which upper layer forward a specific kind of traffic received from the lower layers
