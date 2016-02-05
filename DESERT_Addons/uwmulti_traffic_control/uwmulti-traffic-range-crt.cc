@@ -185,12 +185,22 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
                         << std::endl;
             break;
           }
-
-          else{
-            if(debug_)
-              std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer wrong daddr " 
-                        << (int)HDR_UWIP(p)->daddr() << ", " << (int)destAdd << std::endl;
-            break;
+          else{ //NEVER APPENS IF THERE ARE ONLY 2 NODES
+            Packet *p0 = p;
+            do {
+              removeFromBuffer(traffic);
+              insertInBuffer(p,traffic);
+              p = getFromBuffer(traffic);
+            } while (p != NULL && p != p0 && (HDR_UWIP(p)->daddr() != destAdd ));
+            if((HDR_UWIP(p)->daddr() != destAdd )) {
+              if(debug_)
+                std::cout << "UwMultiTrafficRangeCtr::manageCheckedLayer wrong daddr " 
+                          << (int)HDR_UWIP(p)->daddr() << ", " << (int)destAdd << std::endl;
+              break; 
+            }
+            else {
+              sendDown(status[traffic].module_id,p);
+            }
           }
         }
       }
