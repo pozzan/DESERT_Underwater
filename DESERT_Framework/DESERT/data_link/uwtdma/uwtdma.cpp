@@ -80,7 +80,8 @@ UwTDMA::UwTDMA()
   transceiver_status(IDLE),
   out_file_stats(0),
   guard_time(0),
-  tot_slots(0)
+  tot_slots(0),
+  HDR_size(0)
 {
   bind("frame_duration", (double*) &frame_duration);
   bind("debug_", (int*) &debug_);
