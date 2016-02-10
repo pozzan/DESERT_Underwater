@@ -46,10 +46,11 @@ UWMPhy_modem::UWMPhy_modem(std::string pToDevice_) {
     bind("log_", &log_);
     bind("SetModemID_", &SetModemID);
     bind("UseKeepOnline_", &UseKeepOnline);
-    bind("ResetQueue_",&ResetQueue);
+    bind("DeafTime_",&DeafTime);
     t = -1;
     PktRx = NULL;
     pcheckTmr = NULL;
+    pDropTimer = NULL;
     pmDriver = NULL;
 
     for (int i = 0; i < _MTBL; i++) {
@@ -143,9 +144,10 @@ void UWMPhy_modem::recv(Packet* p) {
 }
 
 
-void UWMPhy_modem::setConnections(CheckTimer* pcheckTmr_, UWMdriver* pmDriver_) {
+void UWMPhy_modem::setConnections(CheckTimer* pcheckTmr_, UWMdriver* pmDriver_, DropTimer* pDropTimer_) {
     pcheckTmr = pcheckTmr_;
     pmDriver = pmDriver_;
+    pDropTimer = pDropTimer_;
 }
 
 void UWMPhy_modem::start() {
@@ -173,12 +175,12 @@ void UWMPhy_modem::start() {
     } else {
         pmDriver->setKeepOnlineMode(false);
     }
-    if (getResetModemQueue() == 1)
+    if (getDeafTime() > 0)
     {
 	pmDriver->setResetModemQueue(true);
-    } else {
-      
-	pmDriver->setResetModemQueue(false);
+	std::cout << "DROP_PACKETS" << std::endl;
+	drop_packet = true;
+	pDropTimer->resched(getDeafTime());
     }
     pmDriver -> start();
     pcheckTmr -> resched(period);
@@ -284,24 +286,31 @@ void UWMPhy_modem::endTx(Packet* p)
 }
 
 void UWMPhy_modem::startRx(Packet* p) {
+  if(!drop_packet)
+  {
     if (debug_ >= 2)
         cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::START_RX " << endl;
 
     Phy2MacStartRx(p);
+  }
 }
 
 void UWMPhy_modem::endRx(Packet* p) {
-    std::string str = pmDriver->getRxPayload();
-    unsigned char *buf = (unsigned char *) str.c_str();
-    Packet* p_rx = Packet::alloc();
-    hdr_uwal* uwalh = HDR_UWAL(p_rx);
-    uwalh->binPktLength() = str.length();
-    memset(uwalh->binPkt(),0,sizeof(uwalh->binPkt()));
-    memcpy(uwalh->binPkt(),buf,uwalh->binPktLength());
-    this->updatePktRx(p_rx);
-    if (debug_ >= 2)
-        cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::END_RX " << endl;
-    sendUp(PktRx);
+
+    if (! drop_packet)
+    {
+	std::string str = pmDriver->getRxPayload();
+      unsigned char *buf = (unsigned char *) str.c_str();
+      Packet* p_rx = Packet::alloc();
+      hdr_uwal* uwalh = HDR_UWAL(p_rx);
+      uwalh->binPktLength() = str.length();
+      memset(uwalh->binPkt(),0,sizeof(uwalh->binPkt()));
+      memcpy(uwalh->binPkt(),buf,uwalh->binPktLength());
+      this->updatePktRx(p_rx);
+      if (debug_ >= 2)
+	  cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::END_RX " << endl;
+      sendUp(PktRx);
+    }
     PktRx = NULL;
     pmDriver -> resetModemStatus();
 }
@@ -321,4 +330,9 @@ void CheckTimer::expire(Event *e) {
     pmModem->check_modem();
 
     resched(pmModem->getPeriod());
+}
+
+void DropTimer::expire(Event* e)
+{
+  pModem->drop_packet = false;
 }
