@@ -142,12 +142,12 @@ void UwMultiTrafficControl::recv(Packet* p)
     hdr_uwcbr *ah = HDR_UWCBR(p);
     int traf_type = ah->traffic_type();
     sendUp(getUpperLayer(traf_type), p);
+    if(debug_)
+      std::cout << NOW << " UwMultiTrafficControl::recv type = " << traf_type <<std::endl;
   }
   else //direction DOWN: packet is coming from upper layers
   {
     recvFromUpperLayers(p);
-  if(debug_)
-    std::cout << "UwMultiTrafficControl::recv(" << std::endl;
   }
 }
 
@@ -159,7 +159,7 @@ void UwMultiTrafficControl::recvFromUpperLayers(Packet *p)
   hdr_uwcbr *ah = HDR_UWCBR(p);
   int traf_type = ah->traffic_type();
   if(debug_)
-    std::cout << "UwMultiTrafficControl::recvFromUpperLayers" << std::endl;
+    std::cout << NOW << " UwMultiTrafficControl::recvFromUpperLayers" << std::endl;
   insertInBuffer(p,traf_type);
   manageBuffer(traf_type);
 }
@@ -170,14 +170,14 @@ void UwMultiTrafficControl::insertInBuffer(Packet *p, int traffic)
   if (it != down_buffer.end()) {
     it->second->push(p);
     if(debug_)
-      std::cout << NOW <<"UwMultiTrafficControl::insertInBuffer, traffic = "<< traffic << ", buffer size =" << it->second->size() << std::endl;
+      std::cout << NOW <<" UwMultiTrafficControl::insertInBuffer, traffic = "<< traffic << ", buffer size =" << it->second->size() << std::endl;
   }
   else {
     std::queue<Packet*> *q = new std::queue<Packet*>;
     q->push(p);
     down_buffer[traffic] = q;
     if(debug_)
-      std::cout << NOW <<"UwMultiTrafficControl::insertInBuffer, traffic = "<< traffic << ", buffer size =" << 1 << std::endl;
+      std::cout << NOW <<" UwMultiTrafficControl::insertInBuffer, traffic = "<< traffic << ", buffer size =" << 1 << std::endl;
   }
 }
 
@@ -186,7 +186,7 @@ void UwMultiTrafficControl::manageBuffer(int traffic)
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end()) {
     sendDown(getBestLowerLayer(traffic),removeFromBuffer(traffic));
-    std::cout << "UwMultiTrafficControl::manageBuffer(" << traffic << ")" << std::endl;
+    std::cout << NOW << "UwMultiTrafficControl::manageBuffer(" << traffic << ")" << std::endl;
   }
 }
 
@@ -195,11 +195,11 @@ Packet * UwMultiTrafficControl::removeFromBuffer(int traffic)
   Packet * p = NULL;
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end() && ! it->second->empty()) {
-    if (debug_)
-      std::cout << NOW << "UwMultiTrafficControl::removeFromBuffer(" << traffic 
-                << "), packet in buffer = " << it->second->size() << std::endl;
     p = it->second->front();
     it->second->pop();
+    if (debug_)
+      std::cout << NOW << " UwMultiTrafficControl::removeFromBuffer(" << traffic 
+                << "), packet in buffer = " << it->second->size() << std::endl;
   }
   return p;
 }
@@ -210,7 +210,7 @@ Packet * UwMultiTrafficControl::getFromBuffer(int traffic)
   DownTrafficBuffer::iterator it = down_buffer.find(traffic);
   if (it != down_buffer.end() && ! it->second->empty()) {
     if (debug_)
-      std::cout << NOW << "UwMultiTrafficControl::removeFromBuffer(" << traffic 
+      std::cout << NOW << " UwMultiTrafficControl::getFromBuffer(" << traffic 
                 << "), packet in buffer = " << it->second->size() << std::endl;
     p = it->second->front();
   }
@@ -239,7 +239,7 @@ int UwMultiTrafficControl::getUpperLayer(int traffic)
   UpTrafficMap::iterator it = up_map.find(traffic); 
   if (it != up_map.end()) {
     if(debug_)
-      std::cout << "UwMultiTrafficControl::getUpperLayer(" <<traffic<<") = " 
+      std::cout << NOW << " UwMultiTrafficControl::getUpperLayer(" <<traffic<<") = " 
                 << it->second << std::endl;
     return it->second;
   }
