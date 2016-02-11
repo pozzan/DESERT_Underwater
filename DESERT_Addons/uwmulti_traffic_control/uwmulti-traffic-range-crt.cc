@@ -163,7 +163,7 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
     if (it_s == status.end()) 
       return;
     if(status[traffic].status == RANGE_CNF_WAIT){
-      if(in_range) {
+      if(in_range || status[traffic].robust_id) {
         Packet *p = NULL;
         while(true){
           p = getFromBuffer(traffic);
@@ -174,7 +174,12 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
             //do {
             if(debug_)
               std::cout << NOW << " UwMultiTrafficRangeCtr::manageCheckedLayer sending packet" << std::endl;
-            sendDown(status[traffic].module_id,p);
+            if(in_range) {
+              sendDown(status[traffic].module_id,p);
+            }
+            else {
+              sendDown(status[traffic].robust_id,p);
+            }
             removeFromBuffer(traffic);
               //p = removeFromBuffer(traffic);
             //} while (p != NULL && HDR_UWIP(p)->daddr() == destAdd);
@@ -199,23 +204,21 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
               break; 
             }
             else {
-              sendDown(status[traffic].module_id,p);
+              if(in_range) {
+                sendDown(status[traffic].module_id,p);
+              }
+              else {
+                sendDown(status[traffic].robust_id,p);
+              }
+              removeFromBuffer(traffic);
             }
           }
         }
       }
       else {
-        if(status[traffic].robust_id) {
-          status[traffic].status = IDLE;
-          to->force_cancel();
-          to->num_expires = 0;
-          sendDown(status[traffic].module_id,removeFromBuffer(traffic));
-        }
-        else {
-          to->force_cancel();
-          ++to->num_expires;
-          checkRange(traffic, status[traffic].module_id);
-        }
+        to->force_cancel();
+        ++to->num_expires;
+        checkRange(traffic, status[traffic].module_id);
       }
     }
   }
@@ -293,7 +296,8 @@ void UwMultiTrafficRangeCtr::checkRange(int traffic, int module_id, uint8_t dest
     initStatus(traffic);
   }
   if(status[traffic].status == RANGE_CNF_WAIT){//already checking 
-    std::cout << NOW << " UwMultiTrafficRangeCtr::checkRange ALREADY CHECKING" << endl;
+    if (debug_)
+      std::cout << NOW << " UwMultiTrafficRangeCtr::checkRange ALREADY CHECKING" << endl;
     return;
   }
   status[traffic].status = RANGE_CNF_WAIT;
@@ -346,7 +350,11 @@ void UwMultiTrafficRangeCtr::timerExpired(int traffic)
     if (it_t != timers.end()) {
       it_t->second->num_expires = 0;
     }
-    sendDown(status[traffic].robust_id,removeFromBuffer(traffic));
+    Packet *p = getFromBuffer(traffic);
+    if(p!=NULL)
+      manageCheckedLayer(traffic, HDR_UWIP(p)->daddr(), false);
+
+    //sendDown(status[traffic].robust_id,removeFromBuffer(traffic));
     status[traffic].status = IDLE;
   }
   else 
