@@ -167,7 +167,8 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
         Packet *p = NULL;
         while(true){
           p = getFromBuffer(traffic);
-          if(p != NULL && HDR_UWIP(p)->daddr() == destAdd) {
+          if(p != NULL && (HDR_UWIP(p)->daddr() == destAdd || HDR_CMN(p)->next_hop() == destAdd ||
+                           HDR_CMN(p)->next_hop() == UWIP_BROADCAST)) {
             to->force_cancel();
             to->num_expires = 0;
             status[traffic].status = IDLE;
@@ -196,8 +197,10 @@ void UwMultiTrafficRangeCtr::manageCheckedLayer(int traffic, uint8_t destAdd, bo
               removeFromBuffer(traffic);
               insertInBuffer(p,traffic);
               p = getFromBuffer(traffic);
-            } while (p != NULL && p != p0 && (HDR_UWIP(p)->daddr() != destAdd ));
-            if((HDR_UWIP(p)->daddr() != destAdd )) {
+            } while (p != NULL && p != p0 && (HDR_UWIP(p)->daddr() != destAdd || 
+                     HDR_CMN(p)->next_hop() == destAdd || HDR_CMN(p)->next_hop() == UWIP_BROADCAST));
+            if(!(HDR_UWIP(p)->daddr() == destAdd || HDR_CMN(p)->next_hop() == destAdd || 
+                 HDR_CMN(p)->next_hop() == UWIP_BROADCAST)) {
               if(debug_)
                 std::cout << NOW << " UwMultiTrafficRangeCtr::manageCheckedLayer wrong daddr " 
                           << (int)HDR_UWIP(p)->daddr() << ", " << (int)destAdd << std::endl;
@@ -265,7 +268,7 @@ int UwMultiTrafficRangeCtr::getBestLowerLayer(int traffic, Packet *p)
           if (debug_)
             std::cout << NOW << " UwMultiTrafficRangeCtr::getBestLowerLayer(" << traffic << "): CHECK_RANGE" 
                       << std::endl;
-          checkRange(traffic, BehaviorItem(it_b->second).first, HDR_UWIP(p)->daddr());
+          checkRange(traffic, BehaviorItem(it_b->second).first, HDR_CMN(p)->next_hop());
           break;
         }
         case(ROBUST):
