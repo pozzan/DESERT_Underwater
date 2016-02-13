@@ -177,31 +177,35 @@ int MdriverS2C_EvoLogics::updateStatus() {
                 pr_msg = rx_msg.substr(p_offset, p_parser + parser.size() - p_offset);
 
                 if (pr_msg.find("RECVIM") != string::npos) {
+		    if(!getResetModemQueue())
+		    {
+		      queue_rx.push(pr_msg);
 
-                    queue_rx.push(pr_msg);
-
-                    if (debug_ >= 2) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECVIM::", pr_msg);
-                    }
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECVIM = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
+		      if (debug_ >= 2) {
+			  hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECVIM::", pr_msg);
+		      }
+		      if (getLog()) {
+			  outLog.open((getLogFile()).c_str(), ios::app);
+			  outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECVIM = " << hexdumplog(pr_msg) << endl;
+			  outLog.flush();
+			  outLog.close();
+		      }
+		    }
 
                 } else if (pr_msg.find("RECV") != string::npos) {
-
-                    queue_rx.push(pr_msg);
-                    if (debug_ >= 2) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECV::", pr_msg);
-                    }
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECV = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
+		    if (!getResetModemQueue())
+		    {
+		      queue_rx.push(pr_msg);
+		      if (debug_ >= 2) {
+			  hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECV::", pr_msg);
+		      }
+		      if (getLog()) {
+			  outLog.open((getLogFile()).c_str(), ios::app);
+			  outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECV = " << hexdumplog(pr_msg) << endl;
+			  outLog.flush();
+			  outLog.close();
+		      }
+		    }
                 } else if (pr_msg.find("OK") != string::npos) {
 
                     queue_tx.push(pr_msg);

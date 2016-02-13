@@ -335,4 +335,5 @@ void CheckTimer::expire(Event *e) {
 void DropTimer::expire(Event* e)
 {
   pModem->drop_packet = false;
+  pModem->pmDriver->setResetModemQueue(false);
 }

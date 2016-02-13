@@ -104,11 +104,14 @@ std::string UWMconnector::readFromModem(){
   std::string return_str;
   
   if (!queueMsg.empty()){
-      msgModem tmp_ = queueMsg.front();
-      return_str = tmp_.msg_rx;
-      if (debug_ >= 2)  { 
-	  hexdump("UWMCONNECTOR::READ_FROM_MODEM::", return_str);
-      }
+      //if(! pmDriver->getResetModemQueue())
+      //{
+	msgModem tmp_ = queueMsg.front();
+	return_str = tmp_.msg_rx;
+	if (debug_ >= 2)  { 
+	    hexdump("UWMCONNECTOR::READ_FROM_MODEM::", return_str);
+	}
+      //}
       queueMsg.pop();
   }else {
       return_str = "";
