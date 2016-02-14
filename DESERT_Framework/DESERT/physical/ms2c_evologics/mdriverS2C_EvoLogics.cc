@@ -90,7 +90,12 @@ void MdriverS2C_EvoLogics::start() {
         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::START" << endl;
     }
     mConnector.openConnection();
-    if (getKeepOnlineMode()) {
+    if(getResetModemQueue())
+    {
+	status = _RESET;
+	m_status_tx = _DROPBUFFER;
+	modemTxManager();
+    } else if (getKeepOnlineMode()) {
         if (debug_ >= 0) cout << "MS2C_EVOLOGICS(" << ID << ")::SETTING_KEEP_ONLINE_MODALITY" << endl;
         status = _CFG;
         m_status_tx = _TXKO;
@@ -172,31 +177,35 @@ int MdriverS2C_EvoLogics::updateStatus() {
                 pr_msg = rx_msg.substr(p_offset, p_parser + parser.size() - p_offset);
 
                 if (pr_msg.find("RECVIM") != string::npos) {
+		    if(!getResetModemQueue())
+		    {
+		      queue_rx.push(pr_msg);
 
-                    queue_rx.push(pr_msg);
-
-                    if (debug_ >= 2) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECVIM::", pr_msg);
-                    }
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECVIM = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
+		      if (debug_ >= 2) {
+			  hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECVIM::", pr_msg);
+		      }
+		      if (getLog()) {
+			  outLog.open((getLogFile()).c_str(), ios::app);
+			  outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECVIM = " << hexdumplog(pr_msg) << endl;
+			  outLog.flush();
+			  outLog.close();
+		      }
+		    }
 
                 } else if (pr_msg.find("RECV") != string::npos) {
-
-                    queue_rx.push(pr_msg);
-                    if (debug_ >= 2) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECV::", pr_msg);
-                    }
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECV = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
+		    if (!getResetModemQueue())
+		    {
+		      queue_rx.push(pr_msg);
+		      if (debug_ >= 2) {
+			  hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECV::", pr_msg);
+		      }
+		      if (getLog()) {
+			  outLog.open((getLogFile()).c_str(), ios::app);
+			  outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECV = " << hexdumplog(pr_msg) << endl;
+			  outLog.flush();
+			  outLog.close();
+		      }
+		    }
                 } else if (pr_msg.find("OK") != string::npos) {
 
                     queue_tx.push(pr_msg);
@@ -334,9 +343,27 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     }
                     if ((m_status_tx == _SETIDS && status == _CFG) || (m_status_tx == _IMS && status == _TX) || (m_status_tx == _DROPBUFFERS && status == _RESET) || (m_status_tx == _BURSTS && status == _TX) || (m_status_tx == _PBMS && status == _TX)) {
                         // Update modem status
-                        status = _IDLE;
-                        m_status_tx = _IDLE;
-                        cread = false;
+                        if (m_status_tx == _DROPBUFFERS && status == _RESET)
+			{
+			    cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_" << m_status_tx << "_" << status << endl;
+			    if (getKeepOnlineMode()) {
+				status = _CFG;
+				m_status_tx = _TXKO;
+				cread = false;
+			    } else if (SetModemID) {
+				status = _CFG;
+				m_status_tx = _SETID;
+				cread = false;
+			    } else {
+			      status = _IDLE;
+			      m_status_tx = _IDLE;
+			      cread = false;
+			    }
+			} else {
+			    status = _IDLE;
+			    m_status_tx = _IDLE;
+			    cread = false;
+			}
                     } else if ((m_status_tx == _TXKOD && status == _CFG)) {
                         if (SetModemID)
                         {

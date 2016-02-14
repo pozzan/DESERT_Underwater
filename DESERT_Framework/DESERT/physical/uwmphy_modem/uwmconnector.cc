@@ -104,12 +104,12 @@ std::string UWMconnector::readFromModem(){
   std::string return_str;
   
   if (!queueMsg.empty()){
-      msgModem tmp_ = queueMsg.front();
-      return_str = tmp_.msg_rx;
-      if (debug_ >= 2)  { 
-	  hexdump("UWMCONNECTOR::READ_FROM_MODEM::", return_str);
-      }
-      queueMsg.pop();
+    msgModem tmp_ = queueMsg.front();
+    return_str = tmp_.msg_rx;
+    if (debug_ >= 2)  { 
+      hexdump("UWMCONNECTOR::READ_FROM_MODEM::", return_str);
+    }
+    queueMsg.pop();
   }else {
       return_str = "";
   }
@@ -117,19 +117,3 @@ std::string UWMconnector::readFromModem(){
   return return_str;	 
 }
 
-//void UWMconnector::create_readingBuff(){
-//        
-//        if (debug_ >= 2)
-//        {
-//            cout << "UWMCONNECTOR::CREATE_READINGBUFF" << endl;
-//        }
-//        std::stringstream str("");
-//        str << "readingBuff" << pmDriver -> getID();
-//        str >> readingBuff;
-//        out.open(readingBuff.c_str());
-//	if (!out)
-//	{
-//		std::cerr << "WARNING: Opening error ( " << strerror(errno) << " ). It was not possible to create " << readingBuff << "\n";
-//	}
-//	out.close();
-//}

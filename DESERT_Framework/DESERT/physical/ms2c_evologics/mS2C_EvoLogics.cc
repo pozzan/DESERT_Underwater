@@ -54,9 +54,9 @@ static class MS2C_EvoLogics_TclClass : public TclClass
 } class_module_s2cevologics;
 
 	
-MS2C_EvoLogics::MS2C_EvoLogics(std::string pToDevice_):UWMPhy_modem(pToDevice_), checkTmr(this), mDriver(this){
+MS2C_EvoLogics::MS2C_EvoLogics(std::string pToDevice_):UWMPhy_modem(pToDevice_), checkTmr(this), mDriver(this), dropTmr(this) {
  
-  setConnections(&checkTmr, &mDriver);
+  setConnections(&checkTmr, &mDriver, &dropTmr);
   
 }
 		

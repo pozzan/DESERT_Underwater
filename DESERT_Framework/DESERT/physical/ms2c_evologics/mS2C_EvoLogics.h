@@ -51,6 +51,7 @@ class MS2C_EvoLogics : public UWMPhy_modem
 {
      CheckTimer checkTmr; /**< Object to schedule the "check-modem" events. */
      MdriverS2C_EvoLogics mDriver; /**< Object to drive the modem operations. */ 
+     DropTimer dropTmr;
      
      public:
 	

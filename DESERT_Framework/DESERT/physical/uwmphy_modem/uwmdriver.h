@@ -264,6 +264,10 @@ public:
        	virtual inline bool getKeepOnlineMode() {return KeepOnline;}
 
        	virtual inline void setKeepOnlineMode(bool ko) {KeepOnline = ko;}
+       	
+       	virtual inline void setResetModemQueue(bool reset_m_queue) {ResetModemQueue = reset_m_queue;}
+       	
+       	virtual inline bool getResetModemQueue() {return ResetModemQueue;}
 
          protected:
 
@@ -279,6 +283,8 @@ public:
 	 int status; /**< Status of the driver's general state machine. Seven possible statuses = \e _IDLE, \e _TX, \e _RX , \e _IDLE_RX,\e _CFG, \e _TX_PAUSED and \e _TX_RX.*/
 
 	 bool KeepOnline;
+	 
+	 bool ResetModemQueue;
 
 	 // TX VARIABLES (variables for the next packet to be transmitted)
 	 std::string payload_tx; /**< String where to save the payload of the next packet to send via modem. NOTE: an object of the class UWMcodec must write here after the host-to-modem mapping. */

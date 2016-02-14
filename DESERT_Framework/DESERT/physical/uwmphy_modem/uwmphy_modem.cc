@@ -46,9 +46,11 @@ UWMPhy_modem::UWMPhy_modem(std::string pToDevice_) {
     bind("log_", &log_);
     bind("SetModemID_", &SetModemID);
     bind("UseKeepOnline_", &UseKeepOnline);
+    bind("DeafTime_",&DeafTime);
     t = -1;
     PktRx = NULL;
     pcheckTmr = NULL;
+    pDropTimer = NULL;
     pmDriver = NULL;
 
     for (int i = 0; i < _MTBL; i++) {
@@ -142,9 +144,10 @@ void UWMPhy_modem::recv(Packet* p) {
 }
 
 
-void UWMPhy_modem::setConnections(CheckTimer* pcheckTmr_, UWMdriver* pmDriver_) {
+void UWMPhy_modem::setConnections(CheckTimer* pcheckTmr_, UWMdriver* pmDriver_, DropTimer* pDropTimer_) {
     pcheckTmr = pcheckTmr_;
     pmDriver = pmDriver_;
+    pDropTimer = pDropTimer_;
 }
 
 void UWMPhy_modem::start() {
@@ -171,6 +174,12 @@ void UWMPhy_modem::start() {
         pmDriver->setKeepOnlineMode(true);
     } else {
         pmDriver->setKeepOnlineMode(false);
+    }
+    if (getDeafTime() > 0)
+    {
+	pmDriver->setResetModemQueue(true);
+	cout << NOW << "UWMPHY_MODEM(" << ID << ")::START::MODEM_DEAF_TIME_FOR_"<< getDeafTime() << "_SECONDS" << endl;
+	pDropTimer->resched(getDeafTime());
     }
     pmDriver -> start();
     pcheckTmr -> resched(period);
@@ -226,9 +235,12 @@ int UWMPhy_modem::check_modem() {
     }
     else if (modemStatus == _IDLE && modemStatus_old == _CFG) {
         if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::CONFIGURATION DONE!!!" << endl;
-        pmDriver->emptyModemQueue();
+        //pmDriver->emptyModemQueue();
+	return modemStatus;
     } else if (modemStatus == _IDLE && modemStatus_old == _RESET) {
         return modemStatus;
+    } else if (modemStatus == _CFG && modemStatus_old == _RESET) {
+      return modemStatus;
     } else if (modemStatus == _IDLE && modemStatus_old == _QUIT) {
         //do nothing
         if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::QUITTING_INTERFACE_BYE" << endl;
@@ -280,6 +292,7 @@ void UWMPhy_modem::startRx(Packet* p) {
 }
 
 void UWMPhy_modem::endRx(Packet* p) {
+  
     std::string str = pmDriver->getRxPayload();
     unsigned char *buf = (unsigned char *) str.c_str();
     Packet* p_rx = Packet::alloc();
@@ -289,7 +302,7 @@ void UWMPhy_modem::endRx(Packet* p) {
     memcpy(uwalh->binPkt(),buf,uwalh->binPktLength());
     this->updatePktRx(p_rx);
     if (debug_ >= 2)
-        cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::END_RX " << endl;
+      cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::END_RX " << endl;
     sendUp(PktRx);
     PktRx = NULL;
     pmDriver -> resetModemStatus();
@@ -310,4 +323,9 @@ void CheckTimer::expire(Event *e) {
     pmModem->check_modem();
 
     resched(pmModem->getPeriod());
+}
+
+void DropTimer::expire(Event* e)
+{
+  pModem->pmDriver->setResetModemQueue(false);
 }
