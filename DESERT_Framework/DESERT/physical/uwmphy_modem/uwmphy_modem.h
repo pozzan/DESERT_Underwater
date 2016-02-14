@@ -216,7 +216,6 @@ protected:
 	 int SetModemID; /**< Flag to indicate if the interface has to force the modem to have the ID indicated in the tcl script */
 	 int UseKeepOnline;
 	 int DeafTime;
-	 bool drop_packet;
 	 
 	 /** 
 	  * Link connector. This method must be used by any derived class D of UWMPhy_modem  to link the members pcheckTmr, pmDriver and pmCodec to the corresponding derived objects contained in D;
