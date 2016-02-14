@@ -41,7 +41,6 @@ UWMPhy_modem::UWMPhy_modem(std::string pToDevice_) {
 
     bind("ID_", &ID);
     bind("period_", &period);
-    bind("bin_", &bin_);
     bind("debug_", &debug_);
     bind("log_", &log_);
     bind("SetModemID_", &SetModemID);

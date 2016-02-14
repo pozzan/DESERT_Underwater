@@ -28,3 +28,11 @@
 
 Scheduler/RealTime set adjust_new_width_interval_ 0
 Scheduler/RealTime set min_bin_width_ 0
+
+Module/UW/MPhy_modem/S2C set ID_		1
+Module/UW/MPhy_modem/S2C set period_		1
+Module/UW/MPhy_modem/S2C set debug_ 		0
+Module/UW/MPhy_modem/S2C set log_       	0
+Module/UW/MPhy_modem/S2C set SetModemID_	0
+Module/UW/MPhy_modem/S2C set UseKeepOnline__	0
+Module/UW/MPhy_modem/S2C set DeafTime_ 		2

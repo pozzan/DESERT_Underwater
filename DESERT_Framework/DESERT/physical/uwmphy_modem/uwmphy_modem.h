@@ -169,12 +169,6 @@ public:
 	  {
 		  return log_;
 	  }
-          
-          int getBin()
-          {
-              return bin_;
-          }
-          
                    
         /**
          * Calculate the epoch of the event. Used in sea-trial mode
@@ -209,8 +203,7 @@ protected:
 	 Packet* PktRx; /**< Address of the last received packet. */
 	 std::string pToDevice; /**< A string containing the path to the device to be connected with the network simulator.*/
 	 int debug_; /**< Flag to enable debug mode (i.e., printing of debug messages) if set to 1. */
-         std::ofstream outLog; /**< output strem to print into a disk-file log messages. See UWMPhy_modem::logFile.*/
-	 int bin_;	 
+         std::ofstream outLog; /**< output strem to print into a disk-file log messages. See UWMPhy_modem::logFile.*/	 
 	 std::string logFile; /**< Name of the disk-file where to write the interface's log messages.*/	
 	 int log_; /**< Flag to enable, if set different than 0, the printing of log messages in UWMPhy_modem::logFile. */
 	 int SetModemID; /**< Flag to indicate if the interface has to force the modem to have the ID indicated in the tcl script */
