@@ -569,12 +569,10 @@ void MdriverS2C_EvoLogics::modemTxManager() {
                     outLog.flush();
                     outLog.close();
                 }
+                return;
         }//end switch
-        if (m_status_tx == _IM || m_status_tx == _SETID || m_status_tx == _DROPBUFFER || m_status_tx == _TXKO || m_status_tx == _BURST || m_status_tx == _PBM || m_status_tx == _CLOSE) {
-            mConnector.writeToModem(tx_msg);
-            m_status_tx++;
-        }
-
+	mConnector.writeToModem(tx_msg);
+        m_status_tx++;
     }
 }
 
