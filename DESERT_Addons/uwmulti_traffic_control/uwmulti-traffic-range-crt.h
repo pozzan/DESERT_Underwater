@@ -51,7 +51,7 @@
 #define HDR_UWMTR(P)      (hdr_uwm_tr::access(P))
 
 struct check_status {
-  int module_id;
+  std::map <int, int> module_ids;
   int status;
   int robust_id;
 } ;
@@ -150,7 +150,7 @@ protected:
    * @param module id
    * @param in_range true if the PHY is in range, false otherwise
    */
-  virtual void manageCheckedLayer(int module_id, uint8_t destAdd, bool in_range);
+  virtual void manageCheckedLayer(int module_id, uint8_t destAdd, bool in_range, int idSrc = 0);
 
   /** 
    * default status initialization
