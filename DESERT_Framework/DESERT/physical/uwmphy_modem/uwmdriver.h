@@ -28,7 +28,7 @@
 
 /**
  * @file uwmdriver.h
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 2.0.0
  * \brief Header of the class needed by UWMPhy_modem to handle the different transmissions cases and corresponding protocol messages to be generated according to the tcl-user choices and modem firmware, respectively.
  */

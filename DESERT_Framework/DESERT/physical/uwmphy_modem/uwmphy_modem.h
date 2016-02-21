@@ -28,7 +28,7 @@
 
 /**
  * @file uwmphy_modem.h
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 2.0.0
  * \brief Header of the main class that implements the general interface between ns2/NS-Miracle and real acoustic modems. 
  */

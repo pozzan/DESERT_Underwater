@@ -29,7 +29,7 @@
 
 /**
  * @file uwminterpreter.cc
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 1.0.0
  * \brief Implementation of the UWMinterpreter class.
 */

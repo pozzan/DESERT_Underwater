@@ -28,7 +28,7 @@
 
 /**
  * @file uwmdriver.cc
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 2.0.0
  * \brief Implementation of the UWMdriver class.
  */

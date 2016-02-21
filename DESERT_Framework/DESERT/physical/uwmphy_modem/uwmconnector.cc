@@ -28,7 +28,7 @@
 
 /**
  * @file uwmconnector.cc
- * @author Riccardo Masiero, Matteo Petrani, Ivano Calabrese
+ * @author Riccardo Masiero,Ivano Calabrese
  * \version 2.0.0
  * \brief Implementation of the UWMconnector class.
  */
