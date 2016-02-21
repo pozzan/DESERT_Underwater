@@ -52,17 +52,6 @@
 #include <unistd.h>
 #include <cmath>
 
-#define _IDLE 0 /**< Status 0 of the driver's general state machine (see UWMdriver::status): modem is waiting. */
-#define _TX 1 /**< Status 1 of the driver's general state machine (see UWMdriver::status): modem is transmitting. */
-#define _RX 2 /**< Status 2 of the driver's general state machine (see UWMdriver::status): modem is receiving. */
-#define _IDLE_RX 3 /**< Status 3 of the driver's general state machine (see UWMdriver::status): modem is waiting after the reception of a packet. */
-#define _CFG 4 /**< Status 4 of the driver's general state machine (see UWMdriver::status): modem is being configured. */
-#define _TX_PAUSED 5 /** Status 5 of the driver's general state machine (see UWMdriver::status): modem is buffering the packet to transmit, waiting for the end of an concurring reception. */
-#define _TX_RX 6 /** Status 6 of the driver's general state machine (see UWMdriver::status): modem is transmitting after the reception of a packet. */ 
-#define _RESET 7 /**Reset modem's queue before starting connections */
-#define _QUIT 8
-
-
 
 enum MODEM_STATES {
   MODEM_IDLE = 0,
@@ -140,7 +129,7 @@ public:
 	  * 
 	  *  @return UWMdriver::status, the updated modem's status.
 	  */
-	 virtual int updateStatus() = 0;
+	 virtual modem_state_t updateStatus() = 0;
 
 	 /**
 	  * Method to change the modem ID. This method is called by the UWMPhy_modem object linked to this UWMdriver (the one pointed by pmModem).

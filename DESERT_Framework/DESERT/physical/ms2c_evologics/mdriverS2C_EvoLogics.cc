@@ -447,7 +447,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::MODEM BUSY DELIVERING PIGGYBACK MESSAGE" << endl;   
                     }
-                    if (m_status_tx == TX_STATE_SEND_PBM_DONE && status == _TX)
+                    if (m_status_tx == TX_STATE_SEND_PBM_DONE && status == MODEM_TX)
                     {
                         status = MODEM_IDLE;
                         m_status_tx = TX_STATE_IDLE;

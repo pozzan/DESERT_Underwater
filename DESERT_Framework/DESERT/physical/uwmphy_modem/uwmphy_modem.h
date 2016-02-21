@@ -242,7 +242,7 @@ protected:
 	  * 
 	  *  @return modemStatus, a flag on the status of the modem, see UWMdriver for a description of the driver state machine.
 	  */
-	 virtual int check_modem();
+	 virtual modem_state_t check_modem();
 
 	 /**
 	  *  Method to send to an UWMdriver object the packet to be transmitted, see UWMdriver::modemTx(). 

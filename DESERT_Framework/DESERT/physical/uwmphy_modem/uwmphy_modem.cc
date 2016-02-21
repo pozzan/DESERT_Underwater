@@ -110,18 +110,18 @@ void UWMPhy_modem::recv(Packet* p) {
         cout << "ERROR in modem TX buffer: index t out of bounds! \n";
     }
 
-    while (modemStatus == _CFG) {
+    while (modemStatus == MODEM_CFG) {
         modemStatus = check_modem();
     }
 
-    while (modemStatus == _RESET) {
+    while (modemStatus == MODEM_RESET) {
         modemStatus = check_modem();
     }
-    if (modemStatus == _RX || modemStatus == _IDLE_RX) {
+    if (modemStatus == MODEM_RX || modemStatus == MODEM_IDLE_RX) {
         pmDriver -> resetModemStatus();
         free(PktRx);
         PktRx = NULL;
-        modemStatus = _IDLE;
+        modemStatus = MODEM_IDLE;
         cout << this << " UWMPhy_modem: WARNING, RX packet not delivered to upper layers because it is arrived a concurrent packet to transmit\n";
         if (log_) {
             outLog.open(logFile.c_str(), ios::app);
@@ -129,14 +129,14 @@ void UWMPhy_modem::recv(Packet* p) {
             outLog.close();
         }
     }
-    if (modemStatus == _IDLE) {
+    if (modemStatus == MODEM_IDLE) {
         hdr_mac* mach = HDR_MAC(modemTxBuff[0]);
         hdr_uwal* uwalh = HDR_UWAL(modemTxBuff[0]);
         std::string payload_string;
         payload_string.assign(uwalh->binPkt(),uwalh->binPktLength());
         pmDriver->updateTx(mach->macDA(),payload_string);
         startTx(modemTxBuff[0]);
-       if (pmDriver -> getStatus() != _TX) {
+       if (pmDriver -> getStatus() != MODEM_TX) {
             endTx(popTxBuff());
         }
     }
@@ -196,51 +196,51 @@ void UWMPhy_modem::stop() {
     }
 }
 
-int UWMPhy_modem::check_modem() {
+modem_state_t UWMPhy_modem::check_modem() {
 
-    int modemStatus_old = pmDriver -> getStatus();
-    int modemStatus = pmDriver -> updateStatus();
+    modem_state_t modemStatus_old = pmDriver -> getStatus();
+    modem_state_t modemStatus = pmDriver -> updateStatus();
 
     if (debug_ >= 2) {
         cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::TRANSITION_FROM_" << modemStatus_old << "_TO_" << modemStatus << endl;
     }
 
 
-    if (modemStatus == _IDLE && modemStatus_old == _TX) {
+    if (modemStatus == MODEM_IDLE && modemStatus_old == MODEM_TX) {
 
 
         endTx(popTxBuff());
 
-    } else if (modemStatus == _RX && modemStatus_old == _IDLE)
+    } else if (modemStatus == MODEM_RX && modemStatus_old == MODEM_IDLE)
 
         startRx(PktRx);
 
-    else if (modemStatus == _IDLE_RX && modemStatus_old == _RX)
+    else if (modemStatus == MODEM_IDLE_RX && modemStatus_old == MODEM_RX)
         endRx(PktRx);
 
-    else if (modemStatus == _IDLE_RX && modemStatus_old == _TX_RX) {
+    else if (modemStatus == MODEM_IDLE_RX && modemStatus_old == MODEM_TX_RX) {
         endTx(popTxBuff());
         startRx(PktRx);
         endRx(PktRx);
-    } else if (modemStatus == _CFG && modemStatus_old == _CFG) {
+    } else if (modemStatus == MODEM_CFG && modemStatus_old == MODEM_CFG) {
 
         pmDriver->modemSetID();
         //return modemStatus;
 
-    } else if ((modemStatus == modemStatus_old) || ((modemStatus == _TX_RX) && modemStatus_old == _TX_PAUSED) || (modemStatus == _TX_PAUSED && modemStatus_old == _TX)) {
+    } else if ((modemStatus == modemStatus_old) || ((modemStatus == MODEM_TX_RX) && modemStatus_old == MODEM_TX_PAUSED) || (modemStatus == MODEM_TX_PAUSED && modemStatus_old == MODEM_TX)) {
         // Do nothing
         return modemStatus;
 
     }
-    else if (modemStatus == _IDLE && modemStatus_old == _CFG) {
+    else if (modemStatus == MODEM_IDLE && modemStatus_old == MODEM_CFG) {
         if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::CONFIGURATION DONE!!!" << endl;
         //pmDriver->emptyModemQueue();
 	return modemStatus;
-    } else if (modemStatus == _IDLE && modemStatus_old == _RESET) {
+    } else if (modemStatus == MODEM_IDLE && modemStatus_old == MODEM_RESET) {
         return modemStatus;
-    } else if (modemStatus == _CFG && modemStatus_old == _RESET) {
+    } else if (modemStatus == MODEM_CFG && modemStatus_old == MODEM_RESET) {
       return modemStatus;
-    } else if (modemStatus == _IDLE && modemStatus_old == _QUIT) {
+    } else if (modemStatus == MODEM_IDLE && modemStatus_old == MODEM_QUIT) {
         //do nothing
         if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::QUITTING_INTERFACE_BYE" << endl;
     } else {
