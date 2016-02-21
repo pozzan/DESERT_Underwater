@@ -43,7 +43,7 @@ UWMdriver::UWMdriver(UWMPhy_modem* pmModem_){
   pmInterpreter = NULL;
   pmConnector = NULL;
   ID = pmModem -> getID();
-  status = _IDLE;
+  status = MODEM_IDLE;
   payload_tx = "";
   dest = -1;
   payload_rx = "";
@@ -76,7 +76,7 @@ void UWMdriver::setID(int ID_){
 }
 
 void UWMdriver::resetModemStatus(){
-  status = _IDLE;
+  status = MODEM_IDLE;
   
   if (debug_ >= 2)
   {

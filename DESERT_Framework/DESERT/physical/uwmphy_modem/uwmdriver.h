@@ -61,6 +61,23 @@
 #define _TX_RX 6 /** Status 6 of the driver's general state machine (see UWMdriver::status): modem is transmitting after the reception of a packet. */ 
 #define _RESET 7 /**Reset modem's queue before starting connections */
 #define _QUIT 8
+
+
+
+enum MODEM_STATES {
+  MODEM_IDLE = 0,
+  MODEM_TX,
+  MODEM_RX,
+  MODEM_IDLE_RX,
+  MODEM_CFG,
+  MODEM_TX_PAUSED,
+  MODEM_TX_RX,
+  MODEM_RESET,
+  MODEM_QUIT
+};
+
+typedef enum MODEM_STATES modem_state_t;
+
 using namespace std;
 
 // Forward declaration(s)
@@ -182,7 +199,7 @@ public:
 	  * 
 	  * @return UWMdriver::status. 
 	  */
-	 int getStatus()
+	 modem_state_t getStatus()
 	 {
 		  return status;
 	 }
@@ -280,7 +297,7 @@ public:
 
 	 int ID; /**< ID of the modem. NOTE: UWMdriver::ID (i.e., modem ID, hardware side) is set equal to UWMPhy_modem::ID (i.e., node ID, simulator side) (therefore when node ID transmits, it also coincides with the source ID). @see UWMPhy_modem::start(), UWMdriver::setID(int) */
 	 
-	 int status; /**< Status of the driver's general state machine. Seven possible statuses = \e _IDLE, \e _TX, \e _RX , \e _IDLE_RX,\e _CFG, \e _TX_PAUSED and \e _TX_RX.*/
+	 modem_state_t status; /**< Status of the driver's general state machine. Seven possible statuses = \e _IDLE, \e _TX, \e _RX , \e _IDLE_RX,\e _CFG, \e _TX_PAUSED and \e _TX_RX.*/
 
 	 bool KeepOnline;
 	 

@@ -92,26 +92,26 @@ void MdriverS2C_EvoLogics::start() {
     mConnector.openConnection();
     if(getResetModemQueue())
     {
-	status = _RESET;
+	status = MODEM_RESET;
 	m_status_tx = TX_STATE_DROPBUFFER;
 	modemTxManager();
     } else if (getKeepOnlineMode()) {
         if (debug_ >= 0) cout << "MS2C_EVOLOGICS(" << ID << ")::SETTING_KEEP_ONLINE_MODALITY" << endl;
-        status = _CFG;
+        status = MODEM_CFG;
         m_status_tx = TX_STATE_SET_KO;
         modemTxManager();
     } else if (SetModemID) {
         if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::SETTING_MODEM_ID" << endl; 
-        status = _CFG;
+        status = MODEM_CFG;
         m_status_tx = TX_STATE_SET_ID;
         modemTxManager();
     } else {
-        status = _IDLE;
+        status = MODEM_IDLE;
     }
 }
 
 void MdriverS2C_EvoLogics::emptyModemQueue() {
-    status = _RESET;
+    status = MODEM_RESET;
     m_status_tx = TX_STATE_DROPBUFFER;
     modemTxManager();
 }
@@ -120,7 +120,7 @@ void MdriverS2C_EvoLogics::stop() {
     if (getKeepOnlineMode())
     {
         m_status_tx = TX_STATE_SEND_CLOSE;
-        status = _QUIT;
+        status = MODEM_QUIT;
         modemTxManager();
     } else {
         mConnector.closeConnection();
@@ -128,19 +128,19 @@ void MdriverS2C_EvoLogics::stop() {
 }
 
 void MdriverS2C_EvoLogics::modemTx() {
-    status = _TX;
+    status = MODEM_TX;
     m_status_tx = TX_STATE_SEND_IM;
     modemTxManager();
 }
 
 void MdriverS2C_EvoLogics::modemTxBurst() {
-    status = _TX;
+    status = MODEM_TX;
     m_status_tx = TX_STATE_SEND_BURST;
     modemTxManager();
 }
 
 void MdriverS2C_EvoLogics::modemTxPBM() {
-    status = _TX;
+    status = MODEM_TX;
     m_status_tx = TX_STATE_SEND_PBM;
     modemTxManager();
 }
@@ -321,9 +321,9 @@ int MdriverS2C_EvoLogics::updateStatus() {
         } // End if (rx_msg!="")
     } // End of while (cread)
     cread = true;
-    if (status == _TX || status == _CFG || status == _RESET || status == _QUIT) {// read from queue_tx only
+    if (status == MODEM_TX || status == MODEM_CFG || status == MODEM_RESET || status == MODEM_QUIT) {// read from queue_tx only
 
-        if (m_status_rx == RX_STATE_RX_IM && status == _TX) {
+        if (m_status_rx == RX_STATE_RX_IM && status == MODEM_TX) {
             // Update S2C RX status
             m_status_rx = RX_STATE_IDLE;
         }
@@ -341,45 +341,45 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     if (debug_ >= 2) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_" << m_status_tx << "_" << status << endl;
                     }
-                    if ((m_status_tx == TX_STATE_SET_ID_DONE && status == _CFG) || (m_status_tx == TX_STATE_SEND_IM_DONE && status == _TX) || 
-		      (m_status_tx == TX_STATE_DROPBUFFER_DONE && status == _RESET) || (m_status_tx == TX_STATE_SEND_BURST_DONE && status == _TX) || 
-		      (m_status_tx == TX_STATE_SEND_PBM_DONE && status == _TX)) {
+                    if ((m_status_tx == TX_STATE_SET_ID_DONE && status == MODEM_CFG) || (m_status_tx == TX_STATE_SEND_IM_DONE && status == MODEM_TX) || 
+		      (m_status_tx == TX_STATE_DROPBUFFER_DONE && status == MODEM_RESET) || (m_status_tx == TX_STATE_SEND_BURST_DONE && status == MODEM_TX) || 
+		      (m_status_tx == TX_STATE_SEND_PBM_DONE && status == MODEM_TX)) {
                         // Update modem status
-                        if (m_status_tx == TX_STATE_DROPBUFFER_DONE && status == _RESET)
+                        if (m_status_tx == TX_STATE_DROPBUFFER_DONE && status == MODEM_RESET)
 			{
 			    cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::OK_" << m_status_tx << "_" << status << endl;
 			    if (getKeepOnlineMode()) {
-				status = _CFG;
+				status = MODEM_CFG;
 				m_status_tx = TX_STATE_SET_KO;
 				cread = false;
 			    } else if (SetModemID) {
-				status = _CFG;
+				status = MODEM_CFG;
 				m_status_tx = TX_STATE_SET_ID;
 				cread = false;
 			    } else {
-			      status = _IDLE;
+			      status = MODEM_IDLE;
 			      m_status_tx = TX_STATE_IDLE;
 			      cread = false;
 			    }
 			} else {
-			    status = _IDLE;
+			    status = MODEM_IDLE;
 			    m_status_tx = TX_STATE_IDLE;
 			    cread = false;
 			}
-                    } else if ((m_status_tx == TX_STATE_SET_KO_DONE && status == _CFG)) {
+                    } else if ((m_status_tx == TX_STATE_SET_KO_DONE && status == MODEM_CFG)) {
                         if (SetModemID)
                         {
                             if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::SETTING_MODEM_ID" << endl;
-                            status = _CFG;
+                            status = MODEM_CFG;
                             m_status_tx = TX_STATE_SET_ID;
                             cread = false;
                         } else {
-                            status = _IDLE;
+                            status = MODEM_IDLE;
                             m_status_tx = TX_STATE_IDLE;
                             cread = false;
                         }
-                    } else if (m_status_tx == TX_STATE_SEND_CLOSE_DONE && status == _QUIT) {
-                        status = _IDLE;
+                    } else if (m_status_tx == TX_STATE_SEND_CLOSE_DONE && status == MODEM_QUIT) {
+                        status = MODEM_IDLE;
                         m_status_tx = TX_STATE_IDLE;
                         if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::ACOUSTIC_CONNECTION_CLOSED" << endl;
                         cread = false;
@@ -397,12 +397,12 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     }
 
                 } else if (rx_msg.find("ERROR") != string::npos) {
-                    if ((m_status_tx == TX_STATE_SET_ID_DONE && status == _CFG) || (m_status_tx == TX_STATE_SEND_IM_DONE && status == _TX) || 
-		      (m_status_tx == TX_STATE_DROPBUFFER_DONE && status == _RESET) || (m_status_tx == TX_STATE_SEND_BURST_DONE && status == _TX) || (m_status_tx == TX_STATE_SEND_PBM_DONE && status == _TX)) {
+                    if ((m_status_tx == TX_STATE_SET_ID_DONE && status == MODEM_CFG) || (m_status_tx == TX_STATE_SEND_IM_DONE && status == MODEM_TX) || 
+		      (m_status_tx == TX_STATE_DROPBUFFER_DONE && status == MODEM_RESET) || (m_status_tx == TX_STATE_SEND_BURST_DONE && status == MODEM_TX) || (m_status_tx == TX_STATE_SEND_PBM_DONE && status == MODEM_TX)) {
                         if (debug_ >= 0) {
                             cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::ERROR" << endl;
                         }
-                        status = _IDLE;
+                        status = MODEM_IDLE;
                     } else {
                         if (debug_ >= 0) {
                             cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::ERROR_WRONG_STATUS_TX_" << m_status_tx << "_STATUS_" << status << endl;
@@ -421,24 +421,24 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUSY_CLOSING_CONNECTION" << endl;
                     }
-                    status = _IDLE;
+                    status = MODEM_IDLE;
 
                 } else if (rx_msg.find("BUSY BACKOFF STATE") != string::npos) {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUSY_BACKOFF_STATE" << endl;
                     }
-                    status = _IDLE;
+                    status = MODEM_IDLE;
 
                 } else if (rx_msg.find("FAILEDIM") != string::npos) {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::FAILEDIM" << endl;
                     }
-                    status = _IDLE;
+                    status = MODEM_IDLE;
                 } else if (rx_msg.find("FAILED") != string::npos) {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::FAILED" << endl;
                     }
-                    status = _IDLE;
+                    status = MODEM_IDLE;
                 } else if (rx_msg.find("DELIVERED") != string::npos) {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::DELIVERED" << endl;
@@ -449,7 +449,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
                     }
                     if (m_status_tx == TX_STATE_SEND_PBM_DONE && status == _TX)
                     {
-                        status = _IDLE;
+                        status = MODEM_IDLE;
                         m_status_tx = TX_STATE_IDLE;
                         cread = false;
                     }
@@ -460,11 +460,11 @@ int MdriverS2C_EvoLogics::updateStatus() {
                 cread = false;
             }
         }
-    } else if ((m_status_rx == RX_STATE_RX_IM && status == _RX) || (m_status_rx == RX_STATE_RX_BURST && status == _RX) || (m_status_rx == RX_STATE_RX_PBM && status == _RX)) {
+    } else if ((m_status_rx == RX_STATE_RX_IM && status == MODEM_RX) || (m_status_rx == RX_STATE_RX_BURST && status == MODEM_RX) || (m_status_rx == RX_STATE_RX_PBM && status == MODEM_RX)) {
         // Update S2C RX status
         m_status_rx = RX_STATE_IDLE;
         // Update modem status
-        status = _IDLE_RX;
+        status = MODEM_IDLE_RX;
         // Exit from updateStatus() because status has changed;
         cread = false;
 
@@ -481,17 +481,17 @@ int MdriverS2C_EvoLogics::updateStatus() {
 
                 if (rx_msg.find("RECVIM") != string::npos) {// Acoustic message detected
                     m_status_rx = RX_STATE_RX_IM;
-                    status = _RX;
+                    status = MODEM_RX;
                     mInterpreter.parse_recvim(rx_msg);
                     cread = false;
                 } else if (rx_msg.find("RECV") != string::npos) {
                     m_status_rx = RX_STATE_RX_BURST;
-                    status = _RX;
+                    status = MODEM_RX;
                     mInterpreter.parse_recv(rx_msg);
                     cread = false;
                 } else if (rx_msg.find("RECVPBM") != string::npos) {
                     m_status_rx = RX_STATE_RX_BURST;
-                    status = _RX;
+                    status = MODEM_RX;
                     mInterpreter.parse_recvpbm(rx_msg);
                     cread = false;
                 } else {// Any other AT messages (ignored for the moment)    
@@ -510,7 +510,7 @@ int MdriverS2C_EvoLogics::updateStatus() {
 
 void MdriverS2C_EvoLogics::modemTxManager() {
     std::string tx_msg;
-    if (status == _TX || status == _CFG || status == _RESET || status == _QUIT) {
+    if (status == MODEM_TX || status == MODEM_CFG || status == MODEM_RESET || status == MODEM_QUIT) {
         switch (m_status_tx) {
             case TX_STATE_SET_ID:
                 // Build the configuration message
