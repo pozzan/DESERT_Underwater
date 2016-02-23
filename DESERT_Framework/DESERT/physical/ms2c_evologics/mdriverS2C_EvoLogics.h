@@ -141,7 +141,7 @@ class MdriverS2C_EvoLogics : public UWMdriver
 	         * 
 	         *  @return UWMdriver::status, the updated modem's status.
 	         */
-		virtual int updateStatus();
+		virtual modem_state_t updateStatus();
 
 
 		virtual void modemTxBurst();

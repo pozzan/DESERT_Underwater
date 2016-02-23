@@ -149,7 +149,7 @@ void MdriverS2C_EvoLogics::modemSetID() {
     modemTxManager();
 }
 
-int MdriverS2C_EvoLogics::updateStatus() {
+modem_state_t MdriverS2C_EvoLogics::updateStatus() {
     if (debug_ >= 2) {
         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::STATUS_" << status << "_M_STATUS_TX_" << m_status_tx << "_M_STATUS_RX_" << m_status_rx << endl;
     }
