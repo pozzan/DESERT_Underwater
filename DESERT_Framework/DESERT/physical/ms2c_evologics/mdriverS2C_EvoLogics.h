@@ -42,27 +42,6 @@
 
 #include <queue>
 
-// MACROS for the transmission management of AT messages
-// MESSAGES FLAGS
-//TX CONFIGURATION MESSAGES
-//#define _SETID 1 /**< Status 1 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): set modem ID */
-//#define _SETIDS 2 /**< Status 2 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): modem ID sent */
-//#define _DROPBUFFER 4 /**< Drop burst data and IM at the begin of connection with the modem */
-//#define _DROPBUFFERS 5 /**< Drop burst data and IM at the begin of connection with the modem */
-//#define _IM 11 /**< Status 11 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): send instant message */
-//#define _IMS 12 /**< Status 12 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): instant message sent to modem */
-//#define _RXIM -1 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of an instant message */
-//#define _TXKO 7 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): TX of an AT!KO command */
-//#define _TXKOD 8 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): TX of an AT!KO command done  */
-//#define _BURST 13 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): send a BURST message  */
-//#define _BURSTS 14 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): BURST message sent  */
-//#define _PBM 15 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): send a PiggyBack message  */
-//#define _PBMS 16 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): PiggyBack message sent  */
-//#define _RXBURST 20 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a BURST message */
-//#define _RXPBM 21 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
-//#define _CLOSE 23 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
-//#define _CLOSED 24 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
-
 #define DROPBUFFER_TYPE 4
 
 enum STATES_RX {

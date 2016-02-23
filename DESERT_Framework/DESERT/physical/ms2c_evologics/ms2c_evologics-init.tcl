@@ -32,5 +32,5 @@ Module/UW/MPhy_modem/S2C set period_		1
 Module/UW/MPhy_modem/S2C set debug_ 		0
 Module/UW/MPhy_modem/S2C set log_       	0
 Module/UW/MPhy_modem/S2C set SetModemID_	0
-Module/UW/MPhy_modem/S2C set UseKeepOnline__	0
+Module/UW/MPhy_modem/S2C set UseKeepOnline_	0
 Module/UW/MPhy_modem/S2C set DeafTime_ 		2
