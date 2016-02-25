@@ -204,11 +204,7 @@ modem_state_t UWMPhy_modem::check_modem() {
     if (debug_ >= 2) {
         cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::TRANSITION_FROM_" << modemStatus_old << "_TO_" << modemStatus << endl;
     }
-
-
     if (modemStatus == MODEM_IDLE && modemStatus_old == MODEM_TX) {
-
-
         endTx(popTxBuff());
 
     } else if (modemStatus == MODEM_RX && modemStatus_old == MODEM_IDLE)
@@ -225,34 +221,8 @@ modem_state_t UWMPhy_modem::check_modem() {
     } else if (modemStatus == MODEM_CFG && modemStatus_old == MODEM_CFG) {
 
         pmDriver->modemSetID();
-        //return modemStatus;
 
-    } else if ((modemStatus == modemStatus_old) || ((modemStatus == MODEM_TX_RX) && modemStatus_old == MODEM_TX_PAUSED) || (modemStatus == MODEM_TX_PAUSED && modemStatus_old == MODEM_TX)) {
-        // Do nothing
-        return modemStatus;
-
-    }
-    else if (modemStatus == MODEM_IDLE && modemStatus_old == MODEM_CFG) {
-        if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::CONFIGURATION DONE!!!" << endl;
-        //pmDriver->emptyModemQueue();
-	return modemStatus;
-    } else if (modemStatus == MODEM_IDLE && modemStatus_old == MODEM_RESET) {
-        return modemStatus;
-    } else if (modemStatus == MODEM_CFG && modemStatus_old == MODEM_RESET) {
-      return modemStatus;
-    } else if (modemStatus == MODEM_IDLE && modemStatus_old == MODEM_QUIT) {
-        //do nothing
-        if (debug_ >= 0) cout << NOW << "UWMPHY_MODEM(" << ID << ")::QUITTING_INTERFACE_BYE" << endl;
-    } else {
-        if (debug_ >= 0) {
-            cout << NOW << "UWMPHY_MODEM(" << ID << ")::CHECK_MODEM::ERROR_UNEXPECTED_STATE_TRANSITION_FROM_" << modemStatus_old << "_TO_" << modemStatus << endl;
-        }
-        if (log_) {
-            outLog.open(logFile.c_str(), ios::app);
-            outLog << left << "[" << getEpoch() << "]::" << NOW << "::UWMPHY_MODEM("<<ID<<")::CHECK_MODEM::UNEXPECTED_TRANSITION_FROM_" << modemStatus_old << "_TO_" << modemStatus << endl;
-            outLog.close();
-        }
-    }
+    } 
 
     return modemStatus;
 }
