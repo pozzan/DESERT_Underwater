@@ -146,6 +146,8 @@ class MdriverS2C_EvoLogics : public UWMdriver
 	         */
 		virtual void modemTxManager();
 		
+		virtual void printPacketonLog();
+		
 		tx_states_t updateTxStatus(tx_states_t state);
 		
                                

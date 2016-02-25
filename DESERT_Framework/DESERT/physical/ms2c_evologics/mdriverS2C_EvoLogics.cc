@@ -161,13 +161,6 @@ modem_state_t MdriverS2C_EvoLogics::updateStatus() {
 
         if (rx_msg != "") {
 
-            if (getLog()) {
-                outLog.open((getLogFile()).c_str(), ios::app);
-                outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RX_MSG = " << hexdumplog(rx_msg) << endl;
-                outLog.flush();
-                outLog.close();
-            }
-
             std::string pr_msg;
             std::string parser("\r\n");
             size_t p_offset = 0;
@@ -175,143 +168,17 @@ modem_state_t MdriverS2C_EvoLogics::updateStatus() {
 
             while (p_parser != std::string::npos) {
                 pr_msg = rx_msg.substr(p_offset, p_parser + parser.size() - p_offset);
-
-                if (pr_msg.find("RECVIM") != string::npos) {
-		    if(!getResetModemQueue())
-		    {
-		      queue_rx.push(pr_msg);
-
-		      if (debug_ >= 2) {
-			  hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECVIM::", pr_msg);
-		      }
-		      if (getLog()) {
-			  outLog.open((getLogFile()).c_str(), ios::app);
-			  outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECVIM = " << hexdumplog(pr_msg) << endl;
-			  outLog.flush();
-			  outLog.close();
-		      }
-		    }
-
-                } else if (pr_msg.find("RECV") != string::npos) {
-		    if (!getResetModemQueue())
-		    {
-		      queue_rx.push(pr_msg);
-		      if (debug_ >= 2) {
-			  hexdump("MS2C_EVOLOGICS::UPDATESTATUS::RECV::", pr_msg);
-		      }
-		      if (getLog()) {
-			  outLog.open((getLogFile()).c_str(), ios::app);
-			  outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::RECV = " << hexdumplog(pr_msg) << endl;
-			  outLog.flush();
-			  outLog.close();
-		      }
-		    }
-                } else if (pr_msg.find("OK") != string::npos) {
-
-                    queue_tx.push(pr_msg);
-                    if (debug_ >= 2) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
-                    }
-
-                } else if (pr_msg.find("BUSY CLOSING CONNECTION") != string::npos) {
-                    if (debug_ >= 2) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
-                    }
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::BUSY = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
-
-                    queue_tx.push(pr_msg);
-
-                } else if (pr_msg.find("BUSY BACKOFF STATE") != string::npos) {
-                    if (debug_ >= 2) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
-                    }
-
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::BUSY = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
-                    queue_tx.push(pr_msg);
-                } else if (pr_msg.find("BUSY DELIVERING") != string::npos) {
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::BUSY = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
-                    queue_tx.push(pr_msg);
-                } else if (pr_msg.find("ERROR") != string::npos) {
-
-                    queue_tx.push(pr_msg);
-
-                    if (debug_ >= 2) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
-                    }
-
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::ERROR = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
-                    
-                } else if (pr_msg.find("DELIVERED") != string::npos) {
-/*                    if (debug_ >= 1) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
-                    }*/
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::DELIVERED = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
-                    //queue_tx.push(pr_msg);
-
-                } else if (pr_msg.find("FAILEDIM") != string::npos) {
-                    if (debug_ >= 0) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
-                    }
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::FAILEDIM = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
-
-                    queue_tx.push(pr_msg);
-
-                } else if (pr_msg.find("FAILED") != string::npos) {
-                    if (debug_ >= 0) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::", pr_msg);
-                    }
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::FAILED = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
-                    queue_tx.push(pr_msg);
-
-
-                } else if ((pr_msg.find("USBLANGLES") != string::npos) && (pr_msg.find("USBLLONG") != string::npos)) { //positioning messages, we don't care about it
-
-                    if (debug_ >= 0) {
-                        hexdump("MS2C_EVOLOGICS::UPDATESTATUS::UNKNOWN_PACKET_", pr_msg);
-                    }
-                    if (getLog()) {
-                        outLog.open((getLogFile()).c_str(), ios::app);
-                        outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::MS2C_EVOLOGICS_DRIVER(" << ID << ")::UPDATE_STATUS::UNKNOWN = " << hexdumplog(pr_msg) << endl;
-                        outLog.flush();
-                        outLog.close();
-                    }
-
-                }
+		
+		if ( (pr_msg.find("RECVIM") != string::npos) || (pr_msg.find("RECV") != string::npos) )
+		{
+		  queue_rx.push(pr_msg);
+		}
+		if ((pr_msg.find("OK") != string::npos) || (pr_msg.find("BUSY CLOSING CONNECTION") != string::npos) ||
+		  (pr_msg.find("BUSY BACKOFF STATE") != string::npos) || (pr_msg.find("BUSY DELIVERING") != string::npos) ||
+		  (pr_msg.find("FAILEDIM") != string::npos) || (pr_msg.find("FAILED") != string::npos) || (pr_msg.find("ERROR") != string::npos))
+		{
+		  queue_tx.push(pr_msg);
+		}
                 p_offset += pr_msg.size();
                 p_parser = rx_msg.find(parser, p_offset + 1);
             } // End while (p_parser!=std::string::npos)
@@ -405,32 +272,6 @@ modem_state_t MdriverS2C_EvoLogics::updateStatus() {
                     m_status_tx = TX_STATE_IDLE;
                     cread = false;
 
-                } else if (rx_msg.find("BUSY CLOSING CONNECTION") != string::npos) {
-                    if (debug_ >= 0) {
-                        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUSY_CLOSING_CONNECTION" << endl;
-                    }
-                    status = MODEM_IDLE;
-
-                } else if (rx_msg.find("BUSY BACKOFF STATE") != string::npos) {
-                    if (debug_ >= 0) {
-                        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::BUSY_BACKOFF_STATE" << endl;
-                    }
-                    status = MODEM_IDLE;
-
-                } else if (rx_msg.find("FAILEDIM") != string::npos) {
-                    if (debug_ >= 0) {
-                        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::FAILEDIM" << endl;
-                    }
-                    status = MODEM_IDLE;
-                } else if (rx_msg.find("FAILED") != string::npos) {
-                    if (debug_ >= 0) {
-                        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::FAILED" << endl;
-                    }
-                    status = MODEM_IDLE;
-                } else if (rx_msg.find("DELIVERED") != string::npos) {
-                    if (debug_ >= 0) {
-                        cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::DELIVERED" << endl;
-                    }
                 } else if  (rx_msg.find("BUSY DELIVERING") != string::npos) {
                     if (debug_ >= 0) {
                         cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::MODEM BUSY DELIVERING PIGGYBACK MESSAGE" << endl;   
@@ -442,8 +283,9 @@ modem_state_t MdriverS2C_EvoLogics::updateStatus() {
                         cread = false;
                     }
                 } else {
-                    if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UNKNOWN_PACKET_IN_QUEUE_" << rx_msg << endl;
-                }
+
+		  status = MODEM_IDLE;
+		}
             } else {
                 cread = false;
             }
@@ -493,6 +335,12 @@ modem_state_t MdriverS2C_EvoLogics::updateStatus() {
 
     return status;
 }
+
+void MdriverS2C_EvoLogics::printPacketonLog()
+{
+  //TODO
+}
+
 
 void MdriverS2C_EvoLogics::modemTxManager() {
     std::string tx_msg;

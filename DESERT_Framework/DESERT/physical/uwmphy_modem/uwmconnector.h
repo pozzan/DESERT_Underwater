@@ -61,12 +61,6 @@ using namespace std;
 // Forward declaration to avoid dependence from UWMdriver.h
 class UWMdriver; 
 
-// This struct is used in the queue data structure to save the messages received from the modem.
-/* struct msgModem {
-  char msg_rx[_MAX_MSG_LENGTH]; /**< Message from the modem.*/
-//  int msg_length; /**< Length of the message (bytes).*/
-//};
-
 struct msgModem {
   string msg_rx; /**< Message from the modem.*/
   int msg_length; /**< Length of the message (bytes).*/

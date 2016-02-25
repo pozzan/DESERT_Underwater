@@ -267,13 +267,13 @@ public:
           */
          virtual void emptyModemQueue() = 0;
 
-       	virtual inline bool getKeepOnlineMode() {return KeepOnline;}
+	 virtual inline bool getKeepOnlineMode() {return KeepOnline;}
 
-       	virtual inline void setKeepOnlineMode(bool ko) {KeepOnline = ko;}
+	 virtual inline void setKeepOnlineMode(bool ko) {KeepOnline = ko;}
        	
-       	virtual inline void setResetModemQueue(bool reset_m_queue) {ResetModemQueue = reset_m_queue;}
+	 virtual inline void setResetModemQueue(bool reset_m_queue) {ResetModemQueue = reset_m_queue;}
        	
-       	virtual inline bool getResetModemQueue() {return ResetModemQueue;}
+	 virtual inline bool getResetModemQueue() {return ResetModemQueue;}
 
          protected:
 
@@ -291,6 +291,8 @@ public:
 	 bool KeepOnline;
 	 
 	 bool ResetModemQueue;
+	 
+	 virtual void printPacketonLog() = 0;
 
 	 // TX VARIABLES (variables for the next packet to be transmitted)
 	 std::string payload_tx; /**< String where to save the payload of the next packet to send via modem. NOTE: an object of the class UWMcodec must write here after the host-to-modem mapping. */
@@ -308,7 +310,7 @@ public:
 
 	 /** 
 	  * Link connector. This method must be used by any derived class D of UWDriver to link the members pmInterpreter and pmConnector of UWMdriver to the corresponding derived objects contained in D.
-	  * @see: e.g., MdriverFSK_WHOI_MM or MdriverS2C_EvoLogics
+	  * @see: e.g. MdriverS2C_EvoLogics
 	  *
 	  * @param[in] pmInterpreter_ pointer to a UWMinterpreter object
 	  * @param[in] pmConnector_ pointer to an UWMconnector object
