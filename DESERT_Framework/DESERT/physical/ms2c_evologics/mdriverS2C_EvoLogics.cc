@@ -448,13 +448,11 @@ modem_state_t MdriverS2C_EvoLogics::updateStatus() {
                 cread = false;
             }
         }
-    //} else if ((m_status_rx == RX_STATE_RX_IM && status == MODEM_RX) || (m_status_rx == RX_STATE_RX_BURST && status == MODEM_RX) || (m_status_rx == RX_STATE_RX_PBM && status == MODEM_RX)) {
     } else if(status == MODEM_RX) {
-        // Update S2C RX status
+      
+      
         m_status_rx = RX_STATE_IDLE;
-        // Update modem status
         status = MODEM_IDLE_RX;
-        // Exit from updateStatus() because status has changed;
         cread = false;
 
     }
@@ -487,7 +485,6 @@ modem_state_t MdriverS2C_EvoLogics::updateStatus() {
                     if (debug_ >= 0) cout << NOW << "MS2C_EVOLOGICS(" << ID << ")::UPDATE_STATUS::IGNORED_AT_MESSAGE_" << rx_msg << endl;
                 }
             } else {
-                // Exit from the while loop because no packets in queue_rx
                 cread = false;
             } // End if (!queue_rx.empty())
         }// End while (cread)
