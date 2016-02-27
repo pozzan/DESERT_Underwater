@@ -50,6 +50,10 @@ UWMdriver::UWMdriver(UWMPhy_modem* pmModem_){
   src = -1;
   debug_ = pmModem -> getDebug();
   
+  if (debug_ > MAX_LOG_LEVEL )
+  {
+    debug_ = MAX_LOG_LEVEL;
+  }
 }
 		
 UWMdriver::~UWMdriver(){
@@ -93,5 +97,17 @@ void UWMdriver::updateRx(int s, int d, std::string prx){
    src = s;
    dstPktRx = d;
    payload_rx = prx;
+}
+
+void UWMdriver::printOnLog(log_level_t log_level,string module, string message)
+{
+  log_level_t actual_log_level = getDebug();
+  if (actual_log_level >= log_level)
+  {
+    outLog.open((getLogFile()).c_str(), ios::app);
+    outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::" << module <<"(" << ID << ")::"<< message << endl;
+    outLog.flush();
+    outLog.close();
+  }
 }
 

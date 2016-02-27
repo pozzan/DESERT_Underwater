@@ -52,6 +52,8 @@
 #include <unistd.h>
 #include <cmath>
 
+#define MAX_LOG_LEVEL 2
+
 
 enum MODEM_STATES {
   MODEM_IDLE = 0,
@@ -64,6 +66,14 @@ enum MODEM_STATES {
   MODEM_RESET,
   MODEM_QUIT
 };
+
+enum LOG_LEVEL {
+  LOG_LEVEL_ERROR = 0,
+  LOG_LEVEL_INFO,
+  LOG_LEVEL_DEBUG
+};
+
+typedef enum LOG_LEVEL log_level_t;
 
 typedef enum MODEM_STATES modem_state_t;
 
@@ -234,9 +244,9 @@ public:
 	  * 
 	  * @return UWMPhy_modem::debug_
 	  */
-	 int getDebug()
+	 log_level_t getDebug()
 	 {
-		  return debug_;
+	   return (log_level_t)debug_;
 	 }
          
          /**
@@ -274,6 +284,8 @@ public:
 	 virtual inline void setResetModemQueue(bool reset_m_queue) {ResetModemQueue = reset_m_queue;}
        	
 	 virtual inline bool getResetModemQueue() {return ResetModemQueue;}
+	 
+	 void printOnLog(log_level_t log_level,string module, string message);
 
          protected:
 
@@ -292,7 +304,6 @@ public:
 	 
 	 bool ResetModemQueue;
 	 
-	 virtual void printPacketonLog() = 0;
 
 	 // TX VARIABLES (variables for the next packet to be transmitted)
 	 std::string payload_tx; /**< String where to save the payload of the next packet to send via modem. NOTE: an object of the class UWMcodec must write here after the host-to-modem mapping. */
