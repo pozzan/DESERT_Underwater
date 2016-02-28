@@ -114,19 +114,7 @@ class Msocket: public UWMconnector
     */
    int getSocket(){return sockfd;}
 	
-   /**
-    * Method to return the readingBuff string (it is needed by the reading function invoked by the parallel thread)
-    * 
-    * @return UWMconnector::readingBuff
-    */ 
-   //std::string getReadingBuff(){return readingBuff;}
-        
-   /**
-    * Method to return the debug_ flag (it is needed by the reading function invoked by the parallel thread)
-    * 
-    * @return UWMconnector::debug_
-    */
-   int getDebug(){return debug_;}
+
 };
 
 

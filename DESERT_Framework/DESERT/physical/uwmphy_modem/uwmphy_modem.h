@@ -165,9 +165,9 @@ public:
 	  * 
 	  * @return UWMPhy_modem::log_
 	  */
-	  int getLog()
+	  log_level_t getLogLevel()
 	  {
-		  return log_;
+		  return (log_level_t)loglevel_;
 	  }
                    
         /**
@@ -205,7 +205,7 @@ protected:
 	 int debug_; /**< Flag to enable debug mode (i.e., printing of debug messages) if set to 1. */
          std::ofstream outLog; /**< output strem to print into a disk-file log messages. See UWMPhy_modem::logFile.*/	 
 	 std::string logFile; /**< Name of the disk-file where to write the interface's log messages.*/	
-	 int log_; /**< Flag to enable, if set different than 0, the printing of log messages in UWMPhy_modem::logFile. */
+	 int loglevel_; /**< Log level on file, from ERROR (0) to DEBUG (2) in UWMPhy_modem::logFile. */
 	 int SetModemID; /**< Flag to indicate if the interface has to force the modem to have the ID indicated in the tcl script */
 	 int UseKeepOnline;
 	 int DeafTime;

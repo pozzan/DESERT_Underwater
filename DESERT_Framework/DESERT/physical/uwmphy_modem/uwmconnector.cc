@@ -82,22 +82,19 @@ UWMconnector::UWMconnector(UWMdriver* pmDriver_, std::string pathToDevice_){
   
   // Members initialization
   pmDriver = pmDriver_;
-  debug_ = pmDriver -> getDebug();
   pathToDevice = pathToDevice_;
-  readingBuff = "";
-  
-  if (debug_ >= 2) {cout << this << ": in constructor of UWMconnector which points to driver: " << pmDriver << "\n";}
 }
 
 UWMconnector::~UWMconnector(){
-    
-    out.close();
-    in.close();
+
 }
 		
 		
 void UWMconnector::closeConnection(){
 }
+
+
+
 		
 std::string UWMconnector::readFromModem(){
   
@@ -106,9 +103,6 @@ std::string UWMconnector::readFromModem(){
   if (!queueMsg.empty()){
     msgModem tmp_ = queueMsg.front();
     return_str = tmp_.msg_rx;
-    if (debug_ >= 2)  { 
-      hexdump("UWMCONNECTOR::READ_FROM_MODEM::", return_str);
-    }
     queueMsg.pop();
   }else {
       return_str = "";

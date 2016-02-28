@@ -147,7 +147,7 @@ public:
 	  *  @param[in] ID the ID that must be assigned to the modem.
 	  *  @param[out] ID (i.e., the member UWMdriver::ID), changed to \e ID_.
 	  */
-	 void setID(int);
+	 inline void setID(int ID_){ ID = ID_; }
 
 	 /** 
 	  *  Method to reset the modem status. NOTE: this function should be used by the UWMPhy_modem object linked to this
@@ -244,10 +244,7 @@ public:
 	  * 
 	  * @return UWMPhy_modem::debug_
 	  */
-	 log_level_t getDebug()
-	 {
-	   return (log_level_t)debug_;
-	 }
+	 inline log_level_t getDebug() { return (log_level_t)debug_; }
          
          /**
           * 
@@ -264,7 +261,7 @@ public:
 	  * 
 	  * @return UWMPhy_modem::log_
 	  */
-	 int getLog();
+	 log_level_t getLogLevel();
 	 
 	 /**
 	  * Method to return the name of the disk-fiel used to print the log messages.
@@ -272,9 +269,8 @@ public:
 	  * @return UWMPhy_modem::logFile
 	  */
 	 std::string getLogFile();
-         /**
-          * Method to empty the modem queue
-          */
+
+	 
          virtual void emptyModemQueue() = 0;
 
 	 virtual inline bool getKeepOnlineMode() {return KeepOnline;}

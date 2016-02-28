@@ -97,26 +97,36 @@ MinterpreterAT::~MinterpreterAT(){
 
 std::string MinterpreterAT::build_setAL(int _al){
     string at_string;
-	stringstream astr("");
-	astr << "AT!AL" << _al;
-	astr >> at_string;	
-	return at_string; 
+    stringstream astr("");
+    astr << "AT!AL" << _al;
+    astr >> at_string;	
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_SEND=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
+    return at_string; 
 }
 	
 std::string MinterpreterAT::build_sendim(int _length, int _dest, std::string _flag, std::string _payload)
 {
     string at_string;
-	stringstream astr("");
+    stringstream astr("");
     astr << "AT*SENDIM," << _length << "," << _dest << "," << _flag << ",";
-	astr >> at_string;	
-	at_string =  at_string + _payload;
+    astr >> at_string;	
+    at_string =  at_string + _payload;
 	
-	if (debug_ >= 1)
+    if (debug_)
     {
         cout << "MS2C_EVOLOGICS_AT_MESSAGE_" << hexdumplog(at_string) << endl;
     }
-	// Return the created at_string
-	return at_string;
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_SEND=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
+    // Return the created at_string
+    return at_string;
 }
 
 std::string MinterpreterAT::build_atko(int value)
@@ -128,7 +138,12 @@ std::string MinterpreterAT::build_atko(int value)
     if (debug_ >= 1)
     {
         cout << "MS2C_EVOLOGICS_AT_MESSAGE_" << hexdumplog(at_string) << endl;
-    }    
+    }
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_SEND=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
     return at_string;
 }
 
@@ -140,7 +155,11 @@ std::string MinterpreterAT::build_atzn(int _drop_type)
     
     astr << "ATZ" << _drop_type;
     astr >> at_string;
-    
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_SEND=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
     return at_string;
 }
 
@@ -155,6 +174,11 @@ std::string MinterpreterAT::build_atsend(int _length, int _dest, std::string _pa
     {
         cout << "MS2C_EVOLOGICS_AT_MESSAGE_" << hexdumplog(at_string) << endl;
     }
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_SEND=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
     return at_string;
 }
 
@@ -168,6 +192,11 @@ std::string MinterpreterAT::build_ath(int _type_connection_close)
     {
         cout << "MS2C_EVOLOGICS_AT_MESSAGE_" << at_string << endl;
     }
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_SEND=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
     return at_string;
 }
 
@@ -182,13 +211,22 @@ std::string MinterpreterAT::build_atsendpbm(int _length, int _dest, std::string 
     {
         cout << "MS2C_EVOLOGICS_AT_MESSAGE_" << hexdumplog(at_string) << endl;
     }
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_SEND=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
     return at_string;   
 }
 
 void MinterpreterAT::parse_recvim(std::string at_string) {
     std::string _prefix, _length, _src, _dest, _flag, _bitrate, _rssi, _integrity, _ptime, _velox, _payload;
-    
-    if (debug_ >= 1) cout << "MS2C_EVOLOGICS_AT_MESSAGE_TO_PARSE=" << hexdumplog(at_string) << endl;
+        
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_PARSE=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
 
     size_t offset = 0;
 
@@ -216,7 +254,12 @@ void MinterpreterAT::parse_recvim(std::string at_string) {
 
 void MinterpreterAT::parse_recv(std::string at_string) {
     std::string _prefix, _length, _src, _dest, _bitrate, _rssi, _integrity, _ptime, _velox, _payload;
-    if (debug_ >= 1) cout << "MS2C_EVOLOGICS_AT_MESSAGE_TO_PARSE=" << hexdumplog(at_string) << endl;
+    
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_PARSE=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
 
     size_t offset = 0;
 
@@ -242,8 +285,13 @@ void MinterpreterAT::parse_recv(std::string at_string) {
 }
 
 void MinterpreterAT::parse_recvpbm(std::string at_string) {
-        std::string _prefix, _length, _src, _dest, _bitrate, _rssi, _integrity, _ptime, _velox, _payload;
-    if (debug_ >= 1) cout << "MS2C_EVOLOGICS_AT_MESSAGE_TO_PARSE=" << hexdumplog(at_string) << endl;
+    
+    std::string _prefix, _length, _src, _dest, _bitrate, _rssi, _integrity, _ptime, _velox, _payload;
+    std::stringstream sstr("");
+    string strlog;
+    sstr << "PARSE_RECVIM::MS2C_EVOLOGICS_AT_MESSAGE_TO_PARSE=" << hexdumplog(at_string) << endl;
+    sstr >> strlog;
+    pmDriver->printOnLog(LOG_LEVEL_INFO,"MINTERPRETER_AT",strlog);
 
     size_t offset = 0;
 

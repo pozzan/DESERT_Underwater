@@ -44,6 +44,7 @@
 
 #define DROPBUFFER_TYPE 4
 
+
 enum STATES_RX {
   RX_STATE_IDLE = 0, RX_STATE_RX_IM, RX_STATE_RX_PBM, RX_STATE_RX_BURST
 };
@@ -59,9 +60,14 @@ enum STATES_TX {
   TX_STATE_SEND_CLOSE, TX_STATE_SEND_CLOSE_DONE
 };
 
+
+
+
 typedef enum STATES_RX rx_states_t;
 
 typedef enum STATES_TX tx_states_t;
+
+
 
 
 
@@ -137,6 +143,8 @@ class MdriverS2C_EvoLogics : public UWMdriver
                  * Method to empty modem queue
                  */
                 virtual void emptyModemQueue();
+		
+		//virtual void printOnLog(log_level_t log_level,string message);
                         
                         		
 	protected:
@@ -146,7 +154,6 @@ class MdriverS2C_EvoLogics : public UWMdriver
 	         */
 		virtual void modemTxManager();
 		
-		virtual void printPacketonLog();
 		
 		tx_states_t updateTxStatus(tx_states_t state);
 		

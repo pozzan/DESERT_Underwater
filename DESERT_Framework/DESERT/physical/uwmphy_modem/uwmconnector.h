@@ -115,21 +115,11 @@ class UWMconnector
 		 */
 		std::string readFromModem();
 		
-		/**
-		 * Method to create receiving modem buffer.
-		 * 
-		 * @param[out] disk-file that implements the receiving modem buffer and that is called according to the value set for UWMconnector::readingBuff.
-		 */
-		//void create_readingBuff();
 		
         protected:
 	        
 	        UWMdriver* pmDriver; /**< Pointer to UWMdriver object that contains this UWMconnector.*/
 	        std::string pathToDevice; /**< The path to be connected with the modem device */
-		std::string readingBuff; /**< Name of the disk-file where to write the incoming messages from the modem (i.e., the receiving modem buffer).*/
-		std::ifstream in; /**< Variable to read from the disk-file used as receiving modem buffer */
-		std::ofstream out; /**< Variable to write to the disk-file used as receiving modem buffer */
-		int debug_; /**< Flag to enable debug mode (i.e., printing of debug messages) if set to 1 */
 
 };
 #endif /* UWMCONNECTOR_H */
