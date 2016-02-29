@@ -28,7 +28,7 @@
 
 /**
  * @file uwmphy_modem.h
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 2.0.0
  * \brief Header of the main class that implements the general interface between ns2/NS-Miracle and real acoustic modems. 
  */
@@ -165,16 +165,10 @@ public:
 	  * 
 	  * @return UWMPhy_modem::log_
 	  */
-	  int getLog()
+	  log_level_t getLogLevel()
 	  {
-		  return log_;
+		  return (log_level_t)loglevel_;
 	  }
-          
-          int getBin()
-          {
-              return bin_;
-          }
-          
                    
         /**
          * Calculate the epoch of the event. Used in sea-trial mode
@@ -209,10 +203,9 @@ protected:
 	 Packet* PktRx; /**< Address of the last received packet. */
 	 std::string pToDevice; /**< A string containing the path to the device to be connected with the network simulator.*/
 	 int debug_; /**< Flag to enable debug mode (i.e., printing of debug messages) if set to 1. */
-         std::ofstream outLog; /**< output strem to print into a disk-file log messages. See UWMPhy_modem::logFile.*/
-	 int bin_;	 
+         std::ofstream outLog; /**< output strem to print into a disk-file log messages. See UWMPhy_modem::logFile.*/	 
 	 std::string logFile; /**< Name of the disk-file where to write the interface's log messages.*/	
-	 int log_; /**< Flag to enable, if set different than 0, the printing of log messages in UWMPhy_modem::logFile. */
+	 int loglevel_; /**< Log level on file, from ERROR (0) to DEBUG (2) in UWMPhy_modem::logFile. */
 	 int SetModemID; /**< Flag to indicate if the interface has to force the modem to have the ID indicated in the tcl script */
 	 int UseKeepOnline;
 	 int DeafTime;
@@ -249,7 +242,7 @@ protected:
 	  * 
 	  *  @return modemStatus, a flag on the status of the modem, see UWMdriver for a description of the driver state machine.
 	  */
-	 virtual int check_modem();
+	 virtual modem_state_t check_modem();
 
 	 /**
 	  *  Method to send to an UWMdriver object the packet to be transmitted, see UWMdriver::modemTx(). 

@@ -39,51 +39,6 @@
 #include <string>
 #include <cctype>
 
-static void hexdump(std::string name, std::string str)
-{
-    int len = str.size();
-    const char *data = str.c_str();
-
-    std::cout << name << "[" << len << "]: " << std::hex;
-    for (int i = 0; i < len; i++)
-    {
-        std::cout.fill('0');
-        std::cout.width(2);
-        std::cout << std::right << (int)data[i];
-
-        if (std::isalnum(data[i]) || std::ispunct(data[i]))
-            std::cout << "(" << data[i] << ")";
-        std::cout << " ";
-    }
-
-    std::cout.width(0);
-    std::cout << std::dec << std::endl;
-}
-
-
-static std::string hexdumplog(std::string str)
-{
-    int len = str.size();
-    const char *data = str.c_str();
-    
-    std::string str_out = "";
-    for (int i = 0; i < len; i++)
-    {
-       if (std::isalnum(data[i]) || std::ispunct(data[i]))
-            str_out += data[i];
-	else {
-	    //str_out += '@';
-	    std::string str;
-	    std::stringstream sstr("");
-	    sstr << "[" << std::hex << (unsigned int)(unsigned char) data[i] << std::dec << "]";
-	    sstr >> str;	
-	    str_out += str;
-	}
-    }
-
-    return str_out;
-}
-
 void Msocket::error(const char *msg)
 {
        perror(msg);
@@ -99,11 +54,7 @@ Msocket::Msocket(UWMdriver* pmDriver_,std::string portno_):UWMconnector(pmDriver
         
         server_host = "localhost";
         portno = atoi(pathToDevice.c_str());
-        
-	if (debug_) {
-	   cout << "MSOCKET::port:" << portno << endl;
-           cout << "MSOCKET::serverhost:" << server_host << endl;
-	}
+
    
    } else {
         
@@ -194,17 +145,13 @@ void *read_process_msocket(void *pMsocket_me_)
 		
 		// Check the queue length
                 if (pMsocket_me->queueMsg.size() > _MAX_QUEUE_LENGTH) {
-                    cout << "MSOCKET::READ::WARNING::BUFFER_FULL ---> drop the oldest packet" << endl;
+                    cout << "MSOCKET::READ::ERROR::BUFFER_FULL ---> drop the oldest packet" << endl;
 			pMsocket_me->queueMsg.pop();
 		}
                 
                 tmp_.msg_rx.assign(msg_rx, tmp_.msg_length);
 		pMsocket_me->queueMsg.push(tmp_);
-		
-		if (pMsocket_me->getDebug() >= 2) {
-                    cout << "MSOCKET::READ::[WRITE in queue]: <-- " << hexdumplog(tmp_.msg_rx) << endl;
-                    cout << "MSOCKET::READ::N_PACKETS_IN_QUEUE " << pMsocket_me->queueMsg.size() << endl;
-		}
+
 		
 		usleep(1000);
 	}

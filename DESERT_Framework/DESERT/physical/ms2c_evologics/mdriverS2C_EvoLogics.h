@@ -42,26 +42,33 @@
 
 #include <queue>
 
-// MACROS for the transmission management of AT messages
-// MESSAGES FLAGS
-//TX CONFIGURATION MESSAGES
-#define _SETID 1 /**< Status 1 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): set modem ID */
-#define _SETIDS 2 /**< Status 2 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): modem ID sent */
-#define _DROPBUFFER 4 /**< Drop burst data and IM at the begin of connection with the modem */
-#define _DROPBUFFERS 5 /**< Drop burst data and IM at the begin of connection with the modem */
-#define _IM 11 /**< Status 11 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): send instant message */
-#define _IMS 12 /**< Status 12 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_tx): instant message sent to modem */
-#define _RXIM -1 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of an instant message */
-#define _TXKO 7 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): TX of an AT!KO command */
-#define _TXKOD 8 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): TX of an AT!KO command done  */
-#define _BURST 13 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): send a BURST message  */
-#define _BURSTS 14 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): BURST message sent  */
-#define _PBM 15 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): send a PiggyBack message  */
-#define _PBMS 16 /**< Status 7 of the driver's AT-complaint TX state machine (see MdriverS2C_EvoLogics::m_status_rx): PiggyBack message sent  */
-#define _RXBURST 20 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a BURST message */
-#define _RXPBM 21 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
-#define _CLOSE 23 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
-#define _CLOSED 24 /**< Status -1 of the driver's AT-complaint RX state machine (see MdriverS2C_EvoLogics::m_status_rx): reception of a PiggyBack message */
+#define DROPBUFFER_TYPE 4
+
+
+enum STATES_RX {
+  RX_STATE_IDLE = 0, RX_STATE_RX_IM, RX_STATE_RX_PBM, RX_STATE_RX_BURST
+};
+
+enum STATES_TX {
+  TX_STATE_IDLE = 0,
+  TX_STATE_SET_ID, TX_STATE_SET_ID_DONE,
+  TX_STATE_DROPBUFFER, TX_STATE_DROPBUFFER_DONE,
+  TX_STATE_SEND_IM, TX_STATE_SEND_IM_DONE,
+  TX_STATE_SET_KO, TX_STATE_SET_KO_DONE,
+  TX_STATE_SEND_BURST, TX_STATE_SEND_BURST_DONE,
+  TX_STATE_SEND_PBM, TX_STATE_SEND_PBM_DONE,
+  TX_STATE_SEND_CLOSE, TX_STATE_SEND_CLOSE_DONE
+};
+
+
+
+
+typedef enum STATES_RX rx_states_t;
+
+typedef enum STATES_TX tx_states_t;
+
+
+
 
 
 /**
@@ -72,9 +79,9 @@ class MdriverS2C_EvoLogics : public UWMdriver
        MinterpreterAT mInterpreter; /** < Object that builds/parses AT messages. */
        Msocket mConnector; /** < Object that handles the physical host to modem communications via TCP/IP sockets. */
        
-       int m_status_tx; /**< TX status for the transmission manager methods, see methods MdriverS2C_EvoLogics::modemTxManager and MdriverS2C_EvoLogics::updateStatus. */
+       tx_states_t m_status_tx; /**< TX status for the transmission manager methods, see methods MdriverS2C_EvoLogics::modemTxManager and MdriverS2C_EvoLogics::updateStatus. */
             
-       int m_status_rx; /**< RX status for the MdriverS2C_EvoLogics::updateStatus() method. */
+       rx_states_t m_status_rx; /**< RX status for the MdriverS2C_EvoLogics::updateStatus() method. */
        
        queue<std::string> queue_tx; /**< Queue used to buffer incoming strings for tx messages.*/
        
@@ -119,7 +126,7 @@ class MdriverS2C_EvoLogics : public UWMdriver
 	         * 
 	         *  @return UWMdriver::status, the updated modem's status.
 	         */
-		virtual int updateStatus();
+		virtual modem_state_t updateStatus();
 
 
 		virtual void modemTxBurst();
@@ -136,6 +143,8 @@ class MdriverS2C_EvoLogics : public UWMdriver
                  * Method to empty modem queue
                  */
                 virtual void emptyModemQueue();
+		
+		//virtual void printOnLog(log_level_t log_level,string message);
                         
                         		
 	protected:
@@ -144,6 +153,10 @@ class MdriverS2C_EvoLogics : public UWMdriver
 	         * Method to manage modem to host and host to modem communications. This method has to handle the different transmissions cases and corresponding protocol messages to be generated according to the tcl-user choices and modem firmware, respectively.
 	         */
 		virtual void modemTxManager();
+		
+		
+		tx_states_t updateTxStatus(tx_states_t state);
+		
                                
 };
 #endif	/* UWMDRIVERS2CEVOLOGICS_H */

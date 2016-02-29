@@ -28,7 +28,7 @@
 
 /**
  * @file uwmconnector.h
- * @author Riccardo Masiero, Matteo Petrani, Ivano Calabrese
+ * @author Riccardo Masiero, Ivano Calabrese
  * \version 2.0.0
  * \brief  Header of the class needed by UWMPhy_modem to handle the physical connection between NS-Miracle and a real acoustic modem device. 
  */
@@ -60,12 +60,6 @@ using namespace std;
 
 // Forward declaration to avoid dependence from UWMdriver.h
 class UWMdriver; 
-
-// This struct is used in the queue data structure to save the messages received from the modem.
-/* struct msgModem {
-  char msg_rx[_MAX_MSG_LENGTH]; /**< Message from the modem.*/
-//  int msg_length; /**< Length of the message (bytes).*/
-//};
 
 struct msgModem {
   string msg_rx; /**< Message from the modem.*/
@@ -121,21 +115,11 @@ class UWMconnector
 		 */
 		std::string readFromModem();
 		
-		/**
-		 * Method to create receiving modem buffer.
-		 * 
-		 * @param[out] disk-file that implements the receiving modem buffer and that is called according to the value set for UWMconnector::readingBuff.
-		 */
-		//void create_readingBuff();
 		
         protected:
 	        
 	        UWMdriver* pmDriver; /**< Pointer to UWMdriver object that contains this UWMconnector.*/
 	        std::string pathToDevice; /**< The path to be connected with the modem device */
-		std::string readingBuff; /**< Name of the disk-file where to write the incoming messages from the modem (i.e., the receiving modem buffer).*/
-		std::ifstream in; /**< Variable to read from the disk-file used as receiving modem buffer */
-		std::ofstream out; /**< Variable to write to the disk-file used as receiving modem buffer */
-		int debug_; /**< Flag to enable debug mode (i.e., printing of debug messages) if set to 1 */
 
 };
 #endif /* UWMCONNECTOR_H */
