@@ -255,7 +255,7 @@ proc createNode { id } {
     
     #Setup positions
     $position($id) setX_ [expr $id*10]
-    $position($id) setY_ [expr $id*10]
+    $position($id) setY_ [expr $id*8]
     $position($id) setZ_ -15.5
     
     $mac($id) $opt(ack_mode)
