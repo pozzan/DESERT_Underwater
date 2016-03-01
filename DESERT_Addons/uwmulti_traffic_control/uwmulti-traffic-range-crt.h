@@ -40,6 +40,7 @@
 
 #include "uwmulti-traffic-control.h"
 #include <uwip-module.h>
+#include <set>
 
 // DEFINE BEHAVIORS
 #define ROBUST 2
@@ -51,7 +52,7 @@
 #define HDR_UWMTR(P)      (hdr_uwm_tr::access(P))
 
 struct check_status {
-  std::map <int, int> module_ids;
+  std::set <int> module_ids;
   int status;
   int robust_id;
 } ;
@@ -118,9 +119,9 @@ public:
   void sendDown(int moduleId, Packet* p) { if(p != NULL ) { Module::sendDown(moduleId, p); } }
 
 protected:
-  StatusMap status;
-  double check_to_period;
-  int signaling_pktSize;
+  StatusMap status; /**< Map of status per traffic types*/
+  double check_to_period; /**< Time-Out period*/
+  int signaling_pktSize; /**< Signaling packet size*/
   /** 
    * manage to tx a packet of traffic type
    *
@@ -159,10 +160,17 @@ protected:
    */
   virtual void initStatus(int traffic);
 
+  /** 
+   * handle when a a timer expires
+   * 
+   * @param traffic application traffic id
+   */
   virtual void timerExpired(int traffic);
 
 private:
-  //Variables
+  /**
+  * Definition of timer class. When it expires, the PROBE fails.
+  */
   class UwCheckRangeTimer : public TimerHandler {
   public:
 
@@ -175,16 +183,21 @@ private:
         module = m;
     }
     ~UwCheckRangeTimer() {}
-    int traffic;
-    int num_expires;
-    int const max_increment;
+    int traffic; /**<traffic type*/
+    int num_expires; /**< expires counter*/
+    int const max_increment; /**< max increment of the timeout*/
 
   protected:
+    /**
+     * Timer expire procedure: handles the PROBE timeout
+     * @param Event *e, pointer to the event that cause the expire
+     */
     virtual void expire(Event *e);
-    UwMultiTrafficRangeCtr* module;
+    UwMultiTrafficRangeCtr* module; /**< Pointer to the module class 
+                                         where the timer is used*/
   };
-
-  std::map <int, UwCheckRangeTimer*> timers; //<traffic, timer>
+  //Variables
+  std::map <int, UwCheckRangeTimer*> timers; /**< Map of timer per traffic types*/
 };
 
 #endif /* UWMULTI_TRAFFIC_CONTROL_H  */

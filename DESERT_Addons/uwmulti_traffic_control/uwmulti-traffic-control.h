@@ -100,9 +100,9 @@ public:
 protected:
 
   int debug_; /**< Flag to activate debug verbosity.*/
-  UpTrafficMap up_map;
-  DownTrafficMap down_map;
-  DownTrafficBuffer down_buffer;
+  UpTrafficMap up_map; /**< Map of upper layers.*/
+  DownTrafficMap down_map; /**< Map of lower layers.*/
+  DownTrafficBuffer down_buffer; /**< Map of buffer per traffic types*/
   
   /** 
    * Handle a packet coming from upper layers
