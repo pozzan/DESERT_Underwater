@@ -128,7 +128,8 @@ double UwOpticalMPropagation::getGain(Packet* p)
 
 double UwOpticalMPropagation::getLambertBeerGain(double d, double beta){
   double cosBeta = omnidirectional_ ? 1 : cos(beta);
-  double L = d / cosBeta;
+  //double L = d / cosBeta;
+  double L =  theta_ ? 2 * d * (cos(theta_/2) - sin(theta_/2) / tan(theta_)) : d;
   double PCgain = 2 * Ar_ * cosBeta / (M_PI * pow(L, 2.0) * (1 - cos(theta_)) + 2 * At_) 
          * exp(-c_*d);
   return (PCgain == PCgain) ? PCgain : 0;
