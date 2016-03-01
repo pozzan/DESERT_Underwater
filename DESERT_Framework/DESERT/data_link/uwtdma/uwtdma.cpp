@@ -87,6 +87,7 @@ UwTDMA::UwTDMA()
   bind("debug_", (int*) &debug_);
   bind("sea_trial_", (int*) &sea_trial_);
   bind("fair_mode", (int*) &fair_mode);
+  bind("HDR_size_", (int*) &HDR_size);
   if (fair_mode == 1)
   {
     bind("guard_time", (double*) &guard_time);
@@ -332,8 +333,7 @@ int UwTDMA::command(int argc, const char*const* argv)
             return TCL_OK;
           }
         }
-      }
-      
+      }      
       start(start_time);
       return TCL_OK;
     }
