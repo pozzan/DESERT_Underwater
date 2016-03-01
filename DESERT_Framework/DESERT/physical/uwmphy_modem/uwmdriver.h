@@ -28,7 +28,7 @@
 
 /**
  * @file uwmdriver.h
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 2.0.0
  * \brief Header of the class needed by UWMPhy_modem to handle the different transmissions cases and corresponding protocol messages to be generated according to the tcl-user choices and modem firmware, respectively.
  */
@@ -52,15 +52,31 @@
 #include <unistd.h>
 #include <cmath>
 
-#define _IDLE 0 /**< Status 0 of the driver's general state machine (see UWMdriver::status): modem is waiting. */
-#define _TX 1 /**< Status 1 of the driver's general state machine (see UWMdriver::status): modem is transmitting. */
-#define _RX 2 /**< Status 2 of the driver's general state machine (see UWMdriver::status): modem is receiving. */
-#define _IDLE_RX 3 /**< Status 3 of the driver's general state machine (see UWMdriver::status): modem is waiting after the reception of a packet. */
-#define _CFG 4 /**< Status 4 of the driver's general state machine (see UWMdriver::status): modem is being configured. */
-#define _TX_PAUSED 5 /** Status 5 of the driver's general state machine (see UWMdriver::status): modem is buffering the packet to transmit, waiting for the end of an concurring reception. */
-#define _TX_RX 6 /** Status 6 of the driver's general state machine (see UWMdriver::status): modem is transmitting after the reception of a packet. */ 
-#define _RESET 7 /**Reset modem's queue before starting connections */
-#define _QUIT 8
+#define MAX_LOG_LEVEL 2
+
+
+enum MODEM_STATES {
+  MODEM_IDLE = 0,
+  MODEM_TX,
+  MODEM_RX,
+  MODEM_IDLE_RX,
+  MODEM_CFG,
+  MODEM_TX_PAUSED,
+  MODEM_TX_RX,
+  MODEM_RESET,
+  MODEM_QUIT
+};
+
+enum LOG_LEVEL {
+  LOG_LEVEL_ERROR = 0,
+  LOG_LEVEL_INFO,
+  LOG_LEVEL_DEBUG
+};
+
+typedef enum LOG_LEVEL log_level_t;
+
+typedef enum MODEM_STATES modem_state_t;
+
 using namespace std;
 
 // Forward declaration(s)
@@ -123,7 +139,7 @@ public:
 	  * 
 	  *  @return UWMdriver::status, the updated modem's status.
 	  */
-	 virtual int updateStatus() = 0;
+	 virtual modem_state_t updateStatus() = 0;
 
 	 /**
 	  * Method to change the modem ID. This method is called by the UWMPhy_modem object linked to this UWMdriver (the one pointed by pmModem).
@@ -131,7 +147,7 @@ public:
 	  *  @param[in] ID the ID that must be assigned to the modem.
 	  *  @param[out] ID (i.e., the member UWMdriver::ID), changed to \e ID_.
 	  */
-	 void setID(int);
+	 inline void setID(int ID_){ ID = ID_; }
 
 	 /** 
 	  *  Method to reset the modem status. NOTE: this function should be used by the UWMPhy_modem object linked to this
@@ -182,7 +198,7 @@ public:
 	  * 
 	  * @return UWMdriver::status. 
 	  */
-	 int getStatus()
+	 modem_state_t getStatus()
 	 {
 		  return status;
 	 }
@@ -228,10 +244,7 @@ public:
 	  * 
 	  * @return UWMPhy_modem::debug_
 	  */
-	 int getDebug()
-	 {
-		  return debug_;
-	 }
+	 inline log_level_t getDebug() { return (log_level_t)debug_; }
          
          /**
           * 
@@ -248,7 +261,7 @@ public:
 	  * 
 	  * @return UWMPhy_modem::log_
 	  */
-	 int getLog();
+	 log_level_t getLogLevel();
 	 
 	 /**
 	  * Method to return the name of the disk-fiel used to print the log messages.
@@ -256,14 +269,19 @@ public:
 	  * @return UWMPhy_modem::logFile
 	  */
 	 std::string getLogFile();
-         /**
-          * Method to empty the modem queue
-          */
+
+	 
          virtual void emptyModemQueue() = 0;
 
-       	virtual inline bool getKeepOnlineMode() {return KeepOnline;}
+	 virtual inline bool getKeepOnlineMode() {return KeepOnline;}
 
-       	virtual inline void setKeepOnlineMode(bool ko) {KeepOnline = ko;}
+	 virtual inline void setKeepOnlineMode(bool ko) {KeepOnline = ko;}
+       	
+	 virtual inline void setResetModemQueue(bool reset_m_queue) {ResetModemQueue = reset_m_queue;}
+       	
+	 virtual inline bool getResetModemQueue() {return ResetModemQueue;}
+	 
+	 void printOnLog(log_level_t log_level,string module, string message);
 
          protected:
 
@@ -276,9 +294,12 @@ public:
 
 	 int ID; /**< ID of the modem. NOTE: UWMdriver::ID (i.e., modem ID, hardware side) is set equal to UWMPhy_modem::ID (i.e., node ID, simulator side) (therefore when node ID transmits, it also coincides with the source ID). @see UWMPhy_modem::start(), UWMdriver::setID(int) */
 	 
-	 int status; /**< Status of the driver's general state machine. Seven possible statuses = \e _IDLE, \e _TX, \e _RX , \e _IDLE_RX,\e _CFG, \e _TX_PAUSED and \e _TX_RX.*/
+	 modem_state_t status; /**< Status of the driver's general state machine. Seven possible statuses = \e _IDLE, \e _TX, \e _RX , \e _IDLE_RX,\e _CFG, \e _TX_PAUSED and \e _TX_RX.*/
 
 	 bool KeepOnline;
+	 
+	 bool ResetModemQueue;
+	 
 
 	 // TX VARIABLES (variables for the next packet to be transmitted)
 	 std::string payload_tx; /**< String where to save the payload of the next packet to send via modem. NOTE: an object of the class UWMcodec must write here after the host-to-modem mapping. */
@@ -296,7 +317,7 @@ public:
 
 	 /** 
 	  * Link connector. This method must be used by any derived class D of UWDriver to link the members pmInterpreter and pmConnector of UWMdriver to the corresponding derived objects contained in D.
-	  * @see: e.g., MdriverFSK_WHOI_MM or MdriverS2C_EvoLogics
+	  * @see: e.g. MdriverS2C_EvoLogics
 	  *
 	  * @param[in] pmInterpreter_ pointer to a UWMinterpreter object
 	  * @param[in] pmConnector_ pointer to an UWMconnector object

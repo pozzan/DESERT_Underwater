@@ -28,7 +28,7 @@
 
 /**
  * @file uwmconnector.cc
- * @author Riccardo Masiero, Matteo Petrani, Ivano Calabrese
+ * @author Riccardo Masiero,Ivano Calabrese
  * \version 2.0.0
  * \brief Implementation of the UWMconnector class.
  */
@@ -82,34 +82,28 @@ UWMconnector::UWMconnector(UWMdriver* pmDriver_, std::string pathToDevice_){
   
   // Members initialization
   pmDriver = pmDriver_;
-  debug_ = pmDriver -> getDebug();
   pathToDevice = pathToDevice_;
-  readingBuff = "";
-  
-  if (debug_ >= 2) {cout << this << ": in constructor of UWMconnector which points to driver: " << pmDriver << "\n";}
 }
 
 UWMconnector::~UWMconnector(){
-    
-    out.close();
-    in.close();
+
 }
 		
 		
 void UWMconnector::closeConnection(){
 }
+
+
+
 		
 std::string UWMconnector::readFromModem(){
   
   std::string return_str;
   
   if (!queueMsg.empty()){
-      msgModem tmp_ = queueMsg.front();
-      return_str = tmp_.msg_rx;
-      if (debug_ >= 2)  { 
-	  hexdump("UWMCONNECTOR::READ_FROM_MODEM::", return_str);
-      }
-      queueMsg.pop();
+    msgModem tmp_ = queueMsg.front();
+    return_str = tmp_.msg_rx;
+    queueMsg.pop();
   }else {
       return_str = "";
   }
@@ -117,19 +111,3 @@ std::string UWMconnector::readFromModem(){
   return return_str;	 
 }
 
-//void UWMconnector::create_readingBuff(){
-//        
-//        if (debug_ >= 2)
-//        {
-//            cout << "UWMCONNECTOR::CREATE_READINGBUFF" << endl;
-//        }
-//        std::stringstream str("");
-//        str << "readingBuff" << pmDriver -> getID();
-//        str >> readingBuff;
-//        out.open(readingBuff.c_str());
-//	if (!out)
-//	{
-//		std::cerr << "WARNING: Opening error ( " << strerror(errno) << " ). It was not possible to create " << readingBuff << "\n";
-//	}
-//	out.close();
-//}

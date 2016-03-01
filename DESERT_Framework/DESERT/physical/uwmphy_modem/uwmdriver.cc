@@ -28,7 +28,7 @@
 
 /**
  * @file uwmdriver.cc
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 2.0.0
  * \brief Implementation of the UWMdriver class.
  */
@@ -43,13 +43,17 @@ UWMdriver::UWMdriver(UWMPhy_modem* pmModem_){
   pmInterpreter = NULL;
   pmConnector = NULL;
   ID = pmModem -> getID();
-  status = _IDLE;
+  status = MODEM_IDLE;
   payload_tx = "";
   dest = -1;
   payload_rx = "";
   src = -1;
   debug_ = pmModem -> getDebug();
   
+  if (debug_ > 1 )
+  {
+    debug_ = 1;
+  }
 }
 		
 UWMdriver::~UWMdriver(){
@@ -62,26 +66,19 @@ void UWMdriver::setConnections(UWMinterpreter* pmInterpreter_, UWMconnector* pmC
 
 }
 
-
-std::string UWMdriver::getLogFile(){
-     return pmModem -> getLogFile();
+std::string UWMdriver::getLogFile()
+{
+  return pmModem->getLogFile(); 
 }
 
-int UWMdriver::getLog(){
-     return pmModem -> getLog();
-}
-
-void UWMdriver::setID(int ID_){
-   ID = ID_;  
+log_level_t UWMdriver::getLogLevel()
+{ 
+  return pmModem->getLogLevel(); 
 }
 
 void UWMdriver::resetModemStatus(){
-  status = _IDLE;
-  
-  if (debug_ >= 2)
-  {
-      cout << "UWMDRIVER::STATUS_IDLE" << endl;
-  }
+  status = MODEM_IDLE;
+
 }
 		
 void UWMdriver::updateTx(int d, std::string ptx){
@@ -93,5 +90,17 @@ void UWMdriver::updateRx(int s, int d, std::string prx){
    src = s;
    dstPktRx = d;
    payload_rx = prx;
+}
+
+void UWMdriver::printOnLog(log_level_t log_level,string module, string message)
+{
+  log_level_t actual_log_level = getLogLevel();
+  if (actual_log_level >= log_level)
+  {
+    outLog.open((getLogFile()).c_str(), ios::app);
+    outLog << left << "[" << pmModem->getEpoch() << "]::" << NOW << "::" << module <<"(" << ID << ")::"<< message << endl;
+    outLog.flush();
+    outLog.close();
+  }
 }
 

@@ -28,7 +28,7 @@
 
 /**
  * @file uwmphy_modem.h
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 2.0.0
  * \brief Header of the main class that implements the general interface between ns2/NS-Miracle and real acoustic modems. 
  */
@@ -66,6 +66,7 @@ using namespace std;
 
 // Forward declaration
 class CheckTimer; 
+class DropTimer;
 
 /**
  * The main class implementing the module used to implement the interface between ns2/NS-Miracle and real acoustic modems. UWMPhy_modem (as well as its possible derived classes) handles all the messages needed by NS-Miracle (e.g., cross-layer messages between MAC and PHY)  and contains all the variables set by the tcl-user; furthermore, this module coordinates the interactions between UWMcodec and UWMdriver. This class replaces the physical layer of NS-Miracle and inherits from MPhy (see NS-Miracle documentation at  http://telecom.dei.unipd.it/ns/miracle/doxygen/classMPhy.html).
@@ -78,6 +79,8 @@ class UWMPhy_modem : public MPhy
          * @see CheckTimer
          */
 	 friend class CheckTimer;
+	 
+	 friend class DropTimer;
 
 public:
 	 /** 
@@ -162,16 +165,10 @@ public:
 	  * 
 	  * @return UWMPhy_modem::log_
 	  */
-	  int getLog()
+	  log_level_t getLogLevel()
 	  {
-		  return log_;
+		  return (log_level_t)loglevel_;
 	  }
-          
-          int getBin()
-          {
-              return bin_;
-          }
-          
                    
         /**
          * Calculate the epoch of the event. Used in sea-trial mode
@@ -180,6 +177,9 @@ public:
          inline unsigned long int getEpoch() {return time(NULL);}
 
          inline int getKeepOnline() {return UseKeepOnline;}
+         
+         inline int getDeafTime() {return DeafTime;}
+         
 
 	 /**
 	  * Method to update the value of the pointer to the last received packet. This method should be used by an object of the class UWMcodec.
@@ -194,6 +194,7 @@ protected:
 
 	 CheckTimer* pcheckTmr; /**< Pointer to an object to schedule the "check-modem" events. */
 	 UWMdriver* pmDriver; /**< Pointer to an object to drive the modem operations. */
+	 DropTimer* pDropTimer;
 
 	 int ID; /**< ID of the node. NOTE: when the node transmits, this value must coincide with the source ID. */
 	 double period; /**< Checking period of the modem's buffer. */
@@ -202,12 +203,12 @@ protected:
 	 Packet* PktRx; /**< Address of the last received packet. */
 	 std::string pToDevice; /**< A string containing the path to the device to be connected with the network simulator.*/
 	 int debug_; /**< Flag to enable debug mode (i.e., printing of debug messages) if set to 1. */
-         std::ofstream outLog; /**< output strem to print into a disk-file log messages. See UWMPhy_modem::logFile.*/
-	 int bin_;	 
+         std::ofstream outLog; /**< output strem to print into a disk-file log messages. See UWMPhy_modem::logFile.*/	 
 	 std::string logFile; /**< Name of the disk-file where to write the interface's log messages.*/	
-	 int log_; /**< Flag to enable, if set different than 0, the printing of log messages in UWMPhy_modem::logFile. */
-     int SetModemID; /**< Flag to indicate if the interface has to force the modem to have the ID indicated in the tcl script */
-     int UseKeepOnline;
+	 int loglevel_; /**< Log level on file, from ERROR (0) to DEBUG (2) in UWMPhy_modem::logFile. */
+	 int SetModemID; /**< Flag to indicate if the interface has to force the modem to have the ID indicated in the tcl script */
+	 int UseKeepOnline;
+	 int DeafTime;
 	 
 	 /** 
 	  * Link connector. This method must be used by any derived class D of UWMPhy_modem  to link the members pcheckTmr, pmDriver and pmCodec to the corresponding derived objects contained in D;
@@ -220,7 +221,7 @@ protected:
 	  * @param[out] pmDriver (i.e., the member UWMPhy_modem::pmDriver)
 	  * @param[out] pmCodec (i.e., the member UWMPhy_modem::pmCodec)
 	  */
-         void setConnections(CheckTimer*, UWMdriver*);
+         void setConnections(CheckTimer*, UWMdriver*, DropTimer*);
 
 	 /** 
 	  *  Connection starter. This method starts the connection with the modem. It performs all the needed operations 
@@ -241,7 +242,7 @@ protected:
 	  * 
 	  *  @return modemStatus, a flag on the status of the modem, see UWMdriver for a description of the driver state machine.
 	  */
-	 virtual int check_modem();
+	 virtual modem_state_t check_modem();
 
 	 /**
 	  *  Method to send to an UWMdriver object the packet to be transmitted, see UWMdriver::modemTx(). 
@@ -330,4 +331,19 @@ protected:
 
 	 UWMPhy_modem* pmModem; /**< Pointer to an UWMPhy_modem object. It is used to call UWMPhy_modem::check_modem() when the countdown expires.*/
 };
+
+
+class DropTimer : public TimerHandler
+{
+public:
+    DropTimer(UWMPhy_modem* pModem_) : TimerHandler()
+    {
+      pModem = pModem_;
+    }
+protected:
+    virtual void expire(Event* e);
+    UWMPhy_modem* pModem;
+};
+
+
 #endif	/* UWMPHY_MODEM_H */

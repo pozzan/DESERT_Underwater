@@ -29,7 +29,7 @@
 
 /**
  * @file uwminterpreter.h
- * @author Riccardo Masiero, Matteo Petrani
+ * @author Riccardo Masiero
  * \version 1.0.0
  * \brief Header of the class that is in charge of building/parsing the necessary messages to make the UWMdriver able to communicate with the modem.
  */
