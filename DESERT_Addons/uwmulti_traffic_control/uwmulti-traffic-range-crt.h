@@ -42,20 +42,24 @@
 #include <uwip-module.h>
 #include <set>
 
+#define HDR_UWMTR(P)      (hdr_uwm_tr::access(P))
 // DEFINE BEHAVIORS
-#define ROBUST 2
-#define CHECK_RANGE 3
+enum CONTROL_RANGE_BEHAVIORS {
+  ROBUST = 2,
+  CHECK_RANGE
+};
 
 // DEFINE STATES
-#define IDLE 1
-#define RANGE_CNF_WAIT 2
-#define HDR_UWMTR(P)      (hdr_uwm_tr::access(P))
+enum TRAFFIC_STATES {
+  IDLE = 1,
+  RANGE_CNF_WAIT
+};
 
 struct check_status {
   std::set <int> module_ids;
   int status;
   int robust_id;
-} ;
+};
 typedef std::map <int, check_status> StatusMap; /** traffic, status */
 
 typedef struct hdr_uwm_tr {
@@ -112,11 +116,11 @@ public:
    */
   virtual int command(int, const char*const*);
 
-  void recv(Packet* p, int idSrc);
+  virtual void recv(Packet* p, int idSrc);
 
-  void sendDown(Packet* p) { if(p != NULL ) { Module::sendDown(p); } }
+  virtual void sendDown(Packet* p) { if(p != NULL ) { Module::sendDown(p); } }
 
-  void sendDown(int moduleId, Packet* p) { if(p != NULL ) { Module::sendDown(moduleId, p); } }
+  virtual void sendDown(int moduleId, Packet* p) { if(p != NULL ) { Module::sendDown(moduleId, p); } }
 
 protected:
   StatusMap status; /**< Map of status per traffic types*/

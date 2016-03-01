@@ -68,17 +68,17 @@ UwMultiTrafficControl::UwMultiTrafficControl()
   down_map(),
   down_buffer()
 {
-	bind("debug_", &debug_);
+  bind("debug_", &debug_);
 }
 
 int UwMultiTrafficControl::command(int argc, const char*const* argv) 
 {
-	if (argc == 4) 
+  if (argc == 4) 
   {
-		if(strcasecmp(argv[1], "addUpLayer") == 0)
+    if(strcasecmp(argv[1], "addUpLayer") == 0)
     {
       addUpLayerFromTag(atoi(argv[2]),argv[3]);
-			return TCL_OK;
+      return TCL_OK;
 		}
 		else if(strcasecmp(argv[1], "addLowLayer") == 0)
     {
@@ -94,7 +94,7 @@ int UwMultiTrafficControl::command(int argc, const char*const* argv)
       return TCL_OK;
     }
   }
-	
+
   return Module::command(argc, argv);     
 } /* UwMultiTrafficControl::command */
 
