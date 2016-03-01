@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
+# Copyright (c) 2014 Regents of the SIGNET lab, University of Padova.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,11 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Filippo Campagnaro
-# Author: Roberto Francescon
-# version: 1.0.0
+# @file   uwmultiphy-default.tcl
+# @author Filippo Campagnaro
+# @version 1.0.0
 
-Module/UW/TDMA set debug_ 		0
-Module/UW/TDMA set HDR_size_ 		0
-Module/UW/TDMA set wait_constant_	0.1
-Module/UW/TDMA set MAC_addr_ 		0
-Module/UW/TDMA set sea_trial_ 		0
-Module/UW/TDMA set frame_time           0
-Module/UW/TDMA set guard_time           0
-Module/UW/TDMA set tot_slots            0
-Module/UW/TDMA set fair_mode            0
+Module/UW/MULTI_TRAFFIC_CONTROL set debug_  0
+Module/UW/MULTI_TRAFFIC_RANGE_CTR set check_to_period_  2.5
+Module/UW/MULTI_TRAFFIC_RANGE_CTR set signaling_pktSize_  2
 
-Module/UW/TDMA instproc init {args} {
-    $self next $args
-    $self settag "UW/TDMA"
-}

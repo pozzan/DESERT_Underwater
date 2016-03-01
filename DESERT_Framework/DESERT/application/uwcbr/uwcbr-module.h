@@ -69,7 +69,7 @@ typedef struct hdr_uwcbr {
     float rftt_;        /**< Forward Trip Time of the packet. */
     bool rftt_valid_;   /**< Flag used to set the validity of the fft field. */
     char priority_;     /**< Priority flag: 1 means high priority, 0 normal priority. */
-
+    uint16_t traffic_type_; /**< Traffic type: (video, audio, image, etc..) meaning left to the user */
     static int offset_; /**< Required by the PacketHeaderManager. */
 
     /**
@@ -110,6 +110,13 @@ typedef struct hdr_uwcbr {
     inline float& rftt() {
         return (rftt_);
     }
+
+    /**
+     * Reference to the rftt_ variable.
+     */
+    inline uint16_t& traffic_type() {
+        return (traffic_type_);
+    }    
 } hdr_uwcbr;
 
 
@@ -242,6 +249,7 @@ protected:
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     int debug_;                 /**< Flag to enable several levels of debug. */
     int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
+    uint traffic_type_;         /**< Traffic type of the packets. */
     
     UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
     

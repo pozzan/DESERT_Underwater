@@ -484,7 +484,7 @@ void MMacTLOHI::initMphyIds()
   }
 
   ClMsgDiscovery m;
-  m.addSenderData((const PlugIn*) this, getLayer(), getId(), name() , getTag());
+  m.addSenderData((const PlugIn*) this, getLayer(), getId(), getStackId(), name() , getTag());
   sendSyncClMsgUp(&m);
   sendSyncClMsgDown(&m);
   
