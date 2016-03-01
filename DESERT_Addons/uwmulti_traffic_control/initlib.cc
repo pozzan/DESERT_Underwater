@@ -39,12 +39,12 @@
 
 extern EmbeddedTcl UwMultiTrafficControlInitTclCode;
 
-packet_t PT_MUTLI_TR_PROBE;
-packet_t PT_MUTLI_TR_PROBE_ACK;
+packet_t PT_MULTI_TR_PROBE;
+packet_t PT_MULTI_TR_PROBE_ACK;
 
 extern "C" int Uwmulti_traffic_control_Init() {
-	PT_MUTLI_TR_PROBE = p_info::addPacket("MUTLI_TR_PROBE");
-	PT_MUTLI_TR_PROBE_ACK = p_info::addPacket("MUTLI_TR_PROBE_ACK");
+	PT_MULTI_TR_PROBE = p_info::addPacket("MULTI_TR_PROBE");
+	PT_MULTI_TR_PROBE_ACK = p_info::addPacket("MULTI_TR_PROBE_ACK");
 	UwMultiTrafficControlInitTclCode.load();
 	return 0;
 }

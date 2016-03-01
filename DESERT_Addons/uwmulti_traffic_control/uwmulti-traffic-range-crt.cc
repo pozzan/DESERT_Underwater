@@ -39,8 +39,8 @@
 #include "uwip-clmsg.h"
 #include <iostream>
 
-extern packet_t PT_MUTLI_TR_PROBE;
-extern packet_t PT_MUTLI_TR_PROBE_ACK;
+extern packet_t PT_MULTI_TR_PROBE;
+extern packet_t PT_MULTI_TR_PROBE_ACK;
 
 int hdr_uwm_tr::offset_;
 
@@ -106,23 +106,23 @@ void UwMultiTrafficRangeCtr::recv(Packet* p, int idSrc)
 {
   hdr_cmn *ch = HDR_CMN(p);
   if (ch->direction() == hdr_cmn::UP) {
-    if (ch->ptype() == PT_MUTLI_TR_PROBE_ACK) {
+    if (ch->ptype() == PT_MULTI_TR_PROBE_ACK) {
       hdr_uwip* iph  = HDR_UWIP(p);
       if (debug_)
-        std::cout << NOW << " UwMultiTrafficRangeCtr::recv PT_MUTLI_TR_PROBE_ACK from:" 
+        std::cout << NOW << " UwMultiTrafficRangeCtr::recv PT_MULTI_TR_PROBE_ACK from:" 
                   << (int)(iph->saddr()) << " in layer " << idSrc << std::endl;
       manageCheckedLayer(HDR_UWMTR(p)->traffic() , iph->saddr(), true, idSrc);      
       Packet::free(p);
     }
-    else if (ch->ptype() == PT_MUTLI_TR_PROBE) {
+    else if (ch->ptype() == PT_MULTI_TR_PROBE) {
       UWIPClMsgSendAddr msg;
       sendSyncClMsgUp(&msg);
       hdr_uwip* iph  = HDR_UWIP(p);
       if (iph->daddr() ==  msg.getAddr() || iph->daddr() == UWIP_BROADCAST) {
-        ch->ptype() = PT_MUTLI_TR_PROBE_ACK;
+        ch->ptype() = PT_MULTI_TR_PROBE_ACK;
         ch->size() = signaling_pktSize;
         if (debug_)
-          std::cout << NOW << " UwMultiTrafficRangeCtr::recv PT_MUTLI_TR_PROBE from:" 
+          std::cout << NOW << " UwMultiTrafficRangeCtr::recv PT_MULTI_TR_PROBE from:" 
                    << (int)iph->saddr() << " in layer " << idSrc << std::endl;
         iph->daddr() = iph->saddr();
         iph->saddr() =  msg.getAddr();
@@ -132,7 +132,7 @@ void UwMultiTrafficRangeCtr::recv(Packet* p, int idSrc)
       else {
 
         if (debug_)
-          std::cout << NOW << " UwMultiTrafficRangeCtr::recv PT_MUTLI_TR_PROBE from :" << (int)iph->saddr() 
+          std::cout << NOW << " UwMultiTrafficRangeCtr::recv PT_MULTI_TR_PROBE from :" << (int)iph->saddr() 
                     << " for:" << (int)iph->daddr() << "and not " << msg.getAddr() << " in layer " 
                     << idSrc << " discarded" << std::endl;
         Packet::free(p);
@@ -324,7 +324,7 @@ void UwMultiTrafficRangeCtr::checkRange(int traffic, int module_id, uint8_t dest
   }
   Packet* p = Packet::alloc();
   hdr_cmn* ch = hdr_cmn::access(p);
-  ch->ptype() = PT_MUTLI_TR_PROBE;
+  ch->ptype() = PT_MULTI_TR_PROBE;
   ch->size() = signaling_pktSize;
   hdr_uwm_tr* tr = HDR_UWMTR(p);
   tr->traffic() = traffic;
@@ -336,7 +336,7 @@ void UwMultiTrafficRangeCtr::checkRange(int traffic, int module_id, uint8_t dest
   sendDown(module_id, p);
   if (debug_)
   std::cout << NOW << " UwMultiTrafficRangeCtr(" << (int)iph->saddr() << ")::checkRange " 
-            << "sending PT_MUTLI_TR_PROBE to " << (int) iph->saddr() << std::endl;
+            << "sending PT_MULTI_TR_PROBE to " << (int) iph->saddr() << std::endl;
 }
 
 void UwMultiTrafficRangeCtr::timerExpired(int traffic) 
