@@ -117,12 +117,8 @@ void UwHermesPhy::initializeLUT()
   input_file_.open(tmp_);
   if (input_file_.is_open()) {
     // skip first 2 lines
-    for (int i = 0; i < 2; ++i)
-    {
-      std::getline(input_file_, line_);
-    }
     if(debug_)
-      std::cout << "UwHermesPhy(" << mac_addr << ")::initializeLUT()" << endl;
+      std::cout << "UwHermesPhy::initializeLUT()" << endl;
     while (std::getline(input_file_, line_)) {
       //TODO: retrive the right row and break the loop
       ::std::stringstream line_stream(line_);
@@ -298,7 +294,7 @@ double UwHermesPhy::chunckInterpolator( double p, int size ) {
   if (debug_)
 /*    std::cout <<  NOW << "  UnderwaterPhysical(" << mac_addr << ")::chunckInterpolator( double p, int size ) n_chunck_coded_frame = " 
       << n_chunck_coded_frame <<  " n_chunck_coded_packet = " << n_chunck_coded_packet << std::endl;*/
-    std::cout <<  NOW << "  UwHermesPhy::chunckInterpolator( double p, int size ) n_chunck_coded_frame = " 
+    std::cout <<  NOW << "  UwHermesPhy::chunckInterpolator( "<< p << " " << size << ") n_chunck_coded_frame = " 
       << n_chunck_coded_frame <<  " n_chunck_coded_packet = " << n_chunck_coded_packet << std::endl;
   return pow(p,(float(n_chunck_coded_packet)/n_chunck_coded_frame));
 }
