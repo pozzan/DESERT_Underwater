@@ -1,7 +1,3 @@
-This database provide performace figures of packet delivery ratio (PDR) versus transmission range, measured during real test campaigns. When using the Hermes simulator, specify the path of which lookup table you want to use, and then initialize the physical layer. Set the spectral mask according to the info provided in this file.
-
-default.csv is an example for MODE5.
-
 The FAU Hermes acoustic modem can work in 6 modes:
 MODE0:
 	Modulation: BPSK
@@ -46,5 +42,5 @@ MODE5:
 	Carrier Frequency: 300 kHz
 	Info bit/frame: 9120
 
-All the info from: A Very High Bit Rate Broadband Acoustic Modem For Short-to-Medium Range Data Transmission in Ports and Shallow Water using Spread Spectrum Modulation and Decision Feedback Equalizing
+ref: A Very High Bit Rate Broadband Acoustic Modem For Short-to-Medium Range Data Transmission in Ports and Shallow Water using Spread Spectrum Modulation and Decision Feedback Equalizing
 Pierre-Philippe Beaujean, PhD Florida Atlantic University.
