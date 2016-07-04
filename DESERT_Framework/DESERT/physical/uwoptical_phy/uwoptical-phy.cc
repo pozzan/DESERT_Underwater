@@ -67,6 +67,7 @@ UwOpticalPhy::UwOpticalPhy() :
     bind("S_",&S);
     bind("T_",&T);
     bind("Ar_",&Ar_);
+    bind("debug_", &debug_);
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv)
