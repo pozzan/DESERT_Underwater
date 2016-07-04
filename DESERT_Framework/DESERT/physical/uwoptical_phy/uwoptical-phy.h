@@ -106,6 +106,7 @@ protected:
 
     virtual void initializeLUT();   
     // Variables
+    int debug_; // output detail level
 private:
     //Variables
     double Id; //dark current
