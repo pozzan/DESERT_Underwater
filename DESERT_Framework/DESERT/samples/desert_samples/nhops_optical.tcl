@@ -182,7 +182,7 @@ Module/UW/OPTICAL/PHY   set R_                          $opt(shuntRes)
 Module/UW/OPTICAL/PHY   set S_                          $opt(sensitivity)
 Module/UW/OPTICAL/PHY   set T_                          $opt(temperatura)
 Module/UW/OPTICAL/PHY   set Ar_                         $opt(rxArea)
-#Module/UW/OPTICAL/PHY   set debug_                      -7
+Module/UW/OPTICAL/PHY   set debug_                      -7
 
 Module/UW/OPTICAL/Propagation set Ar_       $opt(rxArea)
 Module/UW/OPTICAL/Propagation set At_       $opt(txArea)
