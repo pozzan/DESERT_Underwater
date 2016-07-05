@@ -118,6 +118,12 @@ void UwOpticalPhy::startRx(Packet* p)
     if ( (PktRx == 0) && (txPending == false) )
     {
         double snr_dB = getSNRdB(p);
+
+	if (debug_) {
+	  cout << "UwOpticalPhy::startRx snr_db = " << snr_dB << endl;
+	  cout << "UwOpticalPhy::startRx Pn = " << ph->Pn << endl;
+	}
+	
     	if (snr_dB > MPhy_Bpsk::getAcquisitionThreshold())
     	{
     		if (ph->modulationType == MPhy_Bpsk::modid)
@@ -162,6 +168,7 @@ double UwOpticalPhy::getNoisePower(Packet* p)
 void UwOpticalPhy::endRx(Packet* p)
 { 
     hdr_cmn* ch = HDR_CMN(p);
+    hdr_MPhy *ph = HDR_MPHY(p);
     if (MPhy_Bpsk::PktRx != 0)
     {
     	if (MPhy_Bpsk::PktRx == p)
@@ -169,7 +176,14 @@ void UwOpticalPhy::endRx(Packet* p)
             if(interference_)
             {
                 double interference_power = interference_->getInterferencePower(p);
-                if(interference_power == 0)
+		interference_power = pow(S*interference_power, 2);
+		double sinr_linear = pow((S*ph->Pr),2) /
+		  ((2*q*(Id+Il)*ph->srcSpectralMask->getBandwidth() +
+		    ((4*K*T*ph->srcSpectralMask->getBandwidth())/R)) +
+		   (ph->Pn + interference_power));
+		double sinr_db = sinr_linear ? 10*log10(sinr_linear) : -DBL_MAX;
+				
+                if(sinr_db > MPhy_Bpsk::getAcquisitionThreshold())
                 {
                     //no interference
                     ch->error() = 0; 
@@ -178,7 +192,12 @@ void UwOpticalPhy::endRx(Packet* p)
                 {
                     //at least one interferent packet
                     ch->error() = 1;
-                    if (debug_) cout << "UwOpticalPhy::endRx interference power = " << interference_power << endl;
+                    if (debug_) {
+		      cout << "UwOpticalPhy::endRx interference power = " << interference_power << endl;
+		      cout << "UwOpticalPhy::endRx sinr_db = " << sinr_db << endl;
+		      cout << "UwOpticalPhy::endRx Pn = " << ph->Pn << endl;
+		      cout << "UwOpticalPhy::endRx Pr = " << ph->Pr << endl;
+		    }
                 }
             }
             else
