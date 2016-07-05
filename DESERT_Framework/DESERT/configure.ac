@@ -95,6 +95,7 @@ DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/mobility/uwsmposition'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/interference/uwinterference'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/propagation/uwoptical_propagation'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/channel/uwoptical_channel'
+DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/interference/uwhelloworld'
 
 #if test x$have_woss != xyes ; then
     #AC_MSG_WARN([---------------------------------------------------------------------])
@@ -157,6 +158,7 @@ AC_CONFIG_FILES([
     interference/uwinterference/Makefile
     propagation/uwoptical_propagation/Makefile
     channel/uwoptical_channel/Makefile
+    interference/uwhelloworld/Makefile
     ])
 
 AC_OUTPUT 

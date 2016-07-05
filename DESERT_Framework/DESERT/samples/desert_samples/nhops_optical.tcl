@@ -84,6 +84,8 @@ load libuwoptical_propagation.so
 load libuwoptical_channel.so
 load libuwoptical_phy.so
 
+load libuwhelloworld.so
+
 #############################
 # NS-Miracle initialization #
 #############################
@@ -335,6 +337,8 @@ for {set i 0} {$i < $opt(nn)} {incr i} {
 $ns at $opt(starttime)    "$cbr($src_id) start"
 $ns at $opt(stoptime)     "$cbr($src_id) stop"
 
+set helloworld [new Module/UW/HELLOWORLD]
+$ns at $opt(starttime) "$helloworld Hello"
 
 ###################
 # Final Procedure #
