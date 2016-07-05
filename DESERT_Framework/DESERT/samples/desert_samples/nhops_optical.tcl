@@ -184,7 +184,6 @@ Module/UW/OPTICAL/PHY   set S_                          $opt(sensitivity)
 Module/UW/OPTICAL/PHY   set T_                          $opt(temperatura)
 Module/UW/OPTICAL/PHY   set Ar_                         $opt(rxArea)
 #Module/UW/OPTICAL/PHY   set debug_                      -7
-Module/UW/OPTICAL/PHY   set interference_model_         2; #SINR
 #Module/UW/OPTICAL/PHY   set interference_threshold_     1e-15
 
 Module/UW/OPTICAL/Propagation set Ar_       $opt(rxArea)
@@ -244,6 +243,8 @@ proc createNode { id } {
     $phy($id) setLUTFileName "$opt(LUTpath)"
     $phy($id) setLUTSeparator " "
     $phy($id) useLUT
+    $phy($id) setInterferenceModel "SINR"
+
 
     $ipif($id) addr [expr $id +1]
 
