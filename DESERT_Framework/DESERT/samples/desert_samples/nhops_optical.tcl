@@ -387,10 +387,10 @@ proc finish {} {
     set tdma_sent_pkts_sum 0.0
     set tdma_recv_pkts_sum 0.0
     for {set i 0} {$i < $opt(nn)} {incr i} {
-	set tdma_sent_pkts [$mac($i) get_sent_pkts]
-	set tdma_recv_pkts [$mac($i) get_recv_pkts]
-	set tdma_sent_pkts_sum [expr $tdma_sent_pkts_sum + $tdma_sent_pkts]
-	set tdma_recv_pkts_sum [expr $tdma_recv_pkts_sum + $tdma_recv_pkts]
+	set tdma_sent_pkts($i) [$mac($i) get_sent_pkts]
+	set tdma_recv_pkts($i) [$mac($i) get_recv_pkts]
+	set tdma_sent_pkts_sum [expr $tdma_sent_pkts_sum + $tdma_sent_pkts($i)]
+	set tdma_recv_pkts_sum [expr $tdma_recv_pkts_sum + $tdma_recv_pkts($i)]
     }
     
     if ($opt(verbose)) {
@@ -398,6 +398,14 @@ proc finish {} {
         puts "Sent Packets             : $cbr_sent_pkts"
         puts "Received Packets         : $cbr_rcv_pkts"
 	puts "Packet error rate        : [expr 1 - $tdma_recv_pkts_sum/$tdma_sent_pkts_sum]"
+    }
+
+    if ($opt(verbose)) {
+	puts "Packets delivery ratio per link"
+	for {set i 1} {$i < $opt(nn)} {incr i} {
+	    set pdr [expr $tdma_recv_pkts($i) / ($tdma_sent_pkts([expr $i - 1]) + 0.0)]
+	    puts "[expr $i - 1] -> $i : $pdr"
+	}
     }
 
     
