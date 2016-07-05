@@ -57,9 +57,10 @@
 #include <map>
 #include <vector>
 
-
 #define OPTICAL_MODULATION_TYPE "OPTIC_BPSK"
 #define NOT_FOUND_VALUE 0
+
+enum InterferenceModel {ZERO, THRESHOLD, SINR};
 
 typedef ::std::map< double, double > DepthMap;
 typedef DepthMap::iterator DMIt;
@@ -107,6 +108,8 @@ protected:
     virtual void initializeLUT();   
     // Variables
     int debug_; // output detail level
+    InterferenceModel interference_model_;
+    double interference_threshold_;
 private:
     //Variables
     double Id; //dark current
