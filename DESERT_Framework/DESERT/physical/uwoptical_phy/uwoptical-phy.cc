@@ -68,6 +68,8 @@ UwOpticalPhy::UwOpticalPhy() :
     bind("T_",&T);
     bind("Ar_",&Ar_);
     bind("debug_", &debug_);
+    bind("interference_model_", &interference_model_);
+    bind("interference_threshold_", &interference_threshold_);
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv)
@@ -176,14 +178,24 @@ void UwOpticalPhy::endRx(Packet* p)
             if(interference_)
             {
                 double interference_power = interference_->getInterferencePower(p);
-		interference_power = pow(S*interference_power, 2);
-		double sinr_linear = pow((S*ph->Pr),2) /
-		  ((2*q*(Id+Il)*ph->srcSpectralMask->getBandwidth() +
-		    ((4*K*T*ph->srcSpectralMask->getBandwidth())/R)) +
-		   (ph->Pn + interference_power));
-		double sinr_db = sinr_linear ? 10*log10(sinr_linear) : -DBL_MAX;
-				
-                if(sinr_db > MPhy_Bpsk::getAcquisitionThreshold())
+		bool no_interf = false;
+		if (interference_model_ == INTERF_MODEL_ZERO) {
+		  no_interf = (interference_power == 0);
+		}
+		else if (interference_model_ == INTERF_MODEL_SINR) {
+		  interference_power = pow(S*interference_power, 2);
+		  double sinr_linear = pow((S*ph->Pr),2) /
+		    ((2*q*(Id+Il)*ph->srcSpectralMask->getBandwidth() +
+		      ((4*K*T*ph->srcSpectralMask->getBandwidth())/R)) +
+		     (ph->Pn + interference_power));
+		  double sinr_db = sinr_linear ? 10*log10(sinr_linear) : -DBL_MAX;
+		  no_interf = (sinr_db > MPhy_Bpsk::getAcquisitionThreshold());
+		}
+		else if (interference_model_ == INTERF_MODEL_THR) {
+		  no_interf = (interference_power < interference_threshold_);
+		}
+		
+                if(no_interf)
                 {
                     //no interference
                     ch->error() = 0; 
@@ -194,9 +206,9 @@ void UwOpticalPhy::endRx(Packet* p)
                     ch->error() = 1;
                     if (debug_) {
 		      cout << "UwOpticalPhy::endRx interference power = " << interference_power << endl;
-		      cout << "UwOpticalPhy::endRx sinr_db = " << sinr_db << endl;
-		      cout << "UwOpticalPhy::endRx Pn = " << ph->Pn << endl;
-		      cout << "UwOpticalPhy::endRx Pr = " << ph->Pr << endl;
+		      //cout << "UwOpticalPhy::endRx sinr_db = " << sinr_db << endl;
+		      //cout << "UwOpticalPhy::endRx Pn = " << ph->Pn << endl;
+		      //cout << "UwOpticalPhy::endRx Pr = " << ph->Pr << endl;
 		    }
                 }
             }
