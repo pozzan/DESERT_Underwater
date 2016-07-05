@@ -39,5 +39,4 @@ Module/UW/OPTICAL/PHY set S_                                    0.26
 Module/UW/OPTICAL/PHY set T_                                    293.15
 Module/UW/OPTICAL/PHY set Ar_                                   0.0000011
 Module/UW/OPTICAL/PHY set debug_                                0
-Module/UW/OPTICAL/PHY set interference_model_                   1
 Module/UW/OPTICAL/PHY set interference_threshold_               1

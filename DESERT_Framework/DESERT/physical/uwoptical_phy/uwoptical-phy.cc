@@ -53,7 +53,8 @@ public:
 UwOpticalPhy::UwOpticalPhy() :
     lut_file_name_(""),
     lut_token_separator_('\t'),
-    use_woss_(false)
+    use_woss_(false),
+    interference_model_(ZERO)
 {
     if (!MPhy_Bpsk::initialized)
     {
@@ -68,7 +69,6 @@ UwOpticalPhy::UwOpticalPhy() :
     bind("T_",&T);
     bind("Ar_",&Ar_);
     bind("debug_", &debug_);
-    bind("interference_model_", &interference_model_);
     bind("interference_threshold_", &interference_threshold_);
 }
 
@@ -109,6 +109,25 @@ int UwOpticalPhy::command(int argc, const char*const* argv)
       }
       lut_token_separator_ = tmp_.at(0);
       return TCL_OK;
+    }
+    else if (strcasecmp(argv[1], "setInterferenceModel") == 0) {
+      const string model_name(argv[2]);
+      if (model_name == "ZERO") {
+	interference_model_ = ZERO;
+	return TCL_OK;
+      }
+      else if (model_name == "THRESHOLD") {
+	interference_model_ = THRESHOLD;
+	return TCL_OK;
+      }
+      else if (model_name == "SINR") {
+	interference_model_ = SINR;
+	return TCL_OK;
+      }
+      else {
+	cerr << "Unknown interference model" << endl;
+	return TCL_ERROR;
+      }
     }
   }
   return MPhy_Bpsk::command(argc, argv);
@@ -179,10 +198,10 @@ void UwOpticalPhy::endRx(Packet* p)
             {
                 double interference_power = interference_->getInterferencePower(p);
 		bool no_interf = false;
-		if (interference_model_ == INTERF_MODEL_ZERO) {
+		if (interference_model_ == ZERO) {
 		  no_interf = (interference_power == 0);
 		}
-		else if (interference_model_ == INTERF_MODEL_SINR) {
+		else if (interference_model_ == SINR) {
 		  interference_power = pow(S*interference_power, 2);
 		  double sinr_linear = pow((S*ph->Pr),2) /
 		    ((2*q*(Id+Il)*ph->srcSpectralMask->getBandwidth() +
@@ -191,7 +210,7 @@ void UwOpticalPhy::endRx(Packet* p)
 		  double sinr_db = sinr_linear ? 10*log10(sinr_linear) : -DBL_MAX;
 		  no_interf = (sinr_db > MPhy_Bpsk::getAcquisitionThreshold());
 		}
-		else if (interference_model_ == INTERF_MODEL_THR) {
+		else if (interference_model_ == THRESHOLD) {
 		  no_interf = (interference_power < interference_threshold_);
 		}
 		
