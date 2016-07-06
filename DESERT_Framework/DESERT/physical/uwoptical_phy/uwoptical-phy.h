@@ -60,7 +60,7 @@
 #define OPTICAL_MODULATION_TYPE "OPTIC_BPSK"
 #define NOT_FOUND_VALUE 0
 
-enum InterferenceModel {ZERO, THRESHOLD, SINR};
+enum InterferenceModel {ZERO, THRESHOLD, SINR, OOK};
 
 typedef ::std::map< double, double > DepthMap;
 typedef DepthMap::iterator DMIt;
@@ -105,7 +105,10 @@ protected:
 
     virtual double linearInterpolator( double x, double x1, double y1, double x2, double y2 );  
 
-    virtual void initializeLUT();   
+    virtual void initializeLUT();
+
+    virtual double getOOKPER(double snr, int nbits, Packet*);
+
     // Variables
     int debug_; // output detail level
     InterferenceModel interference_model_;

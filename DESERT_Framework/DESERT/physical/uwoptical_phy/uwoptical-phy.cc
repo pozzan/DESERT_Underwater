@@ -124,6 +124,10 @@ int UwOpticalPhy::command(int argc, const char*const* argv)
 	interference_model_ = SINR;
 	return TCL_OK;
       }
+      else if (model_name == "OOK") {
+	interference_model_ = OOK;
+	return TCL_OK;
+      }
       else {
 	cerr << "Unknown interference model" << endl;
 	return TCL_ERROR;
@@ -212,6 +216,21 @@ void UwOpticalPhy::endRx(Packet* p)
 		}
 		else if (interference_model_ == THRESHOLD) {
 		  no_interf = (interference_power < interference_threshold_);
+		}
+		else if (interference_model_ == OOK) {
+
+		    interference_power = pow(S*interference_power, 2);
+             	    int nbits = ch->size()*8;
+		    double sinr_linear = pow((S*ph->Pr),2) /
+		        ((2*q*(Id+Il)*ph->srcSpectralMask->getBandwidth() +
+		        ((4*K*T*ph->srcSpectralMask->getBandwidth())/R)) +
+		        (ph->Pn + interference_power));
+
+                    double per_ni = getOOKPER(sinr_linear, nbits, p);
+    		    if (debug_) cout << "UwOpticalPhy::PER = " << per_ni << endl;
+                    double x = RNG::defaultrng()->uniform_double();
+                    no_interf = x > per_ni;
+
 		}
 		
                 if(no_interf)
@@ -309,3 +328,9 @@ void UwOpticalPhy::initializeLUT()
     cerr << "Impossible to open file " << lut_file_name_ << endl;
   }
 }
+
+double UwOpticalPhy::getOOKPER(double _snr, int _nbits, Packet* _p) {
+    double ber_ = 0.5 * erfc(0.5*sqrt(_snr));
+    return 1 - pow(1 - ber_, _nbits);
+}
+
