@@ -70,6 +70,9 @@ UwOpticalPhy::UwOpticalPhy() :
     bind("Ar_",&Ar_);
     bind("debug_", &debug_);
     bind("interference_threshold_", &interference_threshold_);
+    bind("use_reed_solomon", &use_reed_solomon);
+    bind("rs_n", &rs_n);
+    bind("rs_k", &rs_k);
 }
 
 int UwOpticalPhy::command(int argc, const char*const* argv)
@@ -226,7 +229,11 @@ void UwOpticalPhy::endRx(Packet* p)
 		        ((4*K*T*ph->srcSpectralMask->getBandwidth())/R)) +
 		        (ph->Pn + interference_power));
 
-                    double per_ni = getOOKPER(sinr_linear, nbits, p);
+		    double per_ni = 1;
+		    if (use_reed_solomon)
+		      per_ni = getRSPER(sinr_linear, nbits);
+		    else
+		      per_ni = getOOKPER(sinr_linear, nbits, p);
     		    if (debug_) cout << "UwOpticalPhy::PER = " << per_ni << endl;
                     double x = RNG::defaultrng()->uniform_double();
                     no_interf = x > per_ni;
@@ -332,5 +339,32 @@ void UwOpticalPhy::initializeLUT()
 double UwOpticalPhy::getOOKPER(double _snr, int _nbits, Packet* _p) {
     double ber_ = 0.5 * erfc(0.5*sqrt(_snr));
     return 1 - pow(1 - ber_, _nbits);
+}
+
+double binomial_coeff(int n, int k) {
+  double r = 1;
+  for (int i=1; i<= k; i++) {
+    r *= n - (k-i);
+    r /= i;
+  }
+  return r;
+}
+
+double UwOpticalPhy::getRSPER(double snr, int nbits) {
+  double pbit = getOOKPER(snr, 1, 0);
+  int t = (rs_n - rs_k)/2;
+  double bin = binomial_coeff(rs_n, t+1);
+  double pw = bin * pow(pbit, t+1) * pow(1-pbit, rs_n-t-1);
+  double pbit_rs = (2*t+1)/(double)rs_n * pw; 
+
+  // cout << "nbits = " << nbits << endl;
+  // cout << "RS pbit = " << pbit_rs << endl;
+  // cout << "RS pw = " << pw << endl;
+  // cout << "OOK pbit = " << pbit << endl;
+
+  double per = 1 - pow(1 - pbit_rs, nbits);
+  // cout << "RS per = " << per << endl;
+  // cout << "OOK per = " << getOOKPER(snr, nbits, 0) << endl;
+  return per;
 }
 
