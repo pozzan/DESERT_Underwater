@@ -243,7 +243,7 @@ proc createNode { id } {
     $phy($id) setLUTFileName "$opt(LUTpath)"
     $phy($id) setLUTSeparator " "
     $phy($id) useLUT
-    $phy($id) setInterferenceModel "SINR"
+    $phy($id) setInterferenceModel "CHUNK"
 
 
     $ipif($id) addr [expr $id +1]
