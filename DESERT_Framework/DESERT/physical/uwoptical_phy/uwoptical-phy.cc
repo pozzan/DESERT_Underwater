@@ -293,6 +293,29 @@ void UwOpticalPhy::endRx(Packet* p)
     }
 }
 
+void UwOpticalPhy::recv(Packet *p) {
+  hdr_cmn *ch = HDR_CMN(p);
+ 
+  if(ch->direction() == hdr_cmn::UP) {
+    MPhy_Bpsk::recv(p);
+    if (use_reed_solomon) {
+      if (debug_) cout << "UwOpticalPhy::recv " <<
+		    "recv coded size = " << ch->size() << endl;
+      double code_rate = rs_n / (double) rs_k;
+      ch->size() = ceil((ch->size()-1) / code_rate);
+    }
+  }
+  else { // (ch->direction() == hdr_cmn::DOWN)
+    if (use_reed_solomon) {
+      if (debug_) cout << "UwOpticalPhy::recv " <<
+		    "send original size = " << ch->size() << endl;
+      double code_rate = rs_n / (double) rs_k;
+      ch->size() = ceil(code_rate * ch->size());
+    }
+    MPhy_Bpsk::recv(p);
+  }
+}
+
 double UwOpticalPhy::lookUpLightNoiseE(double depth)
 {
   //TODO: search noise Energy in the lookup table
