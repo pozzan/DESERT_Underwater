@@ -99,6 +99,7 @@ public:
 
     virtual double getNoisePower(Packet* p);
     
+    virtual void recv(Packet *p);
 protected:
 
     virtual double lookUpLightNoiseE(double depth);
