@@ -50,6 +50,22 @@ public:
     }
 } class_module_optical;
 
+inline int binomial_rv(int n, double p) {
+  static RNG *rng = RNG::defaultrng();
+  double u = rng->uniform();
+  double c = p / (1-p);
+  int i = 0;
+  double pr = pow(1-p, n);
+  assert(pr > 0);
+  double F = pr;;
+  while (u >= F) {
+    pr *= c * (n-i) / (i+1);
+    F += pr;
+    i++;
+  }
+  return i;
+}
+
 UwOpticalPhy::UwOpticalPhy() :
     lut_file_name_(""),
     lut_token_separator_('\t'),
@@ -231,13 +247,13 @@ void UwOpticalPhy::endRx(Packet* p)
 
 		    double per_ni = 1;
 		    if (use_reed_solomon)
-		      per_ni = getRSPER(sinr_linear, nbits);
-		    else
+		      no_interf = codedPktErrors(sinr_linear, nbits);
+		    else {
 		      per_ni = getOOKPER(sinr_linear, nbits, p);
-    		    if (debug_) cout << "UwOpticalPhy::PER = " << per_ni << endl;
-                    double x = RNG::defaultrng()->uniform_double();
-                    no_interf = x > per_ni;
-
+		      if (debug_) cout << "UwOpticalPhy::PER = " << per_ni << endl;
+		      double x = RNG::defaultrng()->uniform_double();
+		      no_interf = x > per_ni;
+		    }
 		}
 		
                 if(no_interf)
@@ -341,30 +357,14 @@ double UwOpticalPhy::getOOKPER(double _snr, int _nbits, Packet* _p) {
     return 1 - pow(1 - ber_, _nbits);
 }
 
-double binomial_coeff(int n, int k) {
-  double r = 1;
-  for (int i=1; i<= k; i++) {
-    r *= n - (k-i);
-    r /= i;
-  }
-  return r;
-}
-
-double UwOpticalPhy::getRSPER(double snr, int nbits) {
+bool UwOpticalPhy::codedPktErrors(double snr, int nbits) {
   double pbit = getOOKPER(snr, 1, 0);
   int t = (rs_n - rs_k)/2;
-  double bin = binomial_coeff(rs_n, t+1);
-  double pw = bin * pow(pbit, t+1) * pow(1-pbit, rs_n-t-1);
-  double pbit_rs = (2*t+1)/(double)rs_n * pw; 
-
-  // cout << "nbits = " << nbits << endl;
-  // cout << "RS pbit = " << pbit_rs << endl;
-  // cout << "RS pw = " << pw << endl;
-  // cout << "OOK pbit = " << pbit << endl;
-
-  double per = 1 - pow(1 - pbit_rs, nbits);
-  // cout << "RS per = " << per << endl;
-  // cout << "OOK per = " << getOOKPER(snr, nbits, 0) << endl;
-  return per;
+  int nblocks = ceil((double)nbits / rs_k);
+  for (int i = 0; i < nblocks; i++) {
+    int numerrs = binomial_rv(rs_n, pbit);
+    if (numerrs > t) return false;
+  }
+  return true;
 }
 

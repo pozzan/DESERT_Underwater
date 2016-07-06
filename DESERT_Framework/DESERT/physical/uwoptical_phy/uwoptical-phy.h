@@ -107,8 +107,8 @@ protected:
 
     virtual void initializeLUT();
 
-    virtual double getOOKPER(double snr, int nbits, Packet*);
-    virtual double getRSPER(double snr, int nbits);
+    double getOOKPER(double snr, int nbits, Packet*);
+    bool codedPktErrors(double snr, int nbits);
 
     // Variables
     int debug_; // output detail level
