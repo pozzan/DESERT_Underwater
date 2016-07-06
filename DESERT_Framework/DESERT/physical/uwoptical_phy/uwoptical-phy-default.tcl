@@ -40,3 +40,6 @@ Module/UW/OPTICAL/PHY set T_                                    293.15
 Module/UW/OPTICAL/PHY set Ar_                                   0.0000011
 Module/UW/OPTICAL/PHY set debug_                                0
 Module/UW/OPTICAL/PHY set interference_threshold_               1
+Module/UW/OPTICAL/PHY set use_reed_solomon                      0
+Module/UW/OPTICAL/PHY set rs_n                                  1
+Module/UW/OPTICAL/PHY set rs_k                                  1

@@ -108,6 +108,7 @@ protected:
     virtual void initializeLUT();
 
     virtual double getOOKPER(double snr, int nbits, Packet*);
+    virtual double getRSPER(double snr, int nbits);
 
     // Variables
     int debug_; // output detail level
@@ -125,6 +126,9 @@ private:
     char lut_token_separator_; //
     DepthMap lut_map;
     bool use_woss_;
+    int use_reed_solomon;
+    int rs_n;
+    int rs_k;
 };
 
 #endif /* UWOPTICAL_H  */
