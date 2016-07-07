@@ -50,6 +50,7 @@
 #include <string>
 #include <sstream>
 #include <climits>
+#include <vector>
 
 #define UWCBR_DROP_REASON_UNKNOWN_TYPE "UKT"      /**< Reason for a drop in a <i>UWCBR</i> module. */
 #define UWCBR_DROP_REASON_OUT_OF_SEQUENCE "OOS"   /**< Reason for a drop in a <i>UWCBR</i> module. */
@@ -227,7 +228,7 @@ protected:
     nsaddr_t dstAddr_;          /**< IP of the destination. */
     char priority_;             /**< Priority of the data packets. */
     
-    bool* sn_check;             /**< Used to keep track of the packets already received. */
+	std::vector<bool> sn_check;             /**< Used to keep track of the packets already received. */
     
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     int debug_;                 /**< Flag to enable several levels of debug. */
