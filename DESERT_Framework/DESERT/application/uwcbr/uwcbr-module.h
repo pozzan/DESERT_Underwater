@@ -62,8 +62,6 @@
 
 #define HDR_UWCBR(p)      (hdr_uwcbr::access(p))
 
-//using namespace std;
-
 extern packet_t PT_UWCBR;
 
 typedef uint16_t sn_t; 
