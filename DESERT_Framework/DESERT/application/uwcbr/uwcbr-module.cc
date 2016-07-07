@@ -85,6 +85,7 @@ UwCbrModule::UwCbrModule()
 dstPort_(0),
 dstAddr_(0),
 priority_(0),
+sn_check(USHRT_MAX, false),
 PoissonTraffic_(0),
 debug_(0),
 drop_out_of_order_(0),
@@ -122,10 +123,6 @@ esn(0)
     bind("debug_", &debug_);
     bind("drop_out_of_order_", &drop_out_of_order_);
     bind("traffic_type_", (uint*) &traffic_type_);
-    sn_check = new bool[USHRT_MAX];
-    for (int i = 0; i < USHRT_MAX; i++) {
-        sn_check[i] = false;
-    }
 }
 
 UwCbrModule::~UwCbrModule() {
