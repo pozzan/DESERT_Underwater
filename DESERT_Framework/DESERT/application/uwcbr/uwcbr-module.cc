@@ -363,25 +363,35 @@ void UwCbrModule::sendAck(Packet *recvd) {
 void UwCbrModule::sendPktLowPriority() {
     double delay       = 0;
     Packet* p          = Packet::alloc();
-    this->initPkt(p);
+    initPkt(p);
     hdr_cmn* ch        = hdr_cmn::access(p);
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
     uwcbrh->priority() = 0;
-    if (debug_ > 10)
-        printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
-    sendDown(p, delay);
+
+    if (uwcbrh->sn() > ack_sn + tx_window - 1) {
+	if (debug_) cerr << "Tx window is full, enqueue packet SN=" << uwcbrh->sn() << endl;	
+	send_queue.push(p);
+    }
+    else {
+	sendPkt(p, delay);
+    }
 }
 
 void UwCbrModule::sendPktHighPriority() {
     double delay       = 0;
     Packet* p          = Packet::alloc();
-    this->initPkt(p);
+    initPkt(p);
     hdr_cmn* ch        = hdr_cmn::access(p);
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
     uwcbrh->priority() = 1;
-    if (debug_ > 10)
-        printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
-    sendDown(p, delay);
+
+    if (uwcbrh->sn() > ack_sn + tx_window - 1) {
+	if (debug_) cerr << "Tx window is full, enqueue packet SN=" << uwcbrh->sn() << endl;	
+	send_queue.push(p);
+    }
+    else {
+	sendPkt(p, delay);
+    }
 }
 
 void UwCbrModule::transmit() {
