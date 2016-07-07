@@ -156,14 +156,6 @@ public:
     virtual void recv(Packet*);
     
     /**
-     * Performs the reception of packets from upper and lower layers.
-     * 
-     * @param Packet* Pointer to the packet will be received.
-     * @param Handler* Handler.
-     */
-    virtual void recv(Packet* p, Handler* h);
-    
-    /**
      * TCL command interpreter. It implements the following OTcl methods:
      * 
      * @param argc Number of arguments in <i>argv</i>.
@@ -174,8 +166,6 @@ public:
     virtual int command(int argc, const char*const* argv);
     
     
-    virtual int crLayCommand(ClMessage* m);
-
     /**
      * Returns the mean Round Trip Time.
      * 

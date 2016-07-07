@@ -192,13 +192,6 @@ int UwCbrModule::command(int argc, const char*const* argv) {
     return Module::command(argc, argv);
 }
 
-int UwCbrModule::crLayCommand(ClMessage* m) {
-    switch (m->type()) {
-        default:
-            return Module::crLayCommand(m);
-    }
-}
-
 void UwCbrModule::initPkt(Packet* p) {
     hdr_cmn* ch = hdr_cmn::access(p);
     ch->uid()   = uidcnt_++;
@@ -271,12 +264,6 @@ void UwCbrModule::transmit() {
 void UwCbrModule::stop() {
     sendTmr_.force_cancel();
 }
-
-void UwCbrModule::recv(Packet* p, Handler* h) {
-//    hdr_cmn* ch = hdr_cmn::access(p);
-    recv(p);
-}
-
 
 void UwCbrModule::recv(Packet* p) {
     hdr_cmn* ch = hdr_cmn::access(p);
