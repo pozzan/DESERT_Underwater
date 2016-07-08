@@ -78,42 +78,66 @@ void UwSendTimer::expire(Event *e) {
     module->transmit();
 }
 
+void UwRetxTimer::expire(Event *e) {
+    if (module->debug_) cerr << Scheduler::instance().clock() <<"\tTimeout for packet SN=" << packet_sn << endl;
+    module->resendPkt(packet_sn);
+}
+
+void UwRetxTimer::resched(double delay) {
+    if (module->debug_) std::cerr << Scheduler::instance().clock() <<"\t Reschedule timeout for packet SN=" << packet_sn << ", delay = " << delay << std::endl;
+    TimerHandler::resched(delay);
+}
+
+void UwRetxTimer::sched(double delay) {
+    if (module->debug_) std::cerr << Scheduler::instance().clock() <<"\t Schedule timeout for packet SN=" << packet_sn << ", delay = " << delay << std::endl;
+    TimerHandler::sched(delay);
+}
+
+void UwRetxTimer::force_cancel() {
+    if (module->debug_) std::cerr << Scheduler::instance().clock() <<"\t Cancel timeout for packet SN=" << packet_sn << std::endl;
+    TimerHandler::force_cancel();
+}
+
 int UwCbrModule::uidcnt_ = 0;
 
 UwCbrModule::UwCbrModule()
-:
-dstPort_(0),
-dstAddr_(0),
-priority_(0),
-sn_check(USHRT_MAX, false),
-PoissonTraffic_(0),
-debug_(0),
-drop_out_of_order_(0),
-traffic_type_(0),
-sendTmr_(this),
-txsn(1),
-hrsn(0),
-pkts_recv(0),
-pkts_ooseq(0),
-pkts_lost(0),
-pkts_invalid(0),
-pkts_last_reset(0),
-rftt(-1),
-srtt(0),
-sftt(0),
-lrtime(0),
-sthr(0),
-period_(0),
-pktSize_(0),
-sumrtt(0),
-sumrtt2(0),
-rttsamples(0),
-sumftt(0),
-sumftt2(0),
-fttsamples(0),
-sumbytes(0),
-sumdt(0),
-esn(0)
+    :
+    dstPort_(0),
+    dstAddr_(0),
+    priority_(0),
+    sn_check(USHRT_MAX, false),
+    ack_check(USHRT_MAX, false),
+    packet_buffer(),
+    packet_retx_timers(),
+    PoissonTraffic_(0),
+    debug_(0),
+    drop_out_of_order_(0),
+    traffic_type_(0),
+    timeout_(0),
+    sendTmr_(this),
+    txsn(1),
+    hrsn(0),
+    pkts_recv(0),
+    pkts_ooseq(0),
+    pkts_lost(0),
+    pkts_invalid(0),
+    pkts_last_reset(0),
+    rftt(-1),
+    srtt(0),
+    sftt(0),
+    lrtime(0),
+    sthr(0),
+    period_(0),
+    pktSize_(0),
+    sumrtt(0),
+    sumrtt2(0),
+    rttsamples(0),
+    sumftt(0),
+    sumftt2(0),
+    fttsamples(0),
+    sumbytes(0),
+    sumdt(0),
+    esn(0)
 { // binding to TCL variables
     bind("period_", &period_);
     bind("destPort_", (int*) &dstPort_);
@@ -123,9 +147,21 @@ esn(0)
     bind("debug_", &debug_);
     bind("drop_out_of_order_", &drop_out_of_order_);
     bind("traffic_type_", (uint*) &traffic_type_);
+    bind("timeout_", &timeout_);
 }
 
 UwCbrModule::~UwCbrModule() {
+    for (map<sn_t,UwRetxTimer*>::iterator i = packet_retx_timers.begin();
+	 i != packet_retx_timers.end();
+	 i++) {
+	delete i->second;
+    }
+
+    for (map<sn_t,Packet*>::iterator i = packet_buffer.begin();
+	 i != packet_buffer.end();
+	 i++) {
+	Packet::free(i->second);
+    }
 }
 
 int UwCbrModule::command(int argc, const char*const* argv) {
@@ -195,7 +231,7 @@ void UwCbrModule::initPkt(Packet* p) {
     hdr_cmn* ch = hdr_cmn::access(p);
     ch->uid()   = uidcnt_++;
     ch->ptype() = PT_UWCBR;
-    ch->size()  = pktSize_;
+    ch->size()  = pktSize_ + getCbrHeaderSize();
 
     hdr_uwip* uwiph  = hdr_uwip::access(p);
     uwiph->daddr()   = dstAddr_;
@@ -217,6 +253,36 @@ void UwCbrModule::initPkt(Packet* p) {
     }
 }
 
+void UwCbrModule::initAck(Packet *p, Packet *recvd) {
+    hdr_cmn* ch = hdr_cmn::access(p);
+    ch->uid()   = uidcnt_++;
+    ch->ptype() = PT_UWCBR;
+    ch->size()  = getCbrHeaderSize();
+
+    hdr_uwip* uwiph  = hdr_uwip::access(p);
+    hdr_uwip *uwiph_recvd = hdr_uwip::access(recvd);
+    uwiph->daddr()   = uwiph_recvd->saddr();
+    
+    hdr_uwudp* uwudp = hdr_uwudp::access(p);
+    hdr_uwudp* uwudp_recvd = hdr_uwudp::access(recvd);
+    uwudp->dport()   = uwudp_recvd->sport();
+
+    hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
+    hdr_uwcbr* uwcbrh_recvd  = HDR_UWCBR(recvd);
+    uwcbrh->is_ack() = true;
+    uwcbrh->sn()       = uwcbrh_recvd->sn();
+    uwcbrh->priority() = uwcbrh_recvd->priority();
+    uwcbrh->traffic_type() = uwcbrh_recvd->traffic_type();
+    ch->timestamp()    = Scheduler::instance().clock();
+
+    if (rftt >= 0) {
+        uwcbrh->rftt() = rftt;
+        uwcbrh->rftt_valid() = true;
+    } else {
+        uwcbrh->rftt_valid() = false;
+    }
+}
+
 void UwCbrModule::start() {
     sendTmr_.resched(getTimeBeforeNextPkt());
 }
@@ -224,12 +290,48 @@ void UwCbrModule::start() {
 void UwCbrModule::sendPkt() {
     double delay      = 0;
     Packet* p         = Packet::alloc();
-    this->initPkt(p);
+    initPkt(p);
+
     hdr_cmn* ch       = hdr_cmn::access(p);
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
+    
+    pair<map<sn_t,Packet*>::iterator,bool> ret = packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->copy()));
+    assert(ret.second);
+
+    UwRetxTimer *timer = new UwRetxTimer(this, uwcbrh->sn());
+    pair<map<sn_t,UwRetxTimer*>::iterator,bool> ret_timer = packet_retx_timers.insert(pair<sn_t,UwRetxTimer*>(uwcbrh->sn(), timer));
+    assert(ret_timer.second);
+    timer->sched(timeout_);
+    
     if (debug_ > 10)
         printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
     sendDown(p, delay);
+}
+
+void UwCbrModule::resendPkt(sn_t sn) {
+    Packet *p = packet_buffer[sn]->copy();
+    UwRetxTimer *timer = packet_retx_timers[sn];
+    hdr_cmn* ch = hdr_cmn::access(p);
+    ch->uid_ = uidcnt_++;
+    timer->resched(timeout_);
+
+    hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
+    double delay = 0;
+    if (debug_ > 10)
+        printf("CbrModule(%d)::resendPkt, resend a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
+    sendDown(p, delay);
+}
+
+void UwCbrModule::sendAck(Packet *recvd) {
+    Packet *ack = Packet::alloc();
+    initAck(ack, recvd);
+
+    hdr_cmn* ch = hdr_cmn::access(ack);    
+    hdr_uwcbr* uwcbrh = HDR_UWCBR(ack);
+    if (debug_ > 10)
+        printf("CbrModule(%d)::sendAck, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
+    double delay = 0;
+    sendDown(ack, delay);
 }
 
 void UwCbrModule::sendPktLowPriority() {
@@ -257,18 +359,65 @@ void UwCbrModule::sendPktHighPriority() {
 }
 
 void UwCbrModule::transmit() {
-   sendPkt();
-   sendTmr_.resched(getTimeBeforeNextPkt()); // schedule next transmission
+    sendPkt();
+    sendTmr_.resched(getTimeBeforeNextPkt()); // schedule next transmission
 }
 
 void UwCbrModule::stop() {
     sendTmr_.force_cancel();
+    for (map<sn_t,UwRetxTimer*>::iterator i = packet_retx_timers.begin();
+	 i != packet_retx_timers.end();
+	 i++) {
+	i->second->force_cancel();
+    }
+}
+
+void UwCbrModule::recvAck(Packet *p) {
+    hdr_cmn* ch = hdr_cmn::access(p);
+    hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
+    if (debug_ > 10) 
+	printf("CbrModule(%d)::recvAck pktId %d\n", getId(), ch->uid());
+
+    if (ack_check[uwcbrh->sn()]) {
+	if (debug_ > 10) 
+	    printf("CbrModule(%d)::recvAck pktId %d, duplicate ACK for SN %d\n", getId(), ch->uid(), uwcbrh->sn());
+	drop(p, 1, UWCBR_DROP_REASON_DUPACK);
+	return;
+    }
+
+    map<sn_t,Packet*>::iterator i = packet_buffer.find(uwcbrh->sn());
+    if (i == packet_buffer.end()) {
+	if (debug_ > 10) 
+	    printf("CbrModule(%d)::recvAck pktId %d, ACK for unknown SN %d\n", getId(), ch->uid(), uwcbrh->sn());
+	drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_ACK);
+	return;
+    }
+
+    ack_check[uwcbrh->sn()] = true;
+
+    Packet::free(i->second);
+    packet_buffer.erase(i);
+
+    map<sn_t,UwRetxTimer*>::iterator j = packet_retx_timers.find(uwcbrh->sn());
+    j->second->force_cancel();
+    delete j->second;
+    packet_retx_timers.erase(j);
+
+    rftt = Scheduler::instance().clock() - ch->timestamp();
+    
+    if (uwcbrh->rftt_valid()) {
+        double rtt = rftt + uwcbrh->rftt();
+        updateRTT(rtt);
+    }
+    
+    updateFTT(rftt);
+    Packet::free(p);
 }
 
 void UwCbrModule::recv(Packet* p) {
     hdr_cmn* ch = hdr_cmn::access(p);
     if (debug_ > 10) 
-       printf("CbrModule(%d)::recv(Packet*p,Handler*) pktId %d\n", getId(), ch->uid());
+	printf("CbrModule(%d)::recv pktId %d\n", getId(), ch->uid());
 
     if (ch->ptype() != PT_UWCBR) {
         drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
@@ -278,28 +427,34 @@ void UwCbrModule::recv(Packet* p) {
 
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
 
+    if (uwcbrh->is_ack()) {
+	recvAck(p);
+	return;
+    }
+
     esn = hrsn + 1; // expected sn
     
-    if (!drop_out_of_order_) {
-        if (sn_check[uwcbrh->sn() & 0x00ffffff]) { // Packet already processed: drop it
-            incrPktInvalid();
-            drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
-            return;
-        }
+    if (sn_check[uwcbrh->sn() & 0x00ffffff]) { // Packet already processed: drop it
+	incrPktInvalid();
+	sendAck(p);
+	drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
+	return;
     }
     
     sn_check[uwcbrh->sn() & 0x00ffffff] = true;
+
+    ch->size() -= getCbrHeaderSize();
     
-    if (drop_out_of_order_) {
-        if (uwcbrh->sn() < esn) { // packet is out of sequence and is to be discarded
-            incrPktOoseq();
-            if (debug_ > 1) {
-                printf("CbrModule::recv() Pkt out of sequence! cbrh->sn=%d\thrsn=%d\tesn=%d\n", uwcbrh->sn(), hrsn, esn);
-            }
-            drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
-            return;
-        }
-    }
+    // if (drop_out_of_order_) {
+    //     if (uwcbrh->sn() < esn) { // packet is out of sequence and is to be discarded
+    //         incrPktOoseq();
+    //         if (debug_ > 1) {
+    //             printf("CbrModule::recv() Pkt out of sequence! cbrh->sn=%d\thrsn=%d\tesn=%d\n", uwcbrh->sn(), hrsn, esn);
+    //         }
+    //         drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
+    //         return;
+    //     }
+    // }
 
     rftt = Scheduler::instance().clock() - ch->timestamp();
 
@@ -314,24 +469,25 @@ void UwCbrModule::recv(Packet* p) {
     incrPktRecv();
     
     hrsn = uwcbrh->sn();
-    if (drop_out_of_order_) {
-        if (uwcbrh->sn() > esn) { // packet losses are observed
-            incrPktLost(uwcbrh->sn() - (esn));
-        }
-    }
+    // if (drop_out_of_order_) {
+    //     if (uwcbrh->sn() > esn) { // packet losses are observed
+    //         incrPktLost(uwcbrh->sn() - (esn));
+    //     }
+    // }
 
     double dt = Scheduler::instance().clock() - lrtime;
     updateThroughput(ch->size(), dt);
 
     lrtime = Scheduler::instance().clock();
 
+    sendAck(p);
     Packet::free(p);
 
-    if (drop_out_of_order_) {
-        if (pkts_lost + pkts_recv + pkts_last_reset != hrsn) {
-            fprintf(stderr, "ERROR CbrModule::recv() pkts_lost=%d  pkts_recv=%d  hrsn=%d\n", pkts_lost, pkts_recv, hrsn);
-        }
-    }
+    // if (drop_out_of_order_) {
+    //     if (pkts_lost + pkts_recv + pkts_last_reset != hrsn) {
+    //         fprintf(stderr, "ERROR CbrModule::recv() pkts_lost=%d  pkts_recv=%d  hrsn=%d\n", pkts_lost, pkts_recv, hrsn);
+    //     }
+    // }
 }
 
 double UwCbrModule::GetRTT() const {

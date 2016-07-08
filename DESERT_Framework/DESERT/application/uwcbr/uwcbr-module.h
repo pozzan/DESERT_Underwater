@@ -42,34 +42,41 @@
 #ifndef UWCBR_MODULE_H
 #define UWCBR_MODULE_H
 
+#include <module.h>
 #include <uwip-module.h>
 #include <uwudp-module.h>
 
-#include <module.h>
-#include <iostream>
-#include <string>
-#include <sstream>
 #include <climits>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
 #include <vector>
 
 #define UWCBR_DROP_REASON_UNKNOWN_TYPE "UKT"      /**< Reason for a drop in a <i>UWCBR</i> module. */
 #define UWCBR_DROP_REASON_OUT_OF_SEQUENCE "OOS"   /**< Reason for a drop in a <i>UWCBR</i> module. */
 #define UWCBR_DROP_REASON_DUPLICATED_PACKET "DPK" /**< Reason for a drop in a <i>UWCBR</i> module. */
+#define UWCBR_DROP_REASON_DUPACK "DUPACK"
+#define UWCBR_DROP_REASON_UNKNOWN_ACK "UKACK"
 
 #define HDR_UWCBR(p)      (hdr_uwcbr::access(p))
 
-using namespace std;
+//using namespace std;
 
 extern packet_t PT_UWCBR;
+
+typedef uint16_t sn_t; 
 
 /**
  * <i>hdr_uwcbr</i> describes <i>UWCBR</i> packets.
  */
 typedef struct hdr_uwcbr {
-    uint16_t sn_;       /**< Serial number of the packet. */
+    sn_t sn_;       /**< Serial number of the packet. */
     float rftt_;        /**< Forward Trip Time of the packet. */
     bool rftt_valid_;   /**< Flag used to set the validity of the fft field. */
     char priority_;     /**< Priority flag: 1 means high priority, 0 normal priority. */
+    bool is_ack_;       /**< Flag that indicates if this packet is an ACK */
+	
     uint16_t traffic_type_; /**< Traffic type: (video, audio, image, etc..) meaning left to the user */
     static int offset_; /**< Required by the PacketHeaderManager. */
 
@@ -87,7 +94,7 @@ typedef struct hdr_uwcbr {
     /**
      * Reference to the sn_ variable.
      */
-    inline uint16_t& sn() {
+    inline sn_t& sn() {
         return sn_;
     }
     
@@ -117,7 +124,9 @@ typedef struct hdr_uwcbr {
      */
     inline uint16_t& traffic_type() {
         return (traffic_type_);
-    }    
+    }
+
+    inline bool &is_ack() { return is_ack_; }
 } hdr_uwcbr;
 
 
@@ -138,11 +147,30 @@ protected:
     UwCbrModule* module;
 };
 
+/** UwRetxTimer is used to schedule the retransmission of packets after a timeout */
+class UwRetxTimer : public TimerHandler {
+public:
+    UwRetxTimer(UwCbrModule *m, sn_t sn) : TimerHandler() {
+	module = m;
+	packet_sn = sn;
+    }
+
+    virtual void resched(double delay);
+    virtual void sched(double delay);
+    virtual void force_cancel();
+
+protected:
+    virtual void expire(Event *e);
+    UwCbrModule* module;
+    sn_t packet_sn;
+};
+
 /**
  * UwCbrModule class is used to manage <i>UWCBR</i> packets and to collect statistics about them.
  */
 class UwCbrModule : public Module {
     friend class UwSendTimer;
+    friend class UwRetxTimer;
 
 public:
 
@@ -235,17 +263,21 @@ protected:
     nsaddr_t dstAddr_;          /**< IP of the destination. */
     char priority_;             /**< Priority of the data packets. */
     
-	std::vector<bool> sn_check;             /**< Used to keep track of the packets already received. */
+    std::vector<bool> sn_check;             /**< Used to keep track of the packets already received. */
+    std::vector<bool> ack_check;            /**< Used to keep track of which packets have been ACKed */
+    std::map<sn_t, Packet*> packet_buffer;  /**< Hold the packets that have not been ACKed yet, indexed by sn */
+    std::map<sn_t, UwRetxTimer*> packet_retx_timers; /**< Hold the timers that schedule the retransmissions, indexed by sn */
     
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     int debug_;                 /**< Flag to enable several levels of debug. */
     int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
-    uint traffic_type_;         /**< Traffic type of the packets. */
+    uint16_t traffic_type_;         /**< Traffic type of the packets. */
+    double timeout_;            /**< Timeout for the packet retransmission */
     
     UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
     
-    int txsn;                   /**< Sequence number of the next packet to be transmitted. */
-    int hrsn;                   /**< Highest received sequence number. */
+    sn_t txsn;                  /**< Sequence number of the next packet to be transmitted. */
+    sn_t hrsn;                  /**< Highest received sequence number. */
     int pkts_recv;              /**< Total number of received packets. Packet out of sequence are not counted here. */
     int pkts_ooseq;             /**< Total number of packets received out of sequence. */
     int pkts_lost;              /**< Total number of lost packets, including packets received out of sequence. */
@@ -273,7 +305,7 @@ protected:
     double sumbytes;            /**< Sum of bytes received. */
     double sumdt;               /**< Sum of the delays. */
     
-    uint32_t esn;               /**< Expected serial number. */
+    sn_t esn;               /**< Expected serial number. */
 
     /**
      * Initializes a data packet passed as argument with the default values.
@@ -281,6 +313,17 @@ protected:
      * @param Packet* Pointer to a packet already allocated to fill with the right values.
      */
     virtual void initPkt(Packet* p);
+
+    /** \brief Initialize an ACK packet.
+     * @param p Pointer to the new, already allocated, packet.
+     * @param recvd Pointer to the received packet that will be ACKed.
+     */
+    virtual void initAck(Packet *p, Packet *recvd);
+
+    /**
+     * Handle a received ACK packet
+     */
+    virtual void recvAck(Packet *p);
     
     /**
      * Allocates, initialize and sends a packet with the default priority flag set from tcl.
@@ -288,6 +331,17 @@ protected:
      * @see UwCbrModule::initPkt()
      */
     virtual void sendPkt();
+
+    /**
+     * Retransmit the packet with sequence number sn from the packet buffer
+     */
+    virtual void resendPkt(sn_t sn);
+
+    /**
+     * Send an ACK
+     * @param recvd The received packet to ACK
+     */
+    virtual void sendAck(Packet *recvd);
     
     /**
      * Allocates, initialize and sends a packet with the default priority flag set from tcl.
