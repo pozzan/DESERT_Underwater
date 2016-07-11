@@ -49,6 +49,7 @@
 #include <climits>
 #include <iostream>
 #include <map>
+#include <queue>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -129,6 +130,16 @@ typedef struct hdr_uwcbr {
     inline bool &is_ack() { return is_ack_; }
 } hdr_uwcbr;
 
+class uwcbr_sn_greater {
+public:
+    bool operator()(Packet const *const &a, Packet const *const &b) const {
+	assert(a != 0);
+	assert(b != 0);
+	hdr_uwcbr *hdr_a = HDR_UWCBR(a);
+	hdr_uwcbr *hdr_b = HDR_UWCBR(b);
+	return hdr_a->sn() > hdr_b->sn();
+    }
+};
 
 class UwCbrModule;
 
@@ -267,6 +278,9 @@ protected:
     std::vector<bool> ack_check;            /**< Used to keep track of which packets have been ACKed */
     std::map<sn_t, Packet*> packet_buffer;  /**< Hold the packets that have not been ACKed yet, indexed by sn */
     std::map<sn_t, UwRetxTimer*> packet_retx_timers; /**< Hold the timers that schedule the retransmissions, indexed by sn */
+
+    typedef std::priority_queue<Packet*, std::vector<Packet*>, uwcbr_sn_greater> recv_queue_t;
+    recv_queue_t recv_queue; /**< Hold the received packets until they can be processed in order */
     
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     int debug_;                 /**< Flag to enable several levels of debug. */
@@ -324,6 +338,11 @@ protected:
      * Handle a received ACK packet
      */
     virtual void recvAck(Packet *p);
+
+    /**
+     * Process the packets in the recv_queue, ordered by SN, until there is a missing packet
+     */
+    virtual void processOrderedPackets();
     
     /**
      * Allocates, initialize and sends a packet with the default priority flag set from tcl.
