@@ -213,16 +213,32 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             tcl.resultf("%f", GetFTTstd());
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getsentpkts") == 0) {
-            tcl.resultf("%d", txsn - 1);
+            tcl.resultf("%d", min(txsn-1, ack_sn+tx_window-1));
+            return TCL_OK;
+	}
+	else if (strcasecmp(argv[1], "getgeneratedpkts") == 0) {
+	    tcl.resultf("%d", txsn-1);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getrecvpkts") == 0) {
             tcl.resultf("%d", pkts_recv);
+            return TCL_OK;
+	} else if (strcasecmp(argv[1], "getduppkts") == 0) {
+            tcl.resultf("%d", pkts_dup);
+            return TCL_OK;
+	} else if (strcasecmp(argv[1], "getooseqpkts") == 0) {
+            tcl.resultf("%d", pkts_ooseq);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getrecvacks") == 0) {
             tcl.resultf("%d", acks_recv);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getdupacks") == 0) {
             tcl.resultf("%d", acks_dup);
+            return TCL_OK;
+	} else if (strcasecmp(argv[1], "getsentacks") == 0) {
+            tcl.resultf("%d", acks_sent);
+            return TCL_OK;
+	} else if (strcasecmp(argv[1], "getsentdupacks") == 0) {
+            tcl.resultf("%d", acks_dup_sent);
             return TCL_OK;
 	} else if (strcasecmp(argv[1], "setprioritylow") == 0) {
             priority_ = 0;
