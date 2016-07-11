@@ -180,9 +180,8 @@ protected:
 class UwCbrModule : public Module {
     friend class UwSendTimer;
     friend class UwRetxTimer;
-
+    
 public:
-
     /**
      * Constructor of UwCbrModule class.
      */
@@ -209,8 +208,7 @@ public:
      * 
      */
     virtual int command(int argc, const char*const* argv);
-    
-    
+        
     /**
      * Returns the mean Round Trip Time.
      * 
@@ -272,22 +270,34 @@ protected:
     nsaddr_t dstAddr_;          /**< IP of the destination. */
     char priority_;             /**< Priority of the data packets. */
 
-    typedef std::priority_queue<Packet*, std::vector<Packet*>, uwcbr_sn_greater> pkt_queue_t;
-    
-    std::vector<bool> sn_check;             /**< Used to keep track of the packets already received. */
-    std::vector<bool> ack_check;            /**< Used to keep track of which packets have been ACKed */
-    std::map<sn_t, Packet*> packet_buffer;  /**< Hold the packets that have not been ACKed yet, indexed by sn */
-    std::map<sn_t, UwRetxTimer*> packet_retx_timers; /**< Hold the timers that schedule the retransmissions, indexed by sn */
+    /** Used to keep track of the packets already received. */
+    std::vector<bool> sn_check;
+    /** Used to keep track of which packets have been ACKed */
+    std::vector<bool> ack_check;
+    /** Hold the packets that have not been ACKed yet, indexed by sn */
+    std::map<sn_t, Packet*> packet_buffer;
+    /** Hold the timers that schedule the retransmissions, indexed by sn */
+    std::map<sn_t, UwRetxTimer*> packet_retx_timers;
 
-    pkt_queue_t recv_queue; /**< Hold the received packets until they can be processed in order */
-    pkt_queue_t send_queue; /**< Hold the packets that cannot yet be sent */
+    /** Type of the tx/rx packet queues,
+     *  hold packets in a heap with the minimum SN on top 
+     */
+    typedef std::priority_queue<Packet*,
+				std::vector<Packet*>,
+				uwcbr_sn_greater> pkt_queue_t;    
+    /** Hold the received packets until they can be processed in order */
+    pkt_queue_t recv_queue;
+    /** Hold the packets that exceed the transmission window */
+    pkt_queue_t send_queue; 
     
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     int debug_;                 /**< Flag to enable several levels of debug. */
     int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
     uint16_t traffic_type_;         /**< Traffic type of the packets. */
-    int use_rtt_timeout;        /**< Flag to enable the use of the estimated RTT as the retx timeout */
-    double timeout_;            /**< Timeout for the packet retransmission */
+    /** Enable the use of the estimated RTT as the retx timeout */
+    int use_rtt_timeout;
+    /** Timeout for the packet retransmission */
+    double timeout_;            
     
     UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
 
@@ -300,15 +310,24 @@ protected:
     sn_t hrsn;                  /**< Highest received sequence number. */
     sn_t rx_window;             /**< Size of the receiver window */
     
-    int pkts_recv;              /**< Total number of received packets. Packet out of sequence are not counted here. */
+    int pkts_recv;              /**< Total number of packets received in order */
     int pkts_ooseq;             /**< Total number of packets received out of sequence. */
     int pkts_lost;              /**< Total number of lost packets, including packets received out of sequence. */
+    int pkts_dup;               /**< Total number of duplicate packets received */
+    int acks_recv;               /**< Total number of correct ACKs received */
+    int acks_dup;                /**< Total number of duplicate ACKs received */
     int pkts_invalid;           /**< Total number of invalid packets received. */
+    int acks_invalid;
+
+    int acks_sent;
+    int acks_dup_sent;
+    
     int pkts_last_reset;        /**< Used for error checking after stats are reset. Set to pkts_lost+pkts_recv each time resetStats is called. */
+    int acks_last_reset;
     
     double rftt;                /**< Forward Trip Time seen for last received packet. */
-    double srtt;                /**< Smoothed Round Trip Time, calculated as for TCP. */
-    double sftt;                /**< Smoothed Forward Trip Time, calculated as srtt. */
+    //double srtt;                /**< Smoothed Round Trip Time, calculated as for TCP. */
+    //double sftt;                /**< Smoothed Forward Trip Time, calculated as srtt. */
     double lrtime;              /**< Time of last packet reception. */
     double sthr;                /**< Smoothed throughput calculation. */
     
@@ -376,6 +395,11 @@ protected:
      * @param recvd The received packet to ACK
      */
     virtual void sendAck(Packet *recvd);
+
+    /**
+     * Send packets from the send_queue until the tx window is full
+     */
+    virtual void slideTxWindow();
     
     /**
      * Allocates, initialize and sends a packet with the default priority flag set from tcl.
@@ -429,14 +453,14 @@ protected:
      * @param double& Delay Time between the last two receipts.
      */
     virtual void updateThroughput(const int&, const double&);
-    
+
     /**
      * Increases the number of packets lost.
      * 
      * @param int& Number of packets lost.
      */
     virtual void incrPktLost(const int&);
-    
+
     /**
      * Increases by one the number of received packets.
      */
@@ -451,7 +475,7 @@ protected:
      * Increases by one the number of invalid packets.
      */
     virtual void incrPktInvalid();
-    
+
     /**
      * Returns the amount of time to wait before the next transmission. It depends on the PoissonTraffic_ flag.
      * 
