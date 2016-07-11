@@ -151,6 +151,7 @@ UwCbrModule::UwCbrModule()
     bind("debug_", &debug_);
     bind("drop_out_of_order_", &drop_out_of_order_);
     bind("traffic_type_", (uint*) &traffic_type_);
+    bind("use_rtt_timeout", &use_rtt_timeout);
     bind("timeout_", &timeout_);
     bind("rx_window", (uint*) &rx_window);
     bind("tx_window", (uint*) &tx_window);
@@ -310,7 +311,7 @@ void UwCbrModule::sendPkt(Packet *p, double delay) {
     UwRetxTimer *timer = new UwRetxTimer(this, uwcbrh->sn());
     pair<map<sn_t,UwRetxTimer*>::iterator,bool> ret_timer = packet_retx_timers.insert(pair<sn_t,UwRetxTimer*>(uwcbrh->sn(), timer));
     assert(ret_timer.second);
-    timer->sched(timeout_);
+    timer->sched(getRetxTimeout());
     
     if (debug_ > 10)
         printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
@@ -339,7 +340,7 @@ void UwCbrModule::resendPkt(sn_t sn) {
     UwRetxTimer *timer = packet_retx_timers[sn];
     hdr_cmn* ch = hdr_cmn::access(p);
     ch->uid_ = uidcnt_++;
-    timer->resched(timeout_);
+    timer->resched(getRetxTimeout());
 
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
     double delay = 0;
