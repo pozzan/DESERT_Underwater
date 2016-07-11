@@ -115,8 +115,12 @@ UwCbrModule::UwCbrModule()
     traffic_type_(0),
     timeout_(0),
     sendTmr_(this),
+    stopped(true),
     txsn(1),
+    ack_sn(1),
+    tx_window(1),
     hrsn(0),
+    rx_window(1),
     pkts_recv(0),
     pkts_ooseq(0),
     pkts_lost(0),
@@ -148,6 +152,8 @@ UwCbrModule::UwCbrModule()
     bind("drop_out_of_order_", &drop_out_of_order_);
     bind("traffic_type_", (uint*) &traffic_type_);
     bind("timeout_", &timeout_);
+    bind("rx_window", (uint*) &rx_window);
+    bind("tx_window", (uint*) &tx_window);
 }
 
 UwCbrModule::~UwCbrModule() {
@@ -290,7 +296,25 @@ void UwCbrModule::initAck(Packet *p, Packet *recvd) {
 }
 
 void UwCbrModule::start() {
+    stopped = false;
     sendTmr_.resched(getTimeBeforeNextPkt());
+}
+
+void UwCbrModule::sendPkt(Packet *p, double delay) {
+    hdr_cmn *ch = HDR_CMN(p);
+    hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
+    
+    pair<map<sn_t,Packet*>::iterator,bool> ret = packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->copy()));
+    assert(ret.second);
+    
+    UwRetxTimer *timer = new UwRetxTimer(this, uwcbrh->sn());
+    pair<map<sn_t,UwRetxTimer*>::iterator,bool> ret_timer = packet_retx_timers.insert(pair<sn_t,UwRetxTimer*>(uwcbrh->sn(), timer));
+    assert(ret_timer.second);
+    timer->sched(timeout_);
+    
+    if (debug_ > 10)
+        printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
+    sendDown(p, delay);
 }
 
 void UwCbrModule::sendPkt() {
@@ -300,18 +324,14 @@ void UwCbrModule::sendPkt() {
 
     hdr_cmn* ch       = hdr_cmn::access(p);
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
-    
-    pair<map<sn_t,Packet*>::iterator,bool> ret = packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->copy()));
-    assert(ret.second);
 
-    UwRetxTimer *timer = new UwRetxTimer(this, uwcbrh->sn());
-    pair<map<sn_t,UwRetxTimer*>::iterator,bool> ret_timer = packet_retx_timers.insert(pair<sn_t,UwRetxTimer*>(uwcbrh->sn(), timer));
-    assert(ret_timer.second);
-    timer->sched(timeout_);
-    
-    if (debug_ > 10)
-        printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
-    sendDown(p, delay);
+    if (uwcbrh->sn() > ack_sn + tx_window - 1) {
+	if (debug_) cerr << "Tx window is full, enqueue packet SN=" << uwcbrh->sn() << endl;	
+	send_queue.push(p);
+    }
+    else {
+	sendPkt(p, delay);
+    }
 }
 
 void UwCbrModule::resendPkt(sn_t sn) {
@@ -376,6 +396,7 @@ void UwCbrModule::stop() {
 	 i++) {
 	i->second->force_cancel();
     }
+    stopped = true;
 }
 
 void UwCbrModule::recvAck(Packet *p) {
@@ -400,6 +421,12 @@ void UwCbrModule::recvAck(Packet *p) {
     }
 
     ack_check[uwcbrh->sn()] = true;
+    if (uwcbrh->sn() == ack_sn) {
+	sn_t first_unacked = uwcbrh->sn();
+	while (ack_check[first_unacked]) first_unacked++;
+	if (debug_) cerr << "Advance the window to SN=" << first_unacked << endl;
+	ack_sn = first_unacked;
+    }
 
     Packet::free(i->second);
     packet_buffer.erase(i);
@@ -418,6 +445,16 @@ void UwCbrModule::recvAck(Packet *p) {
     
     updateFTT(rftt);
     Packet::free(p);
+
+    while (!send_queue.empty() && !stopped) {
+	Packet *q = send_queue.top();
+	hdr_uwcbr *qh = HDR_UWCBR(q);
+	if (qh->sn() > ack_sn + tx_window - 1) break;
+	send_queue.pop();
+	if (debug_) cerr << "Send a packet from the send_queue SN=" << qh->sn() << endl;
+	double delay = 0;
+	sendPkt(q, delay);
+    }
 }
 
 void UwCbrModule::recv(Packet* p) {
@@ -442,6 +479,15 @@ void UwCbrModule::recv(Packet* p) {
 	incrPktInvalid();
 	sendAck(p);
 	drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
+	return;
+    }
+
+    if (uwcbrh->sn() > esn + rx_window - 1) {
+	if (debug_) cerr << "Packet SN=" << uwcbrh->sn() <<
+			" out of window [" << esn << "," << esn + rx_window - 1 <<
+			"]" << endl;
+	//incrPktOutOfWin();
+	drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
 	return;
     }
     

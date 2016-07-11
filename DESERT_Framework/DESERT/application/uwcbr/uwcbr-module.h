@@ -273,14 +273,16 @@ protected:
     uint16_t dstPort_;          /**< Destination port. */
     nsaddr_t dstAddr_;          /**< IP of the destination. */
     char priority_;             /**< Priority of the data packets. */
+
+    typedef std::priority_queue<Packet*, std::vector<Packet*>, uwcbr_sn_greater> pkt_queue_t;
     
     std::vector<bool> sn_check;             /**< Used to keep track of the packets already received. */
     std::vector<bool> ack_check;            /**< Used to keep track of which packets have been ACKed */
     std::map<sn_t, Packet*> packet_buffer;  /**< Hold the packets that have not been ACKed yet, indexed by sn */
     std::map<sn_t, UwRetxTimer*> packet_retx_timers; /**< Hold the timers that schedule the retransmissions, indexed by sn */
 
-    typedef std::priority_queue<Packet*, std::vector<Packet*>, uwcbr_sn_greater> recv_queue_t;
-    recv_queue_t recv_queue; /**< Hold the received packets until they can be processed in order */
+    pkt_queue_t recv_queue; /**< Hold the received packets until they can be processed in order */
+    pkt_queue_t send_queue; /**< Hold the packets that cannot yet be sent */
     
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     int debug_;                 /**< Flag to enable several levels of debug. */
@@ -289,9 +291,16 @@ protected:
     double timeout_;            /**< Timeout for the packet retransmission */
     
     UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
+
+    bool stopped;               /**< Flag to stop sending queued packets when the tx window slides foward */
     
     sn_t txsn;                  /**< Sequence number of the next packet to be transmitted. */
+    sn_t ack_sn;                /**< Sequence number of the next packet to be ACKed */
+    sn_t tx_window;             /**< Size of the transmitter window */
+    
     sn_t hrsn;                  /**< Highest received sequence number. */
+    sn_t rx_window;             /**< Size of the receiver window */
+    
     int pkts_recv;              /**< Total number of received packets. Packet out of sequence are not counted here. */
     int pkts_ooseq;             /**< Total number of packets received out of sequence. */
     int pkts_lost;              /**< Total number of lost packets, including packets received out of sequence. */
@@ -350,6 +359,13 @@ protected:
      * @see UwCbrModule::initPkt()
      */
     virtual void sendPkt();
+
+    /**
+     * Send an already constructed packet
+     * \param p The packet to send
+     * \param delay Delay that the packet suffers when it is passed to the lower layer
+     */
+    virtual void sendPkt(Packet *p, double delay);
 
     /**
      * Retransmit the packet with sequence number sn from the packet buffer
