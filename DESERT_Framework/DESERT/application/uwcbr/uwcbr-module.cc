@@ -136,7 +136,7 @@ UwCbrModule::UwCbrModule()
     fttsamples(0),
     sumbytes(0),
     sumdt(0),
-    esn(0)
+    esn(1)
 { // binding to TCL variables
     bind("period_", &period_);
     bind("destPort_", (int*) &dstPort_);
@@ -159,6 +159,12 @@ UwCbrModule::~UwCbrModule() {
 	 i != packet_buffer.end();
 	 i++) {
 	Packet::free(i->second);
+    }
+
+    while (!recv_queue.empty()) {
+	Packet *p = recv_queue.top();
+	recv_queue.pop();
+	Packet::free(p);
     }
 }
 
@@ -229,7 +235,7 @@ void UwCbrModule::initPkt(Packet* p) {
     hdr_cmn* ch = hdr_cmn::access(p);
     ch->uid()   = uidcnt_++;
     ch->ptype() = PT_UWCBR;
-    ch->size()  = pktSize_ + getCbrHeaderSize();
+    ch->size()  = pktSize_;
 
     hdr_uwip* uwiph  = hdr_uwip::access(p);
     uwiph->daddr()   = dstAddr_;
@@ -428,8 +434,6 @@ void UwCbrModule::recv(Packet* p) {
 	return;
     }
 
-    esn = hrsn + 1; // expected sn
-    
     if (sn_check[uwcbrh->sn() & 0x00ffffff]) { // Packet already processed: drop it
 	incrPktInvalid();
 	sendAck(p);
@@ -437,53 +441,58 @@ void UwCbrModule::recv(Packet* p) {
 	return;
     }
     
-    sn_check[uwcbrh->sn() & 0x00ffffff] = true;
+    sn_check[uwcbrh->sn() & 0x00ffffff] = true;    
+    hrsn = max(uwcbrh->sn(), hrsn);
+    recv_queue.push(p->copy());
 
-    ch->size() -= getCbrHeaderSize();
-    
-    // if (drop_out_of_order_) {
-    //     if (uwcbrh->sn() < esn) { // packet is out of sequence and is to be discarded
-    //         incrPktOoseq();
-    //         if (debug_ > 1) {
-    //             printf("CbrModule::recv() Pkt out of sequence! cbrh->sn=%d\thrsn=%d\tesn=%d\n", uwcbrh->sn(), hrsn, esn);
-    //         }
-    //         drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
-    //         return;
-    //     }
-    // }
-
-    rftt = Scheduler::instance().clock() - ch->timestamp();
-
-    if (uwcbrh->rftt_valid()) {
-        double rtt = rftt + uwcbrh->rftt();
-        updateRTT(rtt);
+    if (uwcbrh->sn() != esn) { // packet is out of sequence
+	incrPktOoseq();
+	if (debug_ > 1) {
+	    printf("CbrModule::recv() Pkt out of sequence! sn=%d\thrsn=%d\tesn=%d\n", uwcbrh->sn(), hrsn, esn);
+	}
     }
-
-    updateFTT(rftt);
-
-    /* a new packet has been received */
-    incrPktRecv();
     
-    hrsn = uwcbrh->sn();
-    // if (drop_out_of_order_) {
-    //     if (uwcbrh->sn() > esn) { // packet losses are observed
-    //         incrPktLost(uwcbrh->sn() - (esn));
-    //     }
-    // }
-
-    double dt = Scheduler::instance().clock() - lrtime;
-    updateThroughput(ch->size(), dt);
-
-    lrtime = Scheduler::instance().clock();
-
     sendAck(p);
     Packet::free(p);
 
-    // if (drop_out_of_order_) {
-    //     if (pkts_lost + pkts_recv + pkts_last_reset != hrsn) {
-    //         fprintf(stderr, "ERROR CbrModule::recv() pkts_lost=%d  pkts_recv=%d  hrsn=%d\n", pkts_lost, pkts_recv, hrsn);
-    //     }
-    // }
+    processOrderedPackets();    
+}
+
+void UwCbrModule::processOrderedPackets() {
+    if (debug_) cerr << "Process packet queue" << endl;
+    Packet *p;
+    hdr_cmn *ch;
+    hdr_uwcbr *uwcbrh;
+    while (!recv_queue.empty()) {
+	p = recv_queue.top();
+	ch = HDR_CMN(p);
+	uwcbrh = HDR_UWCBR(p);
+	
+	if (debug_) cerr << "Top SN=" << uwcbrh->sn() << endl;
+
+	if (uwcbrh->sn() != esn) break;
+	
+	if (debug_) cerr << "Top has SN=esn=" << esn << endl;
+	
+	rftt = Scheduler::instance().clock() - ch->timestamp();
+	
+	if (uwcbrh->rftt_valid()) {
+	    double rtt = rftt + uwcbrh->rftt();
+	    updateRTT(rtt);
+	}
+	
+	updateFTT(rftt);
+
+	incrPktRecv();
+	
+	double dt = Scheduler::instance().clock() - lrtime;
+	updateThroughput(ch->size(), dt);
+	
+	lrtime = Scheduler::instance().clock();
+
+	recv_queue.pop();
+	esn++;
+    }
 }
 
 double UwCbrModule::GetRTT() const {
