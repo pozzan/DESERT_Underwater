@@ -277,6 +277,7 @@ protected:
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     int debug_;                 /**< Flag to enable several levels of debug. */
     int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
+    int use_rtt_timeout;        /**< Flag to enable the use of the estimated RTT as the retx timeout */
     double timeout_;            /**< Timeout for the packet retransmission */
     
     UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
@@ -449,6 +450,12 @@ protected:
      * @see PoissonTraffic_
      */
     virtual double getTimeBeforeNextPkt();
+
+    inline double getRetxTimeout() {
+	if (!use_rtt_timeout) return timeout_;
+	double rtt = GetRTT();
+	return rtt > 0 ? rtt + 3 * GetRTTstd()  : timeout_;
+    }
     
     /**
      * Returns the size in byte of a <i>hdr_uwcbr</i> packet header.
