@@ -187,6 +187,9 @@ int UwCbrModule::command(int argc, const char*const* argv) {
         } else if (strcasecmp(argv[1], "getsentpkts") == 0) {
             tcl.resultf("%d", (txsn - 1) < max_tx_win_sn() ? txsn-1 : max_tx_win_sn());
             return TCL_OK;
+	} else if (strcasecmp(argv[1], "getretxpkts") == 0) {
+	    tcl.resultf("%d", stats.pkts_retx);
+	    return TCL_OK;
 	}
 	else if (strcasecmp(argv[1], "getgeneratedpkts") == 0) {
 	    tcl.resultf("%d", txsn-1);
@@ -316,6 +319,10 @@ void UwCbrModule::sendPkt(Packet *p, double delay) {
 }
 
 void UwCbrModule::sendPkt() {
+    if (txsn >= USHRT_MAX) {
+	cerr << "Reached the max value for the SN, " << USHRT_MAX-1 << endl;
+	return;
+    }
     double delay      = 0;
     Packet* p         = Packet::alloc();
     initPkt(p);
@@ -343,6 +350,7 @@ void UwCbrModule::resendPkt(sn_t sn) {
     double delay = 0;
     if (debug_ > 10)
         printf("CbrModule(%d)::resendPkt, resend a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
+    stats.pkts_retx++;
     sendDown(p, delay);
 }
 
@@ -359,6 +367,10 @@ void UwCbrModule::sendAck(Packet *recvd) {
 }
 
 void UwCbrModule::sendPktLowPriority() {
+    if (txsn >= USHRT_MAX) {
+	cerr << "Reached the max value for the SN, " << USHRT_MAX-1 << endl;
+	return;
+    }
     double delay       = 0;
     Packet* p          = Packet::alloc();
     initPkt(p);
@@ -375,6 +387,10 @@ void UwCbrModule::sendPktLowPriority() {
 }
 
 void UwCbrModule::sendPktHighPriority() {
+    if (txsn >= USHRT_MAX) {
+	cerr << "Reached the max value for the SN, " << USHRT_MAX-1 << endl;
+	return;
+    }
     double delay       = 0;
     Packet* p          = Packet::alloc();
     initPkt(p);
