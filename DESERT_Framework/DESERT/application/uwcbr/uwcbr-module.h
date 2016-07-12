@@ -375,6 +375,7 @@ protected:
     UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
 
     bool stopped;               /**< Flag to stop sending queued packets when the tx window slides foward */
+    int use_arq;                /**< Flag to enable the ARQ */
     
     sn_t txsn;                  /**< Sequence number of the next packet to be transmitted. */
     sn_t ack_sn;                /**< Sequence number of the next packet to be ACKed */
@@ -526,8 +527,15 @@ protected:
 	return rtt > 0 ? rtt + 3 * GetRTTstd()  : timeout_;
     }
 
-    inline sn_t max_tx_win_sn() { return ack_sn + ((sn_t)tx_window) - 1; }
-    inline sn_t max_rx_win_sn() { return esn + ((sn_t) rx_window) - 1; }
+    inline sn_t max_tx_win_sn() {
+	if (use_arq) return ack_sn + ((sn_t)tx_window) - 1;
+	else return numeric_limits<sn_t>::max();
+    }
+
+    inline sn_t max_rx_win_sn() {
+	if (use_arq) return esn + ((sn_t) rx_window) - 1;
+	else return numeric_limits<sn_t>::max();
+    }
     
     /**
      * Returns the size in byte of a <i>hdr_uwcbr</i> packet header.

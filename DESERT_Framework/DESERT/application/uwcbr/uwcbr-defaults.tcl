@@ -44,6 +44,7 @@ Module/UW/CBR set use_rtt_timeout     1
 Module/UW/CBR set timeout_            60
 Module/UW/CBR set rx_window           1
 Module/UW/CBR set tx_window           1
+Module/UW/CBR set use_arq             0
 
 Module/UW/CBR instproc init {args} {
     $self next $args
