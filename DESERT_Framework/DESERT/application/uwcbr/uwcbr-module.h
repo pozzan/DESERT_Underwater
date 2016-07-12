@@ -348,9 +348,9 @@ protected:
     uwcbr_stats stats;
     
     static int uidcnt_;         /**< Unique id of the packet generated. */
-    uint16_t dstPort_;          /**< Destination port. */
-    nsaddr_t dstAddr_;          /**< IP of the destination. */
-    char priority_;             /**< Priority of the data packets. */
+    int dstPort_;          /**< Destination port. */
+    int dstAddr_;          /**< IP of the destination. */
+    int priority_;             /**< Priority of the data packets. */
 
     /** Used to keep track of the packets already received. */
     std::vector<bool> sn_check;
@@ -377,7 +377,7 @@ protected:
     int pktSize_;               /**< <i>UWCBR</i> packets payload size. */
     int debug_;                 /**< Flag to enable several levels of debug. */
     int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
-    uint16_t traffic_type_;         /**< Traffic type of the packets. */
+    int traffic_type_;         /**< Traffic type of the packets. */
     /** Enable the use of the estimated RTT as the retx timeout */
     int use_rtt_timeout;
     /** Timeout for the packet retransmission */
@@ -389,10 +389,10 @@ protected:
     
     sn_t txsn;                  /**< Sequence number of the next packet to be transmitted. */
     sn_t ack_sn;                /**< Sequence number of the next packet to be ACKed */
-    sn_t tx_window;             /**< Size of the transmitter window */
+    int tx_window;             /**< Size of the transmitter window */
     
     sn_t hrsn;                  /**< Highest received sequence number. */
-    sn_t rx_window;             /**< Size of the receiver window */
+    int rx_window;             /**< Size of the receiver window */
     sn_t esn;               /**< Expected serial number. */
         
     /**
@@ -536,6 +536,9 @@ protected:
 	double rtt = GetRTT();
 	return rtt > 0 ? rtt + 3 * GetRTTstd()  : timeout_;
     }
+
+    inline sn_t max_tx_win_sn() { return ack_sn + ((sn_t)tx_window) - 1; }
+    inline sn_t max_rx_win_sn() { return esn + ((sn_t) rx_window) - 1; }
     
     /**
      * Returns the size in byte of a <i>hdr_uwcbr</i> packet header.
