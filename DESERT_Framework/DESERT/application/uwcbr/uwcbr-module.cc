@@ -103,8 +103,8 @@ UwCbrModule::UwCbrModule() :
     dstPort_(0),
     dstAddr_(0),
     priority_(0),
-    sn_check(USHRT_MAX, false),
-    ack_check(USHRT_MAX, false),
+    sn_check(numeric_limits<sn_t>::max(), false),
+    ack_check(numeric_limits<sn_t>::max(), false),
     PoissonTraffic_(0),
     period_(0),
     pktSize_(0),
@@ -319,8 +319,8 @@ void UwCbrModule::sendPkt(Packet *p, double delay) {
 }
 
 void UwCbrModule::sendPkt() {
-    if (txsn >= USHRT_MAX) {
-	cerr << "Reached the max value for the SN, " << USHRT_MAX-1 << endl;
+    if (txsn >= numeric_limits<sn_t>::max()) {
+	cerr << "Reached the max value for the SN, " << numeric_limits<sn_t>::max()-1 << endl;
 	return;
     }
     double delay      = 0;
@@ -367,8 +367,8 @@ void UwCbrModule::sendAck(Packet *recvd) {
 }
 
 void UwCbrModule::sendPktLowPriority() {
-    if (txsn >= USHRT_MAX) {
-	cerr << "Reached the max value for the SN, " << USHRT_MAX-1 << endl;
+    if (txsn >= numeric_limits<sn_t>::max()) {
+	cerr << "Reached the max value for the SN, " << numeric_limits<sn_t>::max()-1 << endl;
 	return;
     }
     double delay       = 0;
@@ -387,8 +387,8 @@ void UwCbrModule::sendPktLowPriority() {
 }
 
 void UwCbrModule::sendPktHighPriority() {
-    if (txsn >= USHRT_MAX) {
-	cerr << "Reached the max value for the SN, " << USHRT_MAX-1 << endl;
+    if (txsn >= numeric_limits<sn_t>::max()) {
+	cerr << "Reached the max value for the SN, " << numeric_limits<sn_t>::max()-1 << endl;
 	return;
     }
     double delay       = 0;
