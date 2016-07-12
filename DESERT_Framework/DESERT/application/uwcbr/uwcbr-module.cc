@@ -123,14 +123,14 @@ UwCbrModule::UwCbrModule() :
     // binding to TCL variables
     bind("PoissonTraffic_", &PoissonTraffic_);
     bind("debug_", &debug_);
-    bind("destAddr_", (int*) &dstAddr_);
-    bind("destPort_", (int*) &dstPort_);
+    bind("destAddr_", &dstAddr_);
+    bind("destPort_", &dstPort_);
     bind("drop_out_of_order_", &drop_out_of_order_);
     bind("packetSize_", &pktSize_);
     bind("period_", &period_);
-    bind("rx_window", (uint*) &rx_window);
+    bind("rx_window", &rx_window);
     bind("timeout_", &timeout_);
-    bind("tx_window", (uint*) &tx_window);
+    bind("tx_window", &tx_window);
     bind("use_rtt_timeout", &use_rtt_timeout);
 }
 
@@ -185,7 +185,7 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             tcl.resultf("%f", GetFTTstd());
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getsentpkts") == 0) {
-            tcl.resultf("%d", min(txsn-1, ack_sn+tx_window-1));
+            tcl.resultf("%d", (txsn - 1) < max_tx_win_sn() ? txsn-1 : max_tx_win_sn());
             return TCL_OK;
 	}
 	else if (strcasecmp(argv[1], "getgeneratedpkts") == 0) {
@@ -246,14 +246,14 @@ void UwCbrModule::initPkt(Packet* p) {
     ch->size()  = pktSize_;
 
     hdr_uwip* uwiph  = hdr_uwip::access(p);
-    uwiph->daddr()   = dstAddr_;
+    uwiph->daddr()   = (nsaddr_t) dstAddr_;
     
     hdr_uwudp* uwudp = hdr_uwudp::access(p);
-    uwudp->dport()   = dstPort_;
+    uwudp->dport()   = (uint16_t) dstPort_;
 
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
     uwcbrh->sn()       = txsn++;
-    uwcbrh->priority() = priority_;
+    uwcbrh->priority() = (char) priority_;
     ch->timestamp()    = Scheduler::instance().clock();
 
     if (stats.rftt >= 0) {
@@ -322,7 +322,7 @@ void UwCbrModule::sendPkt() {
 
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
 
-    if (uwcbrh->sn() > ack_sn + tx_window - 1) {
+    if (uwcbrh->sn() > max_tx_win_sn()) {
 	if (debug_) cerr << "Tx window is full, enqueue packet SN=" << uwcbrh->sn() << endl;	
 	send_queue.push(p);
     }
@@ -365,7 +365,7 @@ void UwCbrModule::sendPktLowPriority() {
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
     uwcbrh->priority() = 0;
 
-    if (uwcbrh->sn() > ack_sn + tx_window - 1) {
+    if (uwcbrh->sn() > max_tx_win_sn()) {
 	if (debug_) cerr << "Tx window is full, enqueue packet SN=" << uwcbrh->sn() << endl;	
 	send_queue.push(p);
     }
@@ -381,7 +381,7 @@ void UwCbrModule::sendPktHighPriority() {
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
     uwcbrh->priority() = 1;
 
-    if (uwcbrh->sn() > ack_sn + tx_window - 1) {
+    if (uwcbrh->sn() > max_tx_win_sn()) {
 	if (debug_) cerr << "Tx window is full, enqueue packet SN=" << uwcbrh->sn() << endl;	
 	send_queue.push(p);
     }
@@ -462,7 +462,7 @@ void UwCbrModule::slideTxWindow() {
     while (!send_queue.empty()) {
 	Packet *q = send_queue.top();
 	hdr_uwcbr *qh = HDR_UWCBR(q);
-	if (qh->sn() > ack_sn + tx_window - 1) break;
+	if (qh->sn() > max_tx_win_sn()) break;
 	send_queue.pop();
 	if (debug_) cerr << "Send a packet from the send_queue SN=" << qh->sn() << endl;
 	double delay = 0;
@@ -496,9 +496,9 @@ void UwCbrModule::recv(Packet* p) {
 	return;
     }
 
-    if (uwcbrh->sn() > esn + rx_window - 1) {
+    if (uwcbrh->sn() > max_rx_win_sn()) {
 	if (debug_) cerr << "Packet SN=" << uwcbrh->sn() <<
-			" out of window [" << esn << "," << esn + rx_window - 1 <<
+			" out of window [" << esn << "," << max_rx_win_sn() <<
 			"]" << endl;
 	incrPktInvalid();
 	drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
