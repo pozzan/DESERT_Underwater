@@ -135,17 +135,16 @@ struct uwcbr_stats {
     double lrtime;              /**< Time of last packet reception. */
 
     int acks_dup;                /**< Total number of duplicate ACKs received */
+    int acks_dup_sent;
     int acks_invalid;
     int acks_recv;               /**< Total number of correct ACKs received */
+    int acks_sent;
     int pkts_dup;               /**< Total number of duplicate packets received */
     int pkts_invalid;           /**< Total number of invalid packets received. */
-    int pkts_recv;              /**< Total number of packets received in order */
-
-    int acks_sent;
-    int acks_dup_sent;
-    
-    int pkts_ooseq;             /**< Total number of packets received out of sequence. */
     int pkts_lost;              /**< Total number of lost packets, including packets received out of sequence. */
+    int pkts_ooseq;             /**< Total number of packets received out of sequence. */
+    int pkts_recv;              /**< Total number of packets received in order */
+    int pkts_retx;
 
     //double srtt;                /**< Smoothed Round Trip Time, calculated as for TCP. */
     //double sftt;                /**< Smoothed Forward Trip Time, calculated as srtt. */
@@ -177,17 +176,16 @@ struct uwcbr_stats {
 private:
     inline void reset_no_last() {
 	acks_dup = 0;
+	acks_dup_sent = 0;
 	acks_invalid = 0;
 	acks_recv = 0;
+	acks_sent = 0;
 	pkts_dup = 0;
 	pkts_invalid = 0;
-	pkts_recv = 0;
-	
-	acks_sent = 0;
-	acks_dup_sent = 0;
-	
-	pkts_ooseq = 0;
 	pkts_lost = 0;
+	pkts_ooseq = 0;
+	pkts_recv = 0;
+	pkts_retx = 0;
 	
 	//srtt = 0;
 	//sftt = 0;    
