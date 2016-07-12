@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
@@ -508,3 +507,9 @@ protected:
 };
 
 #endif // UWCBR_MODULE_H
+
+// Local Variables:
+// mode: c++
+// indent-tabs-mode: nil
+// c-basic-offset: 4
+// End:

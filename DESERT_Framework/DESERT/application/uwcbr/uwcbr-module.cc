@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
@@ -790,3 +789,9 @@ void uwcbr_stats::update_ftt_rtt(const Packet *const &p) {
     if (uwcbrh->rftt_valid())
         rtt.update(rftt + uwcbrh->rftt());
 }
+
+// Local Variables:
+// mode: c++
+// indent-tabs-mode: nil
+// c-basic-offset: 4
+// End:
