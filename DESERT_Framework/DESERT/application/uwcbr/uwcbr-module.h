@@ -46,8 +46,8 @@
 #include <uwip-module.h>
 #include <uwudp-module.h>
 
-#include <climits>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <queue>
 #include <sstream>
