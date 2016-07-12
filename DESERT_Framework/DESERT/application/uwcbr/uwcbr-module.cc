@@ -114,6 +114,7 @@ UwCbrModule::UwCbrModule() :
     timeout_(0),
     sendTmr_(this),
     stopped(true),
+use_arq(0),
     txsn(1),
     ack_sn(1),
     tx_window(1),
@@ -133,6 +134,7 @@ UwCbrModule::UwCbrModule() :
     bind("timeout_", &timeout_);
     bind("traffic_type_", &traffic_type_);
     bind("tx_window", &tx_window);
+    bind("use_arq", &use_arq);
     bind("use_rtt_timeout", &use_rtt_timeout);
 }
 
@@ -308,14 +310,16 @@ void UwCbrModule::start() {
 void UwCbrModule::sendPkt(Packet *p, double delay) {
     hdr_cmn *ch = HDR_CMN(p);
     hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
+
+    if (use_arq) {
+        pair<map<sn_t,Packet*>::iterator,bool> ret = packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->copy()));
+	assert(ret.second);
     
-    pair<map<sn_t,Packet*>::iterator,bool> ret = packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->copy()));
-    assert(ret.second);
-    
-    UwRetxTimer *timer = new UwRetxTimer(this, uwcbrh->sn());
-    pair<map<sn_t,UwRetxTimer*>::iterator,bool> ret_timer = packet_retx_timers.insert(pair<sn_t,UwRetxTimer*>(uwcbrh->sn(), timer));
-    assert(ret_timer.second);
-    timer->sched(getRetxTimeout());
+	UwRetxTimer *timer = new UwRetxTimer(this, uwcbrh->sn());
+	pair<map<sn_t,UwRetxTimer*>::iterator,bool> ret_timer = packet_retx_timers.insert(pair<sn_t,UwRetxTimer*>(uwcbrh->sn(), timer));
+	assert(ret_timer.second);
+	timer->sched(getRetxTimeout());
+    }
     
     if (debug_ > 10)
         printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
@@ -333,7 +337,7 @@ void UwCbrModule::sendPkt() {
 
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
 
-    if (uwcbrh->sn() > max_tx_win_sn()) {
+    if (uwcbrh->sn() > max_tx_win_sn() && use_arq) {
 	if (debug_) cerr << "Tx window is full, enqueue packet SN=" << uwcbrh->sn() << endl;	
 	send_queue.push(p);
     }
@@ -503,7 +507,7 @@ void UwCbrModule::recv(Packet* p) {
 
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
 
-    if (uwcbrh->is_ack()) {
+    if (uwcbrh->is_ack() && use_arq) {
 	recvAck(p);
 	return;
     }
@@ -516,7 +520,7 @@ void UwCbrModule::recv(Packet* p) {
 	return;
     }
 
-    if (uwcbrh->sn() > max_rx_win_sn()) {
+    if (uwcbrh->sn() > max_rx_win_sn() && use_arq) {
 	if (debug_) cerr << "Packet SN=" << uwcbrh->sn() <<
 			" out of window [" << esn << "," << max_rx_win_sn() <<
 			"]" << endl;
@@ -537,7 +541,7 @@ void UwCbrModule::recv(Packet* p) {
     }
 
     stats.acks_sent++;
-    sendAck(p);
+    if (use_arq) sendAck(p);
     Packet::free(p);
 
     processOrderedPackets();    
@@ -555,7 +559,7 @@ void UwCbrModule::processOrderedPackets() {
 	
 	if (debug_) cerr << "Top SN=" << uwcbrh->sn() << endl;
 
-	if (uwcbrh->sn() != esn) break;
+	if (uwcbrh->sn() != esn && use_arq) break;
 	
 	if (debug_) cerr << "Top has SN=esn=" << esn << endl;
 	
