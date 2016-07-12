@@ -120,6 +120,86 @@ typedef struct hdr_uwcbr {
     inline bool &is_ack() { return is_ack_; }
 } hdr_uwcbr;
 
+struct uwcbr_stats {    
+    int pkts_last_reset;        /**< Used for error checking after stats are reset. Set to pkts_lost+pkts_recv each time resetStats is called. */
+    int acks_last_reset;
+
+    double lrtime;              /**< Time of last packet reception. */
+
+    int acks_dup;                /**< Total number of duplicate ACKs received */
+    int acks_invalid;
+    int acks_recv;               /**< Total number of correct ACKs received */
+    int pkts_dup;               /**< Total number of duplicate packets received */
+    int pkts_invalid;           /**< Total number of invalid packets received. */
+    int pkts_recv;              /**< Total number of packets received in order */
+
+    int acks_sent;
+    int acks_dup_sent;
+    
+    int pkts_ooseq;             /**< Total number of packets received out of sequence. */
+    int pkts_lost;              /**< Total number of lost packets, including packets received out of sequence. */
+
+    //double srtt;                /**< Smoothed Round Trip Time, calculated as for TCP. */
+    //double sftt;                /**< Smoothed Forward Trip Time, calculated as srtt. */
+    //double sthr;                /**< Smoothed throughput calculation. */
+            
+    double rftt;                /**< Forward Trip Time seen for last received packet. */
+  
+    /* Cumulative statistics */
+    double sumrtt;              /**< Sum of RTT samples. */
+    double sumrtt2;             /**< Sum of (RTT^2). */
+    int rttsamples;             /**< Number of RTT samples. */
+
+    double sumftt;              /**< Sum of FTT samples. */
+    double sumftt2;             /**< Sum of (FTT^2). */
+    int fttsamples;             /**< Number of FTT samples. */
+
+    double sumbytes;            /**< Sum of bytes received. */
+    double sumdt;               /**< Sum of the delays. */
+
+    uwcbr_stats() : pkts_last_reset(0), acks_last_reset(0), lrtime(0) {
+	reset_no_last();
+    }
+    
+    inline void reset() {
+	pkts_last_reset += pkts_recv + pkts_invalid;
+	acks_last_reset += acks_recv + acks_dup + acks_invalid;
+	reset_no_last();
+    }
+private:
+    inline void reset_no_last() {
+	acks_dup = 0;
+	acks_invalid = 0;
+	acks_recv = 0;
+	pkts_dup = 0;
+	pkts_invalid = 0;
+	pkts_recv = 0;
+	
+	acks_sent = 0;
+	acks_dup_sent = 0;
+	
+	pkts_ooseq = 0;
+	pkts_lost = 0;
+	
+	//srtt = 0;
+	//sftt = 0;    
+	//sthr = 0;
+	
+	rftt = -1;
+	
+	sumrtt = 0;
+	sumrtt2 = 0;
+	rttsamples = 0;
+	
+	sumftt = 0;
+	sumftt2 = 0;
+	fttsamples = 0;
+	
+	sumbytes = 0;
+	sumdt = 0;
+    }
+};
+
 class uwcbr_sn_greater {
 public:
     bool operator()(Packet const *const &a, Packet const *const &b) const {
@@ -257,6 +337,8 @@ public:
     }
 
 protected:
+    uwcbr_stats stats;
+    
     static int uidcnt_;         /**< Unique id of the packet generated. */
     uint16_t dstPort_;          /**< Destination port. */
     nsaddr_t dstAddr_;          /**< IP of the destination. */
@@ -283,6 +365,8 @@ protected:
     pkt_queue_t send_queue; 
     
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
+    double period_;             /**< Period between two consecutive packet transmissions. */
+    int pktSize_;               /**< <i>UWCBR</i> packets payload size. */
     int debug_;                 /**< Flag to enable several levels of debug. */
     int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
     /** Enable the use of the estimated RTT as the retx timeout */
@@ -300,45 +384,8 @@ protected:
     
     sn_t hrsn;                  /**< Highest received sequence number. */
     sn_t rx_window;             /**< Size of the receiver window */
-    
-    int pkts_recv;              /**< Total number of packets received in order */
-    int pkts_ooseq;             /**< Total number of packets received out of sequence. */
-    int pkts_lost;              /**< Total number of lost packets, including packets received out of sequence. */
-    int pkts_dup;               /**< Total number of duplicate packets received */
-    int acks_recv;               /**< Total number of correct ACKs received */
-    int acks_dup;                /**< Total number of duplicate ACKs received */
-    int pkts_invalid;           /**< Total number of invalid packets received. */
-    int acks_invalid;
-
-    int acks_sent;
-    int acks_dup_sent;
-    
-    int pkts_last_reset;        /**< Used for error checking after stats are reset. Set to pkts_lost+pkts_recv each time resetStats is called. */
-    int acks_last_reset;
-    
-    double rftt;                /**< Forward Trip Time seen for last received packet. */
-    //double srtt;                /**< Smoothed Round Trip Time, calculated as for TCP. */
-    //double sftt;                /**< Smoothed Forward Trip Time, calculated as srtt. */
-    double lrtime;              /**< Time of last packet reception. */
-    double sthr;                /**< Smoothed throughput calculation. */
-    
-    double period_;             /**< Period between two consecutive packet transmissions. */
-    int pktSize_;               /**< <i>UWCBR</i> packets payload size. */
-
-    /* Cumulative statistics */
-    double sumrtt;              /**< Sum of RTT samples. */
-    double sumrtt2;             /**< Sum of (RTT^2). */
-    int rttsamples;             /**< Number of RTT samples. */
-
-    double sumftt;              /**< Sum of FTT samples. */
-    double sumftt2;             /**< Sum of (FTT^2). */
-    int fttsamples;             /**< Number of FTT samples. */
-
-    double sumbytes;            /**< Sum of bytes received. */
-    double sumdt;               /**< Sum of the delays. */
-    
     sn_t esn;               /**< Expected serial number. */
-
+        
     /**
      * Initializes a data packet passed as argument with the default values.
      * 
