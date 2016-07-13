@@ -75,10 +75,11 @@ typedef struct hdr_uwcbr {
     bool rftt_valid_;   /**< Flag used to set the validity of the fft field. */
     char priority_;     /**< Priority flag: 1 means high priority, 0 normal priority. */
     bool is_ack_;       /**< Flag that indicates if this packet is an ACK */
-	
     uint16_t traffic_type_; /**< Traffic type: (video, audio, image, etc..) meaning left to the user */
+    double gen_timestamp_; /**< Time when the packet was generated and put in the send_queue */
+    
     static int offset_; /**< Required by the PacketHeaderManager. */
-
+    
     /**
      * Reference to the offset_ variable.
      */
@@ -126,6 +127,8 @@ typedef struct hdr_uwcbr {
     }
 
     inline bool &is_ack() { return is_ack_; }
+
+    double &gen_timestamp() { return gen_timestamp_; }
 } hdr_uwcbr;
 
 class avg_stddev_stat {
