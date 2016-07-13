@@ -179,6 +179,12 @@ int UwCbrModule::command(int argc, const char*const* argv) {
         } else if (strcasecmp(argv[1], "getthr") == 0) {
             tcl.resultf("%f", GetTHR());
             return TCL_OK;
+        } else if (strcasecmp(argv[1], "getdelay") == 0) {
+            tcl.resultf("%f", stats.avg_delay());
+            return TCL_OK;
+        } else if (strcasecmp(argv[1], "getdelaystd") == 0) {
+            tcl.resultf("%f", stats.delay_stddev());
+            return TCL_OK;
         } else if (strcasecmp(argv[1], "getcbrheadersize") == 0) {
             tcl.resultf("%d", this->getCbrHeaderSize());
             return TCL_OK;
@@ -540,6 +546,14 @@ void UwCbrModule::recv(Packet* p) {
 	}
     }
 
+
+    stats.rftt = Scheduler::instance().clock() - ch->timestamp();    
+    if (uwcbrh->rftt_valid()) {
+	double rtt = stats.rftt + uwcbrh->rftt();
+	updateRTT(rtt);
+    }    
+    updateFTT(stats.rftt);
+        
     stats.acks_sent++;
     if (use_arq) sendAck(p);
     Packet::free(p);
@@ -563,15 +577,8 @@ void UwCbrModule::processOrderedPackets() {
 	
 	if (debug_) cerr << "Top has SN=esn=" << esn << endl;
 	
-	stats.rftt = Scheduler::instance().clock() - ch->timestamp();
+	stats.update_delay(p);
 	
-	if (uwcbrh->rftt_valid()) {
-	    double rtt = stats.rftt + uwcbrh->rftt();
-	    updateRTT(rtt);
-	}
-	
-	updateFTT(stats.rftt);
-
 	incrPktRecv();
 	
 	double dt = Scheduler::instance().clock() - stats.lrtime;
@@ -674,4 +681,29 @@ double UwCbrModule::getTimeBeforeNextPkt() {
         // CBR
         return period_;
     }
+}
+
+double uwcbr_stats::avg_delay() const {
+    if (delaysamples > 0) return sumdelay / delaysamples;
+    else return 0;
+}
+
+double uwcbr_stats::delay_stddev() const {
+    if (delaysamples > 1) {
+	double var = (sumdelay2 - (sumdelay*sumdelay / delaysamples)) / (delaysamples-1);
+	return var > 0 ? sqrt(var) : 0;
+    }
+    else return 0;
+}
+
+void uwcbr_stats::update_delay(const double &delay) {
+    sumdelay += delay;
+    sumdelay2 += delay*delay;
+    delaysamples++;
+}
+
+void uwcbr_stats::update_delay(const Packet *const &p) {
+    hdr_cmn *ch = HDR_CMN(p);
+    double delay = Scheduler::instance().clock() - ch->timestamp();
+    update_delay(delay);
 }
