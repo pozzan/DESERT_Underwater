@@ -156,6 +156,10 @@ struct uwcbr_stats {
     double sumbytes;            /**< Sum of bytes received. */
     double sumdt;               /**< Sum of the delays. */
 
+    double sumdelay;
+    double sumdelay2;
+    int delaysamples;
+
     uwcbr_stats() : pkts_last_reset(0), acks_last_reset(0), lrtime(0) {
 	reset_no_last();
     }
@@ -165,6 +169,11 @@ struct uwcbr_stats {
 	acks_last_reset += acks_recv + acks_dup + acks_invalid;
 	reset_no_last();
     }
+
+    double avg_delay() const;
+    double delay_stddev() const;
+    void update_delay(const double &delay);
+    void update_delay(const Packet *const &p);
 private:
     inline void reset_no_last() {
 	acks_dup = 0;
@@ -192,6 +201,10 @@ private:
 	sumftt = 0;
 	sumftt2 = 0;
 	fttsamples = 0;
+
+	sumdelay = 0;
+	sumdelay2 = 0;
+	delaysamples = 0;
 	
 	sumbytes = 0;
 	sumdt = 0;
