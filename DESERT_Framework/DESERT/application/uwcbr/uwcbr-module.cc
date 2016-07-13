@@ -266,6 +266,7 @@ void UwCbrModule::initPkt(Packet* p) {
     uwcbrh->sn()       = txsn++;
     uwcbrh->priority() = (char) priority_;
     ch->timestamp()    = Scheduler::instance().clock();
+    uwcbrh->gen_timestamp() = Scheduler::instance().clock();
 
     if (stats.rftt >= 0) {
         uwcbrh->rftt() = stats.rftt;
@@ -295,6 +296,7 @@ void UwCbrModule::initAck(Packet *p, Packet *recvd) {
     uwcbrh->sn()       = uwcbrh_recvd->sn();
     uwcbrh->priority() = uwcbrh_recvd->priority();
     ch->timestamp()    = Scheduler::instance().clock();
+    uwcbrh->gen_timestamp() = Scheduler::instance().clock();
 
     if (stats.rftt >= 0) {
         uwcbrh->rftt() = stats.rftt;
@@ -354,6 +356,7 @@ void UwCbrModule::resendPkt(sn_t sn) {
     hdr_cmn* ch = hdr_cmn::access(p);
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
     ch->uid_ = uidcnt_++;
+    ch->timestamp() = Scheduler::instance().clock();
     //uwcbrh->rftt_valid_ = false;
     timer->resched(getRetxTimeout());
 
@@ -480,10 +483,12 @@ void UwCbrModule::slideTxWindow() {
     while (!send_queue.empty()) {
 	Packet *q = send_queue.top();
 	hdr_uwcbr *qh = HDR_UWCBR(q);
+	hdr_cmn *ch = HDR_CMN(q);
 	if (qh->sn() > max_tx_win_sn()) break;
 	send_queue.pop();
 	if (debug_) cerr << "Send a packet from the send_queue SN=" << qh->sn() << endl;
 	double delay = 0;
+	ch->timestamp() = Scheduler::instance().clock();
 	sendPkt(q, delay);
     }
 }
@@ -695,8 +700,8 @@ void avg_stddev_stat::reset() {
 }
 
 void uwcbr_stats::update_delay(const Packet *const &p) {
-    hdr_cmn *ch = HDR_CMN(p);
-    double d = Scheduler::instance().clock() - ch->timestamp();
+    hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
+    double d = Scheduler::instance().clock() - uwcbrh->gen_timestamp();
     delay.update(d);
 }
 
