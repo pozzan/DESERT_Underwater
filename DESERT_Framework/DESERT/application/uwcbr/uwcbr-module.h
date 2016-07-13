@@ -120,7 +120,21 @@ typedef struct hdr_uwcbr {
     inline bool &is_ack() { return is_ack_; }
 } hdr_uwcbr;
 
-struct uwcbr_stats {    
+class avg_stddev_stat {
+public:
+    avg_stddev_stat();
+
+    void update(const double &val);
+    double avg() const;
+    double stddev() const;
+    void reset();
+private:
+    double sum;
+    double sum2;
+    int samples;
+};
+
+struct uwcbr_stats {
     int pkts_last_reset;        /**< Used for error checking after stats are reset. Set to pkts_lost+pkts_recv each time resetStats is called. */
     int acks_last_reset;
 
@@ -145,20 +159,12 @@ struct uwcbr_stats {
     double rftt;                /**< Forward Trip Time seen for last received packet. */
   
     /* Cumulative statistics */
-    double sumrtt;              /**< Sum of RTT samples. */
-    double sumrtt2;             /**< Sum of (RTT^2). */
-    int rttsamples;             /**< Number of RTT samples. */
-
-    double sumftt;              /**< Sum of FTT samples. */
-    double sumftt2;             /**< Sum of (FTT^2). */
-    int fttsamples;             /**< Number of FTT samples. */
-
     double sumbytes;            /**< Sum of bytes received. */
     double sumdt;               /**< Sum of the delays. */
 
-    double sumdelay;
-    double sumdelay2;
-    int delaysamples;
+    avg_stddev_stat delay;
+    avg_stddev_stat ftt;
+    avg_stddev_stat rtt;
 
     uwcbr_stats() : pkts_last_reset(0), acks_last_reset(0), lrtime(0) {
 	reset_no_last();
@@ -170,10 +176,8 @@ struct uwcbr_stats {
 	reset_no_last();
     }
 
-    double avg_delay() const;
-    double delay_stddev() const;
-    void update_delay(const double &delay);
     void update_delay(const Packet *const &p);
+    void update_ftt_rtt(const Packet *const &p);
 private:
     inline void reset_no_last() {
 	acks_dup = 0;
@@ -194,17 +198,9 @@ private:
 	
 	rftt = -1;
 	
-	sumrtt = 0;
-	sumrtt2 = 0;
-	rttsamples = 0;
-	
-	sumftt = 0;
-	sumftt2 = 0;
-	fttsamples = 0;
-
-	sumdelay = 0;
-	sumdelay2 = 0;
-	delaysamples = 0;
+	delay.reset();
+	ftt.reset();
+	rtt.reset();
 	
 	sumbytes = 0;
 	sumdt = 0;
