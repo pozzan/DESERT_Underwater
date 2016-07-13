@@ -471,14 +471,6 @@ void UwCbrModule::recvAck(Packet *p) {
     delete j->second;
     packet_retx_timers.erase(j);
 
-    stats.rftt = Scheduler::instance().clock() - ch->timestamp();
-    
-    if (uwcbrh->rftt_valid()) {
-        double rtt = stats.rftt + uwcbrh->rftt();
-        updateRTT(rtt);
-    }
-    
-    updateFTT(stats.rftt);
     Packet::free(p);
     slideTxWindow();
 }
@@ -501,12 +493,15 @@ void UwCbrModule::recv(Packet* p) {
     if (debug_ > 10) 
 	printf("CbrModule(%d)::recv pktId %d\n", getId(), ch->uid());
 
+    // Incorrect pkt type -> invalid
     if (ch->ptype() != PT_UWCBR) {
         drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
         incrPktInvalid();
         return;
     }
 
+    stats.update_ftt_rtt(p);
+    
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
 
     if (uwcbrh->is_ack() && use_arq) {
@@ -514,14 +509,18 @@ void UwCbrModule::recv(Packet* p) {
 	return;
     }
 
-    if (sn_check[uwcbrh->sn() & 0x00ffffff]) { // Packet already processed: drop it
+    // Check if duplicate
+    if (sn_check[uwcbrh->sn() & 0x00ffffff]) {
 	stats.pkts_dup++;
-	sendAck(p);
-	stats.acks_dup_sent++;
+	if (use_arq) {
+	    sendAck(p);
+	    stats.acks_dup_sent++;
+	}
 	drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
 	return;
     }
 
+    // Check if out of rx window
     if (uwcbrh->sn() > max_rx_win_sn() && use_arq) {
 	if (debug_) cerr << "Packet SN=" << uwcbrh->sn() <<
 			" out of window [" << esn << "," << max_rx_win_sn() <<
@@ -535,23 +534,23 @@ void UwCbrModule::recv(Packet* p) {
     hrsn = max(uwcbrh->sn(), hrsn);
     recv_queue.push(p->copy());
 
-    if (uwcbrh->sn() != esn) { // packet is out of sequence
+    // Check if out of sequence
+    if (uwcbrh->sn() != esn) {
 	incrPktOoseq();
 	if (debug_ > 1) {
 	    printf("CbrModule::recv() Pkt out of sequence! sn=%d\thrsn=%d\tesn=%d\n", uwcbrh->sn(), hrsn, esn);
+	    if (drop_out_of_order_) {
+		drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
+		return;
+	    }
 	}
     }
-
-
-    stats.rftt = Scheduler::instance().clock() - ch->timestamp();    
-    if (uwcbrh->rftt_valid()) {
-	double rtt = stats.rftt + uwcbrh->rftt();
-	updateRTT(rtt);
-    }    
-    updateFTT(stats.rftt);
         
-    stats.acks_sent++;
-    if (use_arq) sendAck(p);
+
+    if (use_arq) {
+	sendAck(p);
+	stats.acks_sent++;
+    }
     Packet::free(p);
 
     processOrderedPackets();    
@@ -569,8 +568,11 @@ void UwCbrModule::processOrderedPackets() {
 	
 	if (debug_) cerr << "Top SN=" << uwcbrh->sn() << endl;
 
-	if (uwcbrh->sn() != esn && use_arq) break;
-	
+	if (uwcbrh->sn() != esn) {
+	    if (use_arq) break;
+	    else incrPktLost(uwcbrh->sn() - esn);
+	}
+	    
 	if (debug_) cerr << "Top has SN=esn=" << esn << endl;
 	
 	stats.update_delay(p);
@@ -582,7 +584,7 @@ void UwCbrModule::processOrderedPackets() {
 	stats.lrtime = Scheduler::instance().clock();
 
 	recv_queue.pop();
-	esn++;
+	esn = uwcbrh->sn()+1;
     }
 }
 
