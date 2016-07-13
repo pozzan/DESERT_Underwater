@@ -180,10 +180,10 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             tcl.resultf("%f", GetTHR());
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getdelay") == 0) {
-            tcl.resultf("%f", stats.avg_delay());
+            tcl.resultf("%f", stats.delay.avg());
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getdelaystd") == 0) {
-            tcl.resultf("%f", stats.delay_stddev());
+            tcl.resultf("%f", stats.delay.stddev());
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getcbrheadersize") == 0) {
             tcl.resultf("%d", this->getCbrHeaderSize());
@@ -591,31 +591,19 @@ void UwCbrModule::processOrderedPackets() {
 }
 
 double UwCbrModule::GetRTT() const {
-    return (stats.rttsamples > 0) ? stats.sumrtt / stats.rttsamples : 0;
+    return stats.rtt.avg();
 }
 
 double UwCbrModule::GetFTT() const {
-    return (stats.fttsamples > 0) ? stats.sumftt / stats.fttsamples : 0;
+    return stats.ftt.avg();
 }
 
 double UwCbrModule::GetRTTstd() const {
-    if (stats.rttsamples > 1) {
-        double var = (stats.sumrtt2 - (stats.sumrtt * stats.sumrtt / stats.rttsamples)) / (stats.rttsamples - 1);
-        return (sqrt(var));
-    } else
-        return 0;
+    return stats.rtt.stddev();
 }
 
 double UwCbrModule::GetFTTstd() const {
-    if (stats.fttsamples > 1) {
-        double var = 0;
-        var = (stats.sumftt2 - (stats.sumftt * stats.sumftt / stats.fttsamples)) / (stats.fttsamples - 1);
-        if (var > 0)
-            return (sqrt(var));
-        else return 0;
-    } else {
-        return 0;
-    }
+    return stats.ftt.stddev();
 }
 
 double UwCbrModule::GetPER() const {
@@ -632,15 +620,11 @@ void UwCbrModule::incrPktLost(const int& npkts) {
 }
 
 void UwCbrModule::updateRTT(const double& rtt) {
-    stats.sumrtt += rtt;
-    stats.sumrtt2 += rtt*rtt;
-    stats.rttsamples++;
+    stats.rtt.update(rtt);
 }
 
 void UwCbrModule::updateFTT(const double& ftt) {
-    stats.sumftt += ftt;
-    stats.sumftt2 += ftt*ftt;
-    stats.fttsamples++;
+    stats.ftt.update(ftt);
 }
 
 void UwCbrModule::updateThroughput(const int& bytes, const double& dt) {
@@ -683,27 +667,48 @@ double UwCbrModule::getTimeBeforeNextPkt() {
     }
 }
 
-double uwcbr_stats::avg_delay() const {
-    if (delaysamples > 0) return sumdelay / delaysamples;
+avg_stddev_stat::avg_stddev_stat(){
+    reset();
+}
+
+void avg_stddev_stat::update(const double &val) {
+    sum += val;
+    sum2 += val*val;
+    samples++;
+}
+
+double avg_stddev_stat::avg() const {
+    if (samples > 0) return sum / samples;
     else return 0;
 }
 
-double uwcbr_stats::delay_stddev() const {
-    if (delaysamples > 1) {
-	double var = (sumdelay2 - (sumdelay*sumdelay / delaysamples)) / (delaysamples-1);
+double avg_stddev_stat::stddev() const {
+    if (samples > 1) {
+	double var = (sum2 - (sum*sum / samples)) / (samples-1);
 	return var > 0 ? sqrt(var) : 0;
     }
     else return 0;
 }
 
-void uwcbr_stats::update_delay(const double &delay) {
-    sumdelay += delay;
-    sumdelay2 += delay*delay;
-    delaysamples++;
+void avg_stddev_stat::reset() {
+    sum = 0;
+    sum2 = 0;
+    samples = 0;
 }
 
 void uwcbr_stats::update_delay(const Packet *const &p) {
     hdr_cmn *ch = HDR_CMN(p);
-    double delay = Scheduler::instance().clock() - ch->timestamp();
-    update_delay(delay);
+    double d = Scheduler::instance().clock() - ch->timestamp();
+    delay.update(d);
+}
+
+void uwcbr_stats::update_ftt_rtt(const Packet *const &p) {
+    hdr_cmn *ch = HDR_CMN(p);
+    hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
+    
+    rftt = Scheduler::instance().clock() - ch->timestamp();
+    ftt.update(rftt);
+    
+    if (uwcbrh->rftt_valid())
+        rtt.update(rftt + uwcbrh->rftt());
 }
