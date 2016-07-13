@@ -614,8 +614,19 @@ double UwCbrModule::GetFTTstd() const {
 }
 
 double UwCbrModule::GetPER() const {
-    cerr << "PER is always zero, pkts are retransmitted" << endl;
-    return 0;
+    if (use_arq) return 0;
+    if (drop_out_of_order_) {
+        if ((stats.pkts_recv + stats.pkts_lost) > 0) {
+            return ((double) stats.pkts_lost / (double) (stats.pkts_recv + stats.pkts_lost));
+        } else {
+            return 0;
+        }
+    } else {
+        if (esn > 1)
+            return (1 - (double) stats.pkts_recv / (double) (esn - 1));
+        else
+            return 0;
+    }
 }
 
 double UwCbrModule::GetTHR() const {
