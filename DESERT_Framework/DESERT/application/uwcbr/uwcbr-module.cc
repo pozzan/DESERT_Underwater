@@ -162,6 +162,12 @@ UwCbrModule::~UwCbrModule() {
 	recv_queue.pop();
 	Packet::free(p);
     }
+
+    while (!send_queue.empty()) {
+	Packet *p = send_queue.top();
+	send_queue.pop();
+	Packet::free(p);
+    }
 }
 
 int UwCbrModule::command(int argc, const char*const* argv) {
@@ -461,29 +467,27 @@ void UwCbrModule::recv(Packet* p) {
 	drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
 	return;
     }
-    
-    sn_check[uwcbrh->sn() & 0x00ffffff] = true;    
-    hrsn = max(uwcbrh->sn(), hrsn);
-    recv_queue.push(p->copy());
 
     // Check if out of sequence
     if (uwcbrh->sn() != esn) {
 	incrPktOoseq();
 	if (debug_ > 1) {
 	    printf("CbrModule::recv() Pkt out of sequence! sn=%d\thrsn=%d\tesn=%d\n", uwcbrh->sn(), hrsn, esn);
-	    if (drop_out_of_order_) {
+	    if (!use_arq && drop_out_of_order_) {
 		drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
 		return;
 	    }
 	}
     }
         
+    sn_check[uwcbrh->sn() & 0x00ffffff] = true;    
+    hrsn = max(uwcbrh->sn(), hrsn);
+    recv_queue.push(p);
 
     if (use_arq) {
 	sendAck(p);
 	stats.acks_sent++;
     }
-    Packet::free(p);
 
     processOrderedPackets();    
 }
@@ -561,6 +565,7 @@ void UwCbrModule::processOrderedPackets() {
 
 	recv_queue.pop();
 	esn = uwcbrh->sn()+1;
+	Packet::free(p);
     }
 }
 
