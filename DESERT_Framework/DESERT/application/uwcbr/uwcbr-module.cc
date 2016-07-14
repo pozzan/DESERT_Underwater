@@ -41,7 +41,15 @@
 
 #include <iostream>
 #include <rng.h>
+#include <sstream>
 #include <stdint.h>
+
+std::string logprefix(const std::string &func) {
+    std::ostringstream os;
+    os << Scheduler::instance().clock() << " " << func << ": ";
+    return os.str();
+}
+#define LOGPREFIX (logprefix(__PRETTY_FUNCTION__))
 
 extern packet_t PT_UWCBR;
 
