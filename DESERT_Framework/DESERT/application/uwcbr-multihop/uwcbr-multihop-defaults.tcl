@@ -25,54 +25,49 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @file   uwcbr-defaults.tcl
+# @author Giovanni Toso
+# @version 1.1.0
 
+load libuwcbr.so
 
-DISTCHECK_CONFIGURE_FLAGS = @NS_ALLINONE_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NSMIRACLE_DISTCHECK_CONFIGURE_FLAGS@ 
+PacketHeaderManager set tab_(PacketHeader/UWCBRMH) 1
 
-ACLOCAL_AMFLAGS = -I m4 
+Module/UW/CBRMHSRC set PoissonTraffic_     1
+Module/UW/CBRMHSRC set debug_              0
+Module/UW/CBRMHSRC set destAddr_           0
+Module/UW/CBRMHSRC set destPort_           0
+Module/UW/CBRMHSRC set drop_out_of_order_  1
+Module/UW/CBRMHSRC set packetSize_         500
+Module/UW/CBRMHSRC set period_             60
+Module/UW/CBRMHSRC set rx_window           1
+Module/UW/CBRMHSRC set timeout_            60
+Module/UW/CBRMHSRC set traffic_type_       0
+Module/UW/CBRMHSRC set tx_window           1
+Module/UW/CBRMHSRC set use_arq             0
+Module/UW/CBRMHSRC set use_rtt_timeout     1
 
-EXTRA_DIST = autogen.sh 
+Module/UW/CBRMHSNK set PoissonTraffic_     1
+Module/UW/CBRMHSNK set debug_              0
+Module/UW/CBRMHSNK set destAddr_           0
+Module/UW/CBRMHSNK set destPort_           0
+Module/UW/CBRMHSNK set drop_out_of_order_  1
+Module/UW/CBRMHSNK set packetSize_         500
+Module/UW/CBRMHSNK set period_             60
+Module/UW/CBRMHSNK set rx_window           1
+Module/UW/CBRMHSNK set timeout_            60
+Module/UW/CBRMHSNK set traffic_type_       0
+Module/UW/CBRMHSNK set tx_window           1
+Module/UW/CBRMHSNK set use_arq             0
+Module/UW/CBRMHSNK set use_rtt_timeout     1
 
-SUBDIRS = m4 \
-    application/uwcbr \
-    application/uwcbr-multihop \
-    application/uwvbr \
-    application/uwApplication \
-    transport/uwudp \
-    network/uwstaticrouting \
-    network/uwsun \
-    network/uwicrp \
-    network/uwip \
-    network/uwflooding \
-    data_link/uwmll \
-    data_link/uw-csma-aloha \
-    data_link/uwdacap \
-    data_link/uwpolling \
-    data_link/uwaloha \
-    data_link/uwsr \
-    data_link/uw-t-lohi \
-    data_link/uwUFetch \
-    data_link/uw-csma-aloha-trigger \
-    data_link/uwtdma \
-    physical/uwphysical \
-    physical/uwgainfromdb \
-    physical/uwphysicaldb\
-    physical/uwphysicalrogersmodel\
-    physical/uwphysicalfromdb\
-    physical/uwmphy_modem \
-    physical/ms2c_evologics \
-    physical/uwmphypatch \
-    physical/uwhermesphy \
-    physical/uwoptical_phy \
-    physical/uw-al \
-    physical/uw-al/packer_common \
-    physical/uw-al/packer_mac \
-    mobility/uwdriftposition \
-    mobility/uwgmposition \
-    mobility/uwrandomlib \
-    mobility/uwsmposition \
-    interference/uwinterference \
-    propagation/uwoptical_propagation \
-    channel/uwoptical_channel
+Module/UW/CBRMHSRC instproc init {args} {
+   $self next $args
+   $self settag "UW/CBRMH"
+}
 
+Module/UW/CBRMHSNK instproc init {args} {
+   $self next $args
+   $self settag "UW/CBRMH"
+}

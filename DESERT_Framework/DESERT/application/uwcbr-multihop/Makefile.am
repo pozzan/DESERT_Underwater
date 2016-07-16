@@ -25,54 +25,43 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+ 
+AM_CXXFLAGS = -Wall -ggdb3
+
+lib_LTLIBRARIES = libuwcbrmh.la 
+check_PROGRAMS = 
+
+SUBDIRS = 
+
+TESTS = 
+
+libuwcbrmh_la_SOURCES = initlib.cc\
+    uwcbr-multihop-defaults.tcl\
+    uwcbr-multihop.cc\
+    tcl-classes.cc \
+    uwcbr-multihop.h
+
+libuwcbrmh_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+libuwcbrmh_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ -L../uwcbr/
+libuwcbrmh_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ -luwcbr
+
+nodist_libuwcbrmh_la_SOURCES = InitTcl.cc
+
+# libuwcbrtracer_la_SOURCES = uwcbr-tracer.cc
+
+# libuwcbrtracer_la_CPPFLAGS = @NS_CPPFLAGS@ @NSMIRACLE_CPPFLAGS@ @DESERT_CPPFLAGS@
+# libuwcbrtracer_la_LDFLAGS =  @NS_LDFLAGS@ @NSMIRACLE_LDFLAGS@ @DESERT_LDFLAGS@ -L./
+# libuwcbrtracer_la_LIBADD = @NS_LIBADD@ @NSMIRACLE_LIBADD@ @DESERT_LIBADD@ -luwcbr
+
+BUILT_SOURCES = InitTcl.cc
+
+CLEANFILES = InitTcl.cc
+
+TCL_FILES = uwcbr-multihop-defaults.tcl
+
+InitTcl.cc: Makefile $(TCL_FILES)
+		cat $(VPATH)/$(TCL_FILES) | @TCL2CPP@ UwCbrMultihopInitTclCode > InitTcl.cc
 
 
-DISTCHECK_CONFIGURE_FLAGS = @NS_ALLINONE_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NSMIRACLE_DISTCHECK_CONFIGURE_FLAGS@ 
-
-ACLOCAL_AMFLAGS = -I m4 
-
-EXTRA_DIST = autogen.sh 
-
-SUBDIRS = m4 \
-    application/uwcbr \
-    application/uwcbr-multihop \
-    application/uwvbr \
-    application/uwApplication \
-    transport/uwudp \
-    network/uwstaticrouting \
-    network/uwsun \
-    network/uwicrp \
-    network/uwip \
-    network/uwflooding \
-    data_link/uwmll \
-    data_link/uw-csma-aloha \
-    data_link/uwdacap \
-    data_link/uwpolling \
-    data_link/uwaloha \
-    data_link/uwsr \
-    data_link/uw-t-lohi \
-    data_link/uwUFetch \
-    data_link/uw-csma-aloha-trigger \
-    data_link/uwtdma \
-    physical/uwphysical \
-    physical/uwgainfromdb \
-    physical/uwphysicaldb\
-    physical/uwphysicalrogersmodel\
-    physical/uwphysicalfromdb\
-    physical/uwmphy_modem \
-    physical/ms2c_evologics \
-    physical/uwmphypatch \
-    physical/uwhermesphy \
-    physical/uwoptical_phy \
-    physical/uw-al \
-    physical/uw-al/packer_common \
-    physical/uw-al/packer_mac \
-    mobility/uwdriftposition \
-    mobility/uwgmposition \
-    mobility/uwrandomlib \
-    mobility/uwsmposition \
-    interference/uwinterference \
-    propagation/uwoptical_propagation \
-    channel/uwoptical_channel
-
+EXTRA_DIST = $(TCL_FILES)

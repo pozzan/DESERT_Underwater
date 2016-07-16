@@ -56,6 +56,7 @@ fi
 #AC_CHECK_WOSS([have_woss=yes],[have_woss=no])
 
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/application/uwcbr'
+DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/application/uwcbr-multihop'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/application/uwvbr'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/application/uwApplication'
 DESERT_CPPFLAGS="$DESERT_CPPFLAGS "'-I$(top_srcdir)/transport/uwudp'
@@ -119,6 +120,7 @@ AC_CONFIG_FILES([
     Makefile
     m4/Makefile
     application/uwcbr/Makefile
+    application/uwcbr-multihop/Makefile
     application/uwvbr/Makefile
     application/uwApplication/Makefile
     transport/uwudp/Makefile
