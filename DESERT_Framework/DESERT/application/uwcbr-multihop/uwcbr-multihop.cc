@@ -78,6 +78,13 @@ void UwCbrMultihopSource::initPkt(Packet *p) {
     hdr_uwcbr_mh *mhh = HDR_UWCBR_MH(p);
     ch->ptype() = PT_UWCBR_MH;
     hdr_uwcbr_mh_assign_path(mhh, forward_path.begin(), forward_path.end());
+
+    if (debug_) {
+	hdr_uwip *iph = HDR_UWIP(p);
+	hdr_uwudp *udph = HDR_UWUDP(p);
+	cerr << LOGPREFIX << "dest ip " << (int) iph->daddr() <<
+	    " port " << (int) udph->dport() << endl;
+    }
 }
 
 void UwCbrMultihopSource::initAck(Packet *p, Packet *recvd) {
@@ -104,6 +111,12 @@ void UwCbrMultihopSink::recv(Packet *p) {
     	drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
     	return;
     }
+
+    hdr_uwip *iph = HDR_UWIP(p);
+    hdr_uwudp *udph = HDR_UWUDP(p);
+    if (debug_) cerr << LOGPREFIX << "Received a packet from " <<
+		    (int) iph->saddr() << " port " << (int) udph->sport() << endl;
+    hdr_uwcbr_mh_update_path(mhh, iph->saddr(), udph->sport());
     
     ch->ptype() = PT_UWCBR;
     UwCbrModule::recv(p);
@@ -120,37 +133,48 @@ void UwCbrMultihopSink::initAck(Packet *p, Packet *recvd) {
     hdr_uwcbr_mh *recvd_mhh = HDR_UWCBR_MH(recvd);
     ch->ptype() = PT_UWCBR_MH;
 
-    uwcbr_mh_addr *begin = recvd_mhh->path() + recvd_mhh->forward_path_begin();
+    uwcbr_mh_addr *begin = recvd_mhh->path();
     uwcbr_mh_addr *end = recvd_mhh->path() + recvd_mhh->forward_path_end();
     reverse_iterator<uwcbr_mh_addr*> rbegin(end);
     reverse_iterator<uwcbr_mh_addr*> rend(begin);
     hdr_uwcbr_mh_assign_path(mhh, rbegin, rend);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-UwCbrMultihop::UwCbrMultihop() {}
-UwCbrMultihop::~UwCbrMultihop() {}
-void UwCbrMultihop::recv(Packet *p) {
+UwCbrMultihopRelay::UwCbrMultihopRelay() : debug_(0) {
+    bind("debug_", &debug_);
 }
 
+UwCbrMultihopRelay::~UwCbrMultihopRelay() {}
 
-int UwCbrMultihop::command(int argc, const char *const *argv) {
-    if (argc == 2) {
-	string s(argv[1]);
-	if (s == "prova")
-	    cerr << "Multihop" << endl;
-	return TCL_OK;
-	return TCL_ERROR;
+void UwCbrMultihopRelay::recv(Packet *p) {
+    cerr << "pkt" << endl;
+    hdr_cmn *ch = HDR_CMN(p);
+    hdr_uwcbr_mh *mhh = HDR_UWCBR_MH(p);    
+    if (ch->ptype() != PT_UWCBR_MH) {
+        drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
+        //incrPktInvalid();
+        return;
     }
-    return Module::command(argc, argv);
+    if (mhh->forward_path_begin() + 1 == mhh->forward_path_end()) {
+    	if (debug_) cerr << LOGPREFIX << "Packet with no more hops" << endl;
+    	drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
+    	return;
+    }
+
+    hdr_uwip *iph = HDR_UWIP(p);
+    hdr_uwudp *udph = HDR_UWUDP(p);
+    if (debug_) cerr << LOGPREFIX << "Received a packet from " <<
+		    (int) iph->saddr() << " port " << (int) udph->sport() << endl;
+    hdr_uwcbr_mh_update_path(mhh, iph->saddr(), udph->sport());
+
+    uwcbr_mh_addr next_hop = mhh->path()[mhh->forward_path_begin()];
+    iph->daddr() = next_hop.ipaddr;
+    udph->dport() = next_hop.port;
+    iph->saddr() = 0;
+    udph->sport() = 0;
+
+    if (debug_) cerr << LOGPREFIX << "Forward packet to " << (int) iph->daddr() <<
+		    " port " << (int) udph->dport() << endl;
+    double delay = 0;
+    sendDown(p, delay);
 }

@@ -44,20 +44,16 @@ public:
 private:
 };
 
-
-
-
-
-class UwCbrMultihop : public Module {
+class UwCbrMultihopRelay : public Module {
 public:
-    UwCbrMultihop();    
-    virtual ~UwCbrMultihop();
-    virtual void recv(Packet *p);
-    virtual int command(int argc, const char *const *argv);
-private:
+    UwCbrMultihopRelay();
+    virtual ~UwCbrMultihopRelay();
+
+    //virtual int command(int argc, const char *const *argv);
     
+    virtual void recv(Packet *p);
+protected:
+    int debug_;
 };
-
-
 
 #endif // UWCBR_MODULE_H
