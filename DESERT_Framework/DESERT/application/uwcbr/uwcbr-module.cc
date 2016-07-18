@@ -87,6 +87,7 @@ void UwSendTimer::expire(Event *e) {
 
 void UwRetxTimer::expire(Event *e) {
     if (module->debug_) cerr << Scheduler::instance().clock() <<"\tTimeout for packet SN=" << packet_sn << endl;
+    module->stats.pkts_retx_timeout++;
     module->resendPkt(packet_sn);
 }
 
@@ -111,8 +112,12 @@ UwCbrModule::UwCbrModule() :
     dstPort_(0),
     dstAddr_(0),
     priority_(0),
+    peer_addr(0),
+    peer_port(0),
     sn_check(numeric_limits<sn_t>::max(), false),
     ack_check(numeric_limits<sn_t>::max(), false),
+    dupack_count(0),
+    dupack_thresh(1),
     PoissonTraffic_(0),
     period_(0),
     pktSize_(0),
@@ -136,6 +141,7 @@ UwCbrModule::UwCbrModule() :
     bind("destAddr_", &dstAddr_);
     bind("destPort_", &dstPort_);
     bind("drop_out_of_order_", &drop_out_of_order_);
+    bind("dupack_thresh", &dupack_thresh);
     bind("packetSize_", &pktSize_);
     bind("period_", &period_);
     bind("rx_window", &rx_window);
@@ -212,14 +218,25 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             tcl.resultf("%d", (txsn - 1) < max_tx_win_sn() ? txsn-1 : max_tx_win_sn());
             return TCL_OK;
 	} else if (strcasecmp(argv[1], "getretxpkts") == 0) {
-	    tcl.resultf("%d", stats.pkts_retx);
+	    tcl.resultf("%d", stats.pkts_retx_timeout + stats.pkts_retx_dupack);
 	    return TCL_OK;
-	}
-	else if (strcasecmp(argv[1], "getgeneratedpkts") == 0) {
+	} else if (strcasecmp(argv[1], "getdupackretxpkts") == 0) {
+	    tcl.resultf("%d", stats.pkts_retx_dupack);
+	    return TCL_OK;
+	} else if (strcasecmp(argv[1], "gettimeoutretxpkts") == 0) {
+	    tcl.resultf("%d", stats.pkts_retx_timeout);
+	    return TCL_OK;
+	} else if (strcasecmp(argv[1], "getgeneratedpkts") == 0) {
 	    tcl.resultf("%d", txsn-1);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getrecvpkts") == 0) {
             tcl.resultf("%d", stats.pkts_recv);
+            return TCL_OK;
+	} else if (strcasecmp(argv[1], "getprocpkts") == 0) {
+            tcl.resultf("%d", stats.pkts_proc);
+            return TCL_OK;
+	} else if (strcasecmp(argv[1], "getinvalidpkts") == 0) {
+            tcl.resultf("%d", stats.pkts_invalid);
             return TCL_OK;
 	} else if (strcasecmp(argv[1], "getduppkts") == 0) {
             tcl.resultf("%d", stats.pkts_dup);
@@ -227,11 +244,17 @@ int UwCbrModule::command(int argc, const char*const* argv) {
 	} else if (strcasecmp(argv[1], "getooseqpkts") == 0) {
             tcl.resultf("%d", stats.pkts_ooseq);
             return TCL_OK;
+	} else if (strcasecmp(argv[1], "getlostpkts") == 0) {
+            tcl.resultf("%d", stats.pkts_lost);
+            return TCL_OK;
         } else if (strcasecmp(argv[1], "getrecvacks") == 0) {
             tcl.resultf("%d", stats.acks_recv);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getdupacks") == 0) {
             tcl.resultf("%d", stats.acks_dup);
+            return TCL_OK;
+	} else if (strcasecmp(argv[1], "getinvalidacks") == 0) {
+            tcl.resultf("%d", stats.acks_invalid);
             return TCL_OK;
 	} else if (strcasecmp(argv[1], "getsentacks") == 0) {
             tcl.resultf("%d", stats.acks_sent);
@@ -273,9 +296,11 @@ void UwCbrModule::initPkt(Packet* p) {
 
     hdr_uwip* uwiph  = hdr_uwip::access(p);
     uwiph->daddr()   = (nsaddr_t) dstAddr_;
+    uwiph->saddr() = 0;
     
     hdr_uwudp* uwudp = hdr_uwudp::access(p);
     uwudp->dport()   = (uint16_t) dstPort_;
+    //uwudp->sport() = 0;
 
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
     uwcbrh->sn()       = txsn++;
@@ -286,7 +311,6 @@ void UwCbrModule::initPkt(Packet* p) {
 
 void UwCbrModule::initAck(Packet *p, Packet *recvd) {
     hdr_cmn* ch = hdr_cmn::access(p);
-    ch->uid()   = uidcnt_++;
     ch->ptype() = PT_UWCBR;
     ch->size()  = getCbrHeaderSize();
 
@@ -298,13 +322,27 @@ void UwCbrModule::initAck(Packet *p, Packet *recvd) {
     hdr_uwudp* uwudp_recvd = hdr_uwudp::access(recvd);
     uwudp->dport()   = uwudp_recvd->sport();
 
+    if (peer_addr == 0 && peer_port == 0) {
+	peer_addr = uwiph_recvd->saddr();
+	peer_port = uwudp_recvd->sport();
+	assert(peer_addr != 0);
+	assert(peer_port != 0);
+    }
+    else {
+	// if (debug_) {
+	//     cerr << LOGPREFIX << "Source address has changed: " << peer_addr << "->" << (int) uwiph->saddr() << endl;
+	//     cerr << LOGPREFIX << "Source port has changed: " << peer_port << "->" << (int) uwudp->sport() << endl;
+	// }
+	assert(peer_addr == uwiph_recvd->saddr());
+	assert(peer_port == uwudp_recvd->sport());
+    }
+    
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
     hdr_uwcbr* uwcbrh_recvd  = HDR_UWCBR(recvd);
     uwcbrh->is_ack() = true;
-    uwcbrh->sn()       = uwcbrh_recvd->sn();
+    uwcbrh->sn()       = esn;
     uwcbrh->priority() = uwcbrh_recvd->priority();
     uwcbrh->traffic_type() = uwcbrh_recvd->traffic_type();
-    ch->timestamp()    = Scheduler::instance().clock();
     uwcbrh->gen_timestamp() = Scheduler::instance().clock();
 
     if (stats.rftt >= 0) {
@@ -330,7 +368,7 @@ void UwCbrModule::sendPkt(Packet *p, double delay) {
     }
 
     if (use_arq && packet_buffer.find(uwcbrh->sn()) == packet_buffer.end()) {
-        pair<map<sn_t,Packet*>::iterator,bool> ret = packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->copy()));
+        pair<map<sn_t,Packet*>::iterator,bool> ret = packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->refcopy()));
 	assert(ret.second);
     
 	UwRetxTimer *timer = new UwRetxTimer(this, uwcbrh->sn());
@@ -414,7 +452,6 @@ void UwCbrModule::resendPkt(sn_t sn) {
     double delay = 0;
     if (debug_ > 10)
         printf("CbrModule(%d)::resendPkt, resend a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
-    stats.pkts_retx++;
     sendPkt(p, delay);
 }
 
@@ -424,6 +461,9 @@ void UwCbrModule::sendAck(Packet *recvd) {
 
     hdr_cmn* ch = hdr_cmn::access(ack);    
     hdr_uwcbr* uwcbrh = HDR_UWCBR(ack);
+    ch->uid()   = uidcnt_++;
+    ch->timestamp()    = Scheduler::instance().clock();
+    
     if (debug_ > 10)
         printf("CbrModule(%d)::sendAck, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
     double delay = 0;
@@ -448,12 +488,14 @@ void UwCbrModule::recv(Packet* p) {
 
     if (uwcbrh->is_ack() && use_arq) {
 	recvAck(p);
+	Packet::free(p);
 	return;
     }
 
     // Check if duplicate
     if (sn_check[uwcbrh->sn() & 0x00ffffff]) {
 	stats.pkts_dup++;
+	stats.pkts_invalid++;
 	if (use_arq) {
 	    sendAck(p);
 	    stats.acks_dup_sent++;
@@ -473,27 +515,28 @@ void UwCbrModule::recv(Packet* p) {
     }
 
     // Check if out of sequence
-    if (uwcbrh->sn() != esn) {
-	incrPktOoseq();
+    if (uwcbrh->sn() != esn) {	
+	stats.acks_dup_sent++;
 	if (debug_ > 1) {
 	    printf("CbrModule::recv() Pkt out of sequence! sn=%d\thrsn=%d\tesn=%d\n", uwcbrh->sn(), hrsn, esn);
 	    if (!use_arq && drop_out_of_order_) {
+		incrPktOoseq();
 		drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
 		return;
 	    }
 	}
     }
+    else if (use_arq) {
+	stats.acks_sent++;
+    }
         
     sn_check[uwcbrh->sn() & 0x00ffffff] = true;    
     hrsn = max(uwcbrh->sn(), hrsn);
-    recv_queue.push(p);
-
-    if (use_arq) {
-	sendAck(p);
-	stats.acks_sent++;
-    }
-
+    stats.pkts_recv++;
+    recv_queue.push(p->refcopy());
     processOrderedPackets();    
+    if (use_arq) sendAck(p);
+    Packet::free(p);
 }
 
 void UwCbrModule::recvAck(Packet *p) {
@@ -502,41 +545,45 @@ void UwCbrModule::recvAck(Packet *p) {
     if (debug_ > 10) 
 	printf("CbrModule(%d)::recvAck pktId %d\n", getId(), ch->uid());
 
-    if (ack_check[uwcbrh->sn()]) {
-	if (debug_ > 10) 
-	    printf("CbrModule(%d)::recvAck pktId %d, duplicate ACK for SN %d\n", getId(), ch->uid(), uwcbrh->sn());
-	stats.acks_dup++;
-	drop(p, 1, UWCBR_DROP_REASON_DUPACK);
-	return;
-    }
-
-    map<sn_t,Packet*>::iterator i = packet_buffer.find(uwcbrh->sn());
-    if (i == packet_buffer.end()) {
-	if (debug_ > 10) 
-	    printf("CbrModule(%d)::recvAck pktId %d, ACK for unknown SN %d\n", getId(), ch->uid(), uwcbrh->sn());
+    // Check invalid ACK
+    if (uwcbrh->sn() < ack_sn) {
+	if (debug_ > 10)
+	    cerr << LOGPREFIX << "Invalid ACK for old packet with SN " << uwcbrh->sn() << endl;
 	stats.acks_invalid++;
-	drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_ACK);
+	drop(p->refcopy(), 1, UWCBR_INVALID_ACK);
 	return;
     }
 
-    stats.acks_recv++;
-    ack_check[uwcbrh->sn()] = true;
+    // Check DUPACK
     if (uwcbrh->sn() == ack_sn) {
-	sn_t first_unacked = uwcbrh->sn();
-	while (ack_check[first_unacked]) first_unacked++;
-	if (debug_) cerr << "Advance the window to SN=" << first_unacked << endl;
-	ack_sn = first_unacked;
+	if (debug_) cerr << LOGPREFIX << "Duplicate ACK for SN " << ack_sn << endl;
+	stats.acks_dup++;
+	dupack_count++;
+	if (dupack_count >= dupack_thresh) {
+	    dupack_count = 0;
+	    stats.pkts_retx_dupack++;
+	    resendPkt(ack_sn);
+	}
+	return;
     }
+    
+    // Normal ACK
+    dupack_count = 0;
+    for (; uwcbrh->sn() > ack_sn; ack_sn++) {
+	map<sn_t,Packet*>::iterator i = packet_buffer.find(ack_sn);
+	assert (i != packet_buffer.end());
+	Packet::free(i->second);
+	packet_buffer.erase(i);
 
-    Packet::free(i->second);
-    packet_buffer.erase(i);
-
-    map<sn_t,UwRetxTimer*>::iterator j = packet_retx_timers.find(uwcbrh->sn());
-    j->second->force_cancel();
-    delete j->second;
-    packet_retx_timers.erase(j);
-
-    Packet::free(p);
+	map<sn_t,UwRetxTimer*>::iterator j = packet_retx_timers.find(ack_sn);
+	j->second->force_cancel();
+	delete j->second;
+	packet_retx_timers.erase(j);
+	
+	stats.acks_recv++;
+	ack_check[ack_sn] = true;
+    }
+    if (debug_) cerr << "Advance the window to SN=" << ack_sn << endl;
     slideTxWindow();
 }
 
@@ -561,13 +608,14 @@ void UwCbrModule::processOrderedPackets() {
 	
 	stats.update_delay(p);
 	
-	incrPktRecv();
+	stats.pkts_proc++;
 	
 	double dt = Scheduler::instance().clock() - stats.lrtime;
 	updateThroughput(ch->size(), dt);
 	stats.lrtime = Scheduler::instance().clock();
 
 	recv_queue.pop();
+	if (use_arq) assert(esn == uwcbrh->sn());
 	esn = uwcbrh->sn()+1;
 	Packet::free(p);
     }
@@ -583,7 +631,6 @@ void UwCbrModule::slideTxWindow() {
 	send_queue.pop();
 	if (debug_) cerr << "Send a packet from the send_queue SN=" << qh->sn() << endl;
 	double delay = 0;
-	ch->timestamp() = Scheduler::instance().clock();
 	sendPkt(q, delay);
     }
 }
