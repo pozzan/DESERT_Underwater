@@ -74,4 +74,11 @@ inline void hdr_uwcbr_mh_update_path(hdr_uwcbr_mh *h, const uwcbr_mh_addr &last_
     begin++;
 }
 
+inline void hdr_uwcbr_mh_update_path(hdr_uwcbr_mh *h, const nsaddr_t &last_addr, const uint16_t &last_port) {
+    uwcbr_mh_addr addr;
+    addr.ipaddr = last_addr;
+    addr.port = last_port;
+    hdr_uwcbr_mh_update_path(h, addr);
+}
+
 #endif

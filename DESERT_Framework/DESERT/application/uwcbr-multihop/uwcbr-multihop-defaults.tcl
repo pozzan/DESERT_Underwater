@@ -62,6 +62,8 @@ Module/UW/CBRMHSNK set tx_window           1
 Module/UW/CBRMHSNK set use_arq             0
 Module/UW/CBRMHSNK set use_rtt_timeout     1
 
+Module/UW/CBRMH_RELAY set debug_           0
+
 Module/UW/CBRMHSRC instproc init {args} {
    $self next $args
    $self settag "UW/CBRMH"

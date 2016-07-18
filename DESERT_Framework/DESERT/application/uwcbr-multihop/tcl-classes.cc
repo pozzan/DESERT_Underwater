@@ -13,15 +13,6 @@ public:
     }
 } class_uwcbr_multihop_pkt;
 
-static class UwCbrMultihopClass : public TclClass {
-public:
-    UwCbrMultihopClass() : TclClass("Module/UW/CBRMH") {}
-
-    TclObject* create(int, const char*const*) {
-        return (new UwCbrMultihop());
-    }
-} class_module_uwcbr_multihop;
-
 static class UwCbrMultihopSourceClass : public TclClass {
 public:
     UwCbrMultihopSourceClass() : TclClass("Module/UW/CBRMHSRC") {}
@@ -39,3 +30,12 @@ public:
         return (new UwCbrMultihopSink());
     }
 } class_uwcbr_multihop_sink;
+
+static class UwCbrMultihopRelayClass : public TclClass {
+public:
+    UwCbrMultihopRelayClass() : TclClass("Module/UW/CBRMH_RELAY") {}
+
+    TclObject* create(int, const char*const*) {
+        return (new UwCbrMultihopRelay());
+    }
+} class_uwcbr_multihop_relay;
