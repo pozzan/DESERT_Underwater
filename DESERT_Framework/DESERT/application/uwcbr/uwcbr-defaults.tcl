@@ -37,6 +37,7 @@ Module/UW/CBR set debug_              0
 Module/UW/CBR set destAddr_           0
 Module/UW/CBR set destPort_           0
 Module/UW/CBR set drop_out_of_order_  1
+Module/UW/CBR set dupack_thresh       3
 Module/UW/CBR set packetSize_         500
 Module/UW/CBR set period_             60
 Module/UW/CBR set rx_window           1
