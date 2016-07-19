@@ -65,6 +65,7 @@ Module/UW/CBRMH_SINK set use_arq             0
 Module/UW/CBRMH_SINK set use_rtt_timeout     1
 
 Module/UW/CBRMH_RELAY set debug_           0
+Module/UW/CBRMH_RELAY set dupack_thresh    2
 
 # Module/UW/CBRMHSRC instproc init {args} {
 #    $self next $args
