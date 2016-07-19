@@ -546,7 +546,7 @@ protected:
     inline double getRetxTimeout() {
 	if (!use_rtt_timeout) return timeout_;
 	double rtt = GetRTT();
-	return rtt > 0 ? rtt + 3 * GetRTTstd()  : timeout_;
+	return rtt > 0 ? rtt + 4 * GetRTTstd()  : timeout_;
     }
 
     inline sn_t max_tx_win_sn() {
