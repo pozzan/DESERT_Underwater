@@ -362,17 +362,20 @@ void UwCbrModule::sendPkt(Packet *p, double delay) {
     }
 
     if (use_arq && packet_buffer.find(uwcbrh->sn()) == packet_buffer.end()) {
-        pair<map<sn_t,Packet*>::iterator,bool> ret = packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->refcopy()));
+        pair<map<sn_t,Packet*>::iterator,bool> ret =
+	    packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->copy()));
 	assert(ret.second);
-    
+
 	UwRetxTimer *timer = new UwRetxTimer(this, uwcbrh->sn());
-	pair<map<sn_t,UwRetxTimer*>::iterator,bool> ret_timer = packet_retx_timers.insert(pair<sn_t,UwRetxTimer*>(uwcbrh->sn(), timer));
+	pair<map<sn_t,UwRetxTimer*>::iterator,bool> ret_timer =
+	    packet_retx_timers.insert(pair<sn_t,UwRetxTimer*>(uwcbrh->sn(), timer));
 	assert(ret_timer.second);
 	timer->sched(getRetxTimeout());
     }
-    
+
     if (debug_ > 10)
-        printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
+        printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n",
+	       getId(), ch->uid(), uwcbrh->sn());
     sendDown(p, delay);
 }
 
@@ -384,7 +387,8 @@ void UwCbrModule::sendPkt() {
     hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
 
     if (uwcbrh->sn() > max_tx_win_sn() && use_arq) {
-	if (debug_) cerr << "Tx window is full, enqueue packet SN=" << uwcbrh->sn() << endl;	
+	if (debug_) cerr << "Tx window is full, enqueue packet SN=" <<
+			uwcbrh->sn() << endl;
 	send_queue.push(p);
     }
     else {
@@ -485,7 +489,6 @@ void UwCbrModule::recv(Packet* p) {
 
     if (uwcbrh->is_ack() && use_arq) {
 	recvAck(p);
-	Packet::free(p);
 	return;
     }
 
@@ -547,7 +550,7 @@ void UwCbrModule::recvAck(Packet *p) {
 	if (debug_ > 10)
 	    cerr << LOGPREFIX << "Invalid ACK for old packet with SN " << uwcbrh->sn() << endl;
 	stats.acks_invalid++;
-	drop(p->refcopy(), 1, UWCBR_INVALID_ACK);
+	drop(p, 1, UWCBR_INVALID_ACK);
 	return;
     }
 
@@ -561,6 +564,7 @@ void UwCbrModule::recvAck(Packet *p) {
 	    stats.pkts_retx_dupack++;
 	    resendPkt(ack_sn);
 	}
+	Packet::free(p);
 	return;
     }
     
@@ -580,6 +584,7 @@ void UwCbrModule::recvAck(Packet *p) {
 	stats.acks_recv++;
 	ack_check[ack_sn] = true;
     }
+    Packet::free(p);
     if (debug_) cerr << "Advance the window to SN=" << ack_sn << endl;
     slideTxWindow();
 }
