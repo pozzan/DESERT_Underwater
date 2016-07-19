@@ -64,6 +64,7 @@ Module/UW/CBRMH_SINK set tx_window           1
 Module/UW/CBRMH_SINK set use_arq             0
 Module/UW/CBRMH_SINK set use_rtt_timeout     1
 
+Module/UW/CBRMH_RELAY set buffer_enabled   1
 Module/UW/CBRMH_RELAY set debug_           0
 Module/UW/CBRMH_RELAY set dupack_thresh    2
 
