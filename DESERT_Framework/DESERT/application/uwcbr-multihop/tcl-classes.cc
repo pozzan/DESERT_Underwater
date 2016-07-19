@@ -15,7 +15,7 @@ public:
 
 static class UwCbrMultihopSourceClass : public TclClass {
 public:
-    UwCbrMultihopSourceClass() : TclClass("Module/UW/CBRMHSRC") {}
+    UwCbrMultihopSourceClass() : TclClass("Module/UW/CBRMH_SRC") {}
 
     TclObject* create(int, const char*const*) {
         return (new UwCbrMultihopSource());
@@ -24,7 +24,7 @@ public:
 
 static class UwCbrMultihopSinkClass : public TclClass {
 public:
-    UwCbrMultihopSinkClass() : TclClass("Module/UW/CBRMHSNK") {}
+    UwCbrMultihopSinkClass() : TclClass("Module/UW/CBRMH_SINK") {}
 
     TclObject* create(int, const char*const*) {
         return (new UwCbrMultihopSink());

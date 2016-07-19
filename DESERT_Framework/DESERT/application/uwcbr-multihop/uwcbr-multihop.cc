@@ -19,7 +19,7 @@ UwCbrMultihopSource::~UwCbrMultihopSource() {}
 int UwCbrMultihopSource::command(int argc, const char *const *argv) {
     Tcl &tcl = Tcl::instance();
     if (argc == 2) {
-	if (strcasecmp(argv[1], "clearhops") == 0) {
+	if (strcasecmp(argv[1], "clearpath") == 0) {
 	    clear_path();
 	    return TCL_OK;
 	}
@@ -63,7 +63,8 @@ void UwCbrMultihopSource::recv(Packet *p) {
         return;
     }
     if (mhh->forward_path_begin() + 1 != mhh->forward_path_end()) {
-    	if (debug_) cerr << LOGPREFIX << "Packet with more hops reached a source" << endl;
+    	if (debug_) cerr << LOGPREFIX << "Packet with more hops" << endl;
+	incrPktInvalid();
     	drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
     	return;
     }
@@ -107,7 +108,8 @@ void UwCbrMultihopSink::recv(Packet *p) {
         return;
     }
     if (mhh->forward_path_begin() + 1 != mhh->forward_path_end()) {
-    	if (debug_) cerr << LOGPREFIX << "Packet with more hops reached a sink" << endl;
+    	if (debug_) cerr << LOGPREFIX << "Packet with more hops" << endl;
+	incrPktInvalid();
     	drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
     	return;
     }
@@ -138,6 +140,13 @@ void UwCbrMultihopSink::initAck(Packet *p, Packet *recvd) {
     reverse_iterator<uwcbr_mh_addr*> rbegin(end);
     reverse_iterator<uwcbr_mh_addr*> rend(begin);
     hdr_uwcbr_mh_assign_path(mhh, rbegin, rend);
+
+    if (debug_) {
+	hdr_uwip *iph = HDR_UWIP(p);
+	hdr_uwudp *udph = HDR_UWUDP(p);
+	cerr << LOGPREFIX << "dest ip " << (int) iph->daddr() <<
+	    " port " << (int) udph->dport() << endl;
+    }
 }
 
 UwCbrMultihopRelay::UwCbrMultihopRelay() : debug_(0) {

@@ -34,42 +34,44 @@ load libuwcbr.so
 
 PacketHeaderManager set tab_(PacketHeader/UWCBRMH) 1
 
-Module/UW/CBRMHSRC set PoissonTraffic_     1
-Module/UW/CBRMHSRC set debug_              0
-Module/UW/CBRMHSRC set destAddr_           0
-Module/UW/CBRMHSRC set destPort_           0
-Module/UW/CBRMHSRC set drop_out_of_order_  1
-Module/UW/CBRMHSRC set packetSize_         500
-Module/UW/CBRMHSRC set period_             60
-Module/UW/CBRMHSRC set rx_window           1
-Module/UW/CBRMHSRC set timeout_            60
-Module/UW/CBRMHSRC set traffic_type_       0
-Module/UW/CBRMHSRC set tx_window           1
-Module/UW/CBRMHSRC set use_arq             0
-Module/UW/CBRMHSRC set use_rtt_timeout     1
+Module/UW/CBRMH_SRC set PoissonTraffic_     1
+Module/UW/CBRMH_SRC set debug_              0
+Module/UW/CBRMH_SRC set destAddr_           0
+Module/UW/CBRMH_SRC set destPort_           0
+Module/UW/CBRMH_SRC set drop_out_of_order_  1
+Module/UW/CBRMH_SRC set dupack_thresh       2
+Module/UW/CBRMH_SRC set packetSize_         500
+Module/UW/CBRMH_SRC set period_             60
+Module/UW/CBRMH_SRC set rx_window           1
+Module/UW/CBRMH_SRC set timeout_            60
+Module/UW/CBRMH_SRC set traffic_type_       0
+Module/UW/CBRMH_SRC set tx_window           1
+Module/UW/CBRMH_SRC set use_arq             0
+Module/UW/CBRMH_SRC set use_rtt_timeout     1
 
-Module/UW/CBRMHSNK set PoissonTraffic_     1
-Module/UW/CBRMHSNK set debug_              0
-Module/UW/CBRMHSNK set destAddr_           0
-Module/UW/CBRMHSNK set destPort_           0
-Module/UW/CBRMHSNK set drop_out_of_order_  1
-Module/UW/CBRMHSNK set packetSize_         500
-Module/UW/CBRMHSNK set period_             60
-Module/UW/CBRMHSNK set rx_window           1
-Module/UW/CBRMHSNK set timeout_            60
-Module/UW/CBRMHSNK set traffic_type_       0
-Module/UW/CBRMHSNK set tx_window           1
-Module/UW/CBRMHSNK set use_arq             0
-Module/UW/CBRMHSNK set use_rtt_timeout     1
+Module/UW/CBRMH_SINK set PoissonTraffic_     1
+Module/UW/CBRMH_SINK set debug_              0
+Module/UW/CBRMH_SINK set destAddr_           0
+Module/UW/CBRMH_SINK set destPort_           0
+Module/UW/CBRMH_SINK set drop_out_of_order_  1
+Module/UW/CBRMH_SINK set dupack_thresh       2
+Module/UW/CBRMH_SINK set packetSize_         500
+Module/UW/CBRMH_SINK set period_             60
+Module/UW/CBRMH_SINK set rx_window           1
+Module/UW/CBRMH_SINK set timeout_            60
+Module/UW/CBRMH_SINK set traffic_type_       0
+Module/UW/CBRMH_SINK set tx_window           1
+Module/UW/CBRMH_SINK set use_arq             0
+Module/UW/CBRMH_SINK set use_rtt_timeout     1
 
 Module/UW/CBRMH_RELAY set debug_           0
 
-Module/UW/CBRMHSRC instproc init {args} {
-   $self next $args
-   $self settag "UW/CBRMH"
-}
+# Module/UW/CBRMHSRC instproc init {args} {
+#    $self next $args
+#    $self settag "UW/CBRMH"
+# }
 
-Module/UW/CBRMHSNK instproc init {args} {
-   $self next $args
-   $self settag "UW/CBRMH"
-}
+# Module/UW/CBRMHSNK instproc init {args} {
+#    $self next $args
+#    $self settag "UW/CBRMH"
+# }
