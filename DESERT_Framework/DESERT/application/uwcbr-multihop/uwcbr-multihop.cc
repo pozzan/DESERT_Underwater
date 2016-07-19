@@ -150,10 +150,12 @@ void UwCbrMultihopSink::initAck(Packet *p, Packet *recvd) {
 
 UwCbrMultihopRelay::UwCbrMultihopRelay() :
     debug_(0),
+    buffer_enabled(1),
     dupack_count(0),
     dupack_thresh(1),
     first_unacked(1)
 {
+    bind("buffer_enabled", &buffer_enabled);
     bind("debug_", &debug_);
     bind("dupack_thresh", &dupack_thresh);
 }
@@ -239,6 +241,12 @@ void UwCbrMultihopRelay::recv(Packet *p) {
 }
 
 void UwCbrMultihopRelay::recvPkt(Packet *p) {
+    if (buffer_enabled == 0) {
+        stats.pkts_forw++;
+        forward(p);
+        return;
+    }
+    
     hdr_cmn *ch = HDR_CMN(p);
     hdr_uwip *iph = HDR_UWIP(p);
     hdr_uwudp *udph = HDR_UWUDP(p);
@@ -258,16 +266,16 @@ void UwCbrMultihopRelay::recvPkt(Packet *p) {
     }
 
     stats.pkts_forw++;
-
-    if (debug_) cerr << LOGPREFIX << "Forward packet to " <<
-                    (int) iph->daddr() << " port " <<
-                    (int) udph->dport() << " SN " <<
-                    cbrh->sn() << endl;
-    double delay = 0;
-    sendDown(p, delay);
+    forward(p);
 }
 
 void UwCbrMultihopRelay::recvAck(Packet *ack) {
+    if (buffer_enabled == 0) {
+        stats.acks_forw++;
+        forward(ack);
+        return;
+    }
+    
     hdr_cmn *ch = HDR_CMN(ack);
     hdr_uwip *iph = HDR_UWIP(ack);
     hdr_uwudp *udph = HDR_UWUDP(ack);
@@ -295,13 +303,7 @@ void UwCbrMultihopRelay::recvAck(Packet *ack) {
             if (debug_) cerr << LOGPREFIX <<
                             "Duplicate ACK for an unknown packet SN " <<
                             first_unacked << endl;
-            if (debug_) cerr << LOGPREFIX << "Forward ACK to " <<
-                            (int) iph->daddr() << " port " <<
-                            (int) udph->dport() << " SN " <<
-                            cbrh->sn() << endl;
-            double delay = 0;
-            stats.acks_forw++;
-            sendDown(ack, delay);
+            forward(ack);
         }
         else if (dupack_count >= dupack_thresh) {
 	    dupack_count = 0;
@@ -311,12 +313,7 @@ void UwCbrMultihopRelay::recvAck(Packet *ack) {
             hdr_uwip *retx_iph = HDR_UWIP(retx);
             hdr_uwudp *retx_udph = HDR_UWUDP(retx);
             hdr_uwcbr *retx_cbrh = HDR_UWCBR(retx);
-            if (debug_) cerr << LOGPREFIX << "Reforward packet to " <<
-                            (int) retx_iph->daddr() << " port " <<
-                            (int) retx_udph->dport() << " SN " <<
-                            retx_cbrh->sn() << endl;
-            double delay = 0;
-            sendDown(retx, delay);
+            forward(retx);
         }
         Packet::free(ack);
         return;
@@ -331,11 +328,18 @@ void UwCbrMultihopRelay::recvAck(Packet *ack) {
 	packet_buffer.erase(i);
     }
     stats.acks_forw++;
+    forward(ack);
+}
 
-    if (debug_) cerr << LOGPREFIX << "Forward ACK to " <<
+void UwCbrMultihopRelay::forward(Packet *p) {
+    hdr_uwip *iph = HDR_UWIP(p);
+    hdr_uwudp *udph = HDR_UWUDP(p);
+    hdr_uwcbr *cbrh = HDR_UWCBR(p);
+    if (debug_) cerr << LOGPREFIX << "Forward to " <<
                     (int) iph->daddr() << " port " <<
-                    (int) udph->dport() << " SN " <<
+                    (int) udph->dport() <<
+                    (cbrh->is_ack() ? " ACK SN " : " SN ") <<
                     cbrh->sn() << endl;
     double delay = 0;
-    sendDown(ack, delay);
+    sendDown(p, delay);
 }

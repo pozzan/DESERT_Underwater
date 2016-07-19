@@ -80,9 +80,11 @@ public:
     virtual void recv(Packet *p);
     virtual void recvPkt(Packet *p);
     virtual void recvAck(Packet *ack);
+    virtual void forward(Packet *p);
 
 protected:
     int debug_;
+    int buffer_enabled;
 
     /** Hold the packets until they are ACKed by the Sink */
     std::map<sn_t,Packet*> packet_buffer;
