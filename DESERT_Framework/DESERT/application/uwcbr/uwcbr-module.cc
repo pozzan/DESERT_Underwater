@@ -497,8 +497,8 @@ void UwCbrModule::recv(Packet* p) {
 	stats.pkts_dup++;
 	stats.pkts_invalid++;
 	if (use_arq) {
-	    sendAck(p);
-	    stats.acks_dup_sent++;
+	    //sendAck(p);
+	    //stats.acks_dup_sent++;
 	}
 	drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
 	return;
