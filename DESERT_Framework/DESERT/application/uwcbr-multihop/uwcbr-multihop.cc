@@ -168,6 +168,37 @@ UwCbrMultihopRelay::~UwCbrMultihopRelay() {
 }
 
 int UwCbrMultihopRelay::command(int argc, const char *const *argv) {
+    Tcl &tcl = Tcl::instance();
+    if (argc == 2) {
+        if (strcasecmp(argv[1], "getforwardedpkts") == 0) {
+            tcl.resultf("%d", stats.pkts_forw);
+            return TCL_OK;
+        }
+        else if (strcasecmp(argv[1], "getforwardedacks") == 0) {
+            tcl.resultf("%d", stats.acks_forw);
+            return TCL_OK;
+        }
+        else if (strcasecmp(argv[1], "getinvalidpkts") == 0) {
+            tcl.resultf("%d", stats.pkts_invalid);
+            return TCL_OK;
+        }
+        else if (strcasecmp(argv[1], "getinvalidacks") == 0) {
+            tcl.resultf("%d", stats.acks_invalid);
+            return TCL_OK;
+        }
+        else if (strcasecmp(argv[1], "getduppkts") == 0) {
+            tcl.resultf("%d", stats.pkts_dup);
+            return TCL_OK;
+        }
+        else if (strcasecmp(argv[1], "getdupacks") == 0) {
+            tcl.resultf("%d", stats.acks_dup);
+            return TCL_OK;
+        }
+        else if (strcasecmp(argv[1], "getretxpkts") == 0) {
+            tcl.resultf("%d", stats.pkts_retx_dupack);
+            return TCL_OK;
+        }
+    }
     return Module::command(argc, argv);
 }
 
@@ -226,7 +257,7 @@ void UwCbrMultihopRelay::recvPkt(Packet *p) {
         return;
     }
 
-    stats.pkts_recv++;
+    stats.pkts_forw++;
 
     if (debug_) cerr << LOGPREFIX << "Forward packet to " <<
                     (int) iph->daddr() << " port " <<
@@ -269,6 +300,7 @@ void UwCbrMultihopRelay::recvAck(Packet *ack) {
                             (int) udph->dport() << " SN " <<
                             cbrh->sn() << endl;
             double delay = 0;
+            stats.acks_forw++;
             sendDown(ack, delay);
         }
         else if (dupack_count >= dupack_thresh) {
