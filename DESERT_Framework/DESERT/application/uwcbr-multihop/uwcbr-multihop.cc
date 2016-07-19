@@ -314,8 +314,8 @@ void UwCbrMultihopRelay::recvAck(Packet *ack) {
             hdr_uwudp *retx_udph = HDR_UWUDP(retx);
             hdr_uwcbr *retx_cbrh = HDR_UWCBR(retx);
             forward(retx);
+            Packet::free(ack);
         }
-        Packet::free(ack);
         return;
     }
 
