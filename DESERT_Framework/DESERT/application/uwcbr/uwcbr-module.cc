@@ -42,6 +42,7 @@
 #include <iostream>
 #include <rng.h>
 #include <sstream>
+#include <stdexcept>
 #include <stdint.h>
 
 std::string logprefix(const std::string &func) {
@@ -290,6 +291,9 @@ int UwCbrModule::command(int argc, const char*const* argv) {
 }
 
 void UwCbrModule::initPkt(Packet* p) {
+    if (txsn >= numeric_limits<sn_t>::max())
+	throw overflow_error("Reached the max value for the SN");
+
     hdr_cmn* ch = hdr_cmn::access(p);
     ch->ptype() = PT_UWCBR;
     ch->size()  = pktSize_;
@@ -383,10 +387,6 @@ void UwCbrModule::sendPkt(Packet *p, double delay) {
 }
 
 void UwCbrModule::sendPkt() {
-    if (txsn >= numeric_limits<sn_t>::max()) {
-	cerr << "Reached the max value for the SN, " << numeric_limits<sn_t>::max()-1 << endl;
-	return;
-    }
     double delay      = 0;
     Packet* p         = Packet::alloc();
     initPkt(p);
