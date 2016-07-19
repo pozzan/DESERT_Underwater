@@ -567,8 +567,9 @@ void UwCbrModule::recvAck(Packet *p) {
 	Packet::free(p);
 	return;
     }
-    
+
     // Normal ACK
+    stats.acks_recv++;
     dupack_count = 0;
     for (; uwcbrh->sn() > ack_sn; ack_sn++) {
 	map<sn_t,Packet*>::iterator i = packet_buffer.find(ack_sn);
@@ -580,8 +581,7 @@ void UwCbrModule::recvAck(Packet *p) {
 	j->second->force_cancel();
 	delete j->second;
 	packet_retx_timers.erase(j);
-	
-	stats.acks_recv++;
+
 	ack_check[ack_sn] = true;
     }
     Packet::free(p);
