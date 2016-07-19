@@ -44,14 +44,14 @@ public:
 };
 
 struct uwcbrmh_relay_stats {
-    int pkts_dup;
-    int pkts_invalid;
-    int pkts_recv;
-    int pkts_retx_dupack;
+    int pkts_dup; /**< Duplicate packets seen, included in pkts_invalid */
+    int pkts_forw; /**< Forwarded packets */
+    int pkts_invalid; /**< Invalid packets */
+    int pkts_retx_dupack; /**< Packets retransmitted because of dupACKs */
 
-    int acks_dup;
-    int acks_forw;
-    int acks_invalid;
+    int acks_dup; /**< Duplicate ACKs seen */
+    int acks_forw; /**< Forwarded ACKs */
+    int acks_invalid; /**< Invalid ACKs */
 
     uwcbrmh_relay_stats() {
         reset_except_total();
@@ -60,8 +60,8 @@ struct uwcbrmh_relay_stats {
 private:
     void reset_except_total() {
         pkts_dup = 0;
+        pkts_forw = 0;
         pkts_invalid = 0;
-        pkts_recv = 0;
         pkts_retx_dupack = 0;
 
         acks_dup = 0;
