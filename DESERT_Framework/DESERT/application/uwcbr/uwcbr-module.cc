@@ -349,12 +349,6 @@ void UwCbrModule::initAck(Packet *p, Packet *recvd) {
     uwcbrh->traffic_type() = uwcbrh_recvd->traffic_type();
     uwcbrh->gen_timestamp() = Scheduler::instance().clock();
 
-    if (stats.rftt >= 0) {
-        uwcbrh->rftt() = stats.rftt;
-        uwcbrh->rftt_valid() = true;
-    } else {
-        uwcbrh->rftt_valid() = false;
-    }
 }
 
 void UwCbrModule::sendPkt(Packet *p, double delay) {
@@ -363,7 +357,7 @@ void UwCbrModule::sendPkt(Packet *p, double delay) {
 
     ch->uid()   = uidcnt_++;
     ch->timestamp() = Scheduler::instance().clock();
-    
+
     if (stats.rftt >= 0) {
         uwcbrh->rftt() = stats.rftt;
         uwcbrh->rftt_valid() = true;
@@ -463,6 +457,13 @@ void UwCbrModule::sendAck(Packet *recvd) {
     hdr_uwcbr* uwcbrh = HDR_UWCBR(ack);
     ch->uid()   = uidcnt_++;
     ch->timestamp()    = Scheduler::instance().clock();
+
+    if (stats.rftt >= 0) {
+        uwcbrh->rftt() = stats.rftt;
+        uwcbrh->rftt_valid() = true;
+    } else {
+        uwcbrh->rftt_valid() = false;
+    }
     
     if (debug_ > 10)
         printf("CbrModule(%d)::sendAck, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
