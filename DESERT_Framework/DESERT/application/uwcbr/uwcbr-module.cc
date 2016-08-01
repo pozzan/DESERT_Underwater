@@ -517,13 +517,13 @@ void UwCbrModule::recv(Packet* p) {
     // Check if out of sequence
     if (uwcbrh->sn() != esn) {	
 	stats.acks_dup_sent++;
-	if (debug_ > 1) {
-	    printf("CbrModule::recv() Pkt out of sequence! sn=%d\thrsn=%d\tesn=%d\n", uwcbrh->sn(), hrsn, esn);
-	    if (!use_arq && drop_out_of_order_) {
-		incrPktOoseq();
-		drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
-		return;
-	    }
+	if (debug_ > 1)
+	    printf("CbrModule::recv() Pkt out of sequence! sn=%d\thrsn=%d\tesn=%d\n",
+		   uwcbrh->sn(), hrsn, esn);
+	if (!use_arq && drop_out_of_order_) {
+	    incrPktOoseq();
+	    drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
+	    return;
 	}
     }
     else if (use_arq) {
