@@ -42,44 +42,39 @@
 #define UWCBR_MODULE_H
 
 #include "uwcbr-packet.h"
-#include "uwcbr-timers.h"
 #include "uwcbr-stats.h"
+#include "uwcbr-timers.h"
 
 #include <module.h>
 #include <uwip-module.h>
 #include <uwudp-module.h>
 
+#include <cmath>
 #include <iostream>
-#include <limits>
 #include <map>
-#include <queue>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#define UWCBR_DROP_REASON_UNKNOWN_TYPE "UKT"      /**< Reason for a drop in a <i>UWCBR</i> module. */
-#define UWCBR_DROP_REASON_OUT_OF_SEQUENCE "OOS"   /**< Reason for a drop in a <i>UWCBR</i> module. */
-#define UWCBR_DROP_REASON_DUPLICATED_PACKET "DPK" /**< Reason for a drop in a <i>UWCBR</i> module. */
+#define UWCBR_DROP_REASON_UNKNOWN_TYPE "UKT"
+#define UWCBR_DROP_REASON_OUT_OF_SEQUENCE "OOS"
+#define UWCBR_DROP_REASON_DUPLICATED_PACKET "DPK"
+#define UWCBR_OLD_ACK "OAK"
+
 #define UWCBR_DROP_REASON_DUPACK "DUPACK"
 #define UWCBR_DROP_REASON_UNKNOWN_ACK "UKACK"
-#define UWCBR_INVALID_ACK "INVACK"
 
-class uwcbr_sn_greater {
-public:
-    bool operator()(Packet const *const &a, Packet const *const &b) const {
-        assert(a != 0);
-        assert(b != 0);
-        hdr_uwcbr *hdr_a = HDR_UWCBR(a);
-        hdr_uwcbr *hdr_b = HDR_UWCBR(b);
-        return hdr_a->sn() > hdr_b->sn();
-    }
-};
 
 /**
  * UwCbrModule class is used to manage <i>UWCBR</i> packets
  */
 class UwCbrModule : public Module {
 public:
+    /**
+     * Return the size in bytes of a <i>hdr_uwcbr</i> packet header.
+     */
+    static int getCbrHeaderSize() { return sizeof(hdr_uwcbr); }
+
     /**
      * Constructor of UwCbrModule class.
      */
@@ -98,20 +93,30 @@ public:
     virtual void recv(Packet*);
 
     /**
-     * Triggers the generation of a new packet.
+     * Triggers the generation of a new packet with default priority.
      *
-     * \see UwCbrModule::sendPkt()
      * \see UwSendTimer::expire()
+     * \see UwCbrModule::transmit(char priority)
      */
     virtual void transmit();
 
     /**
+     * Triggers the generation of a new packet with a specific
+     * priority.
+
+     * \param priority The priority to set on the packet
+     *
+     * \see UwSendTimer::expire()
+     */
+    virtual void transmit(char priority);
+
+    /**
      * Triggers the retranmission of the first unACKed packet.
      *
-     * \see UwCbrModule::resendPkt()
+     * \param timeout Set when the retransmission is due to a retx timeout
      * \see UwRetxTimer::expire()
      */
-    virtual void retransmit_first();
+    virtual void retransmit_first(bool timeout);
 
     /**
      * Start the generation of packets.
@@ -125,14 +130,32 @@ public:
      * packets left in the send queue.
      */
     virtual void stop();
-    
+
     /**
-     * TCL command interpreter. It implements the following OTcl methods:
+     * Tell if this CBR module has been stopped
+     */
+    virtual bool stopped();
+
+    /**
+     * Returns the amount of time to wait before the next
+     * transmission.
+     *
+     * @return double Value to use as delay for the next transmission.
+     * @see PoissonTraffic_
+     */
+    virtual double getTimeBeforeNextPkt();
+
+    /**
+     * Return the amount of time to wait before a retransmission.
+     */
+    virtual double getRetxTimeout();
+
+    /**
+     * TCL command interpreter.
      *
      * @param argc Number of arguments in <i>argv</i>.
      * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
      * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
-     *
      */
     virtual int command(int argc, const char*const* argv);
 
@@ -149,6 +172,8 @@ public:
      * @return Forward Trip Time.
      */
     virtual double GetFTT() const;
+
+    virtual int GetSentPkts() const;
 
     /**
      * Returns the mean Packet Error Rate.
@@ -186,7 +211,7 @@ public:
     /**
      * Prints the IDs of the packet's headers defined by UWCBR.
      */
-    inline void printIdsPkts() const {
+    virtual void printIdsPkts() const {
         std::cout << "UWCBR packets IDs:" << std::endl;
         std::cout << "PT_UWCBR: \t\t" << PT_UWCBR << std::endl;
     }
@@ -202,65 +227,46 @@ protected:
     nsaddr_t peer_addr; /// First source address seen
     uint16_t peer_port; /// First source port seen
 
-    /** DEPRECATED Used to keep track of the packets already received. */
-    std::vector<bool> sn_check;
-    /** DEPRECATED Used to keep track of which packets have been ACKed */
-    std::vector<bool> ack_check;
+    typedef std::map<sn_t, Packet*> queue_t; /// Type of the send/recv queues
+    queue_t send_queue; /// Hold the packets that have not been ACKed
+    queue_t recv_queue; /// Hold the packets that have not been passed up
 
-    
-    /** Hold the packets that have not been ACKed yet, indexed by sn */
-    std::map<sn_t, Packet*> packet_buffer;
+    int tx_window; /// Size of the transmitter window
+    int rx_window; /// Size of the receiver window
 
+    sn_t next_ack; /// Sequence number of the next packet to be ACKed
+    sn_t next_tx; /// SN of the next packet to be transmitted for the first time
+    sn_t next_sn; /// Sequence number of the next packet to be generated
+    sn_t next_recv; /// SN of the next packet to be received
 
-    /** Type of the tx/rx packet queues,
-     *  hold packets in a heap with the minimum SN on top
-     */
-    typedef std::priority_queue<Packet*,
-                                std::vector<Packet*>,
-                                uwcbr_sn_greater> pkt_queue_t;
-    /** Hold the received packets until they can be processed in order */
-    pkt_queue_t recv_queue;
-    /** Hold the packets that exceed the transmission window */
-    pkt_queue_t send_queue;
-
-
-    
-    /** Hold the number of consecutive dupACKs received */
-    int dupack_count;
-    /** Hold the maximum number of dupACKs before a retx */
-    int dupack_thresh;
+    int use_arq; /// Flag to enable the ARQ
+    int dupack_count; /// Hold the number of consecutive dupACKs received
+    int dupack_thresh; /// Hold the maximum number of dupACKs before a retx
+    int use_rtt_timeout; /// Use the estimated RTT as the retx timeout
+    double timeout_; /// Default timeout for the packet retransmission
 
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     double period_;             /**< Period between two consecutive packet transmissions. */
     int pktSize_;               /**< <i>UWCBR</i> packets payload size. */
-    int debug_;                 /**< Flag to enable several levels of debug. */
+
     int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
-    /** Enable the use of the estimated RTT as the retx timeout */
-    int use_rtt_timeout;
-    /** Timeout for the packet retransmission */
-    double timeout_;
 
     UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
     UwRetxTimer retxTimer;      /**< Timer that schedules the retransmissions */
 
-    bool stopped;               /**< Flag to stop sending queued packets when the tx window slides foward */
-    int use_arq;                /**< Flag to enable the ARQ */
-
-    sn_t txsn;                  /**< Sequence number of the next packet to be transmitted. */
-    sn_t ack_sn;                /**< Sequence number of the next packet to be ACKed */
-    int tx_window;             /**< Size of the transmitter window */
-
-    sn_t hrsn;                  /**< Highest received sequence number. */
-    int rx_window;             /**< Size of the receiver window */
-    sn_t esn;               /**< Expected serial number. */
+    int debug_;                 /**< Flag to enable several levels of debug. */
 
     /**
-     * Initializes a data packet passed as argument with the default values.
-     *
-     * @param Packet* Pointer to a packet already allocated to fill
-     * with the right values.
+     * Send packets from the send_queue until there are at most
+     * tx_window packets in flight.
      */
-    virtual void initPkt(Packet* p);
+    void send_from_queue();
+
+    /**
+     * Return the number of packets that can be sent from the
+     * send_queue.
+     */
+    int sendable_count();
 
     /**
      * Initialize a data packet with a non-default priority
@@ -270,47 +276,37 @@ protected:
      */
     virtual void initPkt(Packet *p, char priority);
 
-    virtual void newPkt(Packet *p);
-    
-    /** \brief Initialize an ACK packet.
+    /**
+     * Set the uid and the timing-related headers on a packet.
+     *
+     * This is called just before a sendDown() to have distinct uids
+     * and to exclude the queueing and retx delay from the FTT/RTT
+     * estimation.
+     */
+    void set_uid_and_times(Packet *p);
+
+    /**
+     * Handle a received ACK packet.
+     */
+    virtual void recvAck(Packet *p);
+
+    /**
+     * Handle a received data (non-ACK) packet.
+     */
+    virtual void recvData(Packet *p);
+
+    /** Initialize an ACK packet.
+     *
      * @param p Pointer to the new, already allocated, packet.
      * @param recvd Pointer to the received packet that will be ACKed.
      */
     virtual void initAck(Packet *p, Packet *recvd);
 
     /**
-     * Handle a received ACK packet
+     * Process the packets in the recv_queue, ordered by SN, until
+     * there is a missing packet.
      */
-    virtual void recvAck(Packet *p);
-
-    /**
-     * Process the packets in the recv_queue, ordered by SN, until there is a missing packet
-     */
-    virtual void processOrderedPackets();
-
-    /**
-     * Allocates, initialize and put in the send queue a packet with
-     * the default priority flag set from tcl.
-     *
-     * @see UwCbrModule::initPkt()
-     */
-    virtual void sendPkt();
-
-    /**
-     * Set the uid and the timestamps, then send an already
-     * constructed packet
-     *
-     * \param p The packet to send
-     * \param delay Delay that the packet suffers when it is passed to
-     * the lower layer
-     */
-    virtual void sendPkt(Packet *p, double delay);
-
-    /**
-     * Retransmit the packet with sequence number sn from the packet buffer
-     */
-    virtual void resendPkt(sn_t sn);
-
+    void pass_up_from_queue();
 
     /**
      * Send an ACK
@@ -318,99 +314,20 @@ protected:
      */
     virtual void sendAck(Packet *recvd);
 
-    /**
-     * Send packets from the send_queue until the tx window is full
-     */
-    virtual void slideTxWindow();
-
-    /**
-     * Allocates, initialize and sends a packet with the default priority flag set from tcl.
-     *
-     * @see UwCbrModule::initPkt()
-     */
-    virtual void sendPktLowPriority();
-
-    /**
-     * Allocates, initialize and sends a packet with the default priority flag set from tcl.
-     *
-     * @see UwCbrModule::initPkt()
-     */
-    virtual void sendPktHighPriority();
-
-    /**
-     * Updates the Round Trip Time.
-     *
-     * @param double& New Round Trip Time entry.
-     */
-    virtual void updateRTT(const double&);
-
-    /**
-     * Updates the Forward Trip Time.
-     *
-     * @param double& New Forward Trip Time entry.
-     */
-    virtual void updateFTT(const double&);
-
-    /**
-     * Updates the Throughput.
-     *
-     * @param int& Bytes of the payload of the last packet received.
-     * @param double& Delay Time between the last two receipts.
-     */
-    virtual void updateThroughput(const int&, const double&);
-
-    /**
-     * Increases the number of packets lost.
-     *
-     * @param int& Number of packets lost.
-     */
-    virtual void incrPktLost(const int&);
-
-    /**
-     * Increases by one the number of received packets.
-     */
-    virtual void incrPktRecv();
-
-    /**
-     * Increases by one the number of out of sequence packets received.
-     */
-    virtual void incrPktOoseq();
-
-    /**
-     * Increases by one the number of invalid packets.
-     */
-    virtual void incrPktInvalid();
-
-    /**
-     * Returns the amount of time to wait before the next transmission. It depends on the PoissonTraffic_ flag.
-     *
-     * @return double Value to use as delay for the next transmission.
-     * @see PoissonTraffic_
-     */
-    virtual double getTimeBeforeNextPkt();
-
-    inline double getRetxTimeout() {
-        if (!use_rtt_timeout) return timeout_;
-        double rtt = GetRTT();
-        return rtt > 0 ? rtt + 4 * GetRTTstd()  : timeout_;
+private:
+    enum log_level {ERROR=1, WARNING, INFO, DEBUG=10};
+    static std::stringstream nullss;
+    ostream &log(log_level level) {
+        if (level <= debug_) {
+            return std::cerr << Scheduler::instance().clock() << " [CBR " <<
+                getId() << "]: ";
+        }
+        else {
+            nullss.seekp(0);
+            nullss.str("");
+            return nullss;
+        }
     }
-
-    inline sn_t max_tx_win_sn() {
-        if (use_arq) return ack_sn + ((sn_t)tx_window) - 1;
-        else return numeric_limits<sn_t>::max();
-    }
-
-    inline sn_t max_rx_win_sn() {
-        if (use_arq) return esn + ((sn_t) rx_window) - 1;
-        else return numeric_limits<sn_t>::max();
-    }
-
-    /**
-     * Returns the size in byte of a <i>hdr_uwcbr</i> packet header.
-     *
-     * @return The size of a <i>hdr_uwcbr</i> packet header.
-     */
-    static inline int getCbrHeaderSize() { return sizeof(hdr_uwcbr); }
 };
 
 #endif // UWCBR_MODULE_H

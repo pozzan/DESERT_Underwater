@@ -36,14 +36,18 @@ UwSendTimer::UwSendTimer(UwCbrModule *m) : module(m) {
 }
 
 void UwSendTimer::expire(Event *e) {
-  module->transmit();
+    module->transmit();
+    resched(module->getTimeBeforeNextPkt());
 }
 
 UwRetxTimer::UwRetxTimer(UwCbrModule *m) : module(m) {
 }
 
 void UwRetxTimer::expire(Event *e) {
-  module->retransmit_first();
+    if (!module->stopped()) {
+        module->retransmit_first(true);
+        resched(module->getRetxTimeout());
+    }
 }
 
 timeout_estimator::timeout_estimator(double k_,
@@ -57,15 +61,15 @@ timeout_estimator::timeout_estimator(double k_,
 }
 
 void timeout_estimator::update(double rtt_sample) {
-  if (!valid_) {
-    srtt_ = rtt_sample;
-    rttvar_ = rtt_sample / 2;
-    valid_ = true;
-  }
-  else {
-    rttvar_ = (1-beta) * rttvar_ + beta * abs(srtt_ - rtt_sample);
-    srtt_ = (1-alpha) * srtt_ + alpha * rtt_sample;
-  }
+    if (!valid_) {
+        srtt_ = rtt_sample;
+        rttvar_ = rtt_sample / 2;
+        valid_ = true;
+    }
+    else {
+        rttvar_ = (1-beta) * rttvar_ + beta * abs(srtt_ - rtt_sample);
+        srtt_ = (1-alpha) * srtt_ + alpha * rtt_sample;
+    }
 }
 
 double timeout_estimator::timeout() const {

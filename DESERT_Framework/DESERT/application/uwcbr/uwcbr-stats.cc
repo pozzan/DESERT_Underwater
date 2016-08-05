@@ -27,10 +27,11 @@
 //
 
 #include "uwcbr-stats.h"
+#include "uwcbr-module.h"
 #include <cmath>
+#include <stdexcept>
 
 using namespace std;
-
 
 avg_stddev_stat::avg_stddev_stat(){
     reset();
@@ -39,26 +40,51 @@ avg_stddev_stat::avg_stddev_stat(){
 void avg_stddev_stat::update(const double &val) {
     sum += val;
     sum2 += val*val;
-    samples++;
+    samples_++;
+    last = val;
 }
 
 double avg_stddev_stat::avg() const {
-    if (samples > 0) return sum / samples;
-    else return 0;
+    if (samples_ == 0) throw runtime_error("Avg of zero samples");
+    else return sum / samples_;
+}
+
+double avg_stddev_stat::last_sample() const {
+    if (samples_ == 0) throw runtime_error("No last sample");
+    else return last;
+}
+
+int avg_stddev_stat::samples() const {
+    return samples_;
 }
 
 double avg_stddev_stat::stddev() const {
-    if (samples > 1) {
-        double var = (sum2 - (sum*sum / samples)) / (samples-1);
-        return var > 0 ? sqrt(var) : 0;
+    if (samples_ == 0) throw runtime_error("Stddev of zero samples");
+    else if (samples_ == 1) return 0;
+    else {
+        double var = (sum2 - (sum*sum / samples_)) / (samples_-1);
+        if (var < 0) throw runtime_error("Negative variance");
+        return sqrt(var);
     }
-    else return 0;
 }
 
 void avg_stddev_stat::reset() {
     sum = 0;
     sum2 = 0;
-    samples = 0;
+    samples_ = 0;
+    last = 0;
+}
+
+
+uwcbr_stats::uwcbr_stats() : pkts_last_reset(0), acks_last_reset(0), lrtime(0) {
+    reset_no_last();
+}
+
+void uwcbr_stats::reset() {
+    pkts_last_reset += pkts_recv + pkts_invalid +
+        pkts_dup + pkts_lost + pkts_ooseq;
+    acks_last_reset += acks_recv + acks_old + acks_dup;
+    reset_no_last();
 }
 
 void uwcbr_stats::update_delay(const Packet *const &p) {
@@ -71,13 +97,51 @@ void uwcbr_stats::update_ftt_rtt(const Packet *const &p) {
     hdr_cmn *ch = HDR_CMN(p);
     hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
 
-    rftt = Scheduler::instance().clock() - ch->timestamp();
+    double rftt = Scheduler::instance().clock() - ch->timestamp();
     ftt.update(rftt);
 
     if (uwcbrh->rftt_valid())
         rtt.update(rftt + uwcbrh->rftt());
 }
 
+void uwcbr_stats::update_throughput(const Packet *const &p) {
+    hdr_cmn *ch = HDR_CMN(p);
+    int bytes = ch->size() - UwCbrModule::getCbrHeaderSize();
+    cerr << "Count "<<bytes<<" bytes, CBR hdr "<<UwCbrModule::getCbrHeaderSize()<<endl;
+    double dt = Scheduler::instance().clock() - lrtime;
+    cerr << "Last received at " << lrtime << ", dt = " << dt << endl;
+    lrtime = Scheduler::instance().clock();
+    sumbytes += bytes;
+    sumdt += dt;
+}
+
+double uwcbr_stats::throughput() const {
+    return (sumdt > 0) ? (8 * sumbytes / sumdt) : 0;
+}
+
+void uwcbr_stats::reset_no_last() {
+    acks_dup = 0;
+    acks_dup_sent = 0;
+    acks_old = 0;
+    acks_recv = 0;
+    acks_sent = 0;
+
+    pkts_dup = 0;
+    pkts_invalid = 0;
+    pkts_lost = 0;
+    pkts_ooseq = 0;
+    pkts_proc = 0;
+    pkts_recv = 0;
+    pkts_retx_dupack = 0;
+    pkts_retx_timeout = 0;
+
+    sumbytes = 0;
+    sumdt = 0;
+
+    delay.reset();
+    ftt.reset();
+    rtt.reset();
+}
 
 // Local Variables:
 // mode: c++

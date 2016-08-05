@@ -35,97 +35,65 @@ class avg_stddev_stat {
 public:
     avg_stddev_stat();
 
-    void update(const double &val);
-    double avg() const;
-    double stddev() const;
     void reset();
+    void update(const double &val);
+
+    double avg() const;
+    double last_sample() const;
+    int samples() const;
+    double stddev() const;
+
 private:
     double sum;
     double sum2;
-    int samples;
+    int samples_;
+    double last;
 };
 
 /**
  * Counts the statistics for the sent/received packets
  *
- * The packets are classified in this way: 
+ * The packets are classified in this way:
  */
 class uwcbr_stats {
 public:
-    int pkts_last_reset;        /**< Total number of packets seen before the last reset */
-    int acks_last_reset;        /**< Total number of ACKs seen before the last reset */
+    int pkts_last_reset; /// Total number of data packets seen before the last reset
+    int acks_last_reset; /// Total number of ACKs seen before the last reset
 
-    int acks_dup;                /**< Total number of duplicate ACKs received */
-    int acks_dup_sent;
-    int acks_invalid;            /**< Total number of invalid ACKs received */
-    int acks_recv;               /**< Total number of regular ACKs received */
-    int acks_sent;
+    int acks_dup; /// Number of duplicate ACKs received
+    int acks_dup_sent; /// Number of duplicate ACKs sent
+    int acks_old; /// Number of ACKs received for old packets (< next_ack)
+    int acks_recv; /// Number of regular ACKs received
+    int acks_sent; /// Number of regular ACKs sent
 
-    int pkts_dup;               /**< Total number of duplicate packets received, included in pkts_invalid */
-    int pkts_invalid;           /**< Total number of invalid packets received. */
-    int pkts_lost;              /**< Total number of lost packets. Used only when drop_out_of_sequence = true and use_arq = false */
-    int pkts_ooseq;             /**< Total number of packets received out of sequence. Used only when drop_out_of_sequence = true and use_arq = false */
-    int pkts_proc;              /**< Total number of packets processed in order */
-    int pkts_recv;              /**< Total number of packets received, before the reordering queue */
-    int pkts_retx_dupack;       /**< Total number of packets retransmitted because of a DUPACK */
-    int pkts_retx_timeout;      /**< Total number of packets retransmitted because of a timeout */
+    int pkts_dup; /// Number of duplicate packets received
+    int pkts_invalid; /// Number of packets received with the wrong ptype
+    int pkts_lost; /// Number of packets lost, if ARQ is enabled must be zero
+    int pkts_ooseq; /// Number of packets dropped because they were outside the rx_window
+    int pkts_proc; /// Number of packets processed in order */
+    int pkts_recv; /// Number of packets received and put in the recv_queue
+    int pkts_retx_dupack; /// Number of packets retransmitted because of a DUPACK
+    int pkts_retx_timeout; /// Number of packets retransmitted because of a timeout
 
-    //double srtt;                /**< Smoothed Round Trip Time, calculated as for TCP. */
-    //double sftt;                /**< Smoothed Forward Trip Time, calculated as srtt. */
-    //double sthr;                /**< Smoothed throughput calculation. */
-
-    double lrtime;              /**< Time of last packet reception. */
-    double sumbytes;            /**< Sum of bytes received. */
-    double sumdt;               /**< Sum of the delays. */
-
-    double rftt;                /**< Forward Trip Time seen for last received packet. */
     avg_stddev_stat delay;      /**< Avg. and std.dev. of the delay between the packet generation and processing */
     avg_stddev_stat ftt;        /**< Avg. and std.dev. of the delay between the sending of the packet and its reception */
     avg_stddev_stat rtt;        /**< Avg. and std.dev. of the round trip time, without the queueing delay */
 
-    uwcbr_stats() : pkts_last_reset(0), acks_last_reset(0), lrtime(0) {
-        reset_no_last();
-    }
+    uwcbr_stats();
 
-    inline void reset() {
-        pkts_last_reset += pkts_recv + pkts_invalid + pkts_ooseq;
-        acks_last_reset += acks_recv + acks_invalid + acks_dup;
-        reset_no_last();
-    }
-
+    void reset();
     void update_delay(const Packet *const &p);
     void update_ftt_rtt(const Packet *const &p);
+    void update_throughput(const Packet *const &p);
+
+    double throughput() const;
 private:
-    inline void reset_no_last() {
-        acks_dup = 0;
-        acks_dup_sent = 0;
-        acks_invalid = 0;
-        acks_recv = 0;
-        acks_sent = 0;
+    double lrtime;              /**< Time of last packet reception. */
+    double sumbytes;            /**< Sum of bytes received. */
+    double sumdt;               /**< Sum of the delays. */
 
-        pkts_dup = 0;
-        pkts_invalid = 0;
-        pkts_lost = 0;
-        pkts_ooseq = 0;
-        pkts_proc = 0;
-        pkts_recv = 0;
-        pkts_retx_dupack = 0;
-        pkts_retx_timeout = 0;
-
-        //srtt = 0;
-        //sftt = 0;
-        //sthr = 0;
-
-        sumbytes = 0;
-        sumdt = 0;
-
-        rftt = -1;
-        delay.reset();
-        ftt.reset();
-        rtt.reset();
-    }
+    void reset_no_last();
 };
-
 
 #endif
 

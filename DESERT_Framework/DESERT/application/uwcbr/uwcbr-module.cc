@@ -38,22 +38,13 @@
 
 #include "uwcbr-module.h"
 
-#include <iostream>
+#include <limits>
 #include <rng.h>
-#include <sstream>
 #include <stdexcept>
 #include <stdint.h>
 
-std::string logprefix(const std::string &func) {
-    std::ostringstream os;
-    os << Scheduler::instance().clock() << " " << func << ": ";
-    return os.str();
-}
-#define LOGPREFIX (logprefix(__PRETTY_FUNCTION__))
-
 extern packet_t PT_UWCBR;
-
-int hdr_uwcbr::offset_;         /**< Offset used to access in <i>hdr_uwcbr</i> packets header. */
+int hdr_uwcbr::offset_; /// Offset used to access in <i>hdr_uwcbr</i> packets header.
 
 /**
  * Adds the header for <i>hdr_uwcbr</i> packets in ns2.
@@ -82,33 +73,23 @@ public:
 } class_module_uwcbr;
 
 int UwCbrModule::uidcnt_ = 0;
+stringstream UwCbrModule::nullss;
 
 UwCbrModule::UwCbrModule() :
-    dstPort_(0),
-    dstAddr_(0),
-    priority_(0),
-    peer_addr(0),
-    peer_port(0),
-    sn_check(numeric_limits<sn_t>::max(), false),
-    ack_check(numeric_limits<sn_t>::max(), false),
-    dupack_count(0),
-    dupack_thresh(1),
-    PoissonTraffic_(0),
-    period_(0),
-    pktSize_(0),
-    debug_(0),
-    drop_out_of_order_(0),
-    timeout_(0),
-    sendTmr_(this),
-    retxTimer(this),
-    stopped(true),
-    use_arq(0),
-    txsn(1),
-    ack_sn(1),
     tx_window(1),
-    hrsn(0),
     rx_window(1),
-    esn(1)
+    next_ack(1),
+    next_tx(1),
+    next_sn(1),
+    next_recv(1),
+    dupack_thresh(1),
+    timeout_(1),
+    PoissonTraffic_(1),
+    period_(60),
+    pktSize_(500),
+    drop_out_of_order_(1),
+    sendTmr_(this),
+    retxTimer(this)
 {
     // binding to TCL variables
     bind("PoissonTraffic_", &PoissonTraffic_);
@@ -127,23 +108,93 @@ UwCbrModule::UwCbrModule() :
 }
 
 UwCbrModule::~UwCbrModule() {
-    for (map<sn_t,Packet*>::iterator i = packet_buffer.begin();
-         i != packet_buffer.end();
+    for (queue_t::const_iterator i = send_queue.begin();
+         i != send_queue.end();
          i++) {
         Packet::free(i->second);
     }
 
-    while (!recv_queue.empty()) {
-        Packet *p = recv_queue.top();
-        recv_queue.pop();
-        Packet::free(p);
+    for (queue_t::const_iterator i = recv_queue.begin();
+         i != recv_queue.end();
+         i++) {
+        Packet::free(i->second);
     }
+}
 
-    while (!send_queue.empty()) {
-        Packet *p = send_queue.top();
-        send_queue.pop();
-        Packet::free(p);
+void UwCbrModule::recv(Packet* p) {
+    hdr_cmn* ch = HDR_CMN(p);
+    hdr_uwcbr *cbrh = HDR_UWCBR(p);
+
+    if (ch->ptype() != PT_UWCBR) {
+        drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
+        stats.pkts_invalid++;
     }
+    else if (cbrh->is_ack()) recvAck(p);
+    else recvData(p);
+}
+
+void UwCbrModule::transmit() {
+    transmit((char) priority_);
+}
+
+void UwCbrModule::transmit(char priority) {
+    Packet *p = Packet::alloc();
+    initPkt(p, priority);
+
+    hdr_uwcbr *cbrh = HDR_UWCBR(p);
+    log(DEBUG) << "Generated packet SN=" << cbrh->sn() << endl;
+    send_queue[cbrh->sn()] = p;
+    send_from_queue();
+}
+
+void UwCbrModule::retransmit_first(bool timeout) {
+    if (!use_arq) throw logic_error("Attempted a retx with ARQ disabled");
+
+    Packet *p = send_queue[next_ack]->copy();
+    set_uid_and_times(p);
+
+    hdr_cmn *ch = HDR_CMN(p);
+    hdr_uwcbr *cbrh = HDR_UWCBR(p);
+    log(DEBUG) << "Retx a pkt uid="<<ch->uid()<<
+        " SN="<<cbrh->sn()<<endl;
+    if (timeout) stats.pkts_retx_timeout++;
+    else stats.pkts_retx_dupack++;
+    sendDown(p, 0);
+}
+
+void UwCbrModule::start() {
+    sendTmr_.resched(getTimeBeforeNextPkt());
+    log(INFO) << "Started" << endl;
+}
+
+void UwCbrModule::stop() {
+    sendTmr_.force_cancel();
+    log(INFO) << "Stopped" << endl;
+}
+
+bool UwCbrModule::stopped() {
+    return sendTmr_.status() == TIMER_IDLE;
+}
+
+double UwCbrModule::getTimeBeforeNextPkt() {
+    if (period_ <= 0) {
+        fprintf(stderr, "%s : Error : period <= 0", __PRETTY_FUNCTION__);
+        exit(1);
+    }
+    if (PoissonTraffic_) {
+        double u = RNG::defaultrng()->uniform_double();
+        double lambda = 1 / period_;
+        return -std::log(u) / lambda;
+    } else {
+        // CBR
+        return period_;
+    }
+}
+
+double UwCbrModule::getRetxTimeout() {
+    if (!use_rtt_timeout || stats.rtt.samples() < 1) return timeout_;
+    double rtt = stats.rtt.avg();
+    return rtt + 4 * stats.rtt.stddev();
 }
 
 int UwCbrModule::command(int argc, const char*const* argv) {
@@ -156,10 +207,16 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             stop();
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getrtt") == 0) {
-            tcl.resultf("%f", GetRTT());
+            if (stats.rtt.samples() > 0)
+                tcl.resultf("%f", GetRTT());
+            else
+                tcl.result("NaN");
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getftt") == 0) {
-            tcl.resultf("%f", GetFTT());
+            if (stats.ftt.samples() > 0)
+                tcl.resultf("%f", GetFTT());
+            else
+                tcl.result("NaN");
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getper") == 0) {
             tcl.resultf("%f", GetPER());
@@ -168,22 +225,34 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             tcl.resultf("%f", GetTHR());
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getdelay") == 0) {
-            tcl.resultf("%f", stats.delay.avg());
+            if (stats.delay.samples() > 0)
+                tcl.resultf("%f", stats.delay.avg());
+            else
+                tcl.result("NaN");
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getdelaystd") == 0) {
-            tcl.resultf("%f", stats.delay.stddev());
+            if (stats.delay.samples() > 0)
+                tcl.resultf("%f", stats.delay.stddev());
+            else
+                tcl.result("NaN");
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getcbrheadersize") == 0) {
-            tcl.resultf("%d", this->getCbrHeaderSize());
+            tcl.resultf("%d", getCbrHeaderSize());
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getrttstd") == 0) {
-            tcl.resultf("%f", GetRTTstd());
+            if (stats.rtt.samples() > 0)
+                tcl.resultf("%f", GetRTTstd());
+            else
+                tcl.result("NaN");
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getfttstd") == 0) {
-            tcl.resultf("%f", GetFTTstd());
+            if (stats.ftt.samples() > 0)
+                tcl.resultf("%f", GetFTTstd());
+            else
+                tcl.result("NaN");
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getsentpkts") == 0) {
-            tcl.resultf("%d", (txsn - 1) < max_tx_win_sn() ? txsn-1 : max_tx_win_sn());
+            tcl.resultf("%d", GetSentPkts());
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getretxpkts") == 0) {
             tcl.resultf("%d", stats.pkts_retx_timeout + stats.pkts_retx_dupack);
@@ -195,7 +264,7 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             tcl.resultf("%d", stats.pkts_retx_timeout);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getgeneratedpkts") == 0) {
-            tcl.resultf("%d", txsn-1);
+            tcl.resultf("%d", next_sn-1);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getrecvpkts") == 0) {
             tcl.resultf("%d", stats.pkts_recv);
@@ -222,7 +291,7 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             tcl.resultf("%d", stats.acks_dup);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getinvalidacks") == 0) {
-            tcl.resultf("%d", stats.acks_invalid);
+            tcl.resultf("%d", stats.acks_old);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "getsentacks") == 0) {
             tcl.resultf("%d", stats.acks_sent);
@@ -237,17 +306,17 @@ int UwCbrModule::command(int argc, const char*const* argv) {
             priority_ = 1;
             return TCL_OK;
         } else if (strcasecmp(argv[1], "sendPkt") == 0) {
-            this->sendPkt();
+            transmit();
             return TCL_OK;
         } else if (strcasecmp(argv[1], "sendPktLowPriority") == 0) {
-            this->sendPktLowPriority();
+            transmit(0);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "sendPktHighPriority") == 0) {
-            this->sendPktHighPriority();
+            transmit(1);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "resetStats") == 0) {
             resetStats();
-            fprintf(stderr, "CbrModule::command() resetStats %s, pkts_last_reset=%d, hrsn=%d, txsn=%d\n", tag_, stats.pkts_last_reset, hrsn, txsn);
+            fprintf(stderr, "CbrModule::command() resetStats %s, pkts_last_reset=%d, txsn=%d\n", tag_, stats.pkts_last_reset, next_sn);
             return TCL_OK;
         } else if (strcasecmp(argv[1], "printidspkts") == 0) {
             this->printIdsPkts();
@@ -257,8 +326,85 @@ int UwCbrModule::command(int argc, const char*const* argv) {
     return Module::command(argc, argv);
 }
 
-void UwCbrModule::initPkt(Packet* p, char priority) {
-    if (txsn >= numeric_limits<sn_t>::max())
+double UwCbrModule::GetRTT() const {
+    return stats.rtt.avg();
+}
+
+double UwCbrModule::GetFTT() const {
+    return stats.ftt.avg();
+}
+
+int UwCbrModule::GetSentPkts() const {
+    return next_tx - 1;
+}
+
+double UwCbrModule::GetPER() const {
+    if (use_arq) return 0;
+    if (drop_out_of_order_) {
+        if ((stats.pkts_recv + stats.pkts_lost) > 0) {
+            return ((double) stats.pkts_lost / (double) (stats.pkts_recv + stats.pkts_lost));
+        } else {
+            return 0;
+        }
+    } else {
+        if (next_recv > 1)
+            return (1 - (double) stats.pkts_recv / (double) (next_recv - 1));
+        else
+            return 0;
+    }
+}
+
+double UwCbrModule::GetTHR() const {
+    return stats.throughput();
+}
+
+double UwCbrModule::GetRTTstd() const {
+    return stats.rtt.stddev();
+}
+
+double UwCbrModule::GetFTTstd() const {
+    return stats.ftt.stddev();
+}
+
+void UwCbrModule::resetStats() {
+    stats.reset();
+}
+
+void UwCbrModule::send_from_queue() {
+    while (sendable_count() > 0) {
+        queue_t::iterator i = send_queue.find(next_tx);
+        Packet *p = i->second->copy();
+        set_uid_and_times(p);
+
+        hdr_cmn *ch = HDR_CMN(p);
+        hdr_uwcbr *cbrh = HDR_UWCBR(p);
+        log(DEBUG) << "Send a pkt uid="<<ch->uid()<<" SN="<<cbrh->sn()<<endl;
+
+        sendDown(p, 0);
+        next_tx++;
+
+        if (!use_arq) {
+            Packet::free(i->second);
+            send_queue.erase(i);
+            next_ack++;
+            assert(next_tx == next_sn && next_ack == next_sn);
+        }
+        else if (retxTimer.status() == TIMER_IDLE) {
+            log(DEBUG) << "First packet, start the retx timer" << endl;
+            retxTimer.sched(getRetxTimeout());
+        }
+    }
+}
+
+int UwCbrModule::sendable_count() {
+    int max_sendable = send_queue.size();
+    if (use_arq) max_sendable = min(tx_window, max_sendable);
+    int sent = next_tx - next_ack;
+    return max_sendable - sent;
+}
+
+void UwCbrModule::initPkt(Packet *p, char priority) {
+    if (next_sn >= numeric_limits<sn_t>::max())
         throw overflow_error("Reached the max value for the SN");
 
     hdr_cmn* ch = hdr_cmn::access(p);
@@ -273,14 +419,154 @@ void UwCbrModule::initPkt(Packet* p, char priority) {
     uwudp->dport()   = (uint16_t) dstPort_;
     //uwudp->sport() = 0;
 
-    hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
-    uwcbrh->sn()       = txsn++;
+    hdr_uwcbr* uwcbrh  = hdr_uwcbr::access(p);
+    uwcbrh->sn()       = next_sn++;
     uwcbrh->priority() = priority;
     uwcbrh->gen_timestamp() = Scheduler::instance().clock();
 }
 
-void UwCbrModule::initPkt(Packet *p) {
-    initPkt(p, (char) priority_);
+void UwCbrModule::set_uid_and_times(Packet *p) {
+    hdr_cmn *ch = HDR_CMN(p);
+    hdr_uwcbr *cbrh = HDR_UWCBR(p);
+
+    ch->uid()   = uidcnt_++;
+    ch->timestamp() = Scheduler::instance().clock();
+
+    if (stats.ftt.samples() > 0) {
+        cbrh->rftt() = stats.ftt.last_sample();
+        cbrh->rftt_valid() = true;
+    } else {
+        cbrh->rftt_valid() = false;
+    }
+}
+
+void UwCbrModule::recvData(Packet *p) {
+    hdr_cmn *ch = HDR_CMN(p);
+    hdr_uwcbr *cbrh = HDR_UWCBR(p);
+
+    stats.update_ftt_rtt(p);
+    sn_t sn = cbrh->sn();
+    if (use_arq) {
+        if (sn >= next_recv + rx_window) { // Out of the rx window
+            log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
+                " out of rx window ["<<next_recv<<", "
+                       <<next_recv+rx_window-1<<"]"<<endl;
+            drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
+            stats.pkts_ooseq++;
+        }
+        else if (sn < next_recv ||
+                 recv_queue.find(sn) != recv_queue.end()) { // Duplicate packet
+            stats.pkts_dup++;
+            //stats.pkts_invalid++; // <- the old CBR counted duplicates as invalid
+            log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
+                " is duplicate" << endl;
+            sendAck(p);
+            drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
+        }
+        else { // New packet with SN in the rx window
+            stats.pkts_recv++;
+            log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
+                " received" << endl;
+            recv_queue[sn] = p->refcopy();
+            pass_up_from_queue();
+            sendAck(p);
+            Packet::free(p);
+        }
+    }
+    else { // recv data pkt without ARQ
+        if (sn < next_recv) {
+            stats.pkts_dup++;
+            log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
+                " is duplicate" << endl;
+            drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
+        }
+        else {
+            stats.pkts_recv++;
+            recv_queue[sn] = p;
+            log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
+                " received" << endl;
+            pass_up_from_queue();
+        }
+    }
+}
+
+void UwCbrModule::pass_up_from_queue() {
+    for (queue_t::iterator i = recv_queue.begin();
+         i != recv_queue.end();
+         i++) {
+        sn_t sn = i->first;
+        if (sn != next_recv) {
+            if (use_arq) break;
+            else {
+                int lost = sn - next_recv;
+                stats.pkts_lost += lost;
+                log(DEBUG) << "Lost "<<lost<<" pkts before SN="<<sn<<endl;
+            }
+        }
+
+        Packet *p = i->second;
+        hdr_cmn *ch = HDR_CMN(p);
+        hdr_uwcbr *cbrh = HDR_UWCBR(p);
+
+        stats.update_delay(p);
+        stats.update_throughput(p);
+        stats.pkts_proc++;
+
+        next_recv = sn + 1;
+        log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<cbrh->sn()<<
+            " processed" << endl;
+        recv_queue.erase(i);
+        Packet::free(p);
+    }
+}
+
+void UwCbrModule::recvAck(Packet *p) {
+    if (!use_arq) throw logic_error("Received an ACK with ARQ disabled");
+
+    hdr_cmn *ch = HDR_CMN(p);
+    hdr_uwcbr *cbrh = HDR_UWCBR(p);
+
+    stats.update_ftt_rtt(p);
+    sn_t sn = cbrh->sn();
+    if (sn < next_ack) {
+        log(DEBUG) << "Received ACK for a packet before next_ack=" <<
+            next_ack << ", SN=" << sn << endl;
+        stats.acks_old++;
+        drop(p, 1, UWCBR_OLD_ACK);
+    }
+    else if (sn == next_ack) {
+        log(DEBUG) << "Duplicate ACK for SN " << next_ack << endl;
+        stats.acks_dup++;
+        dupack_count++;
+        if (dupack_count >= dupack_thresh) {
+            dupack_count = 0;
+            if (!stopped()) {
+                stats.pkts_retx_dupack++;
+                retransmit_first(false);
+                retxTimer.resched(getRetxTimeout());
+            }
+        }
+        Packet::free(p);
+    }
+    else {
+        stats.acks_recv++;
+        dupack_count = 0;
+        log(DEBUG) << "Received ACK for SN " << sn << endl;
+        for (queue_t::iterator i = send_queue.begin();
+             i->first < sn;
+             i++) {
+            Packet::free(i->second);
+            send_queue.erase(i);
+            next_ack++;
+        }
+        Packet::free(p);
+        if (send_queue.empty())
+            retxTimer.cancel();
+        else {
+            send_from_queue();
+            retxTimer.resched(getRetxTimeout());
+        }
+    }
 }
 
 void UwCbrModule::initAck(Packet *p, Packet *recvd) {
@@ -301,398 +587,30 @@ void UwCbrModule::initAck(Packet *p, Packet *recvd) {
     if (peer_addr == 0 && peer_port == 0) {
         peer_addr = uwiph_recvd->saddr();
         peer_port = uwudp_recvd->sport();
-        assert(peer_addr != 0);
-        assert(peer_port != 0);
     }
     else {
-        // if (debug_) {
-        //     cerr << LOGPREFIX << "Source address has changed: " << peer_addr << "->" << (int) uwiph->saddr() << endl;
-        //     cerr << LOGPREFIX << "Source port has changed: " << peer_port << "->" << (int) uwudp->sport() << endl;
-        // }
         assert(peer_addr == uwiph_recvd->saddr());
         assert(peer_port == uwudp_recvd->sport());
     }
 
     hdr_uwcbr* uwcbrh  = HDR_UWCBR(p);
-    hdr_uwcbr* uwcbrh_recvd  = HDR_UWCBR(recvd);
+    //hdr_uwcbr* uwcbrh_recvd  = HDR_UWCBR(recvd);
     uwcbrh->is_ack() = true;
-    uwcbrh->sn()       = esn;
+    uwcbrh->sn() = next_recv;
     uwcbrh->priority() = (char) priority_;
     uwcbrh->gen_timestamp() = Scheduler::instance().clock();
-
-}
-
-void UwCbrModule::sendPkt(Packet *p, double delay) {
-    hdr_cmn *ch = HDR_CMN(p);
-    hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
-
-    ch->uid()   = uidcnt_++;
-    ch->timestamp() = Scheduler::instance().clock();
-
-    if (stats.rftt >= 0) {
-        uwcbrh->rftt() = stats.rftt;
-        uwcbrh->rftt_valid() = true;
-    } else {
-        uwcbrh->rftt_valid() = false;
-    }
-
-    if (use_arq) {
-        if (packet_buffer.find(uwcbrh->sn()) == packet_buffer.end()) {
-            pair<map<sn_t,Packet*>::iterator,bool> ret =
-                packet_buffer.insert(pair<sn_t,Packet*>(uwcbrh->sn(), p->copy()));
-            assert(ret.second);
-        }
-
-        if (retxTimer.status() == TIMER_IDLE)
-            retxTimer.sched(getRetxTimeout());
-    }
-
-    if (debug_ > 10)
-        printf("CbrModule(%d)::sendPkt, send a pkt (%d) with sn: %d\n",
-               getId(), ch->uid(), uwcbrh->sn());
-    sendDown(p, delay);
-}
-
-void UwCbrModule::newPkt(Packet *p) {
-    hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
-    if (use_arq && uwcbrh->sn() > max_tx_win_sn()) {
-        if (debug_) cerr << NOW << " Tx window is full, enqueue packet SN=" <<
-                        uwcbrh->sn() << endl;
-        send_queue.push(p);
-    }
-    else {
-        sendPkt(p, 0);
-    }
-}
-
-void UwCbrModule::sendPkt() {
-    Packet *p = Packet::alloc();
-    initPkt(p);
-    newPkt(p);
-}
-
-void UwCbrModule::sendPktLowPriority() {
-    Packet *p = Packet::alloc();
-    initPkt(p, 0);
-    newPkt(p);
-}
-
-void UwCbrModule::sendPktHighPriority() {
-    Packet *p = Packet::alloc();
-    initPkt(p, 1);
-    newPkt(p);
-}
-
-void UwCbrModule::resendPkt(sn_t sn) {
-    Packet *p = packet_buffer[sn]->copy();
-    hdr_cmn* ch = hdr_cmn::access(p);
-    hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
-    retxTimer.resched(getRetxTimeout());
-
-    double delay = 0;
-    if (debug_ > 10)
-        printf("CbrModule(%d)::resendPkt, resend a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
-    sendPkt(p, delay);
 }
 
 void UwCbrModule::sendAck(Packet *recvd) {
     Packet *ack = Packet::alloc();
     initAck(ack, recvd);
+    set_uid_and_times(ack);
 
-    hdr_cmn* ch = hdr_cmn::access(ack);
-    hdr_uwcbr* uwcbrh = HDR_UWCBR(ack);
-    ch->uid()   = uidcnt_++;
-    ch->timestamp()    = Scheduler::instance().clock();
+    hdr_cmn *ch = HDR_CMN(ack);
+    hdr_uwcbr *cbrh = HDR_UWCBR(ack);
+    log(DEBUG) << "Send an ACK uid="<<ch->uid()<<" SN="<<cbrh->sn()<<endl;
 
-    if (stats.rftt >= 0) {
-        uwcbrh->rftt() = stats.rftt;
-        uwcbrh->rftt_valid() = true;
-    } else {
-        uwcbrh->rftt_valid() = false;
-    }
-
-    if (debug_ > 10)
-        printf("CbrModule(%d)::sendAck, send a pkt (%d) with sn: %d\n", getId(), ch->uid(), uwcbrh->sn());
-    double delay = 0;
-    sendDown(ack, delay);
-}
-
-void UwCbrModule::recv(Packet* p) {
-    hdr_cmn* ch = hdr_cmn::access(p);
-    if (debug_ > 10)
-        printf("CbrModule(%d)::recv pktId %d\n", getId(), ch->uid());
-
-    // Incorrect pkt type -> invalid
-    if (ch->ptype() != PT_UWCBR) {
-        drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
-        incrPktInvalid();
-        return;
-    }
-
-    stats.update_ftt_rtt(p);
-
-    hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
-
-    if (uwcbrh->is_ack() && use_arq) {
-        recvAck(p);
-        return;
-    }
-
-    // Check if duplicate
-    if (sn_check[uwcbrh->sn() & 0x00ffffff]) {
-        stats.pkts_dup++;
-        stats.pkts_invalid++;
-        if (use_arq) {
-            sendAck(p);
-            stats.acks_dup_sent++;
-        }
-        drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
-        return;
-    }
-
-    // Check if out of rx window
-    if (uwcbrh->sn() > max_rx_win_sn() && use_arq) {
-        if (debug_) cerr << "Packet SN=" << uwcbrh->sn() <<
-                        " out of window [" << esn << "," << max_rx_win_sn() <<
-                        "]" << endl;
-        incrPktInvalid();
-        drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
-        return;
-    }
-
-    // Check if out of sequence
-    if (uwcbrh->sn() != esn) {
-        stats.acks_dup_sent++;
-        if (debug_ > 1)
-            printf("CbrModule::recv() Pkt out of sequence! sn=%d\thrsn=%d\tesn=%d\n",
-                   uwcbrh->sn(), hrsn, esn);
-        if (!use_arq && drop_out_of_order_) {
-            incrPktOoseq();
-            drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
-            return;
-        }
-    }
-    else if (use_arq) {
-        stats.acks_sent++;
-    }
-
-    sn_check[uwcbrh->sn() & 0x00ffffff] = true;
-    hrsn = max(uwcbrh->sn(), hrsn);
-    stats.pkts_recv++;
-    recv_queue.push(p->refcopy());
-    processOrderedPackets();
-    if (use_arq) sendAck(p);
-    Packet::free(p);
-}
-
-void UwCbrModule::recvAck(Packet *p) {
-    hdr_cmn* ch = hdr_cmn::access(p);
-    hdr_uwcbr* uwcbrh = HDR_UWCBR(p);
-    if (debug_ > 10)
-        cerr << NOW << " CbrModule("<<getId()<<")::recvAck pktId " <<
-            ch->uid() << endl;
-
-    // Check invalid ACK
-    if (uwcbrh->sn() < ack_sn) {
-        if (debug_ > 10)
-            cerr << NOW << "Invalid ACK for old packet with SN " <<
-                uwcbrh->sn() << endl;
-        stats.acks_invalid++;
-        drop(p, 1, UWCBR_INVALID_ACK);
-    }
-    // Check DUPACK
-    else if (uwcbrh->sn() == ack_sn) {
-        if (debug_)
-            cerr << NOW << "Duplicate ACK for SN " << ack_sn << endl;
-        stats.acks_dup++;
-        dupack_count++;
-        if (dupack_count >= dupack_thresh) {
-            dupack_count = 0;
-            stats.pkts_retx_dupack++;
-            resendPkt(ack_sn);
-            retxTimer.resched(getRetxTimeout());
-        }
-        Packet::free(p);
-    }
-    // Normal ACK
-    else {
-        stats.acks_recv++;
-        dupack_count = 0;
-        for (; uwcbrh->sn() > ack_sn; ack_sn++) {
-            map<sn_t,Packet*>::iterator i = packet_buffer.find(ack_sn);
-            assert (i != packet_buffer.end());
-            Packet::free(i->second);
-            packet_buffer.erase(i);
-            
-            ack_check[ack_sn] = true;
-        }
-        Packet::free(p);
-        
-        if (debug_) cerr << NOW << " Advance the window to SN=" << ack_sn << endl;
-        slideTxWindow();
-
-        if (packet_buffer.empty() || stopped)
-            retxTimer.force_cancel();
-        else
-            retxTimer.resched(getRetxTimeout());
-    }
-}
-
-void UwCbrModule::processOrderedPackets() {
-    if (debug_) cerr << "Process packet queue" << endl;
-    Packet *p;
-    hdr_cmn *ch;
-    hdr_uwcbr *uwcbrh;
-    while (!recv_queue.empty()) {
-        p = recv_queue.top();
-        ch = HDR_CMN(p);
-        uwcbrh = HDR_UWCBR(p);
-
-        if (debug_) cerr << "Top SN=" << uwcbrh->sn() << endl;
-
-        if (uwcbrh->sn() != esn) {
-            if (use_arq) break;
-            else incrPktLost(uwcbrh->sn() - esn);
-        }
-
-        if (debug_) cerr << "Top has SN=esn=" << esn << endl;
-
-        stats.update_delay(p);
-
-        stats.pkts_proc++;
-
-        double dt = Scheduler::instance().clock() - stats.lrtime;
-        updateThroughput(ch->size(), dt);
-        stats.lrtime = Scheduler::instance().clock();
-
-        recv_queue.pop();
-        if (use_arq) assert(esn == uwcbrh->sn());
-        esn = uwcbrh->sn()+1;
-        Packet::free(p);
-    }
-}
-
-void UwCbrModule::slideTxWindow() {
-    if (stopped) return;
-    while (!send_queue.empty()) {
-        Packet *q = send_queue.top();
-        hdr_uwcbr *qh = HDR_UWCBR(q);
-        hdr_cmn *ch = HDR_CMN(q);
-        if (qh->sn() > max_tx_win_sn()) break;
-        send_queue.pop();
-        if (debug_) cerr << "Send a packet from the send_queue SN=" << qh->sn() << endl;
-        double delay = 0;
-        sendPkt(q, delay);
-    }
-}
-
-void UwCbrModule::transmit() {
-    sendPkt();
-    sendTmr_.resched(getTimeBeforeNextPkt()); // schedule next transmission
-}
-
-void UwCbrModule::start() {
-    stopped = false;
-    sendTmr_.resched(getTimeBeforeNextPkt());
-}
-
-void UwCbrModule::stop() {
-    sendTmr_.force_cancel();
-    retxTimer.force_cancel();
-    stopped = true;
-}
-
-double UwCbrModule::GetRTT() const {
-    return stats.rtt.avg();
-}
-
-double UwCbrModule::GetFTT() const {
-    return stats.ftt.avg();
-}
-
-double UwCbrModule::GetRTTstd() const {
-    return stats.rtt.stddev();
-}
-
-double UwCbrModule::GetFTTstd() const {
-    return stats.ftt.stddev();
-}
-
-double UwCbrModule::GetPER() const {
-    if (use_arq) return 0;
-    if (drop_out_of_order_) {
-        if ((stats.pkts_recv + stats.pkts_lost) > 0) {
-            return ((double) stats.pkts_lost / (double) (stats.pkts_recv + stats.pkts_lost));
-        } else {
-            return 0;
-        }
-    } else {
-        if (esn > 1)
-            return (1 - (double) stats.pkts_recv / (double) (esn - 1));
-        else
-            return 0;
-    }
-}
-
-double UwCbrModule::GetTHR() const {
-    return ((stats.sumdt != 0) ? stats.sumbytes * 8 / stats.sumdt : 0);
-}
-
-void UwCbrModule::updateRTT(const double& rtt) {
-    stats.rtt.update(rtt);
-}
-
-void UwCbrModule::updateFTT(const double& ftt) {
-    stats.ftt.update(ftt);
-}
-
-void UwCbrModule::updateThroughput(const int& bytes, const double& dt) {
-    stats.sumbytes += bytes;
-    stats.sumdt += dt;
-
-    if (debug_ > 1) {
-        cerr << "bytes=" << bytes << "  dt=" << dt << endl;
-    }
-}
-
-void UwCbrModule::incrPktLost(const int& npkts) {
-    stats.pkts_lost += npkts;
-}
-
-void UwCbrModule::incrPktRecv() {
-    stats.pkts_recv++;
-}
-
-void UwCbrModule::incrPktOoseq() {
-    stats.pkts_ooseq++;
-}
-
-void UwCbrModule::incrPktInvalid() {
-    stats.pkts_invalid++;
-}
-
-void UwCbrModule::resetStats() {
-    stats.reset();
-}
-
-double UwCbrModule::getTimeBeforeNextPkt() {
-    if (period_ < 0) {
-        fprintf(stderr, "%s : Error : period <= 0", __PRETTY_FUNCTION__);
-        exit(1);
-    }
-    if (PoissonTraffic_) {
-        double u = RNG::defaultrng()->uniform_double();
-        double lambda = 1 / period_;
-        return (-log(u) / lambda);
-    } else {
-        // CBR
-        return period_;
-    }
-}
-
-void UwCbrModule::retransmit_first() {
-    stats.pkts_retx_timeout++;
-    resendPkt(ack_sn);
+    sendDown(ack, 0);
 }
 
 // Local Variables:
