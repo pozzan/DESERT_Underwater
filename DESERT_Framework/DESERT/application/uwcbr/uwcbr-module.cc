@@ -269,7 +269,6 @@ void UwCbrModule::initAck(Packet *p, Packet *recvd) {
     uwcbrh->is_ack() = true;
     uwcbrh->sn()       = uwcbrh_recvd->sn();
     uwcbrh->priority() = uwcbrh_recvd->priority();
-    uwcbrh->traffic_type() = uwcbrh_recvd->traffic_type();
     ch->timestamp()    = Scheduler::instance().clock();
 
     if (rftt >= 0) {
