@@ -38,7 +38,9 @@
  */
 
 #include "uwtdma.h"
+
 #include <iostream>
+#include <limits>
 #include <stdint.h>
 #include <mac.h>
 
@@ -67,7 +69,14 @@ static class TDMAModuleClass : public TclClass
 
 void UwTDMATimer::expire(Event *e)
 {
-  ((UwTDMA *)module)->changeStatus();
+  module->changeStatus();
+}
+
+double UwTDMATimer::expire_time() const {
+  if (status_ == TIMER_PENDING)
+    return event_.time_;
+  else
+    return numeric_limits<double>::infinity();
 }
 
 UwTDMA::UwTDMA() 
@@ -80,7 +89,10 @@ UwTDMA::UwTDMA()
   transceiver_status(IDLE),
   out_file_stats(0),
   guard_time(0),
-  tot_slots(0)
+  tot_slots(0),
+  sent_last_slot(0),
+  check_duration(0),
+  send_out_of_order(0)
 {
   bind("frame_duration", (double*) &frame_duration);
   bind("debug_", (int*) &debug_);
@@ -91,6 +103,8 @@ UwTDMA::UwTDMA()
     bind("guard_time", (double*) &guard_time);
     bind("tot_slots", (int*) &tot_slots);
   }
+  bind("check_duration", &check_duration);
+  bind("send_out_of_order", &send_out_of_order);
 }
 
 UwTDMA::~UwTDMA() {}
@@ -98,7 +112,7 @@ UwTDMA::~UwTDMA() {}
 void UwTDMA::recvFromUpperLayers(Packet* p)
 {
   initPkt(p);
-  buffer.push(p);
+  buffer.push_back(p);
   incrUpperDataRx();
   txData();
 }
@@ -114,13 +128,32 @@ void UwTDMA::txData()
 {
   if(slot_status==UW_TDMA_STATUS_MY_SLOT && transceiver_status==IDLE)
   {
-    if(buffer.size()>0)
-    {
-      Packet* p = buffer.front();
-      buffer.pop();
+      for (list<Packet*>::iterator i = buffer.begin();
+           i != buffer.end();
+           i++) {
+        Packet *p = *i;
+        double finish_time = NOW + Mac2PhyTxDuration(p);
+        bool sendable = finish_time <= tdma_timer.expire_time();
+        if (sendable || !check_duration) {
+          buffer.erase(i);
       Mac2PhyStartTx(p);
       incrDataPktsTx();
+          break;
     }
+        else if (!send_out_of_order) {
+          if (debug_) {
+            cerr << NOW << " Do not send a packet, will finish at " <<
+              finish_time << ". Slot ends at " <<
+              tdma_timer.expire_time() << endl;
+          }
+          break;
+        }
+        else {
+          if (debug_) {
+            cerr << NOW << " Look for smaller packets in the buffer" << endl;
+          }
+        }
+      }
   }
   else if(debug_<-5)
   {
@@ -153,6 +186,7 @@ void UwTDMA::Mac2PhyStartTx(Packet* p)
 void UwTDMA::Phy2MacEndTx(const Packet* p)
 {
   transceiver_status = IDLE; 
+  sent_last_slot++;
   txData();
 }
 
@@ -269,6 +303,7 @@ void UwTDMA::changeStatus()
       out_file_stats << left << "[" << getEpoch() << "]::" << NOW 
                      << "::TDMA_node("<< addr << ")::On" << std::endl;
 
+    sent_last_slot = 0;
     stateTxData();
   }
 }
