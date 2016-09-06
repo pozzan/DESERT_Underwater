@@ -40,6 +40,9 @@ extern "C" {
 
 extern packet_t PT_UWCBR;
 
+/**
+ * Type used to represent the packet sequence number
+ */
 typedef uint16_t sn_t;
 
 /**
