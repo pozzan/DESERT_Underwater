@@ -42,6 +42,7 @@
 #define UWCBR_MODULE_H
 
 #include "uwcbr-packet.h"
+#include "uwcbr-timers.h"
 
 #include <module.h>
 #include <uwip-module.h>
@@ -163,48 +164,10 @@ public:
     }
 };
 
-class UwCbrModule;
-
-/**
- * UwSendTimer class is used to handle the scheduling period of <i>UWCBR</i> packets.
- */
-class UwSendTimer : public TimerHandler {
-public:
-
-    UwSendTimer(UwCbrModule *m) : TimerHandler() {
-        module = m;
-    }
-
-protected:
-    virtual void expire(Event *e);
-    UwCbrModule* module;
-};
-
-/** UwRetxTimer is used to schedule the retransmission of packets after a timeout */
-class UwRetxTimer : public TimerHandler {
-public:
-    UwRetxTimer(UwCbrModule *m, sn_t sn) : TimerHandler() {
-        module = m;
-        packet_sn = sn;
-    }
-
-    virtual void resched(double delay);
-    virtual void sched(double delay);
-    virtual void force_cancel();
-
-protected:
-    virtual void expire(Event *e);
-    UwCbrModule* module;
-    sn_t packet_sn;
-};
-
 /**
  * UwCbrModule class is used to manage <i>UWCBR</i> packets and to collect statistics about them.
  */
 class UwCbrModule : public Module {
-    friend class UwSendTimer;
-    friend class UwRetxTimer;
-
 public:
     /**
      * Constructor of UwCbrModule class.
@@ -288,10 +251,33 @@ public:
         std::cout << "PT_UWCBR: \t\t" << PT_UWCBR << std::endl;
     }
 
+    /**
+     * Start the generation of packets
+     */
+    virtual void start();
+
+    /**
+     * Stop the generation of packets
+     */
+    virtual void stop();
+    
+    /**
+     * Generate a new packet and schedule the next packet
+     *
+     * @see UwCbrModule::sendPkt()
+     */
+    virtual void transmit();
+    
+    /**
+     * Retransmit the first unACKed packet from the buffer 
+     */
+    virtual void retransmit_first();
+
 protected:
+    static int uidcnt_;         /**< Unique id of the packet generated. */
+    
     uwcbr_stats stats;
 
-    static int uidcnt_;         /**< Unique id of the packet generated. */
     int dstPort_;          /**< Destination port. */
     int dstAddr_;          /**< IP of the destination. */
     int priority_;             /**< Priority of the data packets. */
@@ -412,24 +398,7 @@ protected:
      * @see UwCbrModule::initPkt()
      */
     virtual void sendPktHighPriority();
-
-    /**
-     * Creates and transmits a packet and schedules a new transmission.
-     *
-     * @see UwCbrModule::sendPkt()
-     */
-    virtual void transmit();
-
-    /**
-     * Start to send packets.
-     */
-    virtual void start();
-
-    /**
-     * Stop to send packets.
-     */
-    virtual void stop();
-
+    
     /**
      * Updates the Round Trip Time.
      *

@@ -81,31 +81,6 @@ public:
     }
 } class_module_uwcbr;
 
-void UwSendTimer::expire(Event *e) {
-    module->transmit();
-}
-
-void UwRetxTimer::expire(Event *e) {
-    if (module->debug_) cerr << Scheduler::instance().clock() <<"\tTimeout for packet SN=" << packet_sn << endl;
-    module->stats.pkts_retx_timeout++;
-    module->resendPkt(packet_sn);
-}
-
-void UwRetxTimer::resched(double delay) {
-    if (module->debug_) std::cerr << Scheduler::instance().clock() <<"\t Reschedule timeout for packet SN=" << packet_sn << ", delay = " << delay << std::endl;
-    TimerHandler::resched(delay);
-}
-
-void UwRetxTimer::sched(double delay) {
-    if (module->debug_) std::cerr << Scheduler::instance().clock() <<"\t Schedule timeout for packet SN=" << packet_sn << ", delay = " << delay << std::endl;
-    TimerHandler::sched(delay);
-}
-
-void UwRetxTimer::force_cancel() {
-    if (module->debug_) std::cerr << Scheduler::instance().clock() <<"\t Cancel timeout for packet SN=" << packet_sn << std::endl;
-    TimerHandler::force_cancel();
-}
-
 int UwCbrModule::uidcnt_ = 0;
 
 UwCbrModule::UwCbrModule() :
@@ -742,6 +717,11 @@ double UwCbrModule::getTimeBeforeNextPkt() {
         // CBR
         return period_;
     }
+}
+
+void UwCbrModule::retransmit_first() {
+    stats.pkts_retx_timeout++;
+    resendPkt(ack_sn);
 }
 
 avg_stddev_stat::avg_stddev_stat(){
