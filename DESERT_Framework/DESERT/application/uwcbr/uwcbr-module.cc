@@ -494,14 +494,14 @@ void UwCbrModule::recv(Packet* p) {
 
     // Check if duplicate
     if (sn_check[uwcbrh->sn() & 0x00ffffff]) {
-        stats.pkts_dup++;
-        stats.pkts_invalid++;
-        if (use_arq) {
-            //sendAck(p);
-            //stats.acks_dup_sent++;
-        }
-        drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
-        return;
+	stats.pkts_dup++;
+	stats.pkts_invalid++;
+	if (use_arq) {
+	    sendAck(p);
+	    stats.acks_dup_sent++;
+	}
+	drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
+	return;
     }
 
     // Check if out of rx window
