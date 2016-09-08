@@ -43,6 +43,7 @@
 
 #include "uwcbr-packet.h"
 #include "uwcbr-timers.h"
+#include "uwcbr-stats.h"
 
 #include <module.h>
 #include <uwip-module.h>
@@ -63,96 +64,6 @@
 #define UWCBR_DROP_REASON_UNKNOWN_ACK "UKACK"
 #define UWCBR_INVALID_ACK "INVACK"
 
-
-class avg_stddev_stat {
-public:
-    avg_stddev_stat();
-
-    void update(const double &val);
-    double avg() const;
-    double stddev() const;
-    void reset();
-private:
-    double sum;
-    double sum2;
-    int samples;
-};
-
-struct uwcbr_stats {
-    int pkts_last_reset;        /**< Total number of packets seen before the last reset */
-    int acks_last_reset;        /**< Total number of ACKs seen before the last reset */
-
-    int acks_dup;                /**< Total number of duplicate ACKs received */
-    int acks_dup_sent;
-    int acks_invalid;            /**< Total number of invalid ACKs received */
-    int acks_recv;               /**< Total number of regular ACKs received */
-    int acks_sent;
-
-    int pkts_dup;               /**< Total number of duplicate packets received, included in pkts_invalid */
-    int pkts_invalid;           /**< Total number of invalid packets received. */
-    int pkts_lost;              /**< Total number of lost packets. Used only when drop_out_of_sequence = true and use_arq = false */
-    int pkts_ooseq;             /**< Total number of packets received out of sequence. Used only when drop_out_of_sequence = true and use_arq = false */
-    int pkts_proc;              /**< Total number of packets processed in order */
-    int pkts_recv;              /**< Total number of packets received, before the reordering queue */
-    int pkts_retx_dupack;       /**< Total number of packets retransmitted because of a DUPACK */
-    int pkts_retx_timeout;      /**< Total number of packets retransmitted because of a timeout */
-
-    //double srtt;                /**< Smoothed Round Trip Time, calculated as for TCP. */
-    //double sftt;                /**< Smoothed Forward Trip Time, calculated as srtt. */
-    //double sthr;                /**< Smoothed throughput calculation. */
-
-    double lrtime;              /**< Time of last packet reception. */
-    double sumbytes;            /**< Sum of bytes received. */
-    double sumdt;               /**< Sum of the delays. */
-
-    double rftt;                /**< Forward Trip Time seen for last received packet. */
-    avg_stddev_stat delay;      /**< Avg. and std.dev. of the delay between the packet generation and processing */
-    avg_stddev_stat ftt;        /**< Avg. and std.dev. of the delay between the sending of the packet and its reception */
-    avg_stddev_stat rtt;        /**< Avg. and std.dev. of the round trip time, without the queueing delay */
-
-    uwcbr_stats() : pkts_last_reset(0), acks_last_reset(0), lrtime(0) {
-        reset_no_last();
-    }
-
-    inline void reset() {
-        pkts_last_reset += pkts_recv + pkts_invalid + pkts_ooseq;
-        acks_last_reset += acks_recv + acks_invalid + acks_dup;
-        reset_no_last();
-    }
-
-    void update_delay(const Packet *const &p);
-    void update_ftt_rtt(const Packet *const &p);
-private:
-    inline void reset_no_last() {
-        acks_dup = 0;
-        acks_dup_sent = 0;
-        acks_invalid = 0;
-        acks_recv = 0;
-        acks_sent = 0;
-
-        pkts_dup = 0;
-        pkts_invalid = 0;
-        pkts_lost = 0;
-        pkts_ooseq = 0;
-        pkts_proc = 0;
-        pkts_recv = 0;
-        pkts_retx_dupack = 0;
-        pkts_retx_timeout = 0;
-
-        //srtt = 0;
-        //sftt = 0;
-        //sthr = 0;
-
-        sumbytes = 0;
-        sumdt = 0;
-
-        rftt = -1;
-        delay.reset();
-        ftt.reset();
-        rtt.reset();
-    }
-};
-
 class uwcbr_sn_greater {
 public:
     bool operator()(Packet const *const &a, Packet const *const &b) const {
@@ -165,7 +76,7 @@ public:
 };
 
 /**
- * UwCbrModule class is used to manage <i>UWCBR</i> packets and to collect statistics about them.
+ * UwCbrModule class is used to manage <i>UWCBR</i> packets
  */
 class UwCbrModule : public Module {
 public:
@@ -186,6 +97,35 @@ public:
      */
     virtual void recv(Packet*);
 
+    /**
+     * Triggers the generation of a new packet.
+     *
+     * \see UwCbrModule::sendPkt()
+     * \see UwSendTimer::expire()
+     */
+    virtual void transmit();
+
+    /**
+     * Triggers the retranmission of the first unACKed packet.
+     *
+     * \see UwCbrModule::resendPkt()
+     * \see UwRetxTimer::expire()
+     */
+    virtual void retransmit_first();
+
+    /**
+     * Start the generation of packets.
+     */
+    virtual void start();
+
+    /**
+     * Stop the generation of packets.
+     *
+     * This will also prevent packet retransmissions and hold any
+     * packets left in the send queue.
+     */
+    virtual void stop();
+    
     /**
      * TCL command interpreter. It implements the following OTcl methods:
      *
@@ -250,51 +190,27 @@ public:
         std::cout << "UWCBR packets IDs:" << std::endl;
         std::cout << "PT_UWCBR: \t\t" << PT_UWCBR << std::endl;
     }
-
-    /**
-     * Start the generation of packets
-     */
-    virtual void start();
-
-    /**
-     * Stop the generation of packets
-     */
-    virtual void stop();
-
-    /**
-     * Generate a new packet and schedule the next packet
-     *
-     * @see UwCbrModule::sendPkt()
-     */
-    virtual void transmit();
-
-    /**
-     * Retransmit the first unACKed packet from the buffer
-     */
-    virtual void retransmit_first();
-
 protected:
     static int uidcnt_;         /**< Unique id of the packet generated. */
 
-    uwcbr_stats stats;
+    uwcbr_stats stats; /// Statistics counters
 
     int dstPort_;          /**< Destination port. */
     int dstAddr_;          /**< IP of the destination. */
     int priority_;             /**< Priority of the data packets. */
 
-    nsaddr_t peer_addr; /**< Address of the CBR source */
-    uint16_t peer_port; /**< Port of the CBR source */
+    nsaddr_t peer_addr; /// First source address seen
+    uint16_t peer_port; /// First source port seen
 
-    /** Used to keep track of the packets already received. */
+    /** DEPRECATED Used to keep track of the packets already received. */
     std::vector<bool> sn_check;
-    /** Used to keep track of which packets have been ACKed */
+    /** DEPRECATED Used to keep track of which packets have been ACKed */
     std::vector<bool> ack_check;
+
+    
     /** Hold the packets that have not been ACKed yet, indexed by sn */
     std::map<sn_t, Packet*> packet_buffer;
-    /** Hold the number of consecutive dupACKs received */
-    int dupack_count;
-    /** Hold the maximum number of dupACKs before a retx */
-    int dupack_thresh;
+
 
     /** Type of the tx/rx packet queues,
      *  hold packets in a heap with the minimum SN on top
@@ -306,6 +222,13 @@ protected:
     pkt_queue_t recv_queue;
     /** Hold the packets that exceed the transmission window */
     pkt_queue_t send_queue;
+
+
+    
+    /** Hold the number of consecutive dupACKs received */
+    int dupack_count;
+    /** Hold the maximum number of dupACKs before a retx */
+    int dupack_thresh;
 
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
     double period_;             /**< Period between two consecutive packet transmissions. */

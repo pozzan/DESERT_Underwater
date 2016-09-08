@@ -695,52 +695,6 @@ void UwCbrModule::retransmit_first() {
     resendPkt(ack_sn);
 }
 
-avg_stddev_stat::avg_stddev_stat(){
-    reset();
-}
-
-void avg_stddev_stat::update(const double &val) {
-    sum += val;
-    sum2 += val*val;
-    samples++;
-}
-
-double avg_stddev_stat::avg() const {
-    if (samples > 0) return sum / samples;
-    else return 0;
-}
-
-double avg_stddev_stat::stddev() const {
-    if (samples > 1) {
-        double var = (sum2 - (sum*sum / samples)) / (samples-1);
-        return var > 0 ? sqrt(var) : 0;
-    }
-    else return 0;
-}
-
-void avg_stddev_stat::reset() {
-    sum = 0;
-    sum2 = 0;
-    samples = 0;
-}
-
-void uwcbr_stats::update_delay(const Packet *const &p) {
-    hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
-    double d = Scheduler::instance().clock() - uwcbrh->gen_timestamp();
-    delay.update(d);
-}
-
-void uwcbr_stats::update_ftt_rtt(const Packet *const &p) {
-    hdr_cmn *ch = HDR_CMN(p);
-    hdr_uwcbr *uwcbrh = HDR_UWCBR(p);
-
-    rftt = Scheduler::instance().clock() - ch->timestamp();
-    ftt.update(rftt);
-
-    if (uwcbrh->rftt_valid())
-        rtt.update(rftt + uwcbrh->rftt());
-}
-
 // Local Variables:
 // mode: c++
 // indent-tabs-mode: nil
