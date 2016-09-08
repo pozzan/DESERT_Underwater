@@ -39,40 +39,58 @@ void UwSendTimer::expire(Event *e) {
   module->transmit();
 }
 
-UwRetxTimer::UwRetxTimer(UwCbrModule *m, sn_t sn) : module(m),
-						    k(4),
-						    alpha(1/8),
-						    beta(1/4),
-						    srtt_valid_(false),
-						    packet_sn(sn) {
+UwRetxTimer::UwRetxTimer(UwCbrModule *m) : module(m) {
 }
 
 void UwRetxTimer::expire(Event *e) {
   module->retransmit_first();
 }
 
-double UwRetxTimer::srtt() {
-  if (!srtt_valid_)
-    throw logic_error("The SRTT is not valid");
-  else
+timeout_estimator::timeout_estimator(double k_,
+                                     double alpha_,
+                                     double beta_,
+                                     double def_to) : k(k_),
+                                                      alpha(alpha_),
+                                                      beta(beta_),
+                                                      default_timeout(def_to),
+                                                      valid_(false) {
+}
+
+void timeout_estimator::update(double rtt_sample) {
+  if (!valid_) {
+    srtt_ = rtt_sample;
+    rttvar_ = rtt_sample / 2;
+    valid_ = true;
+  }
+  else {
+    rttvar_ = (1-beta) * rttvar_ + beta * abs(srtt_ - rtt_sample);
+    srtt_ = (1-alpha) * srtt_ + alpha * rtt_sample;
+  }
+}
+
+double timeout_estimator::timeout() const {
+    if (valid_)
+        return srtt_ + k * rttvar_;
+    else
+        return default_timeout;
+}
+
+double timeout_estimator::srtt() const {
+    if (!valid_) throw logic_error("The SRTT is not valid");
     return srtt_;
 }
 
-double UwRetxTimer::rttvar() {
-  if (!srtt_valid_)
-    throw logic_error("The RTTVAR is not valid");
-  else
+double timeout_estimator::rttvar() const {
+    if (!valid_) throw logic_error("The RTTVAR is not valid");
     return rttvar_;
 }
 
-bool UwRetxTimer::srtt_valid() {
-  return srtt_valid_;
+bool timeout_estimator::valid() const {
+    return valid_;
 }
 
-void UwRetxTimer::update_srtt(double rtt_sample) {
-  throw runtime_error("Not implemented");
-}
-
-void UwRetxTimer::reschedule_srtt() {
-  throw runtime_error("Not implemented");
-}
+// Local Variables:
+// mode: c++
+// indent-tabs-mode: nil
+// c-basic-offset: 4
+// End:

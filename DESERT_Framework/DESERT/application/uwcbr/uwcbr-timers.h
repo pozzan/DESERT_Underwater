@@ -30,7 +30,6 @@
 #define UWCBR_TIMERS_H
 
 #include <timer-handler.h>
-#include "uwcbr-packet.h"
 
 class UwCbrModule;
 
@@ -51,22 +50,35 @@ protected:
  */
 class UwRetxTimer : public TimerHandler {
 public:
-    UwRetxTimer(UwCbrModule *m, sn_t sn);
-    void update_srtt(double rtt_sample);
-    void reschedule_srtt();
-    double srtt();
-    double rttvar();
-    bool srtt_valid();
-    double k;
-    double alpha;
-    double beta;
+    UwRetxTimer(UwCbrModule *m);
 protected:
     virtual void expire(Event *e);
     UwCbrModule *module;
-    sn_t packet_sn;
+};
+
+/**
+ * Estimates the RTT from the samples with the same algorithm used by
+ * TCP
+ */
+class timeout_estimator {
+public:
+    const double k;
+    const double alpha;
+    const double beta;
+    const double default_timeout;
+
+    timeout_estimator(double k_, double alpha_, double beta_, double def_to);
+
+    void update(double rtt_sample);
+    double timeout() const;
+
+    double srtt() const;
+    double rttvar() const;
+    bool valid() const;
+private:
     double srtt_;
     double rttvar_;
-    bool srtt_valid_;
+    bool valid_;
 };
 
 #endif

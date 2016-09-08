@@ -260,22 +260,22 @@ public:
      * Stop the generation of packets
      */
     virtual void stop();
-    
+
     /**
      * Generate a new packet and schedule the next packet
      *
      * @see UwCbrModule::sendPkt()
      */
     virtual void transmit();
-    
+
     /**
-     * Retransmit the first unACKed packet from the buffer 
+     * Retransmit the first unACKed packet from the buffer
      */
     virtual void retransmit_first();
 
 protected:
     static int uidcnt_;         /**< Unique id of the packet generated. */
-    
+
     uwcbr_stats stats;
 
     int dstPort_;          /**< Destination port. */
@@ -291,8 +291,6 @@ protected:
     std::vector<bool> ack_check;
     /** Hold the packets that have not been ACKed yet, indexed by sn */
     std::map<sn_t, Packet*> packet_buffer;
-    /** Hold the timers that schedule the retransmissions, indexed by sn */
-    std::map<sn_t, UwRetxTimer*> packet_retx_timers;
     /** Hold the number of consecutive dupACKs received */
     int dupack_count;
     /** Hold the maximum number of dupACKs before a retx */
@@ -320,6 +318,7 @@ protected:
     double timeout_;
 
     UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
+    UwRetxTimer retxTimer;      /**< Timer that schedules the retransmissions */
 
     bool stopped;               /**< Flag to stop sending queued packets when the tx window slides foward */
     int use_arq;                /**< Flag to enable the ARQ */
@@ -335,10 +334,21 @@ protected:
     /**
      * Initializes a data packet passed as argument with the default values.
      *
-     * @param Packet* Pointer to a packet already allocated to fill with the right values.
+     * @param Packet* Pointer to a packet already allocated to fill
+     * with the right values.
      */
     virtual void initPkt(Packet* p);
 
+    /**
+     * Initialize a data packet with a non-default priority
+     *
+     * \param p Pointer to an already allocated packet
+     * \param priority The priority to set on the packet
+     */
+    virtual void initPkt(Packet *p, char priority);
+
+    virtual void newPkt(Packet *p);
+    
     /** \brief Initialize an ACK packet.
      * @param p Pointer to the new, already allocated, packet.
      * @param recvd Pointer to the received packet that will be ACKed.
@@ -356,16 +366,20 @@ protected:
     virtual void processOrderedPackets();
 
     /**
-     * Allocates, initialize and sends a packet with the default priority flag set from tcl.
+     * Allocates, initialize and put in the send queue a packet with
+     * the default priority flag set from tcl.
      *
      * @see UwCbrModule::initPkt()
      */
     virtual void sendPkt();
 
     /**
-     * Send an already constructed packet
+     * Set the uid and the timestamps, then send an already
+     * constructed packet
+     *
      * \param p The packet to send
-     * \param delay Delay that the packet suffers when it is passed to the lower layer
+     * \param delay Delay that the packet suffers when it is passed to
+     * the lower layer
      */
     virtual void sendPkt(Packet *p, double delay);
 
@@ -373,6 +387,7 @@ protected:
      * Retransmit the packet with sequence number sn from the packet buffer
      */
     virtual void resendPkt(sn_t sn);
+
 
     /**
      * Send an ACK
@@ -398,7 +413,7 @@ protected:
      * @see UwCbrModule::initPkt()
      */
     virtual void sendPktHighPriority();
-    
+
     /**
      * Updates the Round Trip Time.
      *
