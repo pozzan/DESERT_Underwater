@@ -535,18 +535,24 @@ void UwCbrModule::recvAck(Packet *p) {
         drop(p, 1, UWCBR_OLD_ACK);
     }
     else if (sn == next_ack) {
-        log(DEBUG) << "Duplicate ACK for SN " << next_ack << endl;
-        stats.acks_dup++;
-        dupack_count++;
-        if (dupack_count >= dupack_thresh) {
-            dupack_count = 0;
-            if (!stopped()) {
-                stats.pkts_retx_dupack++;
-                retransmit_first(false);
-                retxTimer.resched(getRetxTimeout());
-            }
+        if (send_queue.empty()) {
+            log(DEBUG) << "Duplicate ACK but empty queue SN="<< next_ack << endl;
+            drop(p, 1, UWCBR_ACK_EMPTY);
         }
-        Packet::free(p);
+        else {
+            log(DEBUG) << "Duplicate ACK for SN " << next_ack << endl;
+            stats.acks_dup++;
+            dupack_count++;
+            if (dupack_count >= dupack_thresh) {
+                dupack_count = 0;
+                if (!stopped()) {
+                    stats.pkts_retx_dupack++;
+                    retransmit_first(false);
+                    retxTimer.resched(getRetxTimeout());
+                }
+            }
+            drop(p, 1, UWCBR_DUPACK);
+        }
     }
     else {
         stats.acks_recv++;

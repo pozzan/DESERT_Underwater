@@ -60,10 +60,8 @@
 #define UWCBR_DROP_REASON_OUT_OF_SEQUENCE "OOS"
 #define UWCBR_DROP_REASON_DUPLICATED_PACKET "DPK"
 #define UWCBR_OLD_ACK "OAK"
-
-#define UWCBR_DROP_REASON_DUPACK "DUPACK"
-#define UWCBR_DROP_REASON_UNKNOWN_ACK "UKACK"
-
+#define UWCBR_ACK_EMPTY "EAK"
+#define UWCBR_DUPACK "DAK"
 
 /**
  * UwCbrModule class is used to manage <i>UWCBR</i> packets
