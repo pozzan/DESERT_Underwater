@@ -451,6 +451,8 @@ void UwCbrModule::recvData(Packet *p) {
             log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
                 " out of rx window ["<<next_recv<<", "
                        <<next_recv+rx_window-1<<"]"<<endl;
+            sendAck(p);
+            stats.acks_dup_sent++;
             drop(p, 1, UWCBR_DROP_REASON_OUT_OF_SEQUENCE);
             stats.pkts_ooseq++;
         }
@@ -461,6 +463,7 @@ void UwCbrModule::recvData(Packet *p) {
             log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
                 " is duplicate" << endl;
             sendAck(p);
+            stats.acks_dup_sent++;
             drop(p, 1, UWCBR_DROP_REASON_DUPLICATED_PACKET);
         }
         else { // New packet with SN in the rx window
@@ -470,6 +473,7 @@ void UwCbrModule::recvData(Packet *p) {
             recv_queue[sn] = p->refcopy();
             pass_up_from_queue();
             sendAck(p);
+            stats.acks_sent++;
             Packet::free(p);
         }
     }
@@ -559,8 +563,9 @@ void UwCbrModule::recvAck(Packet *p) {
         dupack_count = 0;
         log(DEBUG) << "Received ACK for SN " << sn << endl;
         for (queue_t::iterator i = send_queue.begin();
-             i->first < sn;
+             i != send_queue.end();
              i++) {
+            if (i->first >= sn) break;
             Packet::free(i->second);
             send_queue.erase(i);
             next_ack++;
