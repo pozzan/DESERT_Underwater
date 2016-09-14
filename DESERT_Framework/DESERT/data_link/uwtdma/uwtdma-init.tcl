@@ -49,6 +49,8 @@ Module/UW/TDMA set frame_time           0
 Module/UW/TDMA set guard_time           0
 Module/UW/TDMA set tot_slots            0
 Module/UW/TDMA set fair_mode            0
+Module/UW/TDMA set check_duration       0
+Module/UW/TDMA set send_out_of_order    0
 
 Module/UW/TDMA instproc init {args} {
     $self next $args

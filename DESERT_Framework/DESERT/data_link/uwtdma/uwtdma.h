@@ -41,7 +41,7 @@
 #define UWTDMA_H
 
 #include <mmac.h>
-#include <queue>
+#include <list>
 #include <iostream>
 #include <assert.h>
 #include <sstream>
@@ -73,6 +73,12 @@ class UwTDMATimer : public TimerHandler
     assert(m != NULL);
     module = m; 
   } 
+
+  /**
+   * Return the next time this timer will expire, or infinity if the
+   * timer is not scheduled
+   */
+  double expire_time() const;
 
  protected:
   /**
@@ -213,9 +219,13 @@ class UwTDMA: public MMac {
   double slot_duration;         /**<Slot duration*/
   double start_time;            /**<Time to wait before starting the protocol*/
   UwTDMATimer tdma_timer;       /**<TDMA timer handler*/
-  std::queue<Packet*> buffer;   /**<Buffer of the MAC node*/
+  std::list<Packet*> buffer;   /**<Buffer of the MAC node*/
   std::ofstream out_file_stats; /**<File stream for the log file*/
 
+  int sent_last_slot; /**< Number of packets sent in the last slot */
+
+  int check_duration; /**< Flag to avoid sending packets that finish too late */
+  int send_out_of_order; /**< Flag to allow sending the pkts out of order */
 };
 
 #endif 
