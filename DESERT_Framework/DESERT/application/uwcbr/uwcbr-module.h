@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
@@ -10,20 +9,20 @@
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
-// 3. Neither the name of the University of Padova (SIGNET lab) nor the 
-//    names of its contributors may be used to endorse or promote products 
+// 3. Neither the name of the University of Padova (SIGNET lab) nor the
+//    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
-// TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
-// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
-// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
-// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+// TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
@@ -31,9 +30,9 @@
  * @file   uwcbr-module.h
  * @author Giovanni Toso
  * @version 1.1.0
- * 
+ *
  * \brief Provides the <i>UWCBR</i> packets header description and the definition of the class <i>UWCBR</i>.
- * 
+ *
  * Provides the <i>UWCBR</i> packets header description and the definition of the class <i>UWCBR</i>.
  * <i>UWCBR</i> can manage no more than 2^16 packets. If a module generates more
  * than 2^16 packets, they will be dropped.
@@ -42,107 +41,43 @@
 #ifndef UWCBR_MODULE_H
 #define UWCBR_MODULE_H
 
+#include "uwcbr-packet.h"
+#include "uwcbr-stats.h"
+#include "uwcbr-timers.h"
+
+#include <module.h>
 #include <uwip-module.h>
 #include <uwudp-module.h>
 
-#include <module.h>
+#include <cmath>
 #include <iostream>
-#include <string>
+#include <map>
 #include <sstream>
-#include <climits>
+#include <string>
+#include <vector>
 
-#define UWCBR_DROP_REASON_UNKNOWN_TYPE "UKT"      /**< Reason for a drop in a <i>UWCBR</i> module. */
-#define UWCBR_DROP_REASON_OUT_OF_SEQUENCE "OOS"   /**< Reason for a drop in a <i>UWCBR</i> module. */
-#define UWCBR_DROP_REASON_DUPLICATED_PACKET "DPK" /**< Reason for a drop in a <i>UWCBR</i> module. */
-
-#define HDR_UWCBR(p)      (hdr_uwcbr::access(p))
-
-using namespace std;
-
-extern packet_t PT_UWCBR;
+#define UWCBR_DROP_REASON_UNKNOWN_TYPE "UKT"
+#define UWCBR_DROP_REASON_OUT_OF_SEQUENCE "OOS"
+#define UWCBR_DROP_REASON_DUPLICATED_PACKET "DPK"
+#define UWCBR_OLD_ACK "OAK"
+#define UWCBR_ACK_EMPTY "EAK"
+#define UWCBR_DUPACK "DAK"
 
 /**
- * <i>hdr_uwcbr</i> describes <i>UWCBR</i> packets.
- */
-typedef struct hdr_uwcbr {
-    uint16_t sn_;       /**< Serial number of the packet. */
-    float rftt_;        /**< Forward Trip Time of the packet. */
-    bool rftt_valid_;   /**< Flag used to set the validity of the fft field. */
-    char priority_;     /**< Priority flag: 1 means high priority, 0 normal priority. */
-
-    static int offset_; /**< Required by the PacketHeaderManager. */
-
-    /**
-     * Reference to the offset_ variable.
-     */
-    inline static int& offset() {
-        return offset_;
-    }
-
-    inline static struct hdr_uwcbr * access(const Packet * p) {
-        return (struct hdr_uwcbr*) p->access(offset_);
-    }
-
-    /**
-     * Reference to the sn_ variable.
-     */
-    inline uint16_t& sn() {
-        return sn_;
-    }
-    
-    /**
-     * Reference to the rftt_valid_ variable.
-     */
-    inline bool& rftt_valid() {
-        return rftt_valid_;
-    }
-    
-    /**
-     * Reference to the priority_ variable.
-     */
-    inline char& priority() {
-        return priority_;
-    }
-    
-    /**
-     * Reference to the rftt_ variable.
-     */
-    inline float& rftt() {
-        return (rftt_);
-    }
-} hdr_uwcbr;
-
-
-class UwCbrModule;
-
-/**
- * UwSendTimer class is used to handle the scheduling period of <i>UWCBR</i> packets.
- */
-class UwSendTimer : public TimerHandler {
-public:
-
-    UwSendTimer(UwCbrModule *m) : TimerHandler() {
-        module = m;
-    }
-
-protected:
-    virtual void expire(Event *e);
-    UwCbrModule* module;
-};
-
-/**
- * UwCbrModule class is used to manage <i>UWCBR</i> packets and to collect statistics about them.
+ * UwCbrModule class is used to manage <i>UWCBR</i> packets
  */
 class UwCbrModule : public Module {
-    friend class UwSendTimer;
-
 public:
+    /**
+     * Return the size in bytes of a <i>hdr_uwcbr</i> packet header.
+     */
+    static int getCbrHeaderSize() { return sizeof(hdr_uwcbr); }
 
     /**
      * Constructor of UwCbrModule class.
      */
     UwCbrModule();
-    
+
     /**
      * Destructor of UwCbrModule class.
      */
@@ -150,70 +85,118 @@ public:
 
     /**
      * Performs the reception of packets from upper and lower layers.
-     * 
+     *
      * @param Packet* Pointer to the packet will be received.
      */
     virtual void recv(Packet*);
-    
+
     /**
-     * Performs the reception of packets from upper and lower layers.
-     * 
-     * @param Packet* Pointer to the packet will be received.
-     * @param Handler* Handler.
+     * Triggers the generation of a new packet with default priority.
+     *
+     * \see UwSendTimer::expire()
+     * \see UwCbrModule::transmit(char priority)
      */
-    virtual void recv(Packet* p, Handler* h);
-    
+    virtual void transmit();
+
     /**
-     * TCL command interpreter. It implements the following OTcl methods:
-     * 
+     * Triggers the generation of a new packet with a specific
+     * priority.
+
+     * \param priority The priority to set on the packet
+     *
+     * \see UwSendTimer::expire()
+     */
+    virtual void transmit(char priority);
+
+    /**
+     * Triggers the retranmission of the first unACKed packet.
+     *
+     * \param timeout Set when the retransmission is due to a retx timeout
+     * \see UwRetxTimer::expire()
+     */
+    virtual void retransmit_first(bool timeout);
+
+    /**
+     * Start the generation of packets.
+     */
+    virtual void start();
+
+    /**
+     * Stop the generation of packets.
+     *
+     * This will also prevent packet retransmissions and hold any
+     * packets left in the send queue.
+     */
+    virtual void stop();
+
+    /**
+     * Tell if this CBR module has been stopped
+     */
+    virtual bool stopped();
+
+    /**
+     * Returns the amount of time to wait before the next
+     * transmission.
+     *
+     * @return double Value to use as delay for the next transmission.
+     * @see PoissonTraffic_
+     */
+    virtual double getTimeBeforeNextPkt();
+
+    /**
+     * Return the amount of time to wait before a retransmission.
+     */
+    virtual double getRetxTimeout();
+
+    /**
+     * TCL command interpreter.
+     *
      * @param argc Number of arguments in <i>argv</i>.
      * @param argv Array of strings which are the command parameters (Note that <i>argv[0]</i> is the name of the object).
      * @return TCL_OK or TCL_ERROR whether the command has been dispatched successfully or not.
-     * 
      */
     virtual int command(int argc, const char*const* argv);
-    
-    
-    virtual int crLayCommand(ClMessage* m);
 
     /**
      * Returns the mean Round Trip Time.
-     * 
+     *
      * @return Round Trip Time.
      */
     virtual double GetRTT() const;
-    
+
     /**
      * Returns the mean Forward Trip Time.
-     * 
+     *
      * @return Forward Trip Time.
      */
     virtual double GetFTT() const;
 
+    virtual int GetSentPkts() const;
+
     /**
      * Returns the mean Packet Error Rate.
-     * 
+     *
      * @return Packet Error Rate.
      */
     virtual double GetPER() const;
-    
+
     /**
      * Returns the mean Throughput.
-     * 
+     *
      * @return Throughput.
      */
     virtual double GetTHR() const;
 
     /**
      * Returns the Round Trip Time Standard Deviation.
-     * 
+     *
      * @return Round Trip Time Standard Deviation.
      */
     virtual double GetRTTstd() const;
-    
+
     /**
      * Returns the mean Forward Trip Time Standard Deviation.
-     * 
+     *
      * @return Forward Trip Time Standard Deviation.
      */
     virtual double GetFTTstd() const;
@@ -222,163 +205,133 @@ public:
      * Resets all the statistics of the <i>UWCBR</i> module.
      */
     virtual void resetStats();
-    
+
     /**
      * Prints the IDs of the packet's headers defined by UWCBR.
      */
-    inline void printIdsPkts() const {
+    virtual void printIdsPkts() const {
         std::cout << "UWCBR packets IDs:" << std::endl;
         std::cout << "PT_UWCBR: \t\t" << PT_UWCBR << std::endl;
     }
-
 protected:
     static int uidcnt_;         /**< Unique id of the packet generated. */
-    uint16_t dstPort_;          /**< Destination port. */
-    nsaddr_t dstAddr_;          /**< IP of the destination. */
-    char priority_;             /**< Priority of the data packets. */
-    
-    bool* sn_check;             /**< Used to keep track of the packets already received. */
-    
+
+    uwcbr_stats stats; /// Statistics counters
+
+    int dstPort_;          /**< Destination port. */
+    int dstAddr_;          /**< IP of the destination. */
+    int priority_;             /**< Priority of the data packets. */
+
+    nsaddr_t peer_addr; /// First source address seen
+    uint16_t peer_port; /// First source port seen
+
+    typedef std::map<sn_t, Packet*> queue_t; /// Type of the send/recv queues
+    queue_t send_queue; /// Hold the packets that have not been ACKed
+    queue_t recv_queue; /// Hold the packets that have not been passed up
+
+    int tx_window; /// Size of the transmitter window
+    int rx_window; /// Size of the receiver window
+
+    sn_t next_ack; /// Sequence number of the next packet to be ACKed
+    sn_t next_tx; /// SN of the next packet to be transmitted for the first time
+    sn_t next_sn; /// Sequence number of the next packet to be generated
+    sn_t next_recv; /// SN of the next packet to be received
+
+    int use_arq; /// Flag to enable the ARQ
+    int dupack_count; /// Hold the number of consecutive dupACKs received
+    int dupack_thresh; /// Hold the maximum number of dupACKs before a retx
+    int use_rtt_timeout; /// Use the estimated RTT as the retx timeout
+    double timeout_; /// Default timeout for the packet retransmission
+
     int PoissonTraffic_;        /**< <i>1</i> if the traffic is generated according to a poissonian distribution, <i>0</i> otherwise. */
-    int debug_;                 /**< Flag to enable several levels of debug. */
-    int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
-    
-    UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
-    
-    int txsn;                   /**< Sequence number of the next packet to be transmitted. */
-    int hrsn;                   /**< Highest received sequence number. */
-    int pkts_recv;              /**< Total number of received packets. Packet out of sequence are not counted here. */
-    int pkts_ooseq;             /**< Total number of packets received out of sequence. */
-    int pkts_lost;              /**< Total number of lost packets, including packets received out of sequence. */
-    int pkts_invalid;           /**< Total number of invalid packets received. */
-    int pkts_last_reset;        /**< Used for error checking after stats are reset. Set to pkts_lost+pkts_recv each time resetStats is called. */
-    
-    double rftt;                /**< Forward Trip Time seen for last received packet. */
-    double srtt;                /**< Smoothed Round Trip Time, calculated as for TCP. */
-    double sftt;                /**< Smoothed Forward Trip Time, calculated as srtt. */
-    double lrtime;              /**< Time of last packet reception. */
-    double sthr;                /**< Smoothed throughput calculation. */
-    
     double period_;             /**< Period between two consecutive packet transmissions. */
     int pktSize_;               /**< <i>UWCBR</i> packets payload size. */
 
-    /* Cumulative statistics */
-    double sumrtt;              /**< Sum of RTT samples. */
-    double sumrtt2;             /**< Sum of (RTT^2). */
-    int rttsamples;             /**< Number of RTT samples. */
+    int drop_out_of_order_;     /**< Flag to enable or disable the check for out of order packets. */
 
-    double sumftt;              /**< Sum of FTT samples. */
-    double sumftt2;             /**< Sum of (FTT^2). */
-    int fttsamples;             /**< Number of FTT samples. */
+    UwSendTimer sendTmr_;       /**< Timer which schedules packet transmissions. */
+    UwRetxTimer retxTimer;      /**< Timer that schedules the retransmissions */
 
-    double sumbytes;            /**< Sum of bytes received. */
-    double sumdt;               /**< Sum of the delays. */
-    
-    uint32_t esn;               /**< Expected serial number. */
+    int debug_;                 /**< Flag to enable several levels of debug. */
 
     /**
-     * Initializes a data packet passed as argument with the default values.
-     * 
-     * @param Packet* Pointer to a packet already allocated to fill with the right values.
+     * Send packets from the send_queue until there are at most
+     * tx_window packets in flight.
      */
-    virtual void initPkt(Packet* p);
-    
+    void send_from_queue();
+
     /**
-     * Allocates, initialize and sends a packet with the default priority flag set from tcl.
-     * 
-     * @see UwCbrModule::initPkt()
+     * Return the number of packets that can be sent from the
+     * send_queue.
      */
-    virtual void sendPkt();
-    
+    int sendable_count();
+
     /**
-     * Allocates, initialize and sends a packet with the default priority flag set from tcl.
-     * 
-     * @see UwCbrModule::initPkt()
+     * Initialize a data packet with a non-default priority
+     *
+     * \param p Pointer to an already allocated packet
+     * \param priority The priority to set on the packet
      */
-    virtual void sendPktLowPriority();
-    
+    virtual void initPkt(Packet *p, char priority);
+
     /**
-     * Allocates, initialize and sends a packet with the default priority flag set from tcl.
-     * 
-     * @see UwCbrModule::initPkt()
+     * Set the uid and the timing-related headers on a packet.
+     *
+     * This is called just before a sendDown() to have distinct uids
+     * and to exclude the queueing and retx delay from the FTT/RTT
+     * estimation.
      */
-    virtual void sendPktHighPriority();
-    
+    void set_uid_and_times(Packet *p);
+
     /**
-     * Creates and transmits a packet and schedules a new transmission.
-     * 
-     * @see UwCbrModule::sendPkt()
+     * Handle a received ACK packet.
      */
-    virtual void transmit();
-    
+    virtual void recvAck(Packet *p);
+
     /**
-     * Start to send packets.
+     * Handle a received data (non-ACK) packet.
      */
-    virtual void start();
-    
+    virtual void recvData(Packet *p);
+
+    /** Initialize an ACK packet.
+     *
+     * @param p Pointer to the new, already allocated, packet.
+     * @param recvd Pointer to the received packet that will be ACKed.
+     */
+    virtual void initAck(Packet *p, Packet *recvd);
+
     /**
-     * Stop to send packets.
+     * Process the packets in the recv_queue, ordered by SN, until
+     * there is a missing packet.
      */
-    virtual void stop();
-    
+    void pass_up_from_queue();
+
     /**
-     * Updates the Round Trip Time.
-     * 
-     * @param double& New Round Trip Time entry.
+     * Send an ACK
+     * @param recvd The received packet to ACK
      */
-    virtual void updateRTT(const double&);
-    
-    /**
-     * Updates the Forward Trip Time.
-     * 
-     * @param double& New Forward Trip Time entry.
-     */
-    virtual void updateFTT(const double&);
-    
-    /**
-     * Updates the Throughput.
-     * 
-     * @param int& Bytes of the payload of the last packet received.
-     * @param double& Delay Time between the last two receipts.
-     */
-    virtual void updateThroughput(const int&, const double&);
-    
-    /**
-     * Increases the number of packets lost.
-     * 
-     * @param int& Number of packets lost.
-     */
-    virtual void incrPktLost(const int&);
-    
-    /**
-     * Increases by one the number of received packets.
-     */
-    virtual void incrPktRecv();
-    
-    /**
-     * Increases by one the number of out of sequence packets received.
-     */
-    virtual void incrPktOoseq();
-    
-    /**
-     * Increases by one the number of invalid packets.
-     */
-    virtual void incrPktInvalid();
-    
-    /**
-     * Returns the amount of time to wait before the next transmission. It depends on the PoissonTraffic_ flag.
-     * 
-     * @return double Value to use as delay for the next transmission.
-     * @see PoissonTraffic_
-     */
-    virtual double getTimeBeforeNextPkt();
-    
-    /**
-     * Returns the size in byte of a <i>hdr_uwcbr</i> packet header.
-     * 
-     * @return The size of a <i>hdr_uwcbr</i> packet header.
-     */
-    static inline int getCbrHeaderSize() { return sizeof(hdr_uwcbr); }
+    virtual void sendAck(Packet *recvd);
+
+private:
+    enum log_level {ERROR=1, WARNING, INFO, DEBUG=10};
+    static std::stringstream nullss;
+    ostream &log(log_level level) {
+        if (level <= debug_) {
+            return std::cerr << Scheduler::instance().clock() << " [CBR " <<
+                getId() << "]: ";
+        }
+        else {
+            nullss.seekp(0);
+            nullss.str("");
+            return nullss;
+        }
+    }
 };
 
 #endif // UWCBR_MODULE_H
+
+// Local Variables:
+// mode: c++
+// indent-tabs-mode: nil
+// c-basic-offset: 4
+// End:

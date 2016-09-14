@@ -32,13 +32,20 @@
 
 PacketHeaderManager set tab_(PacketHeader/UWCBR) 1
 
-Module/UW/CBR set packetSize_         500
-Module/UW/CBR set period_             60
-Module/UW/CBR set destPort_           0
-Module/UW/CBR set destAddr_           0
-Module/UW/CBR set debug_              0
 Module/UW/CBR set PoissonTraffic_     1
+Module/UW/CBR set debug_              0
+Module/UW/CBR set destAddr_           0
+Module/UW/CBR set destPort_           0
 Module/UW/CBR set drop_out_of_order_  1
+Module/UW/CBR set dupack_thresh       1
+Module/UW/CBR set packetSize_         500
+Module/UW/CBR set period_             60.0
+Module/UW/CBR set rx_window           1
+Module/UW/CBR set timeout_            1.0
+Module/UW/CBR set traffic_type_       0
+Module/UW/CBR set tx_window           1
+Module/UW/CBR set use_arq             0
+Module/UW/CBR set use_rtt_timeout     1
 
 Module/UW/CBR instproc init {args} {
     $self next $args
