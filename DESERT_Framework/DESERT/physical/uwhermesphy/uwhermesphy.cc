@@ -56,11 +56,11 @@ L{ 25, 50, 95, 120, 140, 160, 180, 190 },
 P_SUCC{ 0.923077*39/40, 0.913793*58/60, 0.924528*53/60, 0.876712*73/80,
 	0.61643*73/80, 0.75*28/40, 0.275862*29/40, 0 }
 { // binding to TCL variables
-    bind("BCH_N", &BCH_N);
-    bind("BCH_N", &BCH_K);
-    bind("BCH_N", &BCH_T);
-    bind("FRAME_BIT", &FRAME_BIT);
-    Interference_Model = "MEANPOWER";
+  bind("BCH_N", &BCH_N);
+  bind("BCH_K", &BCH_K);
+  bind("BCH_T", &BCH_T);
+  bind("FRAME_BIT", &FRAME_BIT);
+  Interference_Model = "MEANPOWER";
 }
 
 UwHermesPhy::~UwHermesPhy(){
