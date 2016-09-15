@@ -58,14 +58,14 @@ int avg_stddev_stat::samples() const {
     return samples_;
 }
 
-double avg_stddev_stat::stddev() const {
-    if (samples_ == 0) throw runtime_error("Stddev of zero samples");
+double avg_stddev_stat::variance() const {
+    if (samples_ == 0) throw runtime_error("Variance of zero samples");
     else if (samples_ == 1) return 0;
-    else {
-        double var = (sum2 - (sum*sum / samples_)) / (samples_-1);
-        if (var < 0) throw runtime_error("Negative variance");
-        return sqrt(var);
-    }
+    else return max(0.0, (sum2 - (sum*sum / samples_)) / (samples_-1));
+}
+
+double avg_stddev_stat::stddev() const {
+    return sqrt(variance());
 }
 
 void avg_stddev_stat::reset() {
