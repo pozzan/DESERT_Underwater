@@ -107,9 +107,9 @@ void uwcbr_stats::update_ftt_rtt(const Packet *const &p) {
 void uwcbr_stats::update_throughput(const Packet *const &p) {
     hdr_cmn *ch = HDR_CMN(p);
     int bytes = ch->size() - UwCbrModule::getCbrHeaderSize();
-    cerr << "Count "<<bytes<<" bytes, CBR hdr "<<UwCbrModule::getCbrHeaderSize()<<endl;
+    // cerr << "Count "<<bytes<<" bytes, CBR hdr "<<UwCbrModule::getCbrHeaderSize()<<endl;
     double dt = Scheduler::instance().clock() - lrtime;
-    cerr << "Last received at " << lrtime << ", dt = " << dt << endl;
+    // cerr << "Last received at " << lrtime << ", dt = " << dt << endl;
     lrtime = Scheduler::instance().clock();
     sumbytes += bytes;
     sumdt += dt;
