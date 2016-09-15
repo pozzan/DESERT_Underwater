@@ -58,14 +58,14 @@ int avg_stddev_stat::samples() const {
     return samples_;
 }
 
-double avg_stddev_stat::stddev() const {
-    if (samples_ == 0) throw runtime_error("Stddev of zero samples");
+double avg_stddev_stat::variance() const {
+    if (samples_ == 0) throw runtime_error("Variance of zero samples");
     else if (samples_ == 1) return 0;
-    else {
-        double var = (sum2 - (sum*sum / samples_)) / (samples_-1);
-        if (var < 0) throw runtime_error("Negative variance");
-        return sqrt(var);
-    }
+    else return max(0.0, (sum2 - (sum*sum / samples_)) / (samples_-1));
+}
+
+double avg_stddev_stat::stddev() const {
+    return sqrt(variance());
 }
 
 void avg_stddev_stat::reset() {
@@ -107,9 +107,9 @@ void uwcbr_stats::update_ftt_rtt(const Packet *const &p) {
 void uwcbr_stats::update_throughput(const Packet *const &p) {
     hdr_cmn *ch = HDR_CMN(p);
     int bytes = ch->size() - UwCbrModule::getCbrHeaderSize();
-    cerr << "Count "<<bytes<<" bytes, CBR hdr "<<UwCbrModule::getCbrHeaderSize()<<endl;
+    // cerr << "Count "<<bytes<<" bytes, CBR hdr "<<UwCbrModule::getCbrHeaderSize()<<endl;
     double dt = Scheduler::instance().clock() - lrtime;
-    cerr << "Last received at " << lrtime << ", dt = " << dt << endl;
+    // cerr << "Last received at " << lrtime << ", dt = " << dt << endl;
     lrtime = Scheduler::instance().clock();
     sumbytes += bytes;
     sumdt += dt;

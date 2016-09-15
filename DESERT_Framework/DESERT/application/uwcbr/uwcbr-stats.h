@@ -42,6 +42,7 @@ public:
     double last_sample() const;
     int samples() const;
     double stddev() const;
+    double variance() const;
 
 private:
     double sum;
