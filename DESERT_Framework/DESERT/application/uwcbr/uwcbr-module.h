@@ -240,6 +240,7 @@ protected:
     int use_arq; /// Flag to enable the ARQ
     int dupack_count; /// Hold the number of consecutive dupACKs received
     int dupack_thresh; /// Hold the maximum number of dupACKs before a retx
+    bool dupack_backoff; /// True when the dupACKs must be ignored because the pkt was already retxd
     int use_rtt_timeout; /// Use the estimated RTT as the retx timeout
     double timeout_; /// Default timeout for the packet retransmission
 

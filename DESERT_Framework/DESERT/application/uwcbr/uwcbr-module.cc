@@ -157,8 +157,13 @@ void UwCbrModule::retransmit_first(bool timeout) {
     hdr_uwcbr *cbrh = HDR_UWCBR(p);
     log(DEBUG) << "Retx a pkt uid="<<ch->uid()<<
         " SN="<<cbrh->sn()<<endl;
-    if (timeout) stats.pkts_retx_timeout++;
-    else stats.pkts_retx_dupack++;
+    if (timeout) {
+        stats.pkts_retx_timeout++;
+        dupack_backoff = false;
+    }
+    else {
+        stats.pkts_retx_dupack++;
+    }
     sendDown(p, 0);
 }
 
@@ -549,8 +554,8 @@ void UwCbrModule::recvAck(Packet *p) {
             dupack_count++;
             if (dupack_count >= dupack_thresh) {
                 dupack_count = 0;
-                if (!stopped()) {
-                    stats.pkts_retx_dupack++;
+                if (!stopped() && !dupack_backoff) {
+                    dupack_backoff = true;
                     retransmit_first(false);
                     retxTimer.resched(getRetxTimeout());
                 }
@@ -561,6 +566,7 @@ void UwCbrModule::recvAck(Packet *p) {
     else {
         stats.acks_recv++;
         dupack_count = 0;
+        dupack_backoff = false;
         log(DEBUG) << "Received ACK for SN " << sn << endl;
         for (queue_t::iterator i = send_queue.begin();
              i != send_queue.end();
