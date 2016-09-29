@@ -13,8 +13,6 @@
 
 class UwCbrMultihopSource : public UwCbrModule {
 public:
-    UwCbrMultihopSource();
-    virtual ~UwCbrMultihopSource();
 
     virtual int command(int argc, const char *const *argv);
 
@@ -23,7 +21,7 @@ public:
     virtual void clear_path();
 
     virtual void recv(Packet *p);
-    virtual void initPkt(Packet *p);
+    virtual void initPkt(Packet *p, char priority);
     virtual void initAck(Packet *p, Packet *recvd);
 
 protected:
@@ -33,13 +31,8 @@ protected:
 
 class UwCbrMultihopSink : public UwCbrModule {
 public:
-    UwCbrMultihopSink();
-    virtual ~UwCbrMultihopSink();
-
-    //virtual int command(int argc, const char *const *argv);
-
     virtual void recv(Packet *p);
-    virtual void initPkt(Packet *p);
+    virtual void initPkt(Packet *p, char priority);
     virtual void initAck(Packet *p, Packet *recvd);
 };
 
