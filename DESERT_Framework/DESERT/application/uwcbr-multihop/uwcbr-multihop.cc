@@ -13,8 +13,6 @@ std::string logprefix(const std::string &func) {
 }
 #define LOGPREFIX (logprefix(__PRETTY_FUNCTION__))
 
-UwCbrMultihopSource::UwCbrMultihopSource() {}
-UwCbrMultihopSource::~UwCbrMultihopSource() {}
 
 int UwCbrMultihopSource::command(int argc, const char *const *argv) {
     Tcl &tcl = Tcl::instance();
@@ -59,12 +57,12 @@ void UwCbrMultihopSource::recv(Packet *p) {
     hdr_uwcbr_mh *mhh = HDR_UWCBR_MH(p);
     if (ch->ptype() != PT_UWCBR_MH) {
         drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
-        incrPktInvalid();
+        stats.pkts_invalid++;
         return;
     }
     if (mhh->forward_path_begin() + 1 != mhh->forward_path_end()) {
     	if (debug_) cerr << LOGPREFIX << "Packet with more hops" << endl;
-	incrPktInvalid();
+	stats.pkts_invalid++;
     	drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
     	return;
     }
@@ -72,8 +70,8 @@ void UwCbrMultihopSource::recv(Packet *p) {
     UwCbrModule::recv(p);
 }
 
-void UwCbrMultihopSource::initPkt(Packet *p) {
-    UwCbrModule::initPkt(p);
+void UwCbrMultihopSource::initPkt(Packet *p, char priority) {
+    UwCbrModule::initPkt(p, priority);
     hdr_cmn *ch = HDR_CMN(p);
     hdr_uwip *iph = HDR_UWIP(p);
     hdr_uwudp *udph = HDR_UWUDP(p);
@@ -91,13 +89,6 @@ void UwCbrMultihopSource::initAck(Packet *p, Packet *recvd) {
     throw logic_error("The source can't send ACKs");
 }
 
-UwCbrMultihopSink::UwCbrMultihopSink() {}
-UwCbrMultihopSink::~UwCbrMultihopSink() {}
-
-// int UwCbrMultihopSink::command(int argc, const char *const *argv) {
-//     return UwCbrModule::command(argc, argv);
-// }
-
 void UwCbrMultihopSink::recv(Packet *p) {
     hdr_cmn *ch = HDR_CMN(p);
     hdr_uwip *iph = HDR_UWIP(p);
@@ -105,12 +96,12 @@ void UwCbrMultihopSink::recv(Packet *p) {
     hdr_uwcbr_mh *mhh = HDR_UWCBR_MH(p);
     if (ch->ptype() != PT_UWCBR_MH) {
         drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
-        incrPktInvalid();
+        stats.pkts_invalid++;
         return;
     }
     if (mhh->forward_path_begin() + 1 != mhh->forward_path_end()) {
     	if (debug_) cerr << LOGPREFIX << "Packet with more hops" << endl;
-	incrPktInvalid();
+	stats.pkts_invalid++;
     	drop(p, 1, UWCBR_DROP_REASON_UNKNOWN_TYPE);
     	return;
     }
@@ -123,7 +114,7 @@ void UwCbrMultihopSink::recv(Packet *p) {
     UwCbrModule::recv(p);
 }
 
-void UwCbrMultihopSink::initPkt(Packet *p) {
+void UwCbrMultihopSink::initPkt(Packet *p, char priority) {
     throw logic_error("The sink can't send packets");
 }
 
@@ -149,9 +140,7 @@ void UwCbrMultihopSink::initAck(Packet *p, Packet *recvd) {
 }
 
 UwCbrMultihopRelay::UwCbrMultihopRelay() :
-    debug_(0),
     buffer_enabled(1),
-    dupack_count(0),
     dupack_thresh(1),
     first_unacked(1)
 {
@@ -288,7 +277,7 @@ void UwCbrMultihopRelay::recvAck(Packet *ack) {
             cerr << LOGPREFIX << "Invalid ACK for old packet SN = " <<
                 cbrh->sn() << endl;
         stats.acks_invalid++;
-        drop(ack, 1, UWCBR_INVALID_ACK);
+        drop(ack, 1, UWCBR_OLD_ACK);
         return;
     }
 
