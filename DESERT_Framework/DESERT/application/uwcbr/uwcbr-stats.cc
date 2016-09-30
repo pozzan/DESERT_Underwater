@@ -137,6 +137,7 @@ void uwcbr_stats::reset_no_last() {
 
     sumbytes = 0;
     sumdt = 0;
+    lrtime = Scheduler::instance().clock();
 
     delay.reset();
     ftt.reset();
