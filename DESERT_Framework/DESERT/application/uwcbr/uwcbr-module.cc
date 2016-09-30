@@ -473,6 +473,7 @@ void UwCbrModule::recvData(Packet *p) {
         }
         else { // New packet with SN in the rx window
             stats.pkts_recv++;
+            stats.update_throughput(p);
             log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
                 " received" << endl;
             recv_queue[sn] = p->refcopy();
@@ -518,7 +519,7 @@ void UwCbrModule::pass_up_from_queue() {
         hdr_uwcbr *cbrh = HDR_UWCBR(p);
 
         stats.update_delay(p);
-        stats.update_throughput(p);
+        //stats.update_throughput(p);
         stats.pkts_proc++;
 
         next_recv = sn + 1;
