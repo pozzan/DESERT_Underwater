@@ -464,6 +464,7 @@ void UwCbrModule::recvData(Packet *p) {
         else if (sn < next_recv ||
                  recv_queue.find(sn) != recv_queue.end()) { // Duplicate packet
             stats.pkts_dup++;
+            stats.update_throughput(p);
             //stats.pkts_invalid++; // <- the old CBR counted duplicates as invalid
             log(DEBUG) << "Packet uid="<<ch->uid()<<" SN="<<sn<<
                 " is duplicate" << endl;
