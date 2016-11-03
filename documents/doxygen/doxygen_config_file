@@ -68,6 +68,7 @@ INPUT       = ../../DESERT_Framework/DESERT/application/uwcbr \
          	../../DESERT_Framework/DESERT/physical/uwphysicalrogersmodel \
          	../../DESERT_Framework/DESERT/physical/uwhermesphy \
          	../../DESERT_Framework/DESERT/physical/uwoptical_phy \
+               ../../DESERT_Framework/DESERT/physical/uwopticalphy_ookrs \
          	../../DESERT_Framework/DESERT/propagation/uwoptical_propagation \
          	../../DESERT_Framework/DESERT/channel/uwoptical_channel \
             docs/Mainpage.dox

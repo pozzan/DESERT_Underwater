@@ -25,55 +25,22 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @file   uwmultiphy-default.tcl
+# @author Filippo Campagnaro
+# @version 1.0.0
 
+#Module/UW/OPTICAL/PHY_OOKRS set TxPower_  				0.01
+#Module/UW/OPTICAL/PHY_OOKRS set AcquisitionThreshold_dB_              1
+Module/UW/OPTICAL/PHY_OOKRS set Id_                                   [expr 1.0e-9]
+Module/UW/OPTICAL/PHY_OOKRS set Il_                                   [expr 1.0e-6]
+Module/UW/OPTICAL/PHY_OOKRS set R_                                    [expr 1.49e9]
+Module/UW/OPTICAL/PHY_OOKRS set S_                                    0.26
+Module/UW/OPTICAL/PHY_OOKRS set T_                                    293.15
+Module/UW/OPTICAL/PHY_OOKRS set Ar_                                   0.0000011
+#Module/UW/OPTICAL/PHY_OOKRS set debug_                                0
 
-DISTCHECK_CONFIGURE_FLAGS = @NS_ALLINONE_DISTCHECK_CONFIGURE_FLAGS@ \
-                            @NSMIRACLE_DISTCHECK_CONFIGURE_FLAGS@ 
-
-ACLOCAL_AMFLAGS = -I m4 
-
-EXTRA_DIST = autogen.sh 
-
-SUBDIRS = m4 \
-    application/uwcbr \
-    application/uwcbr-multihop \
-    application/uwvbr \
-    application/uwApplication \
-    transport/uwudp \
-    network/uwstaticrouting \
-    network/uwsun \
-    network/uwicrp \
-    network/uwip \
-    network/uwflooding \
-    data_link/uwmll \
-    data_link/uw-csma-aloha \
-    data_link/uwdacap \
-    data_link/uwpolling \
-    data_link/uwaloha \
-    data_link/uwsr \
-    data_link/uw-t-lohi \
-    data_link/uwUFetch \
-    data_link/uw-csma-aloha-trigger \
-    data_link/uwtdma \
-    physical/uwphysical \
-    physical/uwgainfromdb \
-    physical/uwphysicaldb\
-    physical/uwphysicalrogersmodel\
-    physical/uwphysicalfromdb\
-    physical/uwmphy_modem \
-    physical/ms2c_evologics \
-    physical/uwmphypatch \
-    physical/uwhermesphy \
-    physical/uwoptical_phy \
-    physical/uwopticalphy_ookrs \
-    physical/uw-al \
-    physical/uw-al/packer_common \
-    physical/uw-al/packer_mac \
-    mobility/uwdriftposition \
-    mobility/uwgmposition \
-    mobility/uwrandomlib \
-    mobility/uwsmposition \
-    interference/uwinterference \
-    propagation/uwoptical_propagation \
-    channel/uwoptical_channel
-
+Module/UW/OPTICAL/PHY_OOKRS set interference_threshold_               1
+Module/UW/OPTICAL/PHY_OOKRS set use_reed_solomon                      0
+Module/UW/OPTICAL/PHY_OOKRS set rs_n                                  1
+Module/UW/OPTICAL/PHY_OOKRS set rs_k                                  1
