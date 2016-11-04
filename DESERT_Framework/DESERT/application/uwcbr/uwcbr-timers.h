@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2015 Regents of the SIGNET lab, University of Padova.
 // All rights reserved.
 //
@@ -27,73 +26,65 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef UWCBR_PACKET_H
-#define UWCBR_PACKET_H
+#ifndef UWCBR_TIMERS_H
+#define UWCBR_TIMERS_H
 
-#include <packet.h>
+#include <timer-handler.h>
 
-extern "C" {
-#include <stdint.h>
-}
-
-#define HDR_UWCBR(p) (hdr_uwcbr::access(p))
-
-extern packet_t PT_UWCBR;
+class UwCbrModule;
 
 /**
- * Type used to represent the packet sequence number
+ * UwSendTimer is used to handle the scheduling period of <i>UWCBR</i> packets.
  */
-typedef uint16_t sn_t;
-
-/**
- * <i>hdr_uwcbr</i> describes <i>UWCBR</i> packets.
- */
-struct hdr_uwcbr {
-    sn_t sn_;       /**< Serial number of the packet. */
-    float rftt_;        /**< Forward Trip Time of the packet. */
-    bool rftt_valid_;   /**< Flag used to set the validity of the fft field. */
-    char priority_;     /**< Priority flag: 1 means high priority, 0 normal priority. */
-    bool is_ack_;       /**< Flag that indicates if this packet is an ACK */
-    double gen_timestamp_; /**< Time when the packet was generated and put in the send_queue */
-
-    static int offset_; /**< Required by the PacketHeaderManager. */
-
-    /**
-     * Reference to the offset_ variable.
-     */
-    static int& offset() { return offset_; }
-
-    static hdr_uwcbr *access(const Packet *p) {
-        return (hdr_uwcbr*) p->access(offset_);
-    }
-
-    /**
-     * Reference to the sn_ variable.
-     */
-    sn_t& sn() { return sn_; }
-
-    /**
-     * Reference to the rftt_valid_ variable.
-     */
-    bool& rftt_valid() { return rftt_valid_; }
-
-    /**
-     * Reference to the priority_ variable.
-     */
-    char& priority() { return priority_; }
-
-    /**
-     * Reference to the rftt_ variable.
-     */
-    float& rftt() { return (rftt_); }
-
-    bool &is_ack() { return is_ack_; }
-    double &gen_timestamp() { return gen_timestamp_; }
+class UwSendTimer : public TimerHandler {
+public:
+    UwSendTimer(UwCbrModule *m);
+protected:
+    virtual void expire(Event *e);
+    UwCbrModule *module;
 };
+
+/**
+ * UwRetxTimer is used to schedule the retransmission of packets after
+ * a timeout following the algorithm used by TCP
+ */
+class UwRetxTimer : public TimerHandler {
+public:
+    UwRetxTimer(UwCbrModule *m);
+protected:
+    virtual void expire(Event *e);
+    UwCbrModule *module;
+};
+
+/**
+ * Estimates the RTT from the samples with the same algorithm used by
+ * TCP
+ */
+class timeout_estimator {
+public:
+    const double k;
+    const double alpha;
+    const double beta;
+    const double default_timeout;
+
+    timeout_estimator(double k_, double alpha_, double beta_, double def_to);
+
+    void update(double rtt_sample);
+    double timeout() const;
+
+    double srtt() const;
+    double rttvar() const;
+    bool valid() const;
+private:
+    double srtt_;
+    double rttvar_;
+    bool valid_;
+};
+
 #endif
 
 // Local Variables:
 // mode: c++
-// c-basic-offset: 4
 // indent-tabs-mode: nil
+// c-basic-offset: 4
 // End:
