@@ -88,6 +88,8 @@ protected:
   static int modid; ///< Modulation id given by MPhy
   static bool initialized; ///< True after a call to initialize
 private:
+  double getSINRdB(double rx_power, double rx_interf_power,
+                   double bandwidth, double noise_power);
   double linearInterpolator( double x, double x1, double y1, double x2, double y2 );
     
   double BitRate_; ///< Raw bitrate

@@ -216,26 +216,23 @@ void UwOpticalPhyOOKRS::startRx(Packet* p)
 double UwOpticalPhyOOKRS::getSNRdB(Packet* p)
 {
   hdr_MPhy* ph = HDR_MPHY(p);
-  double bw = ph->dstSpectralMask->getBandwidth();
-  double rx_curr = ph->Pr*S;
-  double amb_noise_curr_2 = ph->Pn;
-  double rec_noise_curr_2 = 2*q*(Id+Il)*bw + 4*K*T*bw/R;
-  
-  double snr_linear = rx_curr*rx_curr / (amb_noise_curr_2 + rec_noise_curr_2);
-  assert(snr_linear >= 0);
-  return snr_linear ? 10*log10(snr_linear) : -numeric_limits<double>::infinity();
+  return getSINRdB(ph->Pr, 0, ph->dstSpectralMask->getBandwidth(), ph->Pn);
 }
 
 double UwOpticalPhyOOKRS::getSINRdB(Packet *p) {
   hdr_MPhy* ph = HDR_MPHY(p);
-  double bw = ph->dstSpectralMask->getBandwidth();
-  double rx_curr = ph->Pr*S;
-  double rx_interf_current = ph->Pi*S;
-  double amb_noise_curr_2 = ph->Pn;
-  double rec_noise_curr_2 = 2*q*(Id+Il)*bw + 4*K*T*bw/R;
+  return getSINRdB(ph->Pr, ph->Pi, ph->dstSpectralMask->getBandwidth(), ph->Pn);
+}
+
+double UwOpticalPhyOOKRS::getSINRdB(double rx_power, double rx_interf_power,
+                                    double bandwidth, double noise_power) {
+  double rx_curr_2 = pow(rx_power * S, 2);
+  double rx_interf_current_2 = pow(rx_interf_power * S, 2);
+  double amb_noise_curr_2 = pow(noise_power * S, 2);
+  double rec_noise_curr_2 = 2*q*(Id+Il)*bandwidth + 4*K*T*bandwidth/R;
   
-  double snr_linear = rx_curr*rx_curr / (amb_noise_curr_2 + rec_noise_curr_2 +
-                                         rx_interf_current*rx_interf_current);
+  double snr_linear = rx_curr_2 / (amb_noise_curr_2 + rec_noise_curr_2 +
+                                         rx_interf_current_2);
   assert(snr_linear >= 0);
   return snr_linear ? 10*log10(snr_linear) : -numeric_limits<double>::infinity();
 }
@@ -248,7 +245,7 @@ double UwOpticalPhyOOKRS::getNoisePower(Packet* p)
   assert(dest);
   double depth = use_woss_ ? abs(dest->getAltitude()) : abs(dest->getZ());
   double lut_value = lut_map.empty() ? 0 : lookUpLightNoiseE(depth);
-  return pow(lut_value * Ar_ * S , 2);//right now returns 0, due to not bias the snr calculation with unexpected values
+  return lut_value * Ar_;//right now returns 0, due to not bias the snr calculation with unexpected values
 }
     
 void UwOpticalPhyOOKRS::endRx(Packet* p)
