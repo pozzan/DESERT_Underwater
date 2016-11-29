@@ -115,6 +115,9 @@ private:
   bool txPending; ///< Flag to indicate whether there is a transmission in progress
 };
 
+/** Generate a binomial random variable */
+int binomial_rv(int n, double p);
+
 #endif
 
 // Local Variables:

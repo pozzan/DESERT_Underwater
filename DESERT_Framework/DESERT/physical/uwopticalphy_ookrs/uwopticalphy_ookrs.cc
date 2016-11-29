@@ -50,7 +50,6 @@
 const double K = 1.38064852e-23; ///< Boltzmann constant
 const double q = 1.60217662e-19; ///< Electron charge
 
-/** Generate a binomial random variable */
 int binomial_rv(int n, double p) {
   if (p > 0.5) return n - binomial_rv(n, 1-p);
   double u = RNG::defaultrng()->uniform();
