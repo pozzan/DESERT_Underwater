@@ -82,6 +82,7 @@ load libuwcbr.so
 load libuwoptical_propagation.so
 load libuwoptical_channel.so
 load libuwoptical_phy.so
+load libuwopticalphy_ookrs.so
 
 #############################
 # NS-Miracle initialization #
@@ -98,7 +99,7 @@ set opt(start_clock) [clock seconds]
 set opt(nn)                 2.0 ;# Number of Nodes
 set opt(pktsize)            125  ;# Pkt sike in byte
 set opt(starttime)          1	
-set opt(stoptime)           1000 
+set opt(stoptime)           1000
 set opt(txduration)         [expr $opt(stoptime) - $opt(starttime)] ;# Duration of the simulation
 set opt(ack_mode)           "setNoAckMode"
 set opt(maxinterval_)       10.0
@@ -177,7 +178,22 @@ Module/UW/OPTICAL/PHY   set R_                          $opt(shuntRes)
 Module/UW/OPTICAL/PHY   set S_                          $opt(sensitivity)
 Module/UW/OPTICAL/PHY   set T_                          $opt(temperatura)
 Module/UW/OPTICAL/PHY   set Ar_                         $opt(rxArea)
-Module/UW/OPTICAL/PHY   set debug_                      0
+Module/UW/OPTICAL/PHY   set debug_                      100
+Module/UW/OPTICAL/PHY   set use_reed_solomon            0
+
+
+Module/UW/OPTICAL/PHY_OOKRS   set TxPower_                    $opt(txpower)
+Module/UW/OPTICAL/PHY_OOKRS   set BitRate_                    $opt(bitrate)
+Module/UW/OPTICAL/PHY_OOKRS   set AcquisitionThreshold_dB_    $opt(opt_acq_db)
+Module/UW/OPTICAL/PHY_OOKRS   set Id_                         $opt(id)
+Module/UW/OPTICAL/PHY_OOKRS   set Il_                         $opt(il)
+Module/UW/OPTICAL/PHY_OOKRS   set R_                          $opt(shuntRes)
+Module/UW/OPTICAL/PHY_OOKRS   set S_                          $opt(sensitivity)
+Module/UW/OPTICAL/PHY_OOKRS   set T_                          $opt(temperatura)
+Module/UW/OPTICAL/PHY_OOKRS   set Ar_                         $opt(rxArea)
+Module/UW/OPTICAL/PHY_OOKRS   set debug_                      100
+Module/UW/OPTICAL/PHY_OOKRS   set use_reed_solomon            0
+
 
 Module/UW/OPTICAL/Propagation set Ar_       $opt(rxArea)
 Module/UW/OPTICAL/Propagation set At_       $opt(txArea)
@@ -214,7 +230,7 @@ proc createNode { id } {
     set ipif($id) [new Module/UW/IP]
     set mll($id)  [new Module/UW/MLL] 
     set mac($id)  [new Module/UW/CSMA_ALOHA] 
-    set phy($id)  [new Module/UW/OPTICAL/PHY]
+    set phy($id)  [new Module/UW/OPTICAL/PHY_OOKRS]
 	
 	for {set cnt 0} {$cnt < $opt(nn)} {incr cnt} {
 		$node($id) addModule 7 $cbr($id,$cnt)   1  "CBR"
@@ -247,6 +263,7 @@ proc createNode { id } {
     $phy($id) setLUTFileName "$opt(LUTpath)"
     $phy($id) setLUTSeparator " "
     $phy($id) useLUT
+    #$phy($id) setInterferenceModel OOK
 
     $ipif($id) addr [expr $id +1]
     
@@ -254,8 +271,8 @@ proc createNode { id } {
     $node($id) addPosition $position($id)
     
     #Setup positions
-    $position($id) setX_ [expr $id*10]
-    $position($id) setY_ [expr $id*10]
+    $position($id) setX_ [expr $id*5]
+    $position($id) setY_ [expr $id*5]
     $position($id) setZ_ -15.5
     
     $mac($id) $opt(ack_mode)

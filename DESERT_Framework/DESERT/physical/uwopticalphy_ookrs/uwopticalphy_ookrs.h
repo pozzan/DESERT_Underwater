@@ -90,8 +90,12 @@ protected:
 private:
   double getSINRdB(double rx_power, double rx_interf_power,
                    double bandwidth, double noise_power);
+  double getAmbientNoisePower(double depth);
   double linearInterpolator( double x, double x1, double y1, double x2, double y2 );
-    
+  /** Generate the number of wrong bits in a power chunk interval */
+  int randomBitErrors(Packet *p, const PowerChunk &pc);
+
+  
   double BitRate_; ///< Raw bitrate
   
   double Id; ///< dark current
@@ -113,7 +117,19 @@ private:
 
   Packet *PktRx; ///< Packet the receiver is synchronized to for reception
   bool txPending; ///< Flag to indicate whether there is a transmission in progress
+
+  int use_flash_noise;
+  double flash_K;
+  double flash_prob;
+  double flash_duration;
 };
+
+/** Align the power chunks to the bit boundaries */
+void alignBitBoundaries(PowerChunkList &pcl, double bit_duration);
+/** Split the power chunks on the boundaries of the coded blocks */
+void addBlockBoundaries(PowerChunkList &pcl, int blocklength);
+/** Pad the power chunk list to have the same length of the packet */
+void padPowerChunkList(PowerChunkList &pcl, double duration);
 
 /** Generate a binomial random variable */
 int binomial_rv(int n, double p);

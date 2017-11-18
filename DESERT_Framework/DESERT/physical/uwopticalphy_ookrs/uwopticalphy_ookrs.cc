@@ -243,8 +243,7 @@ double UwOpticalPhyOOKRS::getNoisePower(Packet* p)
   Position* dest = ph->dstPosition;
   assert(dest);
   double depth = use_woss_ ? abs(dest->getAltitude()) : abs(dest->getZ());
-  double lut_value = lut_map.empty() ? 0 : lookUpLightNoiseE(depth);
-  return lut_value * Ar_;//right now returns 0, due to not bias the snr calculation with unexpected values
+  return getAmbientNoisePower(depth);
 }
     
 void UwOpticalPhyOOKRS::endRx(Packet* p)
@@ -356,56 +355,134 @@ double UwOpticalPhyOOKRS::bitErrorRateOOK(double snr) {
   return 0.5 * erfc(sqrt(snr) / (2*sqrt(2)));
 }
 
-void UwOpticalPhyOOKRS::setWrongBits(Packet *p) {
-  double snr = getSNRdB(p);
-  double sinr = getSINRdB(p);
-
+int UwOpticalPhyOOKRS::randomBitErrors(Packet *p, const PowerChunk &pc) {
   hdr_cmn *ch = HDR_CMN(p);
   hdr_MPhy *ph = HDR_MPHY(p);
 
-  if (sinr == numeric_limits<double>::infinity()) {
-    ch->error() = 0;
-    ch->errbitcnt() = 0;
-    return;
-  }
-
+  double bw = ph->dstSpectralMask->getBandwidth();
+  double sinr = getSINRdB(ph->Pr, pc.first, bw, ph->Pn);
+  if (sinr == numeric_limits<double>::infinity()) return 0;
   double sinr_lin = pow(10, sinr/10);
   double ber = bitErrorRateOOK(sinr_lin);
+  double bit_duration = ph->duration / (8 *(ch->size() + ch->fecsize()));
+  int bits = (int) (pc.second / bit_duration);
+  assert(abs(bits * bit_duration - pc.second) <= 1e-9);
+  //if (debug_) cerr << "randomBitErrors: the chunk length is " <<
+  //              bits << " bits" << endl;
+  return binomial_rv(bits, ber);
+}
 
-  if (debug_) cerr << "setWrongBits: snrdb=" << snr <<
-                " sinrdb=" << sinr << endl;
-  if (debug_) cerr << "setWrongBits: sinrlin=" << sinr_lin << endl;
-  if (debug_) cerr << "setWrongBits: ber="<<ber<<endl;
-    
-  if (!use_reed_solomon) {
-    ch->errbitcnt() = binomial_rv(ch->size(), ber);
-    ch->error() = (ch->errbitcnt() > 0);
+void alignBitBoundaries(PowerChunkList &pcl, double bit_duration) {
+  double original_total_duration = 0;
+  double new_total_duration = 0;
+  for (PowerChunkList::iterator i = pcl.begin(); i != pcl.end(); i++) {
+    original_total_duration += i->second;
+    int nbits = round(i->second / bit_duration);
+    double diff = i->second - nbits * bit_duration;
+    i->second = nbits * bit_duration;
+    PowerChunkList::iterator j(i);
+    j++;
+    if (j != pcl.end()) {
+      j->second += diff;
+    }
+    new_total_duration += i->second;
   }
-  else {  
-    int t = (rs_n - rs_k)/2;
-    int nblocks = ceil(ch->size() / (double)rs_k);
-    ch->errbitcnt() = 0;
-    ch->error() = 0;
-    for (int i = 0; i < nblocks; i++) {
-      int blockerr = binomial_rv(rs_n, ber);
-      ch->errbitcnt() += blockerr;
-      if (blockerr > t) ch->error() = 1;
+  assert(abs(original_total_duration - new_total_duration) <= 1e-9);
+}
+
+void padPowerChunkList(PowerChunkList &pcl, double duration) {
+  double total_length = 0;
+  for (PowerChunkList::iterator i = pcl.begin(); i != pcl.end();) {
+    if (i->first == 0)
+      i = pcl.erase(i);
+    else
+      total_length += (i++)->second;
+  }
+  pcl.push_front(PowerChunk(0, duration - total_length));
+}
+
+void addBlockBoundaries(PowerChunkList &pcl, int blocklength) {
+  
+}
+
+void UwOpticalPhyOOKRS::setWrongBits(Packet *p) {
+  hdr_cmn *ch = HDR_CMN(p);
+  hdr_MPhy *ph = HDR_MPHY(p);
+  
+  PowerChunkList pcl(interference_->getInterferencePowerChunkList(p));
+  padPowerChunkList(pcl, ph->duration);
+  alignBitBoundaries(pcl, ph->duration / (ch->size() + ch->fecsize()) / 8);
+  
+  ch->errbitcnt() = 0;
+  ch->error() = 0;
+
+  if (!use_reed_solomon) {
+    for (PowerChunkList::const_iterator i = pcl.begin(); i != pcl.end(); i++) {
+      int errn = randomBitErrors(p, *i);
+      if (errn > 0) {
+        ch->error() = 1;
+        ch->errbitcnt() += errn;
+      }
     }
   }
-  if (debug_) cerr << "setWrongBits: errbitcnt="<<ch->errbitcnt()<<endl;
+  else {
+    int t = (rs_n - rs_k)/2;
+    addBlockBoundaries(pcl, rs_n);
+    for (PowerChunkList::const_iterator i = pcl.begin(); i != pcl.end(); i++) {
+      //TODO
+    }
+  }
+
+  // double snr = getSNRdB(p);
+  // double sinr = getSINRdB(p);
+
+  // hdr_cmn *ch = HDR_CMN(p);
+  // hdr_MPhy *ph = HDR_MPHY(p);
+
+  // if (sinr == numeric_limits<double>::infinity()) {
+  //   ch->error() = 0;
+  //   ch->errbitcnt() = 0;
+  //   return;
+  // }
+
+  // double sinr_lin = pow(10, sinr/10);
+  // double ber = bitErrorRateOOK(sinr_lin);
+
+  // if (debug_) cerr << "setWrongBits: snrdb=" << snr <<
+  //               " sinrdb=" << sinr << endl;
+  // if (debug_) cerr << "setWrongBits: sinrlin=" << sinr_lin << endl;
+  // if (debug_) cerr << "setWrongBits: ber="<<ber<<endl;
+    
+  // if (!use_reed_solomon) {
+  //   ch->errbitcnt() = binomial_rv(ch->size(), ber);
+  //   ch->error() = (ch->errbitcnt() > 0);
+  // }
+  // else {  
+  //   int t = (rs_n - rs_k)/2;
+  //   int nblocks = ceil(ch->size() / (double)rs_k);
+  //   ch->errbitcnt() = 0;
+  //   ch->error() = 0;
+  //   for (int i = 0; i < nblocks; i++) {
+  //     int blockerr = binomial_rv(rs_n, ber);
+  //     ch->errbitcnt() += blockerr;
+  //     if (blockerr > t) ch->error() = 1;
+  //   }
+  // }
+  // if (debug_) cerr << "setWrongBits: errbitcnt="<<ch->errbitcnt()<<endl;
+}
+
+double UwOpticalPhyOOKRS::getAmbientNoisePower(double depth) {
+  depth = abs(depth);
+  double lut_value = lut_map.empty() ? 0 : lookUpLightNoiseE(depth);
+  return lut_value * Ar_;
 }
 
 double UwOpticalPhyOOKRS::getNoiseChannel() {
-  throw runtime_error("getNoiseChannel is not implemented!");
-  
   assert(!use_woss_); // Does not look like it is implemented
   Position *dest = getPosition();
   assert(dest);
   double depth = use_woss_ ? abs(dest->getAltitude()) : abs(dest->getZ());
-  double lut_value = lut_map.empty() ? 0 : lookUpLightNoiseE(depth);
-  double bw = spectralmask_->getBandwidth();
-  double receiver_noise = sqrt(2*q*(Id+Il)*bw + 4*K*T*bw/R) / S;
-  return lut_value * Ar_ * S + receiver_noise;
+  return getAmbientNoisePower(depth);
 }
 
 // Local Variables:
